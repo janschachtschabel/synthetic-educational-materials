@@ -9,7 +9,7 @@ Platzhalter stehen in doppelten geschweiften Klammern, z. B. `{{thema}}`. Welche
 | `volltext_system.md` | Volltext erzeugen (Rolle, Grundregeln) | – |
 | `volltext.md` | Volltext erzeugen (Vorgaben aus dem Seed, Auftrag) | Fließtext/Markdown, etwa eine A4-Seite |
 | `system.md` | gemeinsamer Systemprompt für alle Metadatenfelder | – |
-| `material.md` | gemeinsame Vorlage: vorhandene Felder, Volltext, `{{auftrag}}` | – |
+| `material.md` | gemeinsame Vorlage: Volltext, vorhandene Felder, `{{auftrag}}` (Volltext zuerst, damit der Anbieter den gleichbleibenden Anfang zwischenspeichern kann) | – |
 | `titel.md` | Auftrag Titel | eine Zeile |
 | `beschreibung.md` | Auftrag Beschreibung | Text, 400–800 Zeichen |
 | `keywords.md` | Auftrag Schlagworte | kommagetrennte Liste, 5–8 |
