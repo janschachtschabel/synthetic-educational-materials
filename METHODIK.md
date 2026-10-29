@@ -70,10 +70,11 @@ abgeleitet.
 
 Seeds übernehmen `status` und `konfidenz` in die Herkunftsangabe des Fachs.
 
-Die mitgelieferte Datei stammt noch aus dem früheren Einzelschritt-Verfahren (ein LLM-Aufruf je Thema über
-die ganze Fächerliste). Eine Prüfung ergab: alle Fach-URIs gültig, in Stichproben von 100 Themen das
-erste Fach stets passend, beim zweiten und dritten Fach etwa 5–10 % schwach. Bis zum Neuberechnen zeigt
-sie den Status „ohne Abstimmung“.
+Stand der mitgelieferten Datei (gpt-6-luna, multilingual-e5-small, drei Stimmen, 4.516 Themen):
+Fach 4.205 gesichert, 297 wahrscheinlich, 14 unsicher; Lehrebene 3.436 gesichert, 1.079 wahrscheinlich,
+1 unsicher; Handmapping bei 3.629 Themen bestätigt; 101 Themen auf der Prüfliste. Sechs Themen erhielten
+in keiner Stimme ein Fach; sie tragen das ähnlichste Fach laut Embedding (`mapping.ersatz`) und stehen
+auf der Prüfliste.
 
 **Grundlagenthemen** (`themen_grundlagen.jsonl`): OpenAlex beschreibt Forschungsfelder, Grundlagen des
 Grundstudiums fehlen dort weitgehend. Deshalb schlägt ein LLM je Studienfach Grundlagenthemen vor
@@ -169,9 +170,9 @@ Bedingte Abschnitte `{{#name}}…{{/name}}` erscheinen nur, wenn der Wert gesetz
 - LLM-Zuordnungen sind nicht deterministisch. Die Mehrfachabstimmung macht die Schwankung sichtbar
   (Status und Konfidenz), beseitigt sie aber nicht. Drei Stimmen desselben Modells können sich
   gemeinsam irren; Embedding-Ähnlichkeit und Handmapping dienen als unabhängige Gegenprobe.
-- Die Lehrebene ist ungleich verteilt (25 grundlagen, 3.714 vertiefung, 777 forschung). Weil Forschungs-
+- Die Lehrebene ist ungleich verteilt (94 grundlagen, 2.810 vertiefung, 1.612 forschung). Weil Forschungs-
   themen im 1.–2. Studienjahr ausgeschlossen sind, ist dieses Niveau bei Gleichverteilung nach Thema
-  etwas seltener (bei 30.000 Seeds rund 28 % statt 33 %).
+  seltener (bei 30.000 Seeds rund 22 % statt 33 %). Die Grundlagenthemen gleichen das aus.
 - Synthetische Texte können fachliche Fehler enthalten. Für Trainingszwecke ist die Abbildung Text →
   Metadaten wichtiger als die fachliche Tiefe. Für eine Veröffentlichung als Lernmaterial sind sie nicht
   geprüft.
