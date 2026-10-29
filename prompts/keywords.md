@@ -1,0 +1,1 @@
+5 bis 10 deutsche Schlagwörter, die im Text vorkommen oder ihn eindeutig beschreiben. Fachbegriffe in Grundform, Substantive bevorzugt, keine allgemeinen Wörter wie „Lernen“ oder „Hochschule“, keine Dubletten.

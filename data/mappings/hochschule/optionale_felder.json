@@ -1,0 +1,41 @@
+{
+ "beschreibung": "Optionale Steuerfelder aus dem Brainstorming. anteil: Wahrscheinlichkeit, dass das Feld in einem Seed gesetzt ist.",
+ "didaktische_funktion": {
+  "anteil": 0.6,
+  "werte": [
+   "Einführung in das Thema",
+   "Erarbeitung",
+   "Übung und Anwendung",
+   "Vertiefung",
+   "Wiederholung und Prüfungsvorbereitung"
+  ]
+ },
+ "bearbeitungsdauer_minuten": {
+  "anteil": 0.5,
+  "werte": [
+   15,
+   30,
+   45,
+   90
+  ]
+ },
+ "zielgruppe": {
+  "anteil": 1.0,
+  "werte": [
+   {
+    "uri": "http://w3id.org/openeduhub/vocabs/intendedEndUserRole/learner",
+    "gewicht": 0.85
+   },
+   {
+    "uri": "http://w3id.org/openeduhub/vocabs/intendedEndUserRole/teacher",
+    "gewicht": 0.15
+   }
+  ]
+ },
+ "sprache": {
+  "anteil": 1.0,
+  "werte": [
+   "de"
+  ]
+ }
+}

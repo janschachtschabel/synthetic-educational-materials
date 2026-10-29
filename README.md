@@ -1,1 +1,70 @@
 # synthetic-educational-materials
+
+Erzeugt **Seeds** und **synthetische Bildungsmaterialien** (Volltext, Titel, Beschreibung, Keywords,
+didaktische Frage-Antwort-Paare) aus offenen Vokabularen und Taxonomien. Struktur und Feldnamen folgen
+dem OpenEduHub/edu-sharing-Metadatenschema. Jeder Wert trägt URI, Label und Herkunft.
+
+Bildungsbereiche sind Module. Enthalten ist bisher **Hochschule** (Destatis-Fächersystematik,
+OpenAlex-Themen, Grundlagenthemen mit GND-Beleg). Weitere Bereiche lassen sich ergänzen.
+
+Wie alles entsteht: [METHODIK.md](METHODIK.md). Die Daten im Einzelnen: [data/README.md](data/README.md).
+
+## Installation
+
+```
+python -m pip install -r requirements.txt
+```
+
+Für die LLM-Schritte: `OPENAI_API_KEY` setzen, optional `OPENAI_BASE_URL` (jeder OpenAI-kompatible
+Endpunkt), `LLM_MODEL` (Standard `gpt-6-luna`) und `LLM_WORKERS` (Standard 20). Alles lässt sich auch in
+der Oberfläche oder per Parameter setzen.
+
+## Oberfläche
+
+```
+streamlit run app.py
+```
+
+Reiter: **Seeds** (Anzahl je Bildungsbereich, Feld für die Gleichverteilung, Zufalls-Seed),
+**Materialien** (Start/Fortsetzen mit Fortschrittsanzeige), **Prompts** (bearbeiten und speichern),
+**Mappings** (ansehen, herunterladen, neu bauen), **Methodik**.
+
+## Kommandozeile
+
+```
+python -m sem info
+python -m sem seeds --anzahl hochschule=30000 --gleichverteilung hochschule=thema --seed 42
+python -m sem materialien --seeds output/seeds_hochschule30000_s42.jsonl --limit 100
+python -m sem materialien --seeds output/seeds_hochschule30000_s42.jsonl          # setzt fort
+python -m sem mappings hochschule openalex      # Themen neu feinmappen (LLM)
+python -m sem mappings hochschule grundlagen    # Grundlagenthemen (LLM + GND)
+```
+
+LLM-Optionen für `materialien` und `mappings`: `--base-url`, `--api-key`, `--model`, `--workers`,
+`--retries`.
+
+## Nur die Mappings nutzen
+
+Alles unter `data/` ist ohne den Code nutzbar (JSON, JSONL, CSV, UTF-8):
+
+- `data/vocabs/*.json`: OEH-Vokabulare flach aufbereitet (URI, Notation, Label, Oberbegriff, Ebene)
+- `data/mappings/hochschule/themen_openalex.jsonl`: OpenAlex-Themen mit Destatis-Studienfach,
+  -bereich und -fächergruppe, deutschen Labels, Keywords und Lehrebene
+- `data/mappings/hochschule/themen_grundlagen.jsonl`: Grundlagenthemen je Studienfach mit GND-URI
+- `data/mappings/hochschule/openalex_teilgebiet_studienbereich.csv`: Handmapping der OpenAlex-Teilgebiete
+
+## Aufbau
+
+```
+app.py                     Oberfläche (Streamlit)
+sem/                       Paket: llm, seeds, generate, prompts, schema, vocabs
+sem/bereiche/<bereich>/    ein Modul je Bildungsbereich (Themen, Seeds, Mapping-Bau)
+data/vocabs/               aufbereitete Vokabulare
+data/mappings/<bereich>/   Mappings und Konfiguration je Bereich
+prompts/                   editierbare Prompt-Vorlagen
+output/                    erzeugte Seeds und Materialien (nicht versioniert)
+```
+
+## Lizenz
+
+Code: Apache 2.0. Daten unter `data/`: aus CC0-Quellen abgeleitet, Herkunft siehe METHODIK.md.

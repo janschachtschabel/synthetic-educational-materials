@@ -1,0 +1,85 @@
+{
+ "scheme": {
+  "name": "educationalContext",
+  "uri": "http://w3id.org/openeduhub/vocabs/educationalContext/",
+  "title": "Bildungsstufe",
+  "source": "https://raw.githubusercontent.com/openeduhub/oeh-metadata-vocabs/master/educationalContext.ttl",
+  "public_url": "https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/educationalContext/",
+  "license": "CC0-1.0",
+  "retrieved": "2026-10-29"
+ },
+ "concepts": [
+  {
+   "uri": "http://w3id.org/openeduhub/vocabs/educationalContext/berufliche_bildung",
+   "label": "Berufliche Bildung",
+   "broader": null,
+   "level": 0
+  },
+  {
+   "uri": "http://w3id.org/openeduhub/vocabs/educationalContext/elementarbereich",
+   "label": "Elementarbereich",
+   "broader": null,
+   "level": 0
+  },
+  {
+   "uri": "http://w3id.org/openeduhub/vocabs/educationalContext/erwachsenenbildung",
+   "label": "Erwachsenenbildung",
+   "broader": null,
+   "level": 0
+  },
+  {
+   "uri": "http://w3id.org/openeduhub/vocabs/educationalContext/fernunterricht",
+   "label": "Fernunterricht",
+   "broader": null,
+   "level": 0
+  },
+  {
+   "uri": "http://w3id.org/openeduhub/vocabs/educationalContext/fortbildung",
+   "label": "Fortbildung",
+   "broader": null,
+   "level": 0
+  },
+  {
+   "uri": "http://w3id.org/openeduhub/vocabs/educationalContext/foerderschule",
+   "label": "Förderschule",
+   "broader": null,
+   "level": 0
+  },
+  {
+   "uri": "http://w3id.org/openeduhub/vocabs/educationalContext/hochschule",
+   "label": "Hochschule",
+   "broader": null,
+   "level": 0
+  },
+  {
+   "uri": "http://w3id.org/openeduhub/vocabs/educationalContext/informelles_lernen",
+   "label": "Informelles Lernen",
+   "broader": null,
+   "level": 0
+  },
+  {
+   "uri": "http://w3id.org/openeduhub/vocabs/educationalContext/grundschule",
+   "label": "Primarstufe",
+   "broader": null,
+   "level": 0
+  },
+  {
+   "uri": "http://w3id.org/openeduhub/vocabs/educationalContext/schule",
+   "label": "Schule",
+   "broader": null,
+   "level": 0
+  },
+  {
+   "uri": "http://w3id.org/openeduhub/vocabs/educationalContext/sekundarstufe_1",
+   "label": "Sekundarstufe I",
+   "broader": null,
+   "level": 0
+  },
+  {
+   "uri": "http://w3id.org/openeduhub/vocabs/educationalContext/sekundarstufe_2",
+   "label": "Sekundarstufe II",
+   "broader": null,
+   "level": 0
+  }
+ ]
+}

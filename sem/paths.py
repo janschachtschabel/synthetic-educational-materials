@@ -1,0 +1,8 @@
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+DATA_DIR = ROOT / "data"
+VOCAB_DIR = DATA_DIR / "vocabs"
+MAPPING_DIR = DATA_DIR / "mappings"
+PROMPT_DIR = ROOT / "prompts"
+OUTPUT_DIR = ROOT / "output"

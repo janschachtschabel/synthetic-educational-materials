@@ -1,0 +1,55 @@
+{
+ "scheme": {
+  "name": "intendedEndUserRole",
+  "uri": "http://w3id.org/openeduhub/vocabs/intendedEndUserRole/",
+  "title": "Zielgruppe",
+  "source": "https://raw.githubusercontent.com/openeduhub/oeh-metadata-vocabs/master/intendedEndUserRole.ttl",
+  "public_url": "https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/intendedEndUserRole/",
+  "license": "CC0-1.0",
+  "retrieved": "2026-10-29"
+ },
+ "concepts": [
+  {
+   "uri": "http://w3id.org/openeduhub/vocabs/intendedEndUserRole/author",
+   "label": "Autor/in",
+   "broader": null,
+   "level": 0
+  },
+  {
+   "uri": "http://w3id.org/openeduhub/vocabs/intendedEndUserRole/counsellor",
+   "label": "Berater/in",
+   "broader": null,
+   "level": 0
+  },
+  {
+   "uri": "http://w3id.org/openeduhub/vocabs/intendedEndUserRole/parent",
+   "label": "Eltern",
+   "broader": null,
+   "level": 0
+  },
+  {
+   "uri": "http://w3id.org/openeduhub/vocabs/intendedEndUserRole/teacher",
+   "label": "Lehrer/in",
+   "broader": null,
+   "level": 0
+  },
+  {
+   "uri": "http://w3id.org/openeduhub/vocabs/intendedEndUserRole/learner",
+   "label": "Lerner/in",
+   "broader": null,
+   "level": 0
+  },
+  {
+   "uri": "http://w3id.org/openeduhub/vocabs/intendedEndUserRole/manager",
+   "label": "Verwaltung",
+   "broader": null,
+   "level": 0
+  },
+  {
+   "uri": "http://w3id.org/openeduhub/vocabs/intendedEndUserRole/other",
+   "label": "andere",
+   "broader": null,
+   "level": 0
+  }
+ ]
+}

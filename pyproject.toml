@@ -1,0 +1,13 @@
+[project]
+name = "synthetic-educational-materials"
+version = "0.1.0"
+description = "Seeds und synthetische Bildungsmaterialien aus offenen Vokabularen und Taxonomien"
+requires-python = ">=3.10"
+license = {text = "Apache-2.0"}
+dependencies = ["openai>=1.40", "streamlit>=1.37", "pandas>=2.0", "rdflib>=7.0"]
+
+[tool.setuptools.packages.find]
+include = ["sem*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

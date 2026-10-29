@@ -1,0 +1,34 @@
+{
+ "beschreibung": "Niveaustufen innerhalb der Bildungsstufe Hochschule. exactMatch verweist auf die KIM-Bildungsstufen (ISCED 2011). ausgeschlossen_fuer_lehrebene: Kombinationen, die beim Ziehen vermieden werden.",
+ "quelle": {
+  "name": "Projekt, angelehnt an Hochschulqualifikationsrahmen (HQR) und DQR",
+  "lizenz": "CC0-1.0"
+ },
+ "niveaus": [
+  {
+   "id": "bachelor_einstieg",
+   "label": "Bachelor, 1.–2. Studienjahr",
+   "dqr": 6,
+   "exactMatch": "http://w3id.org/kim/educationalLevel/level_6",
+   "ausgeschlossen_fuer_lehrebene": [
+    "forschung"
+   ]
+  },
+  {
+   "id": "bachelor_fortgeschritten",
+   "label": "Bachelor, ab 3. Studienjahr",
+   "dqr": 6,
+   "exactMatch": "http://w3id.org/kim/educationalLevel/level_6",
+   "ausgeschlossen_fuer_lehrebene": []
+  },
+  {
+   "id": "master",
+   "label": "Master",
+   "dqr": 7,
+   "exactMatch": "http://w3id.org/kim/educationalLevel/level_7",
+   "ausgeschlossen_fuer_lehrebene": [
+    "grundlagen"
+   ]
+  }
+ ]
+}

@@ -1,0 +1,1 @@
+2 bis 4 Sätze, 250 bis 500 Zeichen, sachlich in der dritten Person. Erster Satz: Was ist das Material und worum geht es („Das Skript führt in … ein“). Danach: wichtigste Inhalte und wofür es sich eignet. Keine Wiederholung des Titels, keine Werbesprache.
