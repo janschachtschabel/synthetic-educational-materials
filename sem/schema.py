@@ -28,6 +28,7 @@ F_MEDIENFORM = "synth:medienform"
 F_LEARNING_TIME = "synth:bearbeitungsdauer_minuten"  # OEH cclom:typicallearningtime zählt Millisekunden
 F_FULLTEXT = "synth:volltext"
 F_QA = "synth:frage_antwort_paare"
+F_LRT_CHECK = "synth:inhaltstyp_pruefung"           # Inhaltstyp aus dem fertigen Material bestimmt
 F_PROVENANCE = "synth:provenance"
 F_GENERATION = "synth:generierung"
 

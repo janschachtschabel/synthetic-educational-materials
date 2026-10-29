@@ -11,16 +11,23 @@ from . import schema as S
 from .bereiche import get as get_bereich
 
 
-def build(counts: dict[str, int], balance: dict[str, str] | None = None, seed: int = 42) -> list[dict]:
-    """counts: Bildungsbereich → Anzahl Seeds. balance: Bildungsbereich → Gleichverteilungsfeld."""
+def build(counts: dict[str, int], balance: dict[str, str] | None = None, seed: int = 42,
+          auswahl: dict[str, dict[str, list[str]]] | None = None) -> list[dict]:
+    """counts: Bildungsbereich → Anzahl Seeds. balance: Bildungsbereich → Gleichverteilungsfeld.
+    auswahl: Bildungsbereich → Filter (siehe Bildungsbereich.auswahl_optionen), fehlende = Standard."""
     from .bereiche.base import build_seeds
 
     out = []
     for key, n in counts.items():
         if n > 0:
             b = get_bereich(key)
-            out += build_seeds(b, n, (balance or {}).get(key), seed)
+            out += build_seeds(b, n, (balance or {}).get(key), seed, auswahl=(auswahl or {}).get(key))
     return out
+
+
+def _tp(seed: dict) -> dict:
+    """Herkunftsangabe des Themas."""
+    return seed.get(S.F_PROVENANCE, {}).get(S.F_THEMA, {})
 
 
 def stats(seeds: list[dict]) -> dict:
@@ -40,6 +47,10 @@ def stats(seeds: list[dict]) -> dict:
         "fach_primaer": dict(count(S.F_TAXON_UNI).most_common()),
         "niveau": dict(Counter(s[S.F_NIVEAU]["label"] for s in seeds if S.F_NIVEAU in s)),
         "lehrebene": dict(Counter(s[S.F_THEMA].get("lehrebene") for s in seeds)),
+        "themenquelle": dict(Counter(_tp(s).get("quelle") for s in seeds)),
+        "status": {k: dict(Counter(_tp(s)["status"][k] for s in seeds if k in _tp(s).get("status", {})))
+                   for k in ("fach", "lehrebene", "hochschulrelevanz")},
+        "belege": dict(Counter(b for s in seeds for b in _tp(s).get("belege", {}).get("erfuellt", []))),
     }
 
 

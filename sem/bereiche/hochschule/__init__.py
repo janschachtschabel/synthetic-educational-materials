@@ -30,6 +30,14 @@ def clean_label(label: str) -> str:
     return _ADMIN_NOTE.sub("", _PREFIX.sub("", label)).strip()
 
 
+def kurz_id(label: str) -> str:
+    """Lesbare id für Prompts: „Lösungs(beispiel) und Erwartungshorizont“ → loesungsbeispiel_und_erwartungshorizont."""
+    s = label.casefold()
+    for a, b in (("ä", "ae"), ("ö", "oe"), ("ü", "ue"), ("ß", "ss"), ("(", ""), (")", "")):
+        s = s.replace(a, b)
+    return re.sub(r"[^a-z0-9]+", "_", s).strip("_")
+
+
 def load_jsonl(path):
     return [json.loads(l) for l in path.read_text(encoding="utf-8").splitlines() if l.strip()]
 
@@ -81,6 +89,72 @@ class Hochschule(Bildungsbereich):
             S_("gnd_zusammenfuehren", "GND zusammenführen", "themen_gnd.jsonl, Prüfliste, Ausschlüsse",
                g.build_gnd_zusammenfuehren, llm=False),
         ]
+
+    # --- Auswahl der Themen ------------------------------------------------------------------
+
+    def auswahl_optionen(self) -> dict[str, dict]:
+        status = {"gesichert": "alle Stimmen einig", "wahrscheinlich": "Mehrheit der Stimmen",
+                  "unsicher": "keine Mehrheit oder Ersatzzuordnung, steht auf der Prüfliste",
+                  "redaktionell": "von Hand korrigiert (korrekturen.csv)"}
+        return {
+            "quellen": {"label": "Themenquellen", "beschreibung": "woher die Themen stammen",
+                        "werte": {"openalex": "OpenAlex Topics (Forschungs- und Vertiefungsthemen)",
+                                  "gnd": "GND-Sachschlagwörter aus Lehrbüchern, Hochschulschriften und WLO-Keywords"},
+                        "standard": ["openalex", "gnd"]},
+            "fach_status": {"label": "Status der Fachzuordnung", "beschreibung": "Abstimmung über das Studienfach",
+                            "werte": status, "standard": ["gesichert", "wahrscheinlich", "redaktionell"]},
+            "lehrebene_status": {"label": "Status der Lehrebene", "beschreibung": "Grundlagen, Vertiefung, Forschung",
+                                 "werte": status, "standard": ["gesichert", "wahrscheinlich", "redaktionell"]},
+            "hochschulrelevanz": {"label": "Hochschulrelevanz (nur GND)",
+                                  "beschreibung": "Abstimmung, ob der Begriff an Hochschulen gelehrt wird; "
+                                                  "OpenAlex-Themen gelten als hochschulrelevant",
+                                  "werte": {k: status[k] for k in ("gesichert", "wahrscheinlich", "unsicher")},
+                                  "standard": ["gesichert", "wahrscheinlich"]},
+            "belege": {"label": "Belege (mindestens einer)",
+                       "beschreibung": "leer = keine Anforderung; sonst muss das Thema mindestens einen der "
+                                       "gewählten Belege haben",
+                       "werte": {"lehrbuch": "Lehrbuch mit diesem Schlagwort im hbz-Katalog",
+                                 "hochschulschrift": "mindestens 3 Hochschulschriften im hbz-Katalog",
+                                 "wlo": "WLO-Keyword in Verbindung mit einem passenden Hochschulfach",
+                                 "handmapping": "Fach durch Handmapping (OpenAlex-Teilgebiet) bzw. "
+                                                "GND-Sachgruppen-Brücke bestätigt"},
+                       "standard": []},
+        }
+
+    @staticmethod
+    def belege_des_themas(topic: dict) -> set[str]:
+        b = topic.get("belege") or {}
+        out = set()
+        kat = b.get("katalog") or {}
+        if kat.get("lehrbuecher", 0) >= 1:
+            out.add("lehrbuch")
+        if kat.get("hochschulschriften", 0) >= 3:
+            out.add("hochschulschrift")
+        wlo = b.get("wlo")
+        if wlo:
+            if "fach_passt" in wlo:
+                passt = wlo["fach_passt"] != "nein"
+            else:
+                eigene = {f["uri"] for k in ("studienfach", "studienbereich", "faechergruppe") for f in topic[k]}
+                passt = bool(eigene & {f["uri"] for f in wlo.get("faecher", [])})
+            if passt:
+                out.add("wlo")
+        if (topic.get("mapping") or {}).get("handmapping_bestaetigt"):
+            out.add("handmapping")
+        return out
+
+    def passt(self, topic: dict, auswahl: dict[str, list[str]]) -> bool:
+        m = topic.get("mapping") or {}
+        if topic.get("art", "openalex") not in auswahl["quellen"]:
+            return False
+        if m.get("status", "gesichert") not in auswahl["fach_status"]:
+            return False
+        if (m.get("lehrebene") or {}).get("status", "gesichert") not in auswahl["lehrebene_status"]:
+            return False
+        rel = m.get("hochschulrelevanz")
+        if rel and rel.get("status") not in auswahl["hochschulrelevanz"]:
+            return False
+        return not auswahl["belege"] or bool(self.belege_des_themas(topic) & set(auswahl["belege"]))
 
     def mapping_statistik(self) -> dict:
         from . import build, gnd_themen
@@ -135,6 +209,33 @@ class Hochschule(Bildungsbereich):
             return topic.get("lehrebene") or "unbekannt"
         return topic[balance][0]["uri"]
 
+    @staticmethod
+    def status_des_themas(topic: dict) -> dict:
+        m = topic.get("mapping") or {}
+        out = {"fach": m.get("status"), "lehrebene": (m.get("lehrebene") or {}).get("status")}
+        if m.get("hochschulrelevanz"):
+            out["hochschulrelevanz"] = m["hochschulrelevanz"].get("status")
+        return {k: v for k, v in out.items() if v}
+
+    @classmethod
+    def belege_kompakt(cls, topic: dict) -> dict:
+        """Nachweise für den Seed: Katalogzahlen mit Abfrage-URI, WLO-Datensätze mit Node-Links."""
+        from ...quellen.wlo import NODE_URI
+
+        b = topic.get("belege") or {}
+        out: dict = {"erfuellt": sorted(cls.belege_des_themas(topic))}
+        if b.get("katalog"):
+            k = b["katalog"]
+            out["katalog"] = {x: k.get(x, 0) for x in ("titel", "lehrbuecher", "hochschulschriften")}
+            out["katalog"]["quelle"] = k.get("quelle")
+        if b.get("wlo"):
+            w = b["wlo"]
+            out["wlo"] = {"datensaetze": w.get("datensaetze"), "quelle": w.get("quelle"),
+                          "nodes": [NODE_URI.format(n) for n in w.get("nodes", [])[:10]]}
+            if "fach_passt" in w:
+                out["wlo"]["fach_passt"] = w["fach_passt"]
+        return out
+
     # --- Seed ---------------------------------------------------------------------------
 
     def _fitting_types(self, topic: dict) -> list[dict]:
@@ -181,6 +282,7 @@ class Hochschule(Bildungsbereich):
         q = topic["quelle"]
         seed[S.F_PROVENANCE][S.F_THEMA] = S.provenance(q["name"], uri=q["uri"], license=q["lizenz"], method=topic.get(
             "mapping", {}).get("methode", "Thema aus der Quelle"))
+        seed[S.F_PROVENANCE][S.F_THEMA].update(status=self.status_des_themas(topic), belege=self.belege_kompakt(topic))
 
         seed[S.F_NIVEAU] = {k: niveau[k] for k in ("id", "label", "dqr", "exactMatch")}
         seed[S.F_PROVENANCE][S.F_NIVEAU] = S.provenance(
@@ -196,9 +298,15 @@ class Hochschule(Bildungsbereich):
 
     # --- Prompt-Werte ----------------------------------------------------------------------
 
+    def inhaltstyp_kategorien(self) -> list[dict]:
+        return [{"id": kurz_id(t["label"]), "name": t["label"], "uri": t["uri"]}
+                for t in self.inhaltstypen["inhaltstypen"]]
+
     def prompt_values(self, seed: dict) -> dict:
         t = seed[S.F_THEMA]
         return {
+            "rolle": "eine erfahrene Hochschullehrkraft",
+            "sprache": ", ".join({"de": "Deutsch", "en": "Englisch"}.get(x, x) for x in seed.get(S.F_LANGUAGE, [])),
             "textsorte": seed["synth:textsorte"],
             "inhaltstyp": seed[S.F_LRT + "_DISPLAYNAME"][0],
             "medienform": seed[S.F_MEDIENFORM],

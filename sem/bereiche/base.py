@@ -2,6 +2,8 @@
 
 Ein Bildungsbereich liefert Themen (mit Fachzuordnung), die fest codierten Metadaten
 (Bildungsstufe), die wählbaren Felder für die Gleichverteilung und baut daraus Seeds.
+Über auswahl_optionen() und passt() legt ein Bereich fest, nach welchen Kriterien (z. B. Status
+der Zuordnung, Quelle, Belege) Themen ein- oder ausgeschlossen werden können.
 Neue Bereiche (Schule, Berufsbildung, …) implementieren diese Klasse und registrieren sich
 in sem/bereiche/__init__.py. Ihre Mappings bauen sie über mapping_schritte(); CLI und
 Oberfläche zeigen diese Schritte ohne weitere Anpassung an.
@@ -56,6 +58,11 @@ class Bildungsbereich(ABC):
     def prompt_values(self, seed: dict) -> dict:
         """Werte für die Platzhalter der Prompt-Vorlagen aus einem Seed."""
 
+    def inhaltstyp_kategorien(self) -> list[dict]:
+        """Kategorien für die Prüfung des Inhaltstyps am fertigen Text: [{"id", "name", "uri"}].
+        Leer = keine Prüfung."""
+        return []
+
     # benannte Schrittfolgen, z. B. {"openalex": [...], "gnd": [...]}; „alle“ = alle nacheinander
     mapping_folgen: dict[str, list[str]] = {}
 
@@ -93,9 +100,40 @@ class Bildungsbereich(ABC):
         """Kennzahlen zur Güte der Mappings (z. B. Anteil gesicherter Zuordnungen). Standard: keine."""
         return {}
 
+    def auswahl_optionen(self) -> dict[str, dict]:
+        """Wählbare Filter für die Themen, z. B. nach Status oder Quelle:
+        {name: {"label", "beschreibung", "werte": {wert: beschreibung}, "standard": [werte]}}.
+        Standard: keine (alle Themen)."""
+        return {}
+
+    def standard_auswahl(self) -> dict[str, list[str]]:
+        return {k: list(o["standard"]) for k, o in self.auswahl_optionen().items()}
+
+    def passt(self, topic: dict, auswahl: dict[str, list[str]]) -> bool:
+        """Ob ein Thema zur Auswahl passt. Standard: immer."""
+        return True
+
+    def auswahl_pruefen(self, auswahl: dict[str, list[str]] | None) -> dict[str, list[str]]:
+        """Ergänzt fehlende Filter mit ihrem Standard und weist unbekannte Werte zurück."""
+        opts = self.auswahl_optionen()
+        out = self.standard_auswahl()
+        for k, werte in (auswahl or {}).items():
+            if k not in opts:
+                raise ValueError(f"Unbekannter Filter {k!r} für {self.key}. Möglich: {', '.join(opts) or 'keine'}")
+            falsch = [w for w in werte if w not in opts[k]["werte"]]
+            if falsch:
+                raise ValueError(f"Unbekannte Werte {falsch} für {k}. Möglich: {', '.join(opts[k]['werte'])}")
+            out[k] = list(werte)
+        return out
+
+    def themen_auswahl(self, auswahl: dict[str, list[str]] | None = None) -> list[dict]:
+        auswahl = self.auswahl_pruefen(auswahl)
+        return [t for t in self.topics() if self.passt(t, auswahl)]
+
     def describe(self) -> dict:
         return {"key": self.key, "label": self.label, "balance_options": self.balance_options,
                 "default_balance": self.default_balance, "themen": len(self.topics()),
+                "themen_standardauswahl": len(self.themen_auswahl()), "auswahl_optionen": self.auswahl_optionen(),
                 "mapping_schritte": [s.key for s in self.mapping_schritte()]}
 
 
@@ -138,15 +176,18 @@ def allocate(n: int, groups: dict[str, list[dict]], rng: random.Random) -> list[
 
 
 def build_seeds(bereich: Bildungsbereich, n: int, balance: str | None = None, seed: int = 42,
-                id_prefix: str | None = None) -> list[dict]:
+                id_prefix: str | None = None, auswahl: dict[str, list[str]] | None = None) -> list[dict]:
     balance = balance or bereich.default_balance
     if balance not in bereich.balance_options:
         raise ValueError(f"Unbekanntes Gleichverteilungsfeld {balance!r} für {bereich.key}. "
                          f"Möglich: {', '.join(bereich.balance_options)}")
     rng = random.Random(seed)
+    auswahl = bereich.auswahl_pruefen(auswahl)
     groups: dict[str, list[dict]] = defaultdict(list)
-    for t in bereich.topics():
+    for t in bereich.themen_auswahl(auswahl):
         groups[bereich.balance_key(t, balance)].append(t)
+    if not groups:
+        raise ValueError(f"Keine Themen für {bereich.key} mit dieser Auswahl: {auswahl}")
     state = SeedState()
     seeds = []
     prefix = id_prefix or bereich.key
@@ -154,6 +195,7 @@ def build_seeds(bereich: Bildungsbereich, n: int, balance: str | None = None, se
         state.group = group
         s = {"id": f"{prefix}-{seed}-{i:06d}"}
         s.update(bereich.make_seed(topic, rng, state))
-        s["synth:seed_parameter"] = {"gleichverteilung": balance, "gruppe": group, "zufalls_seed": seed}
+        s["synth:seed_parameter"] = {"gleichverteilung": balance, "gruppe": group, "zufalls_seed": seed,
+                                     "auswahl": auswahl}
         seeds.append(s)
     return seeds

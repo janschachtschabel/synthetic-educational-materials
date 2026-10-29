@@ -25,7 +25,8 @@ der Oberfläche oder per Parameter setzen.
 streamlit run app.py
 ```
 
-Reiter: **Seeds** (Anzahl je Bildungsbereich, Feld für die Gleichverteilung, Zufalls-Seed),
+Reiter: **Seeds** (Anzahl je Bildungsbereich, Feld für die Gleichverteilung, Auswahl der Themen nach
+Status, Quelle und Belegen, Zufalls-Seed),
 **Materialien** (Start/Fortsetzen mit Fortschrittsanzeige), **Prompts** (bearbeiten und speichern),
 **Mappings** (ansehen, herunterladen, neu bauen), **Methodik**.
 
@@ -34,6 +35,8 @@ Reiter: **Seeds** (Anzahl je Bildungsbereich, Feld für die Gleichverteilung, Zu
 ```
 python -m sem info
 python -m sem seeds --anzahl hochschule=30000 --gleichverteilung hochschule=thema --seed 42
+python -m sem auswahl hochschule                # Filter (Status, Quellen, Belege) und Themenzahl
+python -m sem seeds --anzahl hochschule=5000 --auswahl hochschule.fach_status=gesichert hochschule.belege=lehrbuch,wlo
 python -m sem materialien --seeds output/seeds_hochschule30000_s42.jsonl --limit 100
 python -m sem materialien --seeds output/seeds_hochschule30000_s42.jsonl          # setzt fort
 python -m sem mappings hochschule --liste       # Mapping-Schritte anzeigen

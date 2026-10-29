@@ -12,8 +12,11 @@ from pathlib import Path
 
 from .paths import PROMPT_DIR
 
-PROMPT_FILES = ["volltext_system", "volltext", "metadaten_system", "titel", "beschreibung", "keywords",
-                "fragen_antworten"]
+# volltext_system + volltext erzeugen den Text; system + material sind für alle Metadatenfelder gleich,
+# die Felddateien liefern den jeweiligen Auftrag
+PROMPT_FILES = ["volltext_system", "volltext", "system", "material", "titel", "beschreibung", "keywords",
+                "inhaltstyp", "fragen_antworten"]
+FELD_PROMPTS = ["titel", "beschreibung", "keywords", "inhaltstyp", "fragen_antworten"]
 
 _SECTION = re.compile(r"\{\{#(\w+)\}\}(.*?)\{\{/\1\}\}", re.S)
 _VAR = re.compile(r"\{\{(\w+)\}\}")

@@ -92,7 +92,7 @@ tab_seeds, tab_mat, tab_prompts, tab_map, tab_meth = st.tabs(
 with tab_seeds:
     st.subheader("Seeds erzeugen")
     st.caption("Ohne LLM. Gleicher Zufalls-Seed und gleiche Einstellungen ergeben dieselben Seeds.")
-    counts, balance = {}, {}
+    counts, balance, auswahl = {}, {}, {}
     for key in BEREICHE:
         b = bereich(key)
         c1, c2 = st.columns([1, 2])
@@ -100,13 +100,24 @@ with tab_seeds:
         opts = list(b.balance_options)
         balance[key] = c2.selectbox(f"{b.label}: gleich verteilen nach", opts, index=opts.index(b.default_balance),
                                     format_func=lambda o, b=b: f"{o} – {b.balance_options[o]}", key=f"bal-{key}")
+        filt = b.auswahl_optionen()
+        if filt:
+            with st.expander(f"{b.label}: welche Themen einbezogen werden (Status, Quellen, Belege)"):
+                wahl = {}
+                for name, o in filt.items():
+                    wahl[name] = st.multiselect(o["label"], list(o["werte"]), default=o["standard"],
+                                                key=f"f-{key}-{name}", help=o["beschreibung"],
+                                                format_func=lambda w, o=o: f"{w} – {o['werte'][w]}")
+                auswahl[key] = wahl
+                st.caption(f"{len(b.themen_auswahl(wahl))} von {len(b.topics())} Themen ausgewählt. "
+                           "Voreinstellung: gesichert, wahrscheinlich und redaktionell; unsicher erst nach Prüfung.")
     rnd = st.number_input("Zufalls-Seed", 0, 2**31 - 1, 42)
     name = st.text_input("Dateiname", value=f"seeds_s{rnd}.jsonl")
     if st.button("Seeds erzeugen", type="primary"):
         with st.spinner("erzeuge …"):
-            data = seedlib.build(counts, balance, int(rnd))
-            stats = seedlib.write(data, OUTPUT_DIR / name,
-                                  {"anzahl": counts, "gleichverteilung": balance, "zufalls_seed": int(rnd)})
+            data = seedlib.build(counts, balance, int(rnd), auswahl)
+            stats = seedlib.write(data, OUTPUT_DIR / name, {"anzahl": counts, "gleichverteilung": balance,
+                                                            "zufalls_seed": int(rnd), "auswahl": auswahl})
         st.success(f"{stats['anzahl']} Seeds → output/{name}")
         st.json(stats, expanded=False)
         st.download_button("Herunterladen", (OUTPUT_DIR / name).read_bytes(), file_name=name)
@@ -114,8 +125,8 @@ with tab_seeds:
 # --- Materialien ----------------------------------------------------------------------------
 with tab_mat:
     st.subheader("Materialien erzeugen")
-    st.caption("Pro Seed: Volltext, dann Titel, Beschreibung, Keywords und Frage-Antwort-Paare aus dem Volltext. "
-               "Ein erneuter Start setzt fort und überspringt Fertiges.")
+    st.caption("Pro Seed: Volltext, dann je ein Aufruf für Titel, Beschreibung, Keywords, Inhaltstyp-Prüfung und "
+               "Frage-Antwort-Paare. Ein erneuter Start setzt fort und überspringt Fertiges.")
     files = sorted(p.name for p in OUTPUT_DIR.glob("*.jsonl")
                    if not p.name.startswith("materialien") and ".fehler" not in p.name)
     if not files:
@@ -125,8 +136,11 @@ with tab_mat:
         n_seeds = sum(1 for _ in (OUTPUT_DIR / src).open(encoding="utf-8"))
         limit = st.number_input(f"Anzahl (von {n_seeds} Seeds, 0 = alle)", 0, n_seeds, 0)
         out = st.text_input("Ausgabedatei", value="materialien_" + src.removeprefix("seeds_"))
+        lrt_check = st.checkbox("Inhaltstyp am fertigen Material prüfen", value=True,
+                                help="Bestimmt den Inhaltstyp ohne Kenntnis des Seeds und protokolliert, ob er passt.")
         if st.button("Start / Fortsetzen", type="primary", disabled=bool(jobs().get("mat") and not jobs()["mat"]["done"])):
-            start_job("mat", generate, OUTPUT_DIR / src, OUTPUT_DIR / out, cfg, limit=int(limit) or None)
+            start_job("mat", generate, OUTPUT_DIR / src, OUTPUT_DIR / out, cfg, limit=int(limit) or None,
+                      inhaltstyp_pruefen=lrt_check)
         job_status("mat")
         if (OUTPUT_DIR / out).exists():
             st.download_button("Ergebnis herunterladen", (OUTPUT_DIR / out).read_bytes(), file_name=out)

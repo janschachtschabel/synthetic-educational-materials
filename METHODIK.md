@@ -142,7 +142,7 @@ Ein Seed ist ein JSON-Objekt (eine Zeile in JSONL). Feldnamen folgen dem edu-sha
 | `synth:didaktische_funktion` | z. B. Einführung, Übung und Anwendung | in 60 % der Seeds, zufällig |
 | `synth:bearbeitungsdauer_minuten` | 15, 30, 45 oder 90 | in 50 % der Seeds, zufällig |
 | `synth:provenance` | Herkunft je Feld: Quelle, URI, Lizenz, Methode | automatisch |
-| `synth:seed_parameter` | Gleichverteilungsfeld, Gruppe, Zufalls-Seed | automatisch |
+| `synth:seed_parameter` | Gleichverteilungsfeld, Gruppe, Zufalls-Seed, Themenauswahl | automatisch |
 
 Kontrollierte Werte stehen wie in edu-sharing als Liste von URIs. Das Label steht in `<feld>_DISPLAYNAME`
 und ist unverändert aus dem Vokabular übernommen. Für Prompts werden Labels bereinigt (ohne Präfix
@@ -156,21 +156,51 @@ zufälliger Reihenfolge, jedes einmal, bevor sich eines wiederholt. Ab `n` ≥ A
 `thema` also jedes Thema dabei. Der Inhaltstyp wird je Gruppe rotiert: Gewählt wird jeweils der bisher
 seltenste passende Typ.
 
+**Auswahl der Themen.** Welche Themen in die Seeds eingehen, ist wählbar (CLI `--auswahl`, Oberfläche
+„welche Themen einbezogen werden“; `python -m sem auswahl hochschule` zeigt Filter und Themenzahl):
+
+| Filter | Werte | Voreinstellung |
+|---|---|---|
+| `quellen` | `openalex`, `gnd` | beide |
+| `fach_status` | `gesichert`, `wahrscheinlich`, `unsicher`, `redaktionell` | ohne `unsicher` |
+| `lehrebene_status` | wie `fach_status` | ohne `unsicher` |
+| `hochschulrelevanz` (nur GND) | `gesichert`, `wahrscheinlich`, `unsicher` | ohne `unsicher` |
+| `belege` (mindestens einer) | `lehrbuch` (≥ 1 Lehrbuch im hbz-Katalog), `hochschulschrift` (≥ 3), `wlo` (WLO-Keyword mit passendem Hochschulfach), `handmapping` (Fach durch Handmapping bzw. Sachgruppen-Brücke bestätigt) | keine Anforderung |
+
+`unsicher` bleibt standardmäßig draußen, bis die Prüfliste durchgesehen ist; eine Korrektur macht ein
+Thema `redaktionell`, und es ist wieder dabei. Mit der Voreinstellung sind es 9.070 von 9.233 Themen.
+Jeder Seed trägt in `synth:provenance` → `synth:thema` den Status je Zuordnung und seine Belege:
+Katalogzahlen mit Abfrage-URI (lobid), WLO-Datensätze mit Verweis auf WirLernenOnline.de und, wo der
+Export sie enthält, Links auf die Node-IDs. Von WLO werden nur Keywords in Verbindung mit
+Hochschulfächern genutzt. Die `.stats.json` zählt Themenquellen, Status und Belege.
+
 **Reproduzierbarkeit.** Gleiche Mappings, gleiche Einstellungen und gleicher Zufalls-Seed ergeben
 identische Seeds. Neben jeder Seed-Datei liegt eine `.stats.json` mit Parametern und Verteilungen.
 
 ## Materialien
 
-Pro Seed zwei LLM-Aufrufe (OpenAI-kompatible API, Standardmodell `gpt-6-luna`):
+Pro Seed bis zu sechs LLM-Aufrufe (OpenAI-kompatible API, Standardmodell `gpt-6-luna`):
 
-1. **Volltext** aus dem Seed: Prompts `volltext_system.md` und `volltext.md`, etwa eine A4-Seite
+1. **Volltext** aus dem Seed: `volltext_system.md` und `volltext.md`, etwa eine A4-Seite
    (400–550 Wörter). Kürzere Texte werden verworfen und neu angefragt.
-2. **Metadaten nur aus dem Volltext** (plus Inhaltstyp): `metadaten_system.md` setzt die Vorgaben aus
-   `titel.md`, `beschreibung.md`, `keywords.md` und `fragen_antworten.md` zusammen. Ergebnis:
-   `cclom:title`, `cclom:general_description`, `cclom:general_keyword`, `synth:frage_antwort_paare`
-   (Ziel: 10 Paare mit Lernzielstufe nach Bloom/Anderson, mindestens 8). Weil das LLM hier den Seed
-   nicht sieht, lassen sich die Metadaten wirklich aus dem Text ableiten. Das ist wichtig, wenn mit
-   den Daten ein Modell „Text → Metadaten“ trainiert werden soll.
+2. **Titel, Beschreibung, Keywords**, je ein Aufruf in dieser Reihenfolge. Alle nutzen denselben
+   Systemprompt (`system.md`) und dieselbe Materialvorlage (`material.md`): Volltext, die festen
+   Metadaten des Seeds (Bildungsstufe, Fach, Zielgruppe, Sprache, Materialart) und die schon
+   erzeugten Felder; noch leere Felder stehen als „-“. Den Auftrag liefert die Felddatei
+   (`titel.md`, `beschreibung.md`, `keywords.md`). Thema, Themenbeschreibung und Seed-Keywords sieht
+   das LLM hier nicht; die Felder werden also aus dem Text abgeleitet, wie es ein Modell
+   „Text → Metadaten“ später lernen soll. Antworten werden geprüft (Titel 10–120 Zeichen,
+   Beschreibung 250–1.200, mindestens 4 Keywords, höchstens 8 übernommen); ein unbrauchbares Feld
+   wird bis zu dreimal neu angefragt, ohne den Volltext neu zu erzeugen.
+3. **Inhaltstyp-Prüfung** (`inhaltstyp.md`, abschaltbar): Das LLM bestimmt die Materialart aus dem
+   fertigen Material, ohne den Seed-Wert zu sehen, und wählt aus den Inhaltstypen des Bereichs. Das
+   Ergebnis steht in `synth:inhaltstyp_pruefung` (erwartet, erkannt, Übereinstimmung) und dient als
+   Qualitätsmaß; `ccm:oeh_lrt` bleibt der Seed-Wert.
+4. **Frage-Antwort-Paare** (`fragen_antworten.md`, JSON): Ziel 10 Paare mit Lernzielstufe nach
+   Bloom/Anderson, mindestens 8.
+
+Die Prompts für Titel, Beschreibung, Keywords und Inhaltstyp sowie der gemeinsame Systemprompt sind
+aus der WLO-Metadatenanreicherung übernommen und an die synthetischen Materialien angepasst.
 
 Jedes Material behält alle Seed-Felder und bekommt `synth:volltext` sowie `synth:generierung` (Modell,
 Base-URL, Datum, Hash der verwendeten Prompts).
@@ -193,7 +223,9 @@ Bedingte Abschnitte `{{#name}}…{{/name}}` erscheinen nur, wenn der Wert gesetz
 | `thema`, `thema_beschreibung`, `thema_keywords` | aus dem Thema (deutsch) |
 | `fach`, `bildungsstufe`, `niveau`, `zielgruppe` | aus den Metadaten (bereinigte Labels) |
 | `didaktische_funktion`, `bearbeitungsdauer` | optional |
-| `prompt_titel`, `prompt_beschreibung`, `prompt_keywords`, `prompt_fragen_antworten` | nur in `metadaten_system.md` |
+| `rolle`, `sprache` | Autorenrolle im Volltext-Prompt, Sprache als Wort |
+| `titel`, `beschreibung`, `keywords`, `volltext`, `auftrag` | nur in `material.md`: bisher erzeugte Felder („-“ = leer), Volltext, Auftrag aus der Felddatei |
+| `kategorien`, `beispiel_id` | nur in `inhaltstyp.md`: Liste „Name → id“ der Inhaltstypen |
 
 ## Bekannte Grenzen
 
@@ -214,7 +246,8 @@ Bedingte Abschnitte `{{#name}}…{{/name}}` erscheinen nur, wenn der Wert gesetz
 
 1. `sem/bereiche/<bereich>/__init__.py` mit einer Klasse, die `Bildungsbereich` implementiert
    (`topics`, `balance_key`, `make_seed`, `prompt_values`), und in `sem/bereiche/__init__.py`
-   registrieren.
+   registrieren. Optional: `auswahl_optionen` und `passt` für wählbare Filter (Status, Quellen,
+   Belege), `inhaltstyp_kategorien` für die Inhaltstyp-Prüfung.
 2. Mappings unter `data/mappings/<bereich>/` ablegen, gleiche Themenstruktur wie bei Hochschule
    (`id`, `label_de`, Fachfelder mit `uri`/`label`, `quelle`, `mapping`).
 3. Zum Bauen der Mappings `mapping_schritte()` und `mapping_folge` setzen. CLI und Oberfläche zeigen die

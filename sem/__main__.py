@@ -2,6 +2,8 @@
 
     python -m sem info
     python -m sem seeds --anzahl hochschule=30000 [--gleichverteilung hochschule=thema] [--seed 42] [--out …]
+                        [--auswahl hochschule.fach_status=gesichert,wahrscheinlich hochschule.belege=lehrbuch,wlo]
+    python -m sem auswahl hochschule   (Filter, Standardwerte und Themenzahl anzeigen)
     python -m sem materialien --seeds output/seeds.jsonl [--out …] [--limit N] [--workers 20] [--model …]
     python -m sem mappings hochschule [alle|openalex|gnd|schritt …] [--limit N] [--stimmen 3] [--wlo export.csv …]
     python -m sem mappings hochschule --liste
@@ -24,6 +26,18 @@ def _pairs(values: list[str], cast=str) -> dict:
         if not x:
             raise SystemExit(f"Erwartet bereich=wert, nicht {v!r}")
         out[k.strip()] = cast(x.strip())
+    return out
+
+
+def _auswahl(values: list[str]) -> dict:
+    """bereich.filter=w1,w2 → {bereich: {filter: [w1, w2]}}; leerer Wert = keine Werte."""
+    out: dict = {}
+    for v in values or []:
+        k, eq, x = v.partition("=")
+        bereich, dot, name = k.partition(".")
+        if not eq or not dot:
+            raise SystemExit(f"Erwartet bereich.filter=wert1,wert2, nicht {v!r}")
+        out.setdefault(bereich.strip(), {})[name.strip()] = [w.strip() for w in x.split(",") if w.strip()]
     return out
 
 
@@ -54,12 +68,20 @@ def main(argv=None):
     p.add_argument("--anzahl", nargs="+", required=True, metavar="BEREICH=N")
     p.add_argument("--gleichverteilung", nargs="*", metavar="BEREICH=FELD")
     p.add_argument("--seed", type=int, default=42, help="Zufalls-Seed (gleicher Wert = gleiche Seeds)")
+    p.add_argument("--auswahl", nargs="*", metavar="BEREICH.FILTER=W1,W2",
+                   help="welche Themen einbezogen werden (Status, Quellen, Belege); fehlende Filter = Standard")
     p.add_argument("--out", type=Path)
+
+    p = sub.add_parser("auswahl", help="Filter eines Bildungsbereichs mit Standardwerten und Themenzahl")
+    p.add_argument("bereich")
+    p.add_argument("--auswahl", nargs="*", metavar="BEREICH.FILTER=W1,W2")
 
     p = sub.add_parser("materialien", help="Materialien aus Seeds erzeugen (LLM, fortsetzbar)")
     p.add_argument("--seeds", type=Path, required=True)
     p.add_argument("--out", type=Path)
     p.add_argument("--limit", type=int)
+    p.add_argument("--ohne-inhaltstyp-pruefung", action="store_true",
+                   help="Inhaltstyp nicht am fertigen Material prüfen (spart einen Aufruf je Material)")
     _llm_args(p)
 
     p = sub.add_parser("mappings", help="Mappings eines Bildungsbereichs neu bauen (Schritte siehe --liste)")
@@ -84,20 +106,35 @@ def main(argv=None):
     elif a.cmd == "seeds":
         from . import seeds
 
+        from .bereiche import get
+
         counts = _pairs(a.anzahl, int)
         balance = _pairs(a.gleichverteilung)
+        auswahl = {k: get(k).auswahl_pruefen(v) for k, v in _auswahl(a.auswahl).items()}
+        auswahl = {k: auswahl.get(k) or get(k).standard_auswahl() for k in counts}
         out = a.out or OUTPUT_DIR / ("seeds_" + "_".join(f"{k}{v}" for k, v in counts.items()) + f"_s{a.seed}.jsonl")
-        st = seeds.write(seeds.build(counts, balance, a.seed), out,
-                         {"anzahl": counts, "gleichverteilung": balance, "zufalls_seed": a.seed})
+        st = seeds.write(seeds.build(counts, balance, a.seed, auswahl), out,
+                         {"anzahl": counts, "gleichverteilung": balance, "zufalls_seed": a.seed, "auswahl": auswahl})
         print(f"{st['anzahl']} Seeds → {out}")
-        print(json.dumps({k: st[k] for k in ("themen_abgedeckt", "seeds_je_gruppe", "seeds_je_thema", "niveau")},
-                         ensure_ascii=False))
+        print(json.dumps({k: st[k] for k in ("themen_abgedeckt", "seeds_je_gruppe", "seeds_je_thema", "niveau",
+                                             "status", "belege")}, ensure_ascii=False))
+
+    elif a.cmd == "auswahl":
+        from .bereiche import get
+
+        b = get(a.bereich)
+        wahl = b.auswahl_pruefen(_auswahl(a.auswahl).get(a.bereich))
+        for k, o in b.auswahl_optionen().items():
+            print(f"{k} – {o['label']}: {o['beschreibung']}")
+            for w, txt in o["werte"].items():
+                print(f"  [{'x' if w in wahl[k] else ' '}] {w:16} {txt}")
+        print(f"{len(b.themen_auswahl(wahl))} von {len(b.topics())} Themen")
 
     elif a.cmd == "materialien":
         from .generate import generate
 
         out = a.out or a.seeds.with_name(a.seeds.stem.replace("seeds", "materialien") + ".jsonl")
-        prog = generate(a.seeds, out, _cfg(a), limit=a.limit)
+        prog = generate(a.seeds, out, _cfg(a), limit=a.limit, inhaltstyp_pruefen=not a.ohne_inhaltstyp_pruefung)
         print(f"{prog.done} neu, {prog.skipped} schon vorhanden, {prog.failed} fehlgeschlagen → {out}")
         if prog.status != "fertig":
             sys.exit(2)
