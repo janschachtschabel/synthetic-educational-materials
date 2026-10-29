@@ -3,7 +3,8 @@
 Ein Bildungsbereich liefert Themen (mit Fachzuordnung), die fest codierten Metadaten
 (Bildungsstufe), die wählbaren Felder für die Gleichverteilung und baut daraus Seeds.
 Neue Bereiche (Schule, Berufsbildung, …) implementieren diese Klasse und registrieren sich
-in sem/bereiche/__init__.py.
+in sem/bereiche/__init__.py. Ihre Mappings bauen sie über mapping_schritte(); CLI und
+Oberfläche zeigen diese Schritte ohne weitere Anpassung an.
 """
 
 from __future__ import annotations
@@ -11,6 +12,25 @@ from __future__ import annotations
 import random
 from abc import ABC, abstractmethod
 from collections import Counter, defaultdict
+from dataclasses import dataclass
+from typing import Callable
+
+from ..llm import Progress
+
+
+@dataclass
+class MappingSchritt:
+    key: str
+    label: str
+    beschreibung: str
+    # run(cfg, on_progress=None, stop_event=None, **optionen) -> Progress; unbekannte Optionen ignorieren
+    run: Callable[..., Progress]
+    llm: bool = True
+
+
+def fertig(text: str) -> Progress:
+    """Progress für Schritte ohne LLM."""
+    return Progress(total=1, done=1, status=f"fertig – {text}")
 
 
 class Bildungsbereich(ABC):
@@ -36,9 +56,36 @@ class Bildungsbereich(ABC):
     def prompt_values(self, seed: dict) -> dict:
         """Werte für die Platzhalter der Prompt-Vorlagen aus einem Seed."""
 
+    # Reihenfolge für „alle Schritte“
+    mapping_folge: list[str] = []
+
+    def mapping_schritte(self) -> list[MappingSchritt]:
+        """Schritte, mit denen der Bereich seine Mappings neu baut. Standard: keine."""
+        return []
+
+    def mapping_ausfuehren(self, keys: list[str], cfg, on_progress=None, stop_event=None, **optionen) -> Progress:
+        """Führt Schritte nacheinander aus und hält an, sobald einer nicht fertig wird."""
+        schritte = {s.key: s for s in self.mapping_schritte()}
+        prog = fertig("nichts zu tun")
+        for k in keys:
+            if stop_event is not None and stop_event.is_set():
+                break
+            prog = schritte[k].run(cfg, on_progress=on_progress, stop_event=stop_event, **optionen)
+            prog.status = f"{schritte[k].label}: {prog.status}"
+            if on_progress:
+                on_progress(prog)
+            if not prog.status.split(": ", 1)[1].startswith("fertig"):
+                break
+        return prog
+
+    def mapping_statistik(self) -> dict:
+        """Kennzahlen zur Güte der Mappings (z. B. Anteil gesicherter Zuordnungen). Standard: keine."""
+        return {}
+
     def describe(self) -> dict:
         return {"key": self.key, "label": self.label, "balance_options": self.balance_options,
-                "default_balance": self.default_balance, "themen": len(self.topics())}
+                "default_balance": self.default_balance, "themen": len(self.topics()),
+                "mapping_schritte": [s.key for s in self.mapping_schritte()]}
 
 
 class SeedState:

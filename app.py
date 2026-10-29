@@ -13,6 +13,7 @@ from sem import seeds as seedlib
 from sem.bereiche import BEREICHE
 from sem.generate import generate
 from sem.llm import DEFAULT_MODEL, DEFAULT_WORKERS, LLMConfig, Progress
+from sem.mapping.embeddings import DEFAULT_EMBEDDING_MODEL
 from sem.paths import MAPPING_DIR, OUTPUT_DIR, PROMPT_DIR, ROOT, VOCAB_DIR
 from sem.prompts import PROMPT_FILES, placeholders, prompt_path
 
@@ -78,6 +79,10 @@ with st.sidebar:
     retries = st.number_input("Versuche pro Aufgabe", 1, 20, 6)
     outage = st.number_input("Wartezeit bei API-Ausfall (Minuten)", 1, 240, 10,
                              help="Danach pausiert der Lauf und lässt sich später fortsetzen.")
+    st.header("Embeddings")
+    emb_model = st.text_input("Embedding-Modell (lokal, CPU)", value=DEFAULT_EMBEDDING_MODEL,
+                              help="z. B. intfloat/multilingual-e5-small oder "
+                                   "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2")
     cfg = LLMConfig(base_url=base_url or None, api_key=api_key or env.api_key, model=model, workers=int(workers),
                     max_retries=int(retries), outage_minutes=float(outage))
 
@@ -165,16 +170,29 @@ with tab_map:
                     st.dataframe(pd.DataFrame(items)) if items else st.json(data, expanded=False)
                 st.download_button("Herunterladen", p.read_bytes(), file_name=p.name, key=f"dl-{p}")
 
-    st.markdown("**Mappings Hochschule neu bauen** (LLM, fortsetzbar)")
-    from sem.bereiche.hochschule import build as hs_build
-
-    c1, c2 = st.columns(2)
-    if c1.button("OpenAlex-Themen feinmappen"):
-        start_job("map-openalex", hs_build.build_openalex, cfg)
-    if c2.button("Grundlagenthemen (LLM + GND)"):
-        start_job("map-grundlagen", hs_build.build_grundlagen, cfg)
-    job_status("map-openalex")
-    job_status("map-grundlagen")
+    st.markdown("**Mappings neu bauen** (fortsetzbar; bereits Erledigtes wird übersprungen)")
+    for key in BEREICHE:
+        b = bereich(key)
+        schritte = {x.key: x for x in b.mapping_schritte()}
+        if not schritte:
+            continue
+        with st.container(border=True):
+            st.markdown(f"**{b.label}**")
+            stat = b.mapping_statistik()
+            if stat:
+                with st.expander("Aktueller Stand des Mappings"):
+                    st.json(stat)
+            wahl = st.multiselect("Schritte", list(schritte), default=b.mapping_folge, key=f"ms-{key}",
+                                  format_func=lambda k, s=schritte: f"{s[k].label}{' (LLM)' if s[k].llm else ''}")
+            c1, c2 = st.columns(2)
+            lim = c1.number_input("Nur die ersten N Themen (0 = alle)", 0, 100_000, 0, key=f"ml-{key}")
+            stimmen = c2.number_input("Stimmen je Zuordnung", 1, 7, 3, key=f"mv-{key}")
+            job = f"map-{key}"
+            laeuft = bool(jobs().get(job) and not jobs()[job]["done"])
+            if st.button("Start / Fortsetzen", key=f"mb-{key}", disabled=laeuft or not wahl):
+                start_job(job, b.mapping_ausfuehren, [k for k in schritte if k in wahl], cfg,
+                          limit=int(lim) or None, stimmen=int(stimmen), embedding_modell=emb_model)
+            job_status(job)
 
 # --- Methodik -------------------------------------------------------------------------------
 with tab_meth:

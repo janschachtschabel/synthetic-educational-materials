@@ -36,12 +36,16 @@ python -m sem info
 python -m sem seeds --anzahl hochschule=30000 --gleichverteilung hochschule=thema --seed 42
 python -m sem materialien --seeds output/seeds_hochschule30000_s42.jsonl --limit 100
 python -m sem materialien --seeds output/seeds_hochschule30000_s42.jsonl          # setzt fort
-python -m sem mappings hochschule openalex      # Themen neu feinmappen (LLM)
+python -m sem mappings hochschule --liste       # Mapping-Schritte anzeigen
+python -m sem mappings hochschule --limit 50    # Probelauf aller Schritte mit 50 Themen
+python -m sem mappings hochschule               # alle Schritte (LLM + lokale Embeddings), fortsetzbar
+python -m sem mappings hochschule zusammenfuehren   # nur neu auswerten, z. B. nach Korrekturen
 python -m sem mappings hochschule grundlagen    # Grundlagenthemen (LLM + GND)
 ```
 
 LLM-Optionen für `materialien` und `mappings`: `--base-url`, `--api-key`, `--model`, `--workers`,
-`--retries`.
+`--retries`. Für `mappings` zusätzlich `--stimmen` (Standard 3) und `--embedding-modell` (Standard
+`intfloat/multilingual-e5-small`, läuft auf der CPU; wird beim ersten Lauf von Hugging Face geladen).
 
 ## Nur die Mappings nutzen
 
@@ -49,7 +53,10 @@ Alles unter `data/` ist ohne den Code nutzbar (JSON, JSONL, CSV, UTF-8):
 
 - `data/vocabs/*.json`: OEH-Vokabulare flach aufbereitet (URI, Notation, Label, Oberbegriff, Ebene)
 - `data/mappings/hochschule/themen_openalex.jsonl`: OpenAlex-Themen mit Destatis-Studienfach,
-  -bereich und -fächergruppe, deutschen Labels, Keywords und Lehrebene
+  -bereich und -fächergruppe, deutschen Labels, Keywords, Lehrebene sowie Status, Konfidenz und Belegen
+  der Zuordnung
+- `data/mappings/hochschule/studienfach_profile.jsonl`: Kurzprofil je Studienfach
+- `data/mappings/hochschule/pruefliste_themen.csv`: Zuordnungen, die eine Durchsicht brauchen
 - `data/mappings/hochschule/themen_grundlagen.jsonl`: Grundlagenthemen je Studienfach mit GND-URI
 - `data/mappings/hochschule/openalex_teilgebiet_studienbereich.csv`: Handmapping der OpenAlex-Teilgebiete
 
@@ -58,6 +65,7 @@ Alles unter `data/` ist ohne den Code nutzbar (JSON, JSONL, CSV, UTF-8):
 ```
 app.py                     Oberfläche (Streamlit)
 sem/                       Paket: llm, seeds, generate, prompts, schema, vocabs
+sem/mapping/               bereichsunabhängige Mapping-Bausteine (Embeddings, Abstimmung, Prüfliste)
 sem/bereiche/<bereich>/    ein Modul je Bildungsbereich (Themen, Seeds, Mapping-Bau)
 data/vocabs/               aufbereitete Vokabulare
 data/mappings/<bereich>/   Mappings und Konfiguration je Bereich

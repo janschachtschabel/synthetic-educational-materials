@@ -1,11 +1,15 @@
 """Baut die Hochschul-Mappings unter data/mappings/hochschule/ nach.
 
-Schritte (einzeln aufrufbar, siehe METHODIK.md):
-  openalex     OpenAlex Topics laden, über das Handmapping Teilgebiet → Studienbereich vorsortieren
-               und per LLM auf Studienfächer feinmappen (deutsch: Label, Beschreibung, Keywords,
-               Lehrebene)            → themen_openalex.jsonl
-  grundlagen   je Studienfach Grundlagenthemen per LLM vorschlagen und über die GND belegen
-                                     → themen_grundlagen.jsonl (+ grundlagen_ohne_gnd.csv)
+Schritte (einzeln oder als Folge aufrufbar, siehe METHODIK.md):
+  fachprofile      je Studienfach Kurzbeschreibung und typische Themen (LLM) → studienfach_profile.jsonl
+  uebersetzen      OpenAlex-Themen ins Deutsche (LLM; vorhandene Übersetzungen werden übernommen)
+  kandidaten       je Thema die ähnlichsten Studienfächer (lokale Embeddings) plus Hinweise aus dem
+                   Handmapping Teilgebiet → Studienbereich
+  faecher          drei Stimmen je Thema aus den Kandidaten, mit Begründung und Belegbegriffen (LLM)
+  lehrebene        drei Stimmen je Thema nach festen Kriterien (LLM)
+  zusammenfuehren  Auswertung → themen_openalex.jsonl, pruefliste_themen.csv; korrekturen.csv hat Vorrang
+  grundlagen       je Studienfach Grundlagenthemen per LLM, über die GND belegt → themen_grundlagen.jsonl
+  gnd              nur den GND-Abgleich der Grundlagen-Vorschläge wiederholen
 """
 
 from __future__ import annotations
@@ -20,45 +24,57 @@ import urllib.request
 from datetime import date
 from pathlib import Path
 
-from ...llm import LLMClient, LLMConfig, run_tasks
+from ...llm import LLMClient, LLMConfig, Progress, run_tasks
+from ...mapping import abstimmung, pruefung
+from ...mapping.abstimmung import Ziel
+from ...mapping.embeddings import DEFAULT_EMBEDDING_MODEL, Embedder, top_k
 from ...paths import DATA_DIR
 from ...vocabs import load as load_vocab
+from ..base import fertig
 from . import DIR, clean_label, load_jsonl
 
 OPENALEX_TOPICS_URL = ("https://raw.githubusercontent.com/ourresearch/openalex-topic-classification/"
                        "main/v2/data/topics/topics.json")
 CACHE = DATA_DIR / "cache"
 LEHREBENEN = ["grundlagen", "vertiefung", "forschung"]
-
-
-def _ref(voc, uri):
-    return voc.ref(uri)
-
-
-def _derive(voc, fach_uris: list[str]) -> dict:
-    """Studienfächer → zugehörige Studienbereiche und Fächergruppen (ohne Dubletten, Reihenfolge erhalten)."""
-    bereiche = list(dict.fromkeys(voc.by_uri[u]["broader"] for u in fach_uris))
-    gruppen = list(dict.fromkeys(voc.by_uri[b]["broader"] for b in bereiche))
-    return {"studienfach": [_ref(voc, u) for u in fach_uris],
-            "studienbereich": [_ref(voc, u) for u in bereiche],
-            "faechergruppe": [_ref(voc, u) for u in gruppen]}
-
-
-def _fachliste(voc) -> tuple[str, dict]:
-    faecher = [c for c in voc.concepts if c["level"] == 2]
-    by_not = {f["notation"]: f for f in faecher}
-    lines = []
-    for f in sorted(faecher, key=lambda f: (voc.by_uri[f["broader"]]["notation"], f["notation"])):
-        sb = voc.by_uri[f["broader"]]
-        lines.append(f'{f["notation"]} | {clean_label(f["label"])} | Studienbereich {sb["notation"]} {clean_label(sb["label"])}')
-    return "\n".join(lines), by_not
+THEMEN_PATH = DIR / "themen_openalex.jsonl"
+PROFILE_PATH = DIR / "studienfach_profile.jsonl"
+PRUEFLISTE_PATH = DIR / "pruefliste_themen.csv"
+KORREKTUREN_PATH = DIR / "korrekturen.csv"
+KANDIDATEN_PATH = CACHE / "hochschule_kandidaten.json"
+STIMMEN_FAECHER = CACHE / "hochschule_stimmen_faecher.jsonl"
+STIMMEN_LEHREBENE = CACHE / "hochschule_stimmen_lehrebene.jsonl"
+UEBERSETZUNG_PATH = CACHE / "hochschule_uebersetzungen.jsonl"
+N_KANDIDATEN = 15
+N_STIMMEN = 3
 
 
 def _hash(text: str) -> str:
     return hashlib.sha256(text.encode()).hexdigest()[:12]
 
 
-# --- OpenAlex ------------------------------------------------------------------------------
+def _derive(voc, fach_uris: list[str]) -> dict:
+    """Studienfächer → zugehörige Studienbereiche und Fächergruppen (ohne Dubletten, Reihenfolge erhalten)."""
+    bereiche = list(dict.fromkeys(voc.by_uri[u]["broader"] for u in fach_uris))
+    gruppen = list(dict.fromkeys(voc.by_uri[b]["broader"] for b in bereiche))
+    return {"studienfach": [voc.ref(u) for u in fach_uris],
+            "studienbereich": [voc.ref(u) for u in bereiche],
+            "faechergruppe": [voc.ref(u) for u in gruppen]}
+
+
+def _faecher(voc) -> list[dict]:
+    return sorted((c for c in voc.concepts if c["level"] == 2), key=lambda c: c["notation"])
+
+
+def _write_jsonl(path: Path, rows: list[dict]):
+    path.write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows), encoding="utf-8")
+
+
+def _topic_num(tid: str) -> int:
+    return int(tid.rsplit("T", 1)[-1])
+
+
+# --- Quellen -------------------------------------------------------------------------------
 
 def load_openalex_topics() -> list[dict]:
     CACHE.mkdir(parents=True, exist_ok=True)
@@ -68,118 +84,357 @@ def load_openalex_topics() -> list[dict]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def _topics(limit: int | None = None) -> list[dict]:
+    topics = sorted(load_openalex_topics(), key=lambda t: _topic_num(t["id"]))
+    return topics[:limit] if limit else topics
+
+
 def load_subfield_mapping() -> dict[str, list[str]]:
     with (DIR / "openalex_teilgebiet_studienbereich.csv").open(encoding="utf-8") as f:
         return {r["openalex_subfield_id"]: [u.strip() for u in r["studienbereich_uris"].split("|")]
                 for r in csv.DictReader(f)}
 
 
-OPENALEX_SYSTEM = """Du ordnest wissenschaftliche Themen (OpenAlex-Topics) der Destatis-Systematik der Studienfächer zu und übersetzt sie für ein deutsches Bildungsdatenset.
+# --- 1. Fachprofile ------------------------------------------------------------------------
+
+FACHPROFIL_SYSTEM = """Du beschreibst ein Studienfach der Destatis-Fächersystematik, damit Themen ihm automatisch zugeordnet werden können.
+
+Antworte ausschließlich mit JSON:
+{"beschreibung_de": "2 Sätze: Gegenstand und typische Inhalte des Fachs an deutschen Hochschulen",
+ "typische_themen": ["10-15 typische Lehr- und Forschungsthemen, deutsche Fachbegriffe"],
+ "abgrenzung": "1 Satz: welche angrenzenden Themen eher zu welchen Nachbarfächern gehören"}"""
+
+
+def build_fachprofile(cfg: LLMConfig, on_progress=None, stop_event=None, **_):
+    voc = load_vocab("hochschulfaechersystematik")
+    raw = CACHE / "hochschule_fachprofile.jsonl"
+
+    def worker(client: LLMClient, task: dict) -> dict:
+        f = voc.by_uri[task["id"]]
+        sb, fg = voc.by_uri[f["broader"]], voc.by_uri[voc.by_uri[f["broader"]]["broader"]]
+        res = client.chat_json(FACHPROFIL_SYSTEM, f"Studienfach: {clean_label(f['label'])}\n"
+                               f"Studienbereich: {clean_label(sb['label'])}\nFächergruppe: {fg['label']}")
+        if not res.get("beschreibung_de") or not res.get("typische_themen"):
+            raise ValueError("unvollständiges Profil")
+        return {"id": task["id"], "notation": f["notation"], "label": f["label"],
+                "beschreibung_de": res["beschreibung_de"].strip(),
+                "typische_themen": [str(t).strip() for t in res["typische_themen"] if str(t).strip()][:15],
+                "abgrenzung": str(res.get("abgrenzung", "")).strip(),
+                "mapping": {"methode": "LLM-Kurzprofil je Studienfach", "modell": cfg.model,
+                            "datum": date.today().isoformat(), "prompt_hash": _hash(FACHPROFIL_SYSTEM)}}
+
+    prog = run_tasks([{"id": f["uri"]} for f in _faecher(voc)], worker, raw, cfg, on_progress=on_progress,
+                     stop_event=stop_event)
+    if raw.exists():
+        rows = {r["id"]: r for r in load_jsonl(raw)}
+        _write_jsonl(PROFILE_PATH, sorted(rows.values(), key=lambda r: r["notation"]))
+    return prog
+
+
+def load_profile() -> dict[str, dict]:
+    return {r["id"]: r for r in load_jsonl(PROFILE_PATH)} if PROFILE_PATH.exists() else {}
+
+
+# --- 2. Übersetzen -------------------------------------------------------------------------
+
+UEBERSETZEN_SYSTEM = """Du übersetzt wissenschaftliche Themen (OpenAlex-Topics) für ein deutsches Bildungsdatenset.
 
 Für jedes Thema lieferst du:
 - "label_de": prägnanter deutscher Themenname, wie er in einem Vorlesungsverzeichnis stehen könnte
 - "beschreibung_de": 1-2 deutsche Sätze, worum es fachlich geht
 - "keywords_de": 5-10 deutsche Fachbegriffe
-- "studienfaecher": 1-3 Notationen aus der Liste unten, das passendste zuerst. Nur Fächer, in denen das Thema tatsächlich gelehrt wird. Sprach- oder regionsspezifische Themen gehören in die jeweilige Philologie bzw. Regionalwissenschaft.
-- "lehrebene": "grundlagen" (Bachelor-Grundstudium), "vertiefung" (fortgeschrittener Bachelor/Master) oder "forschung" (Promotion/Spezialforschung)
 
-"studienbereich_hinweis" stammt aus einem groben Mapping über das OpenAlex-Teilgebiet. Übernimm ihn, wenn er passt, sonst wähle frei.
-
-Antworte ausschließlich mit JSON: {"ergebnisse": [{"id": "...", "label_de": "...", "beschreibung_de": "...", "keywords_de": [...], "studienfaecher": ["..."], "lehrebene": "..."}]}
-
-Studienfächer (Notation | Studienfach | Studienbereich):
-"""
+Antworte ausschließlich mit JSON: {"ergebnisse": [{"id": "...", "label_de": "...", "beschreibung_de": "...", "keywords_de": ["..."]}]}"""
 
 
-def build_openalex(cfg: LLMConfig, batch: int = 20, limit: int | None = None, on_progress=None, stop_event=None):
-    voc = load_vocab("hochschulfaechersystematik")
-    fachliste, by_not = _fachliste(voc)
-    system = OPENALEX_SYSTEM + fachliste
-    sf_map = load_subfield_mapping()
-    topics = sorted(load_openalex_topics(), key=lambda t: (t["subfield"]["id"], t["id"]))
-    if limit:
-        topics = topics[:limit]
-    tasks = []
-    for i in range(0, len(topics), batch):
-        chunk = topics[i:i + batch]
-        tasks.append({"id": "batch:" + chunk[0]["id"] + "-" + chunk[-1]["id"], "topics": chunk})
+def load_uebersetzungen() -> dict[str, dict]:
+    """Übersetzungen aus dem Zwischenspeicher, sonst aus der vorhandenen Themendatei."""
+    out = {}
+    if THEMEN_PATH.exists():
+        for r in load_jsonl(THEMEN_PATH):
+            if r.get("label_de"):
+                out[r["id"]] = {k: r.get(k) for k in ("label_de", "beschreibung_de", "keywords_de")}
+    if UEBERSETZUNG_PATH.exists():
+        for b in load_jsonl(UEBERSETZUNG_PATH):
+            out.update(b["themen"])
+    return out
 
-    meta = {"modell": cfg.model, "datum": date.today().isoformat(), "prompt_hash": _hash(system)}
-    out_path = DIR / "themen_openalex.jsonl"
-    done = {r["id"] for r in load_jsonl(out_path)} if out_path.exists() else set()
-    tasks = [t for t in tasks if any("https://openalex.org/" + x["id"] not in done for x in t["topics"])]
 
-    # run_tasks schreibt pro Aufgabe eine Zeile; ein Batch liefert mehrere Themen. Deshalb sammelt
-    # der Worker die Themen in einer Batch-Zeile, die danach in Einzelzeilen aufgelöst wird.
-    raw_path = CACHE / "themen_openalex.batches.jsonl"
+def build_uebersetzen(cfg: LLMConfig, limit: int | None = None, on_progress=None, stop_event=None, batch: int = 20, **_):
+    have = load_uebersetzungen()
+    todo = [t for t in _topics(limit) if "https://openalex.org/" + t["id"] not in have]
+    tasks = [{"id": "batch:" + c[0]["id"] + "-" + c[-1]["id"], "topics": c}
+             for c in (todo[i:i + batch] for i in range(0, len(todo), batch))]
 
     def worker(client: LLMClient, task: dict) -> dict:
         items = [{"id": t["id"], "label_en": t["display_name"], "beschreibung_en": t["description"],
-                  "keywords_en": t["keywords"], "openalex_subfield": t["subfield"]["display_name"],
-                  "studienbereich_hinweis": [clean_label(voc.by_uri[u]["label"]) for u in sf_map[t["subfield"]["id"]]]}
-                 for t in task["topics"]]
-        res = client.chat_json(system, json.dumps(items, ensure_ascii=False))
+                  "keywords_en": t["keywords"]} for t in task["topics"]]
+        res = client.chat_json(UEBERSETZEN_SYSTEM, json.dumps(items, ensure_ascii=False))
         by_id = {r.get("id"): r for r in res.get("ergebnisse", [])}
-        rows = []
+        out = {}
         for t in task["topics"]:
             r = by_id.get(t["id"])
-            nots = [str(n).strip() for n in (r or {}).get("studienfaecher", []) if str(n).strip() in by_not][:3]
-            if not r or not nots or not r.get("label_de"):
+            if not r or not r.get("label_de"):
                 raise ValueError(f"unvollständige Antwort für {t['id']}")
-            rows.append({
-                "id": "https://openalex.org/" + t["id"], "art": "openalex",
-                "label_de": r["label_de"].strip(), "label_en": t["display_name"],
-                "beschreibung_de": (r.get("beschreibung_de") or "").strip(), "beschreibung_en": t["description"],
-                "keywords_de": [k.strip() for k in r.get("keywords_de", []) if k.strip()][:10],
-                "keywords_en": t["keywords"],
-                **_derive(voc, [by_not[n]["uri"] for n in nots]),
-                "lehrebene": r.get("lehrebene") if r.get("lehrebene") in LEHREBENEN else "vertiefung",
-                "openalex": {k: t[k] for k in ("subfield", "field", "domain")},
-                "quelle": {"name": "OpenAlex Topics", "uri": "https://openalex.org/" + t["id"], "lizenz": "CC0-1.0"},
-                "mapping": {"methode": "OpenAlex-Teilgebiet → Studienbereich (Handmapping), dann LLM-Feinmapping auf Studienfach",
-                            **meta},
-            })
-        return {"id": task["id"], "themen": rows}
+            out["https://openalex.org/" + t["id"]] = {
+                "label_de": r["label_de"].strip(), "beschreibung_de": (r.get("beschreibung_de") or "").strip(),
+                "keywords_de": [k.strip() for k in r.get("keywords_de", []) if k.strip()][:10]}
+        return {"id": task["id"], "themen": out}
 
-    prog = run_tasks(tasks, worker, raw_path, cfg, on_progress=on_progress, stop_event=stop_event)
-    _flatten_batches(raw_path, out_path)
-    return prog
+    return run_tasks(tasks, worker, UEBERSETZUNG_PATH, cfg, on_progress=on_progress, stop_event=stop_event)
 
 
-def _flatten_batches(raw_path: Path, out_path: Path):
-    if not raw_path.exists():
-        return
-    rows = {r["id"]: r for r in load_jsonl(out_path)} if out_path.exists() else {}
-    for b in load_jsonl(raw_path):
-        for r in b["themen"]:
-            rows[r["id"]] = r
-    out_path.write_text("".join(json.dumps(r, ensure_ascii=False) + "\n"
-                                for r in sorted(rows.values(), key=lambda r: int(r["id"].rsplit("T", 1)[-1]))),
-                        encoding="utf-8")
+# --- Objekte für die Zuordnung ---------------------------------------------------------------
 
-
-def import_topic_mapping(path: Path, model: str = "gpt-6-luna", datum: str | None = None):
-    """Übernimmt ein bereits erzeugtes Feinmapping (Format von topics_hochschule_llm.jsonl)."""
-    voc = load_vocab("hochschulfaechersystematik")
-    topics = {"https://openalex.org/" + t["id"]: t for t in load_openalex_topics()}
-    rows = []
-    for r in load_jsonl(Path(path)):
-        t = topics[r["id"]]
-        rows.append({
-            "id": r["id"], "art": "openalex", "label_de": r["label_de"], "label_en": t["display_name"],
-            "beschreibung_de": r.get("beschreibung_de", ""), "beschreibung_en": t["description"],
-            "keywords_de": r.get("keywords_de", []), "keywords_en": t["keywords"],
-            **_derive(voc, [f["uri"] for f in r["studienfach"]]),
-            "lehrebene": r.get("lehrebene") or "vertiefung",
-            "openalex": {k: t[k] for k in ("subfield", "field", "domain")},
-            "quelle": {"name": "OpenAlex Topics", "uri": r["id"], "lizenz": "CC0-1.0"},
-            "mapping": {"methode": "OpenAlex-Teilgebiet → Studienbereich (Handmapping), dann LLM-Feinmapping auf Studienfach",
-                        "modell": r.get("mapping_modell", model), "datum": datum or date.today().isoformat()},
+def _objekte(limit: int | None = None) -> list[dict]:
+    de = load_uebersetzungen()
+    out = []
+    for t in _topics(limit):
+        tid = "https://openalex.org/" + t["id"]
+        d = de.get(tid, {})
+        kw = list(dict.fromkeys((d.get("keywords_de") or []) + t["keywords"]))
+        out.append({
+            "id": tid, "topic": t, "de": d,
+            "prompt": {"label_de": d.get("label_de", ""), "label_en": t["display_name"],
+                       "beschreibung": d.get("beschreibung_de") or t["description"], "keywords": kw},
+            "text": " ".join([d.get("label_de", ""), t["display_name"], d.get("beschreibung_de", ""),
+                              t["description"], " ".join(kw)]),
         })
-    rows.sort(key=lambda r: int(r["id"].rsplit("T", 1)[-1]))
-    (DIR / "themen_openalex.jsonl").write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows),
-                                               encoding="utf-8")
-    return len(rows)
+    return out
+
+
+def _fach_ziele(voc) -> dict[str, Ziel]:
+    return {f["notation"]: Ziel(f["notation"], f["uri"], clean_label(f["label"]),
+                                "Studienbereich " + clean_label(voc.by_uri[f["broader"]]["label"]))
+            for f in _faecher(voc)}
+
+
+# --- 3. Kandidaten -------------------------------------------------------------------------
+
+def build_kandidaten(cfg: LLMConfig | None = None, limit: int | None = None, on_progress=None,
+                     embedding_modell: str | None = None, embedder: Embedder | None = None,
+                     n_kandidaten: int = N_KANDIDATEN, **_):
+    voc = load_vocab("hochschulfaechersystematik")
+    faecher = _faecher(voc)
+    profile = load_profile()
+    emb = embedder or Embedder(embedding_modell or DEFAULT_EMBEDDING_MODEL)
+    prog = Progress(total=2, status="Embeddings")
+
+    def fach_text(f):
+        sb = voc.by_uri[f["broader"]]
+        p = profile.get(f["uri"], {})
+        return ". ".join(x for x in [f"Studienfach {clean_label(f['label'])}", f"Studienbereich {clean_label(sb['label'])}",
+                                     p.get("beschreibung_de", ""),
+                                     "Typische Themen: " + ", ".join(p.get("typische_themen", []))] if x)
+
+    fv = emb.encode([fach_text(f) for f in faecher], art="ziel")
+    prog.done = 1
+    on_progress and on_progress(prog)
+    objekte = _objekte(limit)
+    ov = emb.encode([o["text"] for o in objekte], art="anfrage")
+    idx, sims = top_k(ov, fv, len(faecher))
+    sf_map = load_subfield_mapping()
+    bereich_von = {f["notation"]: f["broader"] for f in faecher}
+    out = {}
+    for o, row_idx, row_sim in zip(objekte, idx, sims):
+        ranked = [(faecher[i]["notation"], float(s)) for i, s in zip(row_idx, row_sim)]
+        wahl = dict(ranked[:n_kandidaten])
+        # aus jedem handgemappten Studienbereich die zwei ähnlichsten Fächer dazunehmen
+        hinweis = set(sf_map.get(o["topic"]["subfield"]["id"], []))
+        for sb in hinweis:
+            for n, s in [x for x in ranked if bereich_von[x[0]] == sb][:2]:
+                wahl.setdefault(n, s)
+        out[o["id"]] = {"kandidaten": wahl, "handmapping": sorted(hinweis)}
+    KANDIDATEN_PATH.parent.mkdir(parents=True, exist_ok=True)
+    KANDIDATEN_PATH.write_text(json.dumps({"embedding_modell": emb.model, "themen": out}, ensure_ascii=False),
+                               encoding="utf-8")
+    return fertig(f"{len(out)} Themen, Modell {emb.model}")
+
+
+def faecher_by_not(voc) -> dict[str, str]:
+    return {f["notation"]: f["uri"] for f in _faecher(voc)}
+
+
+def load_kandidaten() -> dict:
+    if not KANDIDATEN_PATH.exists():
+        raise FileNotFoundError("Erst den Schritt „kandidaten“ ausführen.")
+    return json.loads(KANDIDATEN_PATH.read_text(encoding="utf-8"))
+
+
+# --- 4. Fächer abstimmen --------------------------------------------------------------------
+
+FAECHER_REGELN = """Zu jedem Thema gibt es eine Liste von Kandidaten (Notation | Studienfach | Studienbereich).
+- Wähle 1 bis 3 Studienfächer aus den Kandidaten, das passendste zuerst. Gib als "code" die Notation an.
+- Wähle nur Fächer, in denen das Thema tatsächlich gelehrt oder erforscht wird. Lieber ein Fach zu wenig als eins zu viel.
+- Sprach- oder regionsspezifische Themen gehören in die jeweilige Philologie bzw. Regionalwissenschaft.
+- Passt kein Kandidat, gib eine leere Auswahl.
+- Je Fach: "begruendung" (ein kurzer Satz) und "belegbegriffe": 1 bis 3 Begriffe wörtlich aus Label, Beschreibung oder Keywords des Themas, die die Zuordnung stützen."""
+
+FAECHER_PERSPEKTIVEN = [
+    "Du ordnest wissenschaftliche Themen den Studienfächern der Destatis-Systematik zu.",
+    "Du bist Studienberaterin an einer deutschen Hochschule: In welchem Studienfach lernen Studierende dieses Thema?",
+    "Du bist Fachreferent einer Universitätsbibliothek: Welchem Studienfach ordnest du Literatur zu diesem Thema zu?",
+]
+
+
+def _systeme(perspektiven: list[str], regeln: str, n: int) -> list[str]:
+    return [perspektiven[i % len(perspektiven)] + "\n\n" + regeln for i in range(n)]
+
+
+def build_faecher(cfg: LLMConfig, limit: int | None = None, on_progress=None, stop_event=None,
+                  stimmen: int = N_STIMMEN, **_):
+    voc = load_vocab("hochschulfaechersystematik")
+    kand = load_kandidaten()["themen"]
+    objekte = [o for o in _objekte(limit) if o["id"] in kand]
+    return abstimmung.abstimmen(objekte, {o["id"]: list(kand[o["id"]]["kandidaten"]) for o in objekte},
+                                _fach_ziele(voc), _systeme(FAECHER_PERSPEKTIVEN, FAECHER_REGELN, stimmen),
+                                STIMMEN_FAECHER, cfg, max_auswahl=3, batch=10, on_progress=on_progress,
+                                stop_event=stop_event)
+
+
+# --- 5. Lehrebene abstimmen -----------------------------------------------------------------
+
+LEHREBENE_ZIELE = {
+    "grundlagen": Ziel("grundlagen", "grundlagen", "Grundlagen",
+                       "Lehrbuchwissen aus Einführungs- und Pflichtmodulen der ersten Bachelorsemester"),
+    "vertiefung": Ziel("vertiefung", "vertiefung", "Vertiefung",
+                       "etabliertes Wissen eines Teilgebiets, typisch für Wahlpflichtmodule im späteren Bachelor oder im Master"),
+    "forschung": Ziel("forschung", "forschung", "Forschung",
+                      "aktuelles Spezialgebiet, das vor allem in Forschungsseminaren, Promotion oder Fachliteratur vorkommt"),
+}
+
+LEHREBENE_REGELN = """Ordne jedes Thema genau einer Lehrebene zu (code aus den Kandidaten). Entscheidend ist, wo das Thema in deutschen Studiengängen überwiegend gelehrt wird, nicht wie schwierig es klingt.
+- Breite Themen, die in vielen Einführungsvorlesungen vorkommen, sind "grundlagen".
+- Benannte Teilgebiete mit eigenen Lehrbüchern und Modulen sind "vertiefung".
+- Sehr spezielle Methoden, Stoffe, Krankheitsbilder oder aktuelle Technologien ohne eigenes Lehrmodul sind "forschung".
+Gib eine kurze "begruendung" und 1 bis 3 "belegbegriffe" aus dem Thema an."""
+
+LEHREBENE_PERSPEKTIVEN = [
+    "Du planst Modulhandbücher deutscher Studiengänge.",
+    "Du bist Studiendekanin und ordnest Themen dem Studienverlauf zu.",
+    "Du bist Lehrbuchlektor und schätzt ein, auf welcher Stufe ein Thema gelehrt wird.",
+]
+
+
+def build_lehrebene(cfg: LLMConfig, limit: int | None = None, on_progress=None, stop_event=None,
+                    stimmen: int = N_STIMMEN, **_):
+    objekte = _objekte(limit)
+    alle = list(LEHREBENE_ZIELE)
+    return abstimmung.abstimmen(objekte, {o["id"]: alle for o in objekte}, LEHREBENE_ZIELE,
+                                _systeme(LEHREBENE_PERSPEKTIVEN, LEHREBENE_REGELN, stimmen), STIMMEN_LEHREBENE, cfg,
+                                max_auswahl=1, batch=20, on_progress=on_progress, stop_event=stop_event)
+
+
+# --- 6. Zusammenführen ----------------------------------------------------------------------
+
+METHODE = ("Kandidaten per Embedding-Ähnlichkeit und Handmapping Teilgebiet → Studienbereich, "
+           "dann LLM-Mehrfachabstimmung mit Begründung und Belegbegriffen")
+
+
+def zusammenfuehren(cfg: LLMConfig | None = None, stimmen: int = N_STIMMEN, modell: str | None = None, **_):
+    voc = load_vocab("hochschulfaechersystematik")
+    by_not = faecher_by_not(voc)
+    kand_all = load_kandidaten()
+    kand = kand_all["themen"]
+    sf_stimmen = abstimmung.lade_stimmen(STIMMEN_FAECHER)
+    le_stimmen = abstimmung.lade_stimmen(STIMMEN_LEHREBENE)
+    korr = pruefung.lade_korrekturen(KORREKTUREN_PATH)
+    alt = {r["id"]: r for r in load_jsonl(THEMEN_PATH)} if THEMEN_PATH.exists() else {}
+    meta = {"methode": METHODE, "modell": modell or (cfg.model if cfg else None),
+            "embedding_modell": kand_all.get("embedding_modell"), "stimmen": stimmen,
+            "datum": date.today().isoformat(),
+            "prompt_hash": _hash("".join(FAECHER_PERSPEKTIVEN) + FAECHER_REGELN + "".join(LEHREBENE_PERSPEKTIVEN)
+                                 + LEHREBENE_REGELN)}
+    rows, pruef = [], []
+    neu = behalten = 0
+    for o in _objekte():
+        tid, t = o["id"], o["topic"]
+        if tid not in sf_stimmen or tid not in le_stimmen or tid not in kand:
+            if tid in alt:
+                rows.append(alt[tid])
+                behalten += 1
+            continue
+        sims = kand[tid]["kandidaten"]
+        fa = abstimmung.auswerten(sf_stimmen[tid], stimmen, o["text"], aehnlichkeit=sims)
+        le = abstimmung.auswerten(le_stimmen[tid], stimmen, o["text"], max_auswahl=1)
+        codes = fa["auswahl"]
+        ebene = le["auswahl"][0] if le["auswahl"] else "vertiefung"
+        hinweis = set(kand[tid]["handmapping"])
+        bestaetigt = any(voc.by_uri[by_not[c]]["broader"] in hinweis for c in codes)
+        mapping = {**meta, "status": fa["status"],
+                   "konfidenz": fa["details"][0]["konfidenz"] if fa["details"] else 0.0,
+                   "handmapping_bestaetigt": bestaetigt, "kandidaten": len(sims),
+                   "faecher": [{**voc.ref(by_not[d["code"]]), **{k: v for k, v in d.items() if k != "code"}}
+                               for d in fa["details"]],
+                   "verworfen": {voc.by_uri[by_not[c]]["label"]: n for c, n in fa["verworfen"].items()},
+                   "lehrebene": {"status": le["status"],
+                                 "konfidenz": le["details"][0]["konfidenz"] if le["details"] else 0.0,
+                                 "stimmen": {**{e: 0 for e in LEHREBENEN}, **{d["code"]: d["stimmen"] for d in le["details"]},
+                                             **le["verworfen"]},
+                                 "begruendungen": le["details"][0]["begruendungen"] if le["details"] else []}}
+        k = korr.get(tid)
+        if k:
+            if k["codes"]:
+                codes = [c for c in k["codes"] if c in by_not][:3] or codes
+                mapping["status"], mapping["konfidenz"] = "redaktionell", 1.0
+            if k["lehrebene"] in LEHREBENEN:
+                ebene = k["lehrebene"]
+                mapping["lehrebene"]["status"] = "redaktionell"
+            mapping["korrektur"] = k
+        if not codes:
+            continue
+        d = o["de"]
+        rows.append({
+            "id": tid, "art": "openalex",
+            "label_de": d.get("label_de") or t["display_name"], "label_en": t["display_name"],
+            "beschreibung_de": d.get("beschreibung_de", ""), "beschreibung_en": t["description"],
+            "keywords_de": d.get("keywords_de", []), "keywords_en": t["keywords"],
+            **_derive(voc, [by_not[c] for c in codes]),
+            "lehrebene": ebene,
+            "openalex": {x: t[x] for x in ("subfield", "field", "domain")},
+            "quelle": {"name": "OpenAlex Topics", "uri": tid, "lizenz": "CC0-1.0"},
+            "mapping": mapping,
+        })
+        neu += 1
+        gruende = []
+        if mapping["status"] == "unsicher":
+            gruende.append("keine Mehrheit für ein Fach")
+        if mapping["lehrebene"]["status"] == "unsicher":
+            gruende.append("keine Mehrheit für die Lehrebene")
+        if not bestaetigt and mapping["status"] == "wahrscheinlich":
+            gruende.append("weicht vom Handmapping ab")
+        if fa["details"] and not fa["details"][0]["belegbegriffe_im_text"] and not k:
+            gruende.append("Hauptfach ohne Beleg im Text")
+        if gruende and not k:
+            pruef.append({
+                "id": tid, "label_de": rows[-1]["label_de"], "grund": "; ".join(gruende),
+                "faecher": " | ".join(f"{x['notation']} {clean_label(x['label'])} ({x['stimmen']}/{stimmen})"
+                                      for x in mapping["faecher"]),
+                "verworfen": " | ".join(f"{l} ({n})" for l, n in mapping["verworfen"].items()),
+                "lehrebene": f"{ebene} ({mapping['lehrebene']['stimmen']})",
+                "openalex_teilgebiet": t["subfield"]["display_name"],
+            })
+    rows.sort(key=lambda r: _topic_num(r["id"]))
+    _write_jsonl(THEMEN_PATH, rows)
+    pruefung.schreibe_pruefliste(PRUEFLISTE_PATH, pruef)
+    return fertig(f"{neu} Themen neu ausgewertet, {behalten} unverändert übernommen, {len(pruef)} auf der Prüfliste")
+
+
+def statistik(rows: list[dict] | None = None) -> dict:
+    """Kennzahlen zur Güte des Mappings (für Oberfläche und Doku)."""
+    from collections import Counter
+
+    rows = rows if rows is not None else (load_jsonl(THEMEN_PATH) if THEMEN_PATH.exists() else [])
+    m = [r.get("mapping", {}) for r in rows]
+    return {
+        "themen": len(rows),
+        "status_fach": dict(Counter(x.get("status", "ohne Abstimmung") for x in m)),
+        "status_lehrebene": dict(Counter((x.get("lehrebene") or {}).get("status", "ohne Abstimmung")
+                                         if isinstance(x.get("lehrebene"), dict) else "ohne Abstimmung" for x in m)),
+        "lehrebene": dict(Counter(r.get("lehrebene") for r in rows)),
+        "handmapping_bestaetigt": sum(1 for x in m if x.get("handmapping_bestaetigt")),
+        "faecher_je_thema": dict(Counter(len(r["studienfach"]) for r in rows)),
+    }
 
 
 # --- Grundlagen über GND -------------------------------------------------------------------
@@ -226,9 +481,9 @@ def _norm(s: str) -> str:
 
 
 def build_grundlagen(cfg: LLMConfig, pro_fach: int = 12, faecher: list[str] | None = None, on_progress=None,
-                     stop_event=None):
+                     stop_event=None, **_):
     voc = load_vocab("hochschulfaechersystematik")
-    alle = [c for c in voc.concepts if c["level"] == 2]
+    alle = _faecher(voc)
     if faecher:
         alle = [c for c in alle if c["notation"] in faecher]
     raw_path = CACHE / "grundlagen_vorschlaege.jsonl"
@@ -249,6 +504,11 @@ def build_grundlagen(cfg: LLMConfig, pro_fach: int = 12, faecher: list[str] | No
     prog = run_tasks(tasks, worker, raw_path, cfg, on_progress=on_progress, stop_event=stop_event)
     resolve_grundlagen(meta)
     return prog
+
+
+def build_gnd(cfg=None, **_):
+    n, miss = resolve_grundlagen()
+    return fertig(f"{n} Grundlagenthemen mit GND-Beleg, {miss} Vorschläge ohne Treffer")
 
 
 def resolve_grundlagen(meta: dict | None = None):
@@ -280,7 +540,7 @@ def resolve_grundlagen(meta: dict | None = None):
                     "quelle": {"name": "Gemeinsame Normdatei (GND)", "uri": hit["uri"], "lizenz": "CC0-1.0"},
                     "mapping": {"methode": "Grundlagenthema per LLM für das Studienfach vorgeschlagen, "
                                            "über GND-Sachschlagwort belegt (Label aus der GND)",
-                                **meta},
+                                "status": "gesichert", **meta},
                 }
             if entry["fach"] not in row["faecher_uris"] and len(row["faecher_uris"]) < 3:
                 row["faecher_uris"].append(entry["fach"])
@@ -289,8 +549,7 @@ def resolve_grundlagen(meta: dict | None = None):
         r.update(_derive(voc, r.pop("faecher_uris")))
         rows.append(r)
     rows.sort(key=lambda r: (r["studienfach"][0]["notation"], r["label_de"]))
-    (DIR / "themen_grundlagen.jsonl").write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows),
-                                                 encoding="utf-8")
+    _write_jsonl(DIR / "themen_grundlagen.jsonl", rows)
     with (DIR / "grundlagen_ohne_gnd.csv").open("w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
         w.writerow(["vorschlag", "studienfach_uri", "studienfach"])

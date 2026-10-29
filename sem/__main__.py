@@ -3,7 +3,8 @@
     python -m sem info
     python -m sem seeds --anzahl hochschule=30000 [--gleichverteilung hochschule=thema] [--seed 42] [--out …]
     python -m sem materialien --seeds output/seeds.jsonl [--out …] [--limit N] [--workers 20] [--model …]
-    python -m sem mappings hochschule openalex|grundlagen|gnd|import <datei>
+    python -m sem mappings hochschule [alle|schritt …] [--limit N] [--stimmen 3] [--embedding-modell …]
+    python -m sem mappings hochschule --liste
 """
 
 from __future__ import annotations
@@ -61,11 +62,13 @@ def main(argv=None):
     p.add_argument("--limit", type=int)
     _llm_args(p)
 
-    p = sub.add_parser("mappings", help="Mappings eines Bildungsbereichs neu bauen")
-    p.add_argument("bereich", choices=["hochschule"])
-    p.add_argument("schritt", choices=["openalex", "grundlagen", "gnd", "import"])
-    p.add_argument("datei", nargs="?", type=Path, help="nur für import")
-    p.add_argument("--limit", type=int, help="nur die ersten N Topics (openalex, zum Testen)")
+    p = sub.add_parser("mappings", help="Mappings eines Bildungsbereichs neu bauen (Schritte siehe --liste)")
+    p.add_argument("bereich")
+    p.add_argument("schritte", nargs="*", default=["alle"], help="Schritte in dieser Reihenfolge, Standard: alle")
+    p.add_argument("--liste", action="store_true", help="Schritte des Bereichs anzeigen")
+    p.add_argument("--limit", type=int, help="nur die ersten N Themen (zum Testen)")
+    p.add_argument("--stimmen", type=int, default=3, help="LLM-Stimmen je Zuordnung")
+    p.add_argument("--embedding-modell", help="lokales Embedding-Modell (Standard intfloat/multilingual-e5-small)")
     p.add_argument("--pro-fach", type=int, default=12, help="Grundlagenthemen je Studienfach")
     _llm_args(p)
 
@@ -99,20 +102,25 @@ def main(argv=None):
             sys.exit(2)
 
     elif a.cmd == "mappings":
-        from .bereiche.hochschule import build
+        from .bereiche import get
         from .llm import print_progress
 
-        if a.schritt == "openalex":
-            print(build.build_openalex(_cfg(a), limit=a.limit, on_progress=print_progress).line())
-        elif a.schritt == "grundlagen":
-            print(build.build_grundlagen(_cfg(a), pro_fach=a.pro_fach, on_progress=print_progress).line())
-        elif a.schritt == "gnd":
-            print("%d Grundlagenthemen mit GND-Beleg, %d Vorschläge ohne Treffer" % build.resolve_grundlagen())
-        elif a.schritt == "import":
-            if not a.datei:
-                raise SystemExit("Datei angeben")
-            print(f"{build.import_topic_mapping(a.datei)} Themen übernommen")
-
+        b = get(a.bereich)
+        schritte = {x.key: x for x in b.mapping_schritte()}
+        if a.liste or not schritte:
+            for x in schritte.values():
+                print(f"{x.key:16} {'LLM ' if x.llm else '    '}{x.beschreibung}")
+            print("alle = " + " → ".join(b.mapping_folge))
+            return
+        keys = b.mapping_folge if a.schritte == ["alle"] else a.schritte
+        unbekannt = [k for k in keys if k not in schritte]
+        if unbekannt:
+            raise SystemExit(f"Unbekannte Schritte {unbekannt}. Möglich: {', '.join(schritte)}, alle")
+        prog = b.mapping_ausfuehren(keys, _cfg(a), on_progress=print_progress, limit=a.limit, stimmen=a.stimmen,
+                                    embedding_modell=a.embedding_modell, pro_fach=a.pro_fach)
+        print("\n" + prog.line())
+        if "fertig" not in prog.status:
+            sys.exit(2)
 
 if __name__ == "__main__":
     main()

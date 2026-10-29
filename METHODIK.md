@@ -38,19 +38,42 @@ der Datei).
 Studienfach. Jedes Thema bekommt ein bis drei Studienfächer. Studienbereich und Fächergruppe werden daraus
 abgeleitet.
 
-**Themen aus OpenAlex** (`themen_openalex.jsonl`):
-1. Handmapping der 252 OpenAlex-Teilgebiete auf einen primären und bis zu zwei weitere Studienbereiche
-   (`openalex_teilgebiet_studienbereich.csv`, redaktionell, überprüfbar).
-2. LLM-Feinmapping je Thema: deutsches Label, deutsche Kurzbeschreibung, deutsche Keywords, ein bis drei
-   Studienfächer aus der vollständigen Fächerliste (der Studienbereich aus Schritt 1 ist nur ein Hinweis)
-   und die Lehrebene `grundlagen`, `vertiefung` oder `forschung`. Ungültige Notationen werden verworfen
-   und die Anfrage wird wiederholt.
-3. Prüfung (Stand der mitgelieferten Datei, Modell gpt-6-luna): alle Fach-URIs gültig, Studienbereich und
-   Fächergruppe konsistent abgeleitet. Bei 562 Themen liegt kein Fach im handgemappten Studienbereich. In
-   der Stichprobe sind das meist Themen, die OpenAlex einem unpassenden Teilgebiet zuordnet (z. B.
-   „Educational Assessment“ unter Information Systems), und die LLM-Zuordnung ist dort besser. In
-   Stichproben von 100 Themen war das erste Fach stets passend, beim zweiten und dritten Fach waren
-   etwa 5–10 % schwach (z. B. Tourismusmanagement → Wirtschaftspädagogik).
+**Themen aus OpenAlex** (`themen_openalex.jsonl`). Jeder Schritt ist einzeln aufrufbar und fortsetzbar
+(`python -m sem mappings hochschule --liste`):
+
+1. `fachprofile`: Das LLM beschreibt jedes der 272 Studienfächer in zwei Sätzen, nennt typische Themen
+   und grenzt es von Nachbarfächern ab (`studienfach_profile.jsonl`, auch für sich nutzbar).
+2. `uebersetzen`: deutsches Label, Kurzbeschreibung und Keywords je Thema. Vorhandene Übersetzungen
+   werden übernommen.
+3. `kandidaten`: Ein lokales, mehrsprachiges Embedding-Modell (Standard `intfloat/multilingual-e5-small`,
+   CPU) vergleicht jedes Thema mit allen Fachprofilen. Kandidaten sind die 15 ähnlichsten Fächer plus je
+   Studienbereich aus dem Handmapping (`openalex_teilgebiet_studienbereich.csv`) dessen zwei ähnlichste
+   Fächer. So wählt das LLM aus einer kurzen, plausiblen Liste statt aus 272 Fächern.
+4. `faecher`: drei unabhängige Stimmen je Thema. Jede Stimme nutzt eine andere Perspektive (Fachsystematik,
+   Studienberatung, Bibliothek), eine andere Reihenfolge der Kandidaten und andere Nachbarthemen im
+   Batch. Je gewähltem Fach nennt das LLM eine Begründung und Belegbegriffe aus dem Thementext.
+5. `lehrebene`: ebenfalls drei Stimmen, nach festen Kriterien (Einführungsmodul, eigenes Teilgebiet,
+   Spezialforschung).
+6. `zusammenfuehren`: Ein Fach wird übernommen, wenn es mindestens zwei von drei Stimmen hat (höchstens
+   drei Fächer). Je Thema stehen unter `mapping`:
+   - `status`: `gesichert` (Hauptfach in allen Stimmen, meist an erster Stelle), `wahrscheinlich`
+     (Mehrheit), `unsicher` (keine Mehrheit) oder `redaktionell` (korrigiert),
+   - `konfidenz`: Stimmenanteil des Hauptfachs,
+   - je Fach: Stimmen, Embedding-Ähnlichkeit, Begründungen und `belegbegriffe_im_text`. Das sind nur die
+     Belegbegriffe, die wirklich im Thementext vorkommen, sie werden automatisch geprüft,
+   - `verworfen`: Fächer mit zu wenigen Stimmen, `handmapping_bestaetigt` und die Stimmen zur Lehrebene.
+
+   Unsichere Fälle, Abweichungen vom Handmapping und Hauptfächer ohne Beleg im Text stehen in
+   `pruefliste_themen.csv`. Wer dort Korrekturen einträgt (`korrektur_codes` als Notationen mit `|`,
+   `korrektur_lehrebene`) und die Datei als `korrekturen.csv` speichert, überschreibt beim nächsten
+   Zusammenführen das LLM-Ergebnis.
+
+Seeds übernehmen `status` und `konfidenz` in die Herkunftsangabe des Fachs.
+
+Die mitgelieferte Datei stammt noch aus dem früheren Einzelschritt-Verfahren (ein LLM-Aufruf je Thema über
+die ganze Fächerliste). Eine Prüfung ergab: alle Fach-URIs gültig, in Stichproben von 100 Themen das
+erste Fach stets passend, beim zweiten und dritten Fach etwa 5–10 % schwach. Bis zum Neuberechnen zeigt
+sie den Status „ohne Abstimmung“.
 
 **Grundlagenthemen** (`themen_grundlagen.jsonl`): OpenAlex beschreibt Forschungsfelder, Grundlagen des
 Grundstudiums fehlen dort weitgehend. Deshalb schlägt ein LLM je Studienfach Grundlagenthemen vor
@@ -143,9 +166,9 @@ Bedingte Abschnitte `{{#name}}…{{/name}}` erscheinen nur, wenn der Wert gesetz
 - OpenAlex-Themen stammen aus der Forschungsliteratur. Medizin, Biologie und Ingenieurwesen sind dort
   stark, Philologien, Kunst und Musik schwach vertreten. Die Grundlagenthemen und die Gleichverteilung
   nach Fach gleichen das teilweise aus.
-- LLM-Zuordnungen sind nicht deterministisch. In Stichproben schwankte die Lehrebene bei etwa 10 % der
-  Themen zwischen zwei Läufen, die Fächer überlappten meist. Die Zuordnungen sind deshalb als Vorschlag
-  zu verstehen und in den JSONL-Dateien prüfbar.
+- LLM-Zuordnungen sind nicht deterministisch. Die Mehrfachabstimmung macht die Schwankung sichtbar
+  (Status und Konfidenz), beseitigt sie aber nicht. Drei Stimmen desselben Modells können sich
+  gemeinsam irren; Embedding-Ähnlichkeit und Handmapping dienen als unabhängige Gegenprobe.
 - Die Lehrebene ist ungleich verteilt (25 grundlagen, 3.714 vertiefung, 777 forschung). Weil Forschungs-
   themen im 1.–2. Studienjahr ausgeschlossen sind, ist dieses Niveau bei Gleichverteilung nach Thema
   etwas seltener (bei 30.000 Seeds rund 28 % statt 33 %).
@@ -160,4 +183,9 @@ Bedingte Abschnitte `{{#name}}…{{/name}}` erscheinen nur, wenn der Wert gesetz
    registrieren.
 2. Mappings unter `data/mappings/<bereich>/` ablegen, gleiche Themenstruktur wie bei Hochschule
    (`id`, `label_de`, Fachfelder mit `uri`/`label`, `quelle`, `mapping`).
-3. Optional eigene Prompts unter `prompts/<bereich>/`.
+3. Zum Bauen der Mappings `mapping_schritte()` und `mapping_folge` setzen. CLI und Oberfläche zeigen die
+   Schritte dann automatisch. Die Bausteine in `sem/mapping/` sind bereichsunabhängig: Embedding-
+   Kandidaten (`embeddings.py`), Mehrfachabstimmung mit Belegen (`abstimmung.py`), Prüfliste und
+   Korrekturen (`pruefung.py`). Ein Schulbereich würde etwa Themen auf Schulfächer, ein
+   Berufsbildungsbereich ESCO-Kompetenzen auf Berufe abstimmen.
+4. Optional eigene Prompts unter `prompts/<bereich>/`.

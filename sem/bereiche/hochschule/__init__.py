@@ -15,7 +15,7 @@ from functools import cached_property
 from ... import schema as S
 from ...paths import MAPPING_DIR
 from ...vocabs import load as load_vocab
-from ..base import Bildungsbereich, SeedState
+from ..base import Bildungsbereich, MappingSchritt, SeedState
 
 DIR = MAPPING_DIR / "hochschule"
 THEMEN_FILES = ["themen_openalex.jsonl", "themen_grundlagen.jsonl"]
@@ -45,6 +45,32 @@ class Hochschule(Bildungsbereich):
         "lehrebene": "Grundlagen, Vertiefung und Forschung etwa gleich oft",
     }
     default_balance = "thema"
+    mapping_folge = ["fachprofile", "uebersetzen", "kandidaten", "faecher", "lehrebene", "zusammenfuehren"]
+
+    def mapping_schritte(self) -> list[MappingSchritt]:
+        from . import build as b
+
+        return [
+            MappingSchritt("fachprofile", "Fachprofile", "Kurzbeschreibung und typische Themen je Studienfach", b.build_fachprofile),
+            MappingSchritt("uebersetzen", "Übersetzen", "OpenAlex-Themen ins Deutsche (Vorhandenes wird übernommen)",
+                           b.build_uebersetzen),
+            MappingSchritt("kandidaten", "Kandidaten", "ähnlichste Studienfächer je Thema (lokale Embeddings)",
+                           b.build_kandidaten, llm=False),
+            MappingSchritt("faecher", "Fächer abstimmen", "drei Stimmen je Thema mit Begründung und Belegen", b.build_faecher),
+            MappingSchritt("lehrebene", "Lehrebene abstimmen", "drei Stimmen je Thema nach festen Kriterien",
+                           b.build_lehrebene),
+            MappingSchritt("zusammenfuehren", "Zusammenführen", "Auswertung, Konfidenz, Prüfliste, Korrekturen",
+                           b.zusammenfuehren, llm=False),
+            MappingSchritt("grundlagen", "Grundlagenthemen", "je Studienfach per LLM, über die GND belegt",
+                           b.build_grundlagen),
+            MappingSchritt("gnd", "GND-Abgleich", "GND-Abgleich der Grundlagen-Vorschläge wiederholen", b.build_gnd,
+                           llm=False),
+        ]
+
+    def mapping_statistik(self) -> dict:
+        from . import build
+
+        return build.statistik()
 
     @cached_property
     def faecher(self):
@@ -113,9 +139,11 @@ class Hochschule(Bildungsbereich):
         vocab_hfs = self.faecher.scheme
         S.set_controlled(seed, S.F_CONTEXT, [self.context], S.provenance(
             "OpenEduHub educationalContext", uri=CONTEXT_URI, license="CC0-1.0", method="fest codiert"))
-        S.set_controlled(seed, S.F_TAXON_UNI, topic["studienfach"], S.provenance(
-            "OpenEduHub-Hochschulfächersystematik (Destatis)", uri=vocab_hfs["uri"], license=vocab_hfs["license"],
-            method=topic.get("mapping", {}).get("methode", "aus dem Thema übernommen")))
+        m = topic.get("mapping", {})
+        prov = S.provenance("OpenEduHub-Hochschulfächersystematik (Destatis)", uri=vocab_hfs["uri"],
+                            license=vocab_hfs["license"], method=m.get("methode", "aus dem Thema übernommen"))
+        prov.update({k: m[k] for k in ("status", "konfidenz") if k in m})
+        S.set_controlled(seed, S.F_TAXON_UNI, topic["studienfach"], prov)
         S.set_controlled(seed, S.F_LRT, [{"uri": typ["uri"], "label": typ["label"]}], S.provenance(
             lrt_src["name"], uri=lrt_src["uri"], license=lrt_src["lizenz"],
             method="passend zur Lehrebene, je Gruppe rotierend (seltenster Typ zuerst)"))
