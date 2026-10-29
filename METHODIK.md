@@ -216,7 +216,13 @@ Pro Seed bis zu sechs LLM-Aufrufe (OpenAI-kompatible API, Standardmodell `gpt-6-
    Ergebnis steht in `synth:inhaltstyp_pruefung` (erwartet, erkannt, Übereinstimmung) und dient als
    Qualitätsmaß; `ccm:oeh_lrt` bleibt der Seed-Wert.
 4. **Frage-Antwort-Paare** (`fragen_antworten.md`, JSON): Ziel 10 Paare mit Lernzielstufe nach
-   Bloom/Anderson, mindestens 8.
+   Bloom/Anderson, mindestens 8. Schritt 3 und 4 laufen gleichzeitig.
+
+Jedes Material vermerkt in `synth:generierung` die Dauer und welche Felder neu angefragt werden mussten
+(`neu_angefragt`). Die Fortschrittsanzeige zählt außerdem Wiederholungen ganzer Materialien
+(z. B. nach Rate-Limit oder Zeitüberschreitung) und zeigt die letzte Meldung. Ein Material braucht fünf
+aufeinanderfolgende Aufrufe; bei Reasoning-Modellen verkürzt ein geringerer Reasoning-Aufwand
+(`--reasoning-effort`, Oberfläche „Reasoning-Aufwand“) die Laufzeit deutlich.
 
 Die Prompts für Titel, Beschreibung, Keywords und Inhaltstyp sowie der gemeinsame Systemprompt sind
 aus der WLO-Metadatenanreicherung übernommen und an die synthetischen Materialien angepasst.

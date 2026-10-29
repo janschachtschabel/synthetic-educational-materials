@@ -5,16 +5,19 @@ Pro Seed nacheinander:
   2. Titel, Beschreibung, Keywords: je ein Aufruf mit gemeinsamem Systemprompt (system) und
      gemeinsamer Materialvorlage (material); der Auftrag kommt aus der Felddatei. Jeder Aufruf
      sieht den Volltext, die festen Metadaten des Seeds und die schon erzeugten Felder.
-  3. Inhaltstyp-Prüfung: Der Inhaltstyp wird ohne Kenntnis des Seed-Werts aus dem fertigen
-     Material bestimmt und mit dem Seed verglichen (nur protokolliert).
-  4. Frage-Antwort-Paare (JSON)
-Liefert ein Feld nichts Brauchbares, wird nur dieses Feld erneut angefragt.
+  3. gleichzeitig: Inhaltstyp-Prüfung (der Inhaltstyp wird ohne Kenntnis des Seed-Werts aus dem
+     fertigen Material bestimmt und mit dem Seed verglichen, nur protokolliert) und
+     Frage-Antwort-Paare (JSON)
+Liefert ein Feld nichts Brauchbares, wird nur dieses Feld erneut angefragt. Dauer und
+Neuanfragen je Feld stehen in synth:generierung.
 """
 
 from __future__ import annotations
 
 import json
 import re
+import time
+from concurrent.futures import ThreadPoolExecutor
 from datetime import date
 from pathlib import Path
 
@@ -81,14 +84,18 @@ def parse_paare(data: dict | list, minimum: int) -> list[dict]:
 
 
 def frage(client: LLMClient, system: str, user: str, parse, json_mode: bool = False,
-          versuche: int = FELD_VERSUCHE):
+          versuche: int = FELD_VERSUCHE, protokoll: dict | None = None, name: str = ""):
+    """Fragt ein Feld an und prüft die Antwort; unbrauchbare Antworten werden neu angefragt.
+    protokoll[name] zählt die Neuanfragen."""
     fehler = None
-    for _ in range(versuche):
+    for i in range(versuche):
         try:
             return parse(client.chat_json(system, user) if json_mode else client.chat(system, user))
         except ValueError as e:  # auch json.JSONDecodeError
             fehler = e
-    raise ValueError(f"nach {versuche} Versuchen unbrauchbar: {fehler}")
+            if protokoll is not None:
+                protokoll[name] = i + 1
+    raise ValueError(f"{name or 'Feld'} nach {versuche} Versuchen unbrauchbar: {fehler}")
 
 
 # --- Ein Material -----------------------------------------------------------------------------
@@ -109,31 +116,46 @@ def generate_one(client: LLMClient, seed: dict, prompts_by_bereich: dict, meta: 
     bereich = get_bereich(seed[S.F_BEREICH])
     prompts = prompts_by_bereich[bereich.key]
     values = bereich.prompt_values(seed)
-    text = client.chat(render(prompts["volltext_system"], values), render(prompts["volltext"], values)).strip()
-    if len(text.split()) < 150:
-        raise ValueError("Volltext zu kurz")
+    start = time.time()
+    neu: dict[str, int] = {}
+    for i in range(FELD_VERSUCHE):
+        text = client.chat(render(prompts["volltext_system"], values), render(prompts["volltext"], values)).strip()
+        if len(text.split()) >= 150:
+            break
+        neu["volltext"] = i + 1
+    else:
+        raise ValueError(f"Volltext nach {FELD_VERSUCHE} Versuchen zu kurz")
 
     system = render(prompts["system"], values)
     felder: dict = {}
+    # Titel, Beschreibung, Keywords nacheinander: jedes Feld sieht die vorherigen
     for name, parse in (("titel", parse_titel), ("beschreibung", parse_beschreibung), ("keywords", parse_keywords)):
         auftrag = render(prompts[name], values)
-        felder[name] = frage(client, system, material_user(prompts, values, felder, text, auftrag), parse)
+        felder[name] = frage(client, system, material_user(prompts, values, felder, text, auftrag), parse,
+                             protokoll=neu, name=name)
 
-    pruefung = None
-    kategorien = bereich.inhaltstyp_kategorien() if inhaltstyp_pruefen else []
-    if kategorien:
+    # Inhaltstyp-Prüfung und Frage-Antwort-Paare hängen nicht voneinander ab: gleichzeitig
+    def inhaltstyp():
+        kategorien = bereich.inhaltstyp_kategorien() if inhaltstyp_pruefen else []
+        if not kategorien:
+            return None
         auftrag = render(prompts["inhaltstyp"], {
             "kategorien": "\n".join(f"- {k['name']} → {k['id']}" for k in kategorien),
             "beispiel_id": kategorien[0]["id"]})
         erkannt = frage(client, system, material_user(prompts, values, felder, text, auftrag, inhaltstyp=False),
-                        lambda t: parse_inhaltstyp(t, kategorien))
+                        lambda t: parse_inhaltstyp(t, kategorien), protokoll=neu, name="inhaltstyp")
         erwartet = seed.get(S.F_LRT, [None])[0]
-        pruefung = {"erwartet": erwartet, "erkannt": erkannt["uri"], "erkannt_label": erkannt["name"],
-                    "uebereinstimmung": erkannt["uri"] == erwartet}
+        return {"erwartet": erwartet, "erkannt": erkannt["uri"], "erkannt_label": erkannt["name"],
+                "uebereinstimmung": erkannt["uri"] == erwartet}
 
-    auftrag = render(prompts["fragen_antworten"], values)
-    qa = frage(client, system, material_user(prompts, values, felder, text, auftrag),
-               lambda d: parse_paare(d, qa_min), json_mode=True)
+    def fragen():
+        auftrag = render(prompts["fragen_antworten"], values)
+        return frage(client, system, material_user(prompts, values, felder, text, auftrag),
+                     lambda d: parse_paare(d, qa_min), json_mode=True, protokoll=neu, name="fragen_antworten")
+
+    with ThreadPoolExecutor(2) as pool:
+        f_typ, f_qa = pool.submit(inhaltstyp), pool.submit(fragen)
+        pruefung, qa = f_typ.result(), f_qa.result()
 
     rec = dict(seed)
     rec[S.F_TITLE] = felder["titel"]
@@ -149,7 +171,7 @@ def generate_one(client: LLMClient, seed: dict, prompts_by_bereich: dict, meta: 
                      (S.F_QA, "fragen_antworten")):
         prov[f] = dict(S.provenance("LLM", method=f"aus Volltext und festen Metadaten erzeugt ({datei})"),
                        modell=meta["modell"])
-    rec[S.F_GENERATION] = meta
+    rec[S.F_GENERATION] = {**meta, "dauer_sekunden": round(time.time() - start, 1), "neu_angefragt": neu}
     return rec
 
 
@@ -162,7 +184,8 @@ def generate(seeds_path: Path, out_path: Path, cfg: LLMConfig, limit: int | None
     prompts_by_bereich = {b: load_prompts(b) for b in bereiche}
     meta = {"modell": cfg.model, "base_url": cfg.public()["base_url"], "datum": date.today().isoformat(),
             "prompt_hash": {b: prompt_hash(p) for b, p in prompts_by_bereich.items()},
-            "inhaltstyp_pruefung": inhaltstyp_pruefen}
+            "inhaltstyp_pruefung": inhaltstyp_pruefen, **({"reasoning_effort": cfg.reasoning_effort}
+                                                           if cfg.reasoning_effort else {})}
     return run_tasks(seeds, lambda client, seed: generate_one(client, seed, prompts_by_bereich, meta,
                                                               inhaltstyp_pruefen=inhaltstyp_pruefen),
                      Path(out_path), cfg, on_progress=on_progress, stop_event=stop_event)

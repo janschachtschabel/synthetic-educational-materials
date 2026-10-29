@@ -76,7 +76,14 @@ with st.sidebar:
     base_url = st.text_input("Base-URL", value=env.base_url or "", placeholder="https://api.openai.com/v1")
     model = st.text_input("Modell", value=env.model or DEFAULT_MODEL)
     api_key = st.text_input("API-Key", type="password", placeholder="aus OPENAI_API_KEY" if env.api_key else "")
-    workers = st.number_input("Worker (parallel)", 1, 200, env.workers or DEFAULT_WORKERS)
+    workers = st.number_input("Worker (parallel)", 1, 200, env.workers or DEFAULT_WORKERS,
+                              help="Materialien, die gleichzeitig erzeugt werden. Mehr Worker = schneller, "
+                                   "solange das Rate-Limit des Anbieters reicht.")
+    efforts = ["Standard des Modells", "minimal", "low", "medium", "high"]
+    effort = st.selectbox("Reasoning-Aufwand", efforts, index=efforts.index(env.reasoning_effort)
+                          if env.reasoning_effort in efforts else 0,
+                          help="Nur für Reasoning-Modelle: geringerer Aufwand antwortet deutlich schneller. "
+                               "Modelle ohne diesen Parameter melden einen Fehler.")
     retries = st.number_input("Versuche pro Aufgabe", 1, 20, 6)
     outage = st.number_input("Wartezeit bei API-Ausfall (Minuten)", 1, 240, 10,
                              help="Danach pausiert der Lauf und lässt sich später fortsetzen.")
@@ -85,7 +92,8 @@ with st.sidebar:
                               help="z. B. intfloat/multilingual-e5-small oder "
                                    "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2")
     cfg = LLMConfig(base_url=base_url or None, api_key=api_key or env.api_key, model=model, workers=int(workers),
-                    max_retries=int(retries), outage_minutes=float(outage))
+                    max_retries=int(retries), outage_minutes=float(outage),
+                    reasoning_effort=None if effort == efforts[0] else effort)
 
 # --- Vorschau-Helfer --------------------------------------------------------------------------
 @st.cache_data(max_entries=4)

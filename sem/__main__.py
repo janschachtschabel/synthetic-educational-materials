@@ -48,13 +48,15 @@ def _llm_args(p):
     g.add_argument("--model")
     g.add_argument("--workers", type=int)
     g.add_argument("--retries", type=int, dest="max_retries")
+    g.add_argument("--reasoning-effort", choices=["minimal", "low", "medium", "high"],
+                   help="nur für Reasoning-Modelle: weniger Denkaufwand = schneller (Standard: Modellstandard)")
 
 
 def _cfg(a):
     from .llm import LLMConfig
 
     return LLMConfig.from_env(base_url=a.base_url, api_key=a.api_key, model=a.model, workers=a.workers,
-                              max_retries=a.max_retries)
+                              max_retries=a.max_retries, reasoning_effort=a.reasoning_effort)
 
 
 def main(argv=None):

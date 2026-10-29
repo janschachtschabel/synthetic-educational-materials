@@ -33,6 +33,7 @@ class LLMConfig:
     outage_minutes: float = 10.0    # so lange wird bei nicht erreichbarer API gewartet, dann pausiert der Lauf
     timeout: float = 180.0
     temperature: float | None = None  # None = Standard des Modells (manche Modelle akzeptieren keinen Wert)
+    reasoning_effort: str | None = None  # z. B. "minimal", "low" bei Reasoning-Modellen; None = Standard
     extra: dict = field(default_factory=dict)  # weitere Parameter für chat.completions.create
 
     @classmethod
@@ -42,6 +43,7 @@ class LLMConfig:
             api_key=os.environ.get("OPENAI_API_KEY") or None,
             model=os.environ.get("LLM_MODEL") or DEFAULT_MODEL,
             workers=int(os.environ.get("LLM_WORKERS") or DEFAULT_WORKERS),
+            reasoning_effort=os.environ.get("LLM_REASONING_EFFORT") or None,
         )
         for k, v in overrides.items():
             if v is not None:
@@ -50,7 +52,10 @@ class LLMConfig:
 
     def public(self) -> dict:
         """Konfiguration ohne Schlüssel, für Herkunftsangaben."""
-        return {"base_url": self.base_url or "https://api.openai.com/v1", "model": self.model}
+        out = {"base_url": self.base_url or "https://api.openai.com/v1", "model": self.model}
+        if self.reasoning_effort:
+            out["reasoning_effort"] = self.reasoning_effort
+        return out
 
 
 class APIUnavailable(Exception):
@@ -70,6 +75,8 @@ class LLMClient:
         kwargs = dict(self.cfg.extra)
         if self.cfg.temperature is not None:
             kwargs["temperature"] = self.cfg.temperature
+        if self.cfg.reasoning_effort:
+            kwargs["reasoning_effort"] = self.cfg.reasoning_effort
         if json_mode:
             kwargs["response_format"] = {"type": "json_object"}
         resp = self.client.chat.completions.create(
@@ -120,6 +127,7 @@ class Progress:
     done: int = 0
     failed: int = 0
     skipped: int = 0
+    retries: int = 0                # wiederholte Versuche (Aufgabe neu gestartet), auch wenn sie danach klappten
     started: float = field(default_factory=time.time)
     status: str = "läuft"
     last_error: str | None = None
@@ -137,8 +145,11 @@ class Progress:
     def line(self) -> str:
         eta = self.eta_seconds
         eta_s = f"{int(eta // 60)}:{int(eta % 60):02d} min" if eta is not None else "–"
-        return (f"{self.done + self.failed}/{self.total}  ok {self.done}  fehler {self.failed}  "
-                f"{self.rate:.1f}/s  Rest {eta_s}  [{self.status}]")
+        line = (f"{self.done + self.failed}/{self.total}  ok {self.done}  fehler {self.failed}  "
+                f"wiederholt {self.retries}  {self.rate:.2f}/s  Rest {eta_s}  [{self.status}]")
+        if self.last_error and self.status == "läuft":
+            line += f"  letzte Meldung: {self.last_error[:120]}"
+        return line
 
 
 def print_progress(p: Progress):
@@ -199,6 +210,9 @@ def run_tasks(
                     stop.set()
                     return None, f"{type(e).__name__}: {e}"
                 last = f"{type(e).__name__}: {e}"
+                with write_lock:
+                    prog.retries += 1
+                    prog.last_error = last
                 if _is_connection_error(e):
                     outage["since"] = outage["since"] or time.time()
                     if time.time() - outage["since"] > cfg.outage_minutes * 60:
