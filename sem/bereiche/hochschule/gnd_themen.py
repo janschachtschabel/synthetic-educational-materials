@@ -90,6 +90,17 @@ def _wlo_beleg(eintraege: list[dict], voc) -> dict:
     return out
 
 
+def _fach_ebene(row: dict, wlo_uris: list[str], voc) -> str:
+    """Feinste Ebene, auf der ein WLO-Fach mit der Zuordnung übereinstimmt (WLO-Fächer stehen oft
+    nur auf Ebene Studienbereich oder Fächergruppe)."""
+    for ebene in ("studienfach", "studienbereich", "faechergruppe"):
+        eigene = {x["uri"] for x in row[ebene]}
+        for u in wlo_uris:
+            if eigene & ({u} | set(voc.ancestors(u))):
+                return ebene
+    return "nein"
+
+
 def build_wlo_belege(cfg=None, **_):
     """WLO-Keywords exakt auf Label und Keywords der OpenAlex-Themen; nur Keywords, die zu höchstens
     drei Themen passen. Prüft, ob ein WLO-Fach im selben Studienbereich liegt wie das abgestimmte Fach."""
@@ -115,19 +126,16 @@ def build_wlo_belege(cfg=None, **_):
             continue
         b = _wlo_beleg(treffer[i], voc)
         b["keywords"] = sorted({e["keyword"] for e in treffer[i]})[:10]
-        bereiche = {s["uri"] for s in r["studienbereich"]} | {f["uri"] for f in r["studienfach"]}
-        wlo_bereiche = set()
-        for f in b["faecher"]:
-            u = f["uri"]
-            wlo_bereiche |= {u, voc.by_uri[u].get("broader") or u}
-        b["fach_passt"] = bool(bereiche & wlo_bereiche)
-        passt += b["fach_passt"]
+        b["fach_passt"] = _fach_ebene(r, [f["uri"] for f in b["faecher"]], voc)
+        passt += b["fach_passt"] != "nein"
         r["belege"]["wlo"] = b
     for r in rows:
         if not r.get("belege"):
             r.pop("belege", None)
     B._write_jsonl(B.THEMEN_PATH, rows)
-    return fertig(f"{len(treffer)} OpenAlex-Themen mit WLO-Beleg, davon {passt} mit passendem Fach")
+    ebenen = Counter(r["belege"]["wlo"]["fach_passt"] for r in rows if r.get("belege", {}).get("wlo"))
+    return fertig(f"{len(treffer)} OpenAlex-Themen mit WLO-Beleg, davon {passt} mit passendem Fach "
+                  f"({', '.join(f'{k}: {v}' for k, v in ebenen.most_common())})")
 
 
 # --- Sachgruppen und Brücke ----------------------------------------------------------------

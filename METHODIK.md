@@ -111,7 +111,7 @@ vorkommt; berücksichtigt werden Keywords ab drei Datensätzen. Der Export und d
 Label bzw. Keyword von höchstens drei OpenAlex-Themen entsprechen (`wlo_belege`), jeweils als Beleg mit
 Zahl der Datensätze, häufigsten Fächern und, wo vorhanden, Links auf die Nodes. Bei OpenAlex-Themen wird
 zusätzlich geprüft, ob ein WLO-Fach im selben Studienbereich liegt wie das abgestimmte Fach
-(`belege.wlo.fach_passt`), eine unabhängige Gegenprobe der Fachzuordnung.
+(`belege.wlo.fach_passt`: feinste übereinstimmende Ebene `studienfach`, `studienbereich`, `faechergruppe` oder `nein`; WLO-Fächer stehen oft nur auf grober Ebene), eine unabhängige Gegenprobe der Fachzuordnung.
 
 **Inhaltstypen** (`inhaltstypen.json`): redaktionelle Auswahl textfähiger Typen aus OEH `new_lrt`. Je Typ
 ist festgelegt, welche Textsorte erzeugt wird, welche Medienform der Volltext hat (Text, Folien, Video-

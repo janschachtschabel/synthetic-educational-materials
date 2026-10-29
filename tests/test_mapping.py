@@ -194,6 +194,6 @@ def test_wlo_belege_an_openalex_themen(pipeline, monkeypatch, tmp_path):
         "kw0": {"schreibweisen": {"kw0": 3}, "anzahl": 3, "nodes": [], "faecher": {fach: 3}},
         "science": {"schreibweisen": {"science": 50}, "anzahl": 50, "nodes": [], "faecher": {fach: 50}}}}),
         encoding="utf-8")
-    assert "1 OpenAlex-Themen mit WLO-Beleg, davon 1" in G.build_wlo_belege().status
+    assert "1 OpenAlex-Themen mit WLO-Beleg, davon 1 mit passendem Fach (studienfach: 1)" in G.build_wlo_belege().status
     r0 = json.loads(B.THEMEN_PATH.read_text(encoding="utf-8").splitlines()[0])
-    assert r0["belege"]["wlo"]["fach_passt"] and r0["belege"]["wlo"]["keywords"] == ["kw0"]  # „science“ zu unspezifisch
+    assert r0["belege"]["wlo"]["fach_passt"] == "studienfach" and r0["belege"]["wlo"]["keywords"] == ["kw0"]  # „science“ zu unspezifisch
