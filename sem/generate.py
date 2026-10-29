@@ -118,6 +118,8 @@ def generate_one(client: LLMClient, seed: dict, prompts_by_bereich: dict, meta: 
     values = bereich.prompt_values(seed)
     start = time.time()
     neu: dict[str, int] = {}
+    tokens = client.zaehler(neu=True) if hasattr(client, "zaehler") else {}
+    sub = {"eingabe": 0, "davon_cache": 0, "ausgabe": 0, "davon_reasoning": 0, "aufrufe": 0}
     for i in range(FELD_VERSUCHE):
         text = client.chat(render(prompts["volltext_system"], values), render(prompts["volltext"], values)).strip()
         if len(text.split()) >= 150:
@@ -153,9 +155,22 @@ def generate_one(client: LLMClient, seed: dict, prompts_by_bereich: dict, meta: 
         return frage(client, system, material_user(prompts, values, felder, text, auftrag),
                      lambda d: parse_paare(d, qa_min), json_mode=True, protokoll=neu, name="fragen_antworten")
 
+    def mit_zaehler(fn):
+        def run():
+            if hasattr(client, "zaehler"):
+                client.zaehler(neu=True)
+            try:
+                return fn()
+            finally:
+                if hasattr(client, "zaehler"):
+                    for k, v in client.zaehler().items():
+                        sub[k] += v
+        return run
+
     with ThreadPoolExecutor(2) as pool:
-        f_typ, f_qa = pool.submit(inhaltstyp), pool.submit(fragen)
+        f_typ, f_qa = pool.submit(mit_zaehler(inhaltstyp)), pool.submit(mit_zaehler(fragen))
         pruefung, qa = f_typ.result(), f_qa.result()
+    tokens = {k: tokens.get(k, 0) + sub[k] for k in sub} if tokens else {}
 
     rec = dict(seed)
     rec[S.F_TITLE] = felder["titel"]
@@ -172,6 +187,8 @@ def generate_one(client: LLMClient, seed: dict, prompts_by_bereich: dict, meta: 
         prov[f] = dict(S.provenance("LLM", method=f"aus Volltext und festen Metadaten erzeugt ({datei})"),
                        modell=meta["modell"])
     rec[S.F_GENERATION] = {**meta, "dauer_sekunden": round(time.time() - start, 1), "neu_angefragt": neu}
+    if tokens:
+        rec[S.F_GENERATION]["tokens"] = tokens
     return rec
 
 

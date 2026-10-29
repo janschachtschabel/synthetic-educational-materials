@@ -76,7 +76,7 @@ with st.sidebar:
     base_url = st.text_input("Base-URL", value=env.base_url or "", placeholder="https://api.openai.com/v1")
     model = st.text_input("Modell", value=env.model or DEFAULT_MODEL)
     api_key = st.text_input("API-Key", type="password", placeholder="aus OPENAI_API_KEY" if env.api_key else "")
-    workers = st.number_input("Worker (parallel)", 1, 200, env.workers or DEFAULT_WORKERS,
+    workers = st.number_input("Worker (parallel)", 1, 1000, env.workers or DEFAULT_WORKERS,
                               help="Materialien, die gleichzeitig erzeugt werden. Mehr Worker = schneller, "
                                    "solange das Rate-Limit des Anbieters reicht.")
     efforts = ["Standard des Modells", "minimal", "low", "medium", "high"]

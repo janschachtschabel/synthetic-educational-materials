@@ -69,6 +69,7 @@ class LLMClient:
         if not cfg.api_key:
             raise ValueError("Kein API-Key: OPENAI_API_KEY setzen oder in der Oberfläche eintragen.")
         self.cfg = cfg
+        self.usage = threading.local()  # Tokenzähler je Thread (eine Aufgabe läuft in einem Thread)
         self.client = OpenAI(base_url=cfg.base_url, api_key=cfg.api_key, timeout=cfg.timeout, max_retries=0)
 
     def chat(self, system: str, user: str, json_mode: bool = False) -> str:
@@ -84,7 +85,23 @@ class LLMClient:
             messages=[{"role": "system", "content": system}, {"role": "user", "content": user}],
             **kwargs,
         )
+        u = getattr(resp, "usage", None)
+        if u is not None:
+            z = self.zaehler()
+            z["aufrufe"] += 1
+            z["eingabe"] += u.prompt_tokens or 0
+            z["ausgabe"] += u.completion_tokens or 0
+            det = getattr(u, "completion_tokens_details", None)
+            z["davon_reasoning"] += (getattr(det, "reasoning_tokens", 0) or 0) if det else 0
+            pdet = getattr(u, "prompt_tokens_details", None)
+            z["davon_cache"] += (getattr(pdet, "cached_tokens", 0) or 0) if pdet else 0
         return resp.choices[0].message.content or ""
+
+    def zaehler(self, neu: bool = False) -> dict:
+        """Tokenzähler des aktuellen Threads; neu=True setzt ihn zurück."""
+        if neu or not hasattr(self.usage, "z"):
+            self.usage.z = {"aufrufe": 0, "eingabe": 0, "davon_cache": 0, "ausgabe": 0, "davon_reasoning": 0}
+        return self.usage.z
 
     def chat_json(self, system: str, user: str) -> dict:
         text = self.chat(system, user, json_mode=True).strip()
