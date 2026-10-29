@@ -407,6 +407,54 @@ def pruefzeile(row: dict, gruende: list[str], stimmen: int, **extra) -> dict:
             "lehrebene": f"{row['lehrebene']} ({m['lehrebene']['stimmen']})", **extra}
 
 
+def korrektur_anwenden(row: dict, k: dict, voc, by_not: dict) -> dict:
+    """Wendet eine Korrektur auf ein fertiges Thema an (ohne Stimmen neu auszuwerten)."""
+    m = row.setdefault("mapping", {})
+    codes = [c for c in (k["codes"] or []) if c in by_not][:3]
+    if codes:
+        row.update(_derive(voc, [by_not[c] for c in codes]))
+        m["status"], m["konfidenz"] = "redaktionell", 1.0
+    if k["lehrebene"] in LEHREBENEN:
+        row["lehrebene"] = k["lehrebene"]
+        m.setdefault("lehrebene", {})["status"] = "redaktionell"
+    if m.get("hochschulrelevanz"):
+        m["hochschulrelevanz"]["status"] = "redaktionell"
+    m["korrektur"] = k
+    return row
+
+
+def korrekturen(cfg: LLMConfig | None = None, **_):
+    """korrekturen.csv auf themen_openalex.jsonl und themen_gnd.jsonl anwenden und die Prüflisten
+    um erledigte Zeilen kürzen. Braucht keine Zwischenergebnisse (Stimmen, Kandidaten)."""
+    import csv
+
+    from . import gnd_themen as G
+
+    voc = load_vocab("hochschulfaechersystematik")
+    by_not = faecher_by_not(voc)
+    korr = pruefung.lade_korrekturen(KORREKTUREN_PATH)
+    n = {"korrigiert": 0, "ausgeschlossen": 0}
+    for themen, pruef in ((THEMEN_PATH, PRUEFLISTE_PATH), (G.THEMEN_GND, G.PRUEF_GND)):
+        if not themen.exists():
+            continue
+        rows = []
+        for r in load_jsonl(themen):
+            k = korr.get(r["id"])
+            if k and k["ausschliessen"]:
+                n["ausgeschlossen"] += 1
+                continue
+            if k:
+                korrektur_anwenden(r, k, voc, by_not)
+                n["korrigiert"] += 1
+            rows.append(r)
+        _write_jsonl(themen, rows)
+        if pruef.exists():
+            with pruef.open(encoding="utf-8") as f:
+                offen = [r for r in csv.DictReader(f) if r["id"] not in korr]
+            pruefung.schreibe_pruefliste(pruef, offen)
+    return fertig(f"{n['korrigiert']} Themen korrigiert oder bestätigt, {n['ausgeschlossen']} ausgeschlossen")
+
+
 def _meta(cfg, modell, kand_all, stimmen, methode, prompts: str) -> dict:
     return {"methode": methode, "modell": modell or (cfg.model if cfg else None),
             "embedding_modell": kand_all.get("embedding_modell"), "stimmen": stimmen,
@@ -428,6 +476,8 @@ def zusammenfuehren(cfg: LLMConfig | None = None, stimmen: int = N_STIMMEN, mode
     neu = behalten = 0
     for o in _objekte():
         tid, t = o["id"], o["topic"]
+        if korr.get(tid, {}).get("ausschliessen"):
+            continue
         if tid not in sf_stimmen or tid not in kand:
             if tid in alt:
                 rows.append(alt[tid])

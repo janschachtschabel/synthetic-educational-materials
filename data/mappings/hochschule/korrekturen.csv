@@ -1,0 +1,454 @@
+id,label_de,korrektur_codes,korrektur_lehrebene,kommentar,prueflistengrund
+https://openalex.org/T10013,Asymmetrische Synthese und Katalyse,032|126,,"Organische Chemie, kein Verfahrenstechnik-Schwerpunkt",weicht vom Handmapping ab
+https://openalex.org/T10059,Werkstoffe für Knochenregeneration und Gewebezüchtung,300|294|282,,Fach korrigiert,weicht vom Handmapping ab
+https://openalex.org/T10064,Analyse komplexer Netzwerke,128|312|079,,komplexe Netzwerke: Physik/Statistik/Informatik,weicht vom Handmapping ab
+https://openalex.org/T10111,Fernerkundung in der Landwirtschaft,003|353|171,,Ergebnis bestätigt,weicht vom Handmapping ab
+https://openalex.org/T10284,Anaerobe Vergärung und Biogaserzeugung,226|310|282,,Fach korrigiert,weicht vom Handmapping ab
+https://openalex.org/T10468,Photovoltaiksysteme und Leistungsoptimierung,048|316|310,,Fach korrigiert,weicht vom Handmapping ab
+https://openalex.org/T10548,Katalytische Kreuzkupplungsreaktionen,032,,Ersatz aus Embedding falsch,"keine Stimme für ein Fach, Vorschlag nur aus Embedding"
+https://openalex.org/T10567,Optimierung von Fahrzeugrouten,276|089|118,,Operations Research,weicht vom Handmapping ab
+https://openalex.org/T10587,Autophagie bei Erkrankungen und in der Therapie,300|025|107,,Fach korrigiert,weicht vom Handmapping ab
+https://openalex.org/T10594,Genomische Züchtung von Nutzpflanzen und Nutztieren,138|353|371,,Fach korrigiert,weicht vom Handmapping ab
+https://openalex.org/T10638,Optische Messtechnik und 3D-Formmessung,088|212|224,,Fach korrigiert,weicht vom Handmapping ab
+https://openalex.org/T10701,Photoredoxkatalyse und radikalische Synthese,032|126,,Fach korrigiert,weicht vom Handmapping ab
+https://openalex.org/T10927,Vertrauensmanagement und Zugriffskontrolle in digitalen Systemen,079|123,,Fach korrigiert,weicht vom Handmapping ab
+https://openalex.org/T11039,Lehrqualität und Evaluation in der Hochschulbildung,052,,Hochschulforschung,keine Mehrheit für ein Fach
+https://openalex.org/T11223,Hafenbetrieb und maritime Logistik,210|268|182,,Fach korrigiert,weicht vom Handmapping ab
+https://openalex.org/T11230,Vibrationsbasierte Energiegewinnung,286|048,,Fach korrigiert,weicht vom Handmapping ab
+https://openalex.org/T11281,Asymmetrische Katalyse und Hydrierung,032,,Fach korrigiert,weicht vom Handmapping ab
+https://openalex.org/T11283,Laborpraktika und digitales Lernen im Ingenieurwesen,052|199,vertiefung,Hochschuldidaktik,weicht vom Handmapping ab
+https://openalex.org/T11312,Bodenfeuchte und satellitengestützte Fernerkundung,385|050|077,,Ergebnis bestätigt,weicht vom Handmapping ab
+https://openalex.org/T11336,"Haushaltsenergie, Luftverschmutzung und Gesundheit",458|232|310,,Fach korrigiert,weicht vom Handmapping ab
+https://openalex.org/T11353,Schlangengifte und Antivenomforschung,126|025|107,,Ergebnis bestätigt,weicht vom Handmapping ab
+https://openalex.org/T11399,"Muskelstoffwechsel, Ernährung und Training",320|029|025,,Ergebnis bestätigt,weicht vom Handmapping ab
+https://openalex.org/T11401,Nanoblasen und Flotation in der Wasseraufbereitung,457|226,,Ergebnis bestätigt,weicht vom Handmapping ab
+https://openalex.org/T11421,Gewerkschaften und Arbeitsbeziehungen,149|175|129,,Fach korrigiert,weicht vom Handmapping ab
+https://openalex.org/T11434,Elektrochemische Analytik und Sensorik,032|286,,Fach korrigiert,weicht vom Handmapping ab
+https://openalex.org/T11441,Organobor- und Organosiliciumchemie,032,,Fach korrigiert,keine Mehrheit für ein Fach
+https://openalex.org/T11479,Smarte Städte und digitale Stadtentwicklung,134|079|140,,Fach korrigiert,weicht vom Handmapping ab
+https://openalex.org/T11492,Wissenschaftliche Integrität und Plagiatsprävention,022|169,,Fach korrigiert,weicht vom Handmapping ab
+https://openalex.org/T11601,Neuronale Schnittstellen und Neuroprothetik,300|286|048,,Fach korrigiert,weicht vom Handmapping ab
+https://openalex.org/T11823,Rohstoffreichtum und wirtschaftliche Entwicklung,175,,Fach korrigiert,keine Mehrheit für ein Fach
+https://openalex.org/T11835,Nachhaltigkeit in der Hochschulbildung,052,,Fach korrigiert,keine Mehrheit für ein Fach
+https://openalex.org/T11859,Historisches Lernen und Demokratiebildung,068|052|361,,Ergebnis bestätigt,weicht vom Handmapping ab
+https://openalex.org/T11904,Räumliche Kognition und Orientierung,132|050|280,,Fach korrigiert,weicht vom Handmapping ab
+https://openalex.org/T11946,Entwurf und Optimierung von Antennen,222|048,,Fach korrigiert,weicht vom Handmapping ab
+https://openalex.org/T12010,Evaluation komplexer Programme und Maßnahmen,148|052,,Fach korrigiert,keine Mehrheit für ein Fach
+https://openalex.org/T12013,Nachhaltigkeitsindikatoren und Umweltökonomie,175|178,,Fach korrigiert,weicht vom Handmapping ab
+https://openalex.org/T12051,"Tanz, Bewegung und psychisches Wohlbefinden",106|029|233,,Fach korrigiert,weicht vom Handmapping ab
+https://openalex.org/T12101,Banditenalgorithmen und Online-Optimierung,079|312,,Fach korrigiert,weicht vom Handmapping ab
+https://openalex.org/T12129,Energiesicherheit und Energiepolitik,129|175,,Fach korrigiert,weicht vom Handmapping ab
+https://openalex.org/T12155,Mikrowellenkeramiken und dielektrische Werkstoffe,216|294,,Ergebnis bestätigt,weicht vom Handmapping ab
+https://openalex.org/T12163,Elektrostatische Aerosolabscheidung und Gasreinigung,457|224|226,,Ergebnis bestätigt,weicht vom Handmapping ab
+https://openalex.org/T12171,Offene Bildungsressourcen und E-Learning,052|022|321,,Fach korrigiert,weicht vom Handmapping ab
+https://openalex.org/T12207,Assistive Technologien für Kommunikation und Mobilität,215|190,,Ergebnis bestätigt,weicht vom Handmapping ab
+https://openalex.org/T12228,Koordinationschemie und metallorganische Chemie,032,,Ersatz aus Embedding falsch,"keine Stimme für ein Fach, Vorschlag nur aus Embedding"
+https://openalex.org/T12264,Gewebezüchtung und regenerative Medizin,300|282|107,,Fach korrigiert,weicht vom Handmapping ab
+https://openalex.org/T12290,Computeranimation menschlicher Bewegung,079|121,,Fach korrigiert,weicht vom Handmapping ab
+https://openalex.org/T12327,Chemiedidaktik und Labormethoden,032|361,,Fachdidaktik Chemie,"keine Stimme für ein Fach, Vorschlag nur aus Embedding"
+https://openalex.org/T12336,Insekten als Lebens- und Futtermittel,320|371|096,,Ergebnis bestätigt,weicht vom Handmapping ab
+https://openalex.org/T12354,Digitale Medien in der Hochschullehre,052|302,,Fach korrigiert,weicht vom Handmapping ab
+https://openalex.org/T12386,Spektrale Röntgen- und CT-Bildgebung,107|215|128,,Fach korrigiert,keine Mehrheit für ein Fach
+https://openalex.org/T12389,Infrarot-Zielerkennung,088|048|057,,Fach korrigiert,weicht vom Handmapping ab
+https://openalex.org/T12395,Digitale Lehr- und Lernformen,052|321,,Fach korrigiert,weicht vom Handmapping ab
+https://openalex.org/T12401,Dienst- und Personaleinsatzplanung,276|277|234,,Fach korrigiert,weicht vom Handmapping ab
+https://openalex.org/T12458,Organische Zinnverbindungen und ihre Eigenschaften,032,,Fach korrigiert,weicht vom Handmapping ab
+https://openalex.org/T12469,"Komplexität, Selbstorganisation und nichtlineare Dynamik",128|105|140,,Fach korrigiert,weicht vom Handmapping ab
+https://openalex.org/T12507,Utopien und Dystopien in der Science-Fiction,188|127,,Fach korrigiert,weicht vom Handmapping ab
+https://openalex.org/T12616,Religion und religiöse Vielfalt in der Schule,544|136|545,,Ergebnis bestätigt,weicht vom Handmapping ab
+https://openalex.org/T12639,Globale Energiewende und Nachhaltigkeit,175|310|178,,Ergebnis bestätigt,weicht vom Handmapping ab
+https://openalex.org/T12643,Nachhaltigkeit urbaner Ökosysteme,283|385|458,,Fach korrigiert,weicht vom Handmapping ab
+https://openalex.org/T12665,Bambus als Rohstoff und Werkstoff,082|058|294,,Fach korrigiert,weicht vom Handmapping ab
+https://openalex.org/T12666,Geschichte der Psychiatrie und psychischen Versorgung,068|275|107,,Fach korrigiert,weicht vom Handmapping ab
+https://openalex.org/T12717,"Weltraumpolitik, Weltraumrecht und Raumfahrtwirtschaft",135|129|057,,Fach korrigiert,weicht vom Handmapping ab
+https://openalex.org/T12729,Wurzelverstärkung und Hangstabilität,058|017|283,,Ergebnis bestätigt,weicht vom Handmapping ab
+https://openalex.org/T12757,"Erinnerung, Identität und Wissensordnungen",024|068,,Fach korrigiert,weicht vom Handmapping ab
+https://openalex.org/T12766,Interdisziplinäre Forschung und Zusammenarbeit,-,,zu unspezifisch als Lehrthema,weicht vom Handmapping ab
+https://openalex.org/T12778,Medizingeschichte und globale Gesundheit,107|232|068,,Fach korrigiert,weicht vom Handmapping ab
+https://openalex.org/T12888,Militärstrategie und -technologie,129,,Fach korrigiert,"keine Stimme für ein Fach, Vorschlag nur aus Embedding"
+https://openalex.org/T12909,Frankreich im 20. Jahrhundert: Politik und Gesellschaft,273|059,,Fach korrigiert,weicht vom Handmapping ab
+https://openalex.org/T12921,Europäisches Strafrecht und Justizkooperation,135,,Fach korrigiert,weicht vom Handmapping ab
+https://openalex.org/T12973,Chinonmethide in der organischen Synthese,032,,Fach korrigiert,weicht vom Handmapping ab
+https://openalex.org/T13115,Axiale Chiralität und atropselektive Synthese,032,,Fach korrigiert,keine Mehrheit für ein Fach
+https://openalex.org/T13208,Synthese funktionalisierter Heterocyclen,032|126,,Fach korrigiert,weicht vom Handmapping ab
+https://openalex.org/T13215,Indischer Ozean: Maritime und koloniale Verflechtungen,273|183|173,,Fach korrigiert,weicht vom Handmapping ab
+https://openalex.org/T13216,Künstlerische Forschung und kreative Praxis,040|023,,Fach korrigiert,weicht vom Handmapping ab
+https://openalex.org/T13222,"Geschichte, Kultur und Politik der Karibik",038|036,,Fach korrigiert,weicht vom Handmapping ab
+https://openalex.org/T13239,Phosphorchemie und Wittig-Reaktionen,032,,Ersatz aus Embedding falsch,"keine Stimme für ein Fach, Vorschlag nur aus Embedding"
+https://openalex.org/T13276,Innovationsökosysteme und Wissenstransfer,021|175,,Fach korrigiert,weicht vom Handmapping ab
+https://openalex.org/T13297,Chemische Stoffbewertung und quantitative Struktur-Wirkungs-Beziehungen,032|126,,Fach korrigiert,weicht vom Handmapping ab
+https://openalex.org/T13386,Digitale Bildung und Lehrerbildung,361|052,,Fach korrigiert,weicht vom Handmapping ab
+https://openalex.org/T13391,Aquaponik und Hydroponik,060|353|371,,Fach korrigiert,weicht vom Handmapping ab
+https://openalex.org/T13432,Raumentwicklung und Umweltpolitik in Russland,044|050|134,,Ergebnis bestätigt,weicht vom Handmapping ab
+https://openalex.org/T13574,Familien und Kinder bei elterlicher Erkrankung,245|253|232,,Ergebnis bestätigt,weicht vom Handmapping ab
+https://openalex.org/T13643,Künstliche Intelligenz und Rechtsprechung,135|079,,Fach korrigiert,weicht vom Handmapping ab
+https://openalex.org/T13722,Ergonomie und menschgerechte Arbeitssysteme,370|203|132,,Fach korrigiert,weicht vom Handmapping ab
+https://openalex.org/T13818,Kulturwissenschaft und Kolonialismus,024|173,,Fach korrigiert,weicht vom Handmapping ab
+https://openalex.org/T13933,Ökologische Ökonomie und soziale Gerechtigkeit,175|178,,Fach korrigiert,weicht vom Handmapping ab
+https://openalex.org/T13974,"Gesundheit, Bildung und Altern",232|195|321,vertiefung,Ergebnis bestätigt,keine Mehrheit für die Lehrebene
+https://openalex.org/T13978,Digitale Methoden im Sprachunterricht,284|271,,Fach korrigiert,weicht vom Handmapping ab
+https://openalex.org/T14044,"Wissen, Gesundheit und Entwicklung in Stadt und Land",178|232|003,,Fach korrigiert,weicht vom Handmapping ab
+https://openalex.org/T14087,Interdisziplinäre Ansätze zu Entwicklung und Nachhaltigkeit,178|030,,Fach korrigiert,weicht vom Handmapping ab
+https://openalex.org/T14147,Living Labs und partizipative Innovation,021|203,,Fach korrigiert,weicht vom Handmapping ab
+https://openalex.org/T14156,Numerische Ingenieurmechanik und Bauteilsimulation,104|118,,Fach korrigiert,weicht vom Handmapping ab
+https://openalex.org/T14163,Optische 3D-Messtechnik und Instrumentierung,088|171,,Fach korrigiert,weicht vom Handmapping ab
+https://openalex.org/T14167,"Konsum, Ernährung und Gesundheit",071|320|175,,Fach korrigiert,weicht vom Handmapping ab
+https://openalex.org/T14207,Studierendenbeteiligung und Partnerschaft in der Hochschullehre,052,vertiefung,Ersatz aus Embedding falsch,"keine Stimme für ein Fach, Vorschlag nur aus Embedding"
+https://openalex.org/T14211,Interdisziplinäre Forschungsthemen,-,,zu unspezifisch als Lehrthema,keine Mehrheit für ein Fach
+https://openalex.org/T14228,Religion und gesellschaftspolitischer Wandel in Nigeria,136|002|083,,Ergebnis bestätigt,weicht vom Handmapping ab
+https://openalex.org/T14236,Digitale Lehr- und Lernmethoden,052|361,,Fach korrigiert,weicht vom Handmapping ab
+https://openalex.org/T14375,"Kultur, Sprache und Wirtschaft im regionalen Kontext",173|036,,Fach korrigiert,weicht vom Handmapping ab
+https://openalex.org/T14391,Umweltbildung und globaler Wandel,050|052,,Fach korrigiert,weicht vom Handmapping ab
+https://openalex.org/T14395,Afrikanische Geschichte und postkoloniale Gesellschaften,273|002|183,,Ergebnis bestätigt,weicht vom Handmapping ab
+https://d-nb.info/gnd/4141955-8,Allgemeiner Teil,-,,"mehrdeutig (Gesetzesteil), kein Lehrthema",keine Mehrheit für ein Fach
+https://d-nb.info/gnd/4144910-1,Besonderer Teil,-,,"mehrdeutig (Gesetzesteil), kein Lehrthema","keine Stimme für ein Fach, Vorschlag nur aus Embedding"
+https://d-nb.info/gnd/4050479-7,Roman,188|067,,Fach korrigiert,weicht vom Handmapping ab; Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4120981-3,Bearbeitung,-,,zu allgemein,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4193203-1,Rechtsfall,135,,Ergebnis bestätigt,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4022648-7,Gymnasium,361,,Ersatz aus Embedding falsch,"keine Stimme für ein Fach, Vorschlag nur aus Embedding"
+https://d-nb.info/gnd/4047497-5,Prosa,188,,Ergebnis bestätigt,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4005709-4,Berichterstattung,303|302,,Fach korrigiert,"keine Stimme für ein Fach, Vorschlag nur aus Embedding"
+https://d-nb.info/gnd/4151352-6,Einleitung,-,,zu allgemein,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4061643-5,Umweltrecht,135|042,,Fach korrigiert,weicht vom Handmapping ab
+https://d-nb.info/gnd/4040848-6,Musikhochschule,-,,"Einrichtung, kein Lehrthema",Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4115716-3,Reform,-,,zu allgemein,weicht vom Handmapping ab
+https://d-nb.info/gnd/4072560-1,Hochschule,052|172,,Hochschulforschung,keine Mehrheit für ein Fach
+https://d-nb.info/gnd/4012178-1,Dienstleistung,021|175,,Fach korrigiert,"keine Stimme für ein Fach, Vorschlag nur aus Embedding"
+https://d-nb.info/gnd/4022350-4,Grundschulkind,115|132,vertiefung,Fach korrigiert,keine Mehrheit für die Lehrebene
+https://d-nb.info/gnd/4155046-8,Forschungsmethode,148|132,,Fach korrigiert,keine Mehrheit für ein Fach; Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/7544915-8,Migrationshintergrund,149,vertiefung,Fach korrigiert,keine Mehrheit für die Lehrebene
+https://d-nb.info/gnd/4077069-2,Schelm,-,,kein Lehrthema,"keine Stimme für ein Fach, Vorschlag nur aus Embedding"
+https://d-nb.info/gnd/4041643-4,Nervensystem,026|107|300,,Fach korrigiert,weicht vom Handmapping ab
+https://d-nb.info/gnd/4039305-7,Militär,129|149,,Fach korrigiert,keine Mehrheit für ein Fach
+https://d-nb.info/gnd/4019838-8,Geisteswissenschaften,-,,Fachbereichsbezeichnung,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4005935-2,Berufsschule,270|052,,Ergebnis bestätigt,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4394290-8,Pflegeberuf,234,,Ergebnis bestätigt,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4058216-4,Studium,-,,zu allgemein,keine Mehrheit für die Lehrebene
+https://d-nb.info/gnd/4017894-8,Forschung,-,,zu allgemein,"keine Stimme für ein Fach, Vorschlag nur aus Embedding"
+https://d-nb.info/gnd/4058167-6,Student,-,,zu allgemein,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4033422-3,Künste,-,,Fachbereichsbezeichnung,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4134078-4,Rechtsstellung,-,,zu allgemein,keine Mehrheit für die Lehrebene
+https://d-nb.info/gnd/4006020-2,Besetzung,-,,mehrdeutig,"keine Stimme für ein Fach, Vorschlag nur aus Embedding"
+https://d-nb.info/gnd/4054367-5,Sekundarstufe 2,361,,Ergebnis bestätigt,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4126392-3,Karosseriebau,235|202,,Ergebnis bestätigt,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4121260-5,Fest,174|024,vertiefung,Fach korrigiert,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4007379-8,Bodenkunde,003|039|385,,Ergebnis bestätigt,weicht vom Handmapping ab
+https://d-nb.info/gnd/4005871-2,Berufsausbildung,270,,Ergebnis bestätigt,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4120744-0,Mitarbeiter,-,,zu allgemein,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4053458-3,Schulbuch,361,,Ergebnis bestätigt,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4047068-4,Praxis,-,,zu allgemein,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4135391-2,Daten,-,,zu allgemein,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4201275-2,Heterogenität,361|190|052,vertiefung,Fach korrigiert,keine Mehrheit für ein Fach
+https://d-nb.info/gnd/4006949-7,Bischof,086|053,vertiefung,Fach korrigiert,keine Mehrheit für die Lehrebene
+https://d-nb.info/gnd/4112532-0,Anreizsystem,021,,Fach korrigiert,weicht vom Handmapping ab
+https://d-nb.info/gnd/4077555-0,Sozialberuf,208|253|245,,Ergebnis bestätigt,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4167290-2,Leistungsmessung,-,,mehrdeutig,weicht vom Handmapping ab
+https://d-nb.info/gnd/4035096-4,Lehrerfortbildung,361,,Ergebnis bestätigt,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4384508-3,Kundenbindung,021,,Fach korrigiert,weicht vom Handmapping ab
+https://d-nb.info/gnd/4003939-0,Autobiografie,188,,Ergebnis bestätigt,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4033842-3,Kurzgeschichte,067|188,grundlagen,Ersatz aus Embedding falsch,"keine Stimme für ein Fach, Vorschlag nur aus Embedding; Hochschulrelevanz nur mit Mehrheit"
+https://d-nb.info/gnd/4066596-3,Wissenschaftliches Manuskript,022,,Fach korrigiert,"keine Stimme für ein Fach, Vorschlag nur aus Embedding"
+https://d-nb.info/gnd/4061778-6,Universität,-,,"Einrichtung, kein Lehrthema",keine Mehrheit für die Lehrebene; weicht vom Handmapping ab
+https://d-nb.info/gnd/4259045-0,Oberstufe,361,,Ergebnis bestätigt,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4140549-3,Bach,077|385,vertiefung,Fach korrigiert,keine Mehrheit für die Lehrebene
+https://d-nb.info/gnd/4040795-0,Museum,092|101,,Fach korrigiert,weicht vom Handmapping ab
+https://d-nb.info/gnd/4199679-3,Wissenschaftlicher Text,284|067,,Fach korrigiert,keine Mehrheit für ein Fach; Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4075664-6,Operation,107,,Fach korrigiert,"keine Stimme für ein Fach, Vorschlag nur aus Embedding"
+https://d-nb.info/gnd/4048213-3,Radiologie,107,,Ergebnis bestätigt,weicht vom Handmapping ab
+https://d-nb.info/gnd/4063106-0,Vernunft,127,,Fach korrigiert,"keine Stimme für ein Fach, Vorschlag nur aus Embedding"
+https://d-nb.info/gnd/4055409-0,Soldat,149|129,vertiefung,Fach korrigiert,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4048561-4,Raum,-,,zu allgemein,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4013585-8,Effizienz,175|021,,Fach korrigiert,keine Mehrheit für ein Fach
+https://d-nb.info/gnd/4061822-5,Universitätsklinik,-,,"Einrichtung, kein Lehrthema",Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4180852-6,Selbststudium,052|321,,Ergebnis bestätigt,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4170834-9,Musikschule,113,vertiefung,Fach korrigiert,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4128946-8,Arbeitsfeld,-,,zu allgemein,keine Mehrheit für ein Fach; Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4046235-3,Planung,-,,zu allgemein,weicht vom Handmapping ab
+https://d-nb.info/gnd/4155620-3,Mathematische Methode,105,,Ergebnis bestätigt,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4040708-1,Multivariate Analyse,312|105,vertiefung,Ergebnis bestätigt,keine Mehrheit für die Lehrebene
+https://d-nb.info/gnd/4071781-1,Geschlechtsunterschied,149|132,,Fach korrigiert,weicht vom Handmapping ab
+https://d-nb.info/gnd/4151297-2,Eingriff,-,,mehrdeutig,"keine Stimme für ein Fach, Vorschlag nur aus Embedding"
+https://d-nb.info/gnd/4000135-0,Abgeordneter,129,,Fach korrigiert,keine Mehrheit für ein Fach
+https://d-nb.info/gnd/4138354-0,Lebensstil,149,,Fach korrigiert,keine Mehrheit für ein Fach
+https://d-nb.info/gnd/4143388-9,Aufführung,155|035,,Ergebnis bestätigt,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4003974-2,Autonomie,127,,Fach korrigiert,weicht vom Handmapping ab
+https://d-nb.info/gnd/4007367-1,Bodenerosion,003|385|050,,Ergebnis bestätigt,weicht vom Handmapping ab
+https://d-nb.info/gnd/4142447-5,Angewandte Wissenschaften,-,,zu allgemein,"keine Stimme für ein Fach, Vorschlag nur aus Embedding; Hochschulrelevanz nur mit Mehrheit"
+https://d-nb.info/gnd/4133962-9,Pflanzenernährung,353|138,,Ergebnis bestätigt,weicht vom Handmapping ab
+https://d-nb.info/gnd/4185080-4,Theologiestudium,-,,"Studiengang, kein Lehrthema",Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4129186-4,Zufriedenheit,132,vertiefung,Fach korrigiert,keine Mehrheit für die Lehrebene
+https://d-nb.info/gnd/4135231-2,Präsentation,303,,Fach korrigiert,keine Mehrheit für ein Fach
+https://d-nb.info/gnd/4008570-3,Buch,022,,Ergebnis bestätigt,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4132695-7,Wertorientierung,132|149,vertiefung,Fach korrigiert,keine Mehrheit für die Lehrebene
+https://d-nb.info/gnd/4123412-1,Illustration,069|092|023,,Ergebnis bestätigt,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4073883-8,Kunsthandwerk,007|092,,Ergebnis bestätigt,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4023744-8,Haushalt,333|071,,Fach korrigiert,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4041425-5,Naturwissenschaftlicher Unterricht,186|254,,Ergebnis bestätigt,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4052588-0,Schlaganfall,107,vertiefung,Fach korrigiert,keine Mehrheit für die Lehrebene
+https://d-nb.info/gnd/4124306-7,Testkonstruktion,132|052,,Fach korrigiert,keine Mehrheit für ein Fach
+https://d-nb.info/gnd/4114599-9,Militärischer Einsatz,129,vertiefung,Fach korrigiert,"keine Stimme für ein Fach, Vorschlag nur aus Embedding"
+https://d-nb.info/gnd/4020872-2,Gewerkschaft,149|129|175,,Fach korrigiert,keine Mehrheit für ein Fach
+https://d-nb.info/gnd/4015293-5,Erklärung,-,,mehrdeutig,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4018037-2,Fräsen,202|104,,Ergebnis bestätigt,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4032352-3,Konzentrationslager,068|273,vertiefung,Fach korrigiert,keine Mehrheit für die Lehrebene
+https://d-nb.info/gnd/4123602-6,Labortechnik,032|226,,Fach korrigiert,keine Mehrheit für ein Fach; Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4026899-8,Information,022|079,,Ergebnis bestätigt,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4015217-0,Erfahrung,-,,zu allgemein,keine Mehrheit für die Lehrebene
+https://d-nb.info/gnd/4042706-7,Novelle,067|188,,Fach korrigiert,"keine Stimme für ein Fach, Vorschlag nur aus Embedding; Hochschulrelevanz nur mit Mehrheit"
+https://d-nb.info/gnd/4126464-2,Lernsoftware,079|052,,Fach korrigiert,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4128997-3,Werkstück,202|104,,Ergebnis bestätigt,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4139399-5,Produkt,-,,zu allgemein,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4014891-9,Entnazifizierung,273|068,,Fach korrigiert,"keine Stimme für ein Fach, Vorschlag nur aus Embedding"
+https://d-nb.info/gnd/4148995-0,Deformationsverhalten,177|294,vertiefung,Fach korrigiert,keine Mehrheit für die Lehrebene
+https://d-nb.info/gnd/4131821-3,Zeitungssprache,067|284,vertiefung,Fach korrigiert,weicht vom Handmapping ab
+https://d-nb.info/gnd/4207519-1,Dialektgeografie,067|152,,Fach korrigiert,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4129601-1,Ausstellung,092,,Ergebnis bestätigt,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4026661-8,Implementation,079,vertiefung,Fach korrigiert,keine Mehrheit für die Lehrebene
+https://d-nb.info/gnd/4065596-9,Werkzeug,202,,Ergebnis bestätigt,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4041358-5,Natur,-,,zu allgemein,weicht vom Handmapping ab; Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4059657-6,Textkritik,188|005,,Ergebnis bestätigt,weicht vom Handmapping ab
+https://d-nb.info/gnd/4135577-5,Verifikation,079,vertiefung,Fach korrigiert,weicht vom Handmapping ab; Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/7864471-9,Arzthaftung,135|107,,Fach korrigiert,keine Mehrheit für ein Fach
+https://d-nb.info/gnd/4018672-6,Frömmigkeit,053|086|136,,Fach korrigiert,weicht vom Handmapping ab
+https://d-nb.info/gnd/4123980-5,Privatsphäre,169|135|079,,Fach korrigiert,weicht vom Handmapping ab
+https://d-nb.info/gnd/4061266-1,Turnen,029|098,,Ergebnis bestätigt,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4183828-2,Studienanfänger,-,,"Personengruppe, kein Lehrthema",Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4069377-6,Betriebliche Fortbildung,270|181,,Ergebnis bestätigt,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4025755-1,Holzverbindung,197|082,,Ergebnis bestätigt,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4192674-2,Disziplin <Wissenschaft>,-,,zu allgemein,keine Mehrheit für ein Fach; Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4800115-6,Gute wissenschaftliche Praxis,169|022,,Fach korrigiert,keine Mehrheit für ein Fach
+https://d-nb.info/gnd/4147883-6,Choral,193|114,,Ergebnis bestätigt,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4054315-8,Seil,074|104,vertiefung,Fach korrigiert,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4225478-4,Hydrogeochemie,039|065,,Ergebnis bestätigt,weicht vom Handmapping ab
+https://d-nb.info/gnd/4060560-7,Tradition,024|174,vertiefung,Fach korrigiert,keine Mehrheit für die Lehrebene
+https://d-nb.info/gnd/1175990566,MINT-Fächer,-,,"Fächergruppe, kein Lehrthema",keine Mehrheit für die Lehrebene
+https://d-nb.info/gnd/4066097-7,Wildbeuter,173|548,vertiefung,Fach korrigiert,keine Mehrheit für die Lehrebene
+https://d-nb.info/gnd/4596172-4,Website,121|079,,Ergebnis bestätigt,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4035419-2,Lernort,052|115,,Fach korrigiert,weicht vom Handmapping ab
+https://d-nb.info/gnd/4552053-7,Latinistikstudium,-,,"Studiengang, kein Lehrthema",Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4057312-6,Sterblichkeit,107|232,,Ergebnis bestätigt,weicht vom Handmapping ab
+https://d-nb.info/gnd/4049187-0,Reichweite,-,,mehrdeutig,"keine Stimme für ein Fach, Vorschlag nur aus Embedding"
+https://d-nb.info/gnd/4074722-0,Menschenbild,127|173,vertiefung,Fach korrigiert,keine Mehrheit für die Lehrebene
+https://d-nb.info/gnd/4040392-0,Motorrad,235,vertiefung,Fach korrigiert,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4627581-2,Reelle Analysis,105,grundlagen,Fach korrigiert,keine Mehrheit für ein Fach
+https://d-nb.info/gnd/4144949-6,Bestimmung,-,,mehrdeutig,keine Mehrheit für ein Fach
+https://d-nb.info/gnd/4136998-1,Kammermusik,080|114,,Ergebnis bestätigt,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4000881-2,Akademiker,-,,"Personengruppe, kein Lehrthema","keine Stimme für ein Fach, Vorschlag nur aus Embedding"
+https://d-nb.info/gnd/7729186-4,Vereinbarkeit von Familie und Beruf,149|021,,Fach korrigiert,weicht vom Handmapping ab
+https://d-nb.info/gnd/4137651-1,Gesangbuch,193|114,vertiefung,Fach korrigiert,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4071235-7,Fitness,029,,Ergebnis bestätigt,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4137133-1,Punktschweißen,202|108,vertiefung,Fach korrigiert,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4209015-5,Monitoring,-,,mehrdeutig,keine Mehrheit für die Lehrebene
+https://d-nb.info/gnd/4122137-0,Faden,225,vertiefung,Fach korrigiert,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4634625-9,Portal <Internet>,079|121,grundlagen,Fach korrigiert,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4011453-3,Denkmal,013|101|012,,Ergebnis bestätigt,weicht vom Handmapping ab
+https://d-nb.info/gnd/4056863-5,Stahlblech,177|108|202,vertiefung,Fach korrigiert,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4135346-8,Optionspreistheorie,021|276|175,,Fach korrigiert,weicht vom Handmapping ab
+https://d-nb.info/gnd/4804696-6,Civil Law,135,vertiefung,Fach korrigiert,keine Mehrheit für die Lehrebene
+https://d-nb.info/gnd/4026592-4,Imkerei,371|003,vertiefung,Fach korrigiert,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4116648-6,Studierfähigkeit,052,vertiefung,Fach korrigiert,"keine Stimme für ein Fach, Vorschlag nur aus Embedding; keine Mehrheit für die Lehrebene"
+https://d-nb.info/gnd/4033151-9,Kriegsverbrechen,135|068|129,,Fach korrigiert,"keine Stimme für ein Fach, Vorschlag nur aus Embedding"
+https://d-nb.info/gnd/4034421-6,Landwirtschaftliche Nutzfläche,003|353,grundlagen,Fach korrigiert,keine Mehrheit für die Lehrebene
+https://d-nb.info/gnd/4056397-2,Sportlehrer,098|029,,Ergebnis bestätigt,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4162055-0,Internationale Schiedsgerichtsbarkeit,135|042,,Fach korrigiert,keine Mehrheit für ein Fach
+https://d-nb.info/gnd/4025243-7,Hochschullehrer,-,,"Personengruppe, kein Lehrthema","keine Stimme für ein Fach, Vorschlag nur aus Embedding; Hochschulrelevanz nur mit Mehrheit"
+https://d-nb.info/gnd/4058716-2,Symbol,-,,mehrdeutig,keine Mehrheit für ein Fach
+https://d-nb.info/gnd/4146858-2,Bühnenbeleuchtung,035|305,,Ergebnis bestätigt,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4023796-5,Hauspflege,234,,Ergebnis bestätigt,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4173548-1,Patientin,-,,"Personengruppe, kein Lehrthema",Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4151928-0,Elektronisches Stellwerk,089|048,vertiefung,Fach korrigiert,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4042284-7,Nierentransplantation,107,vertiefung,Ersatz aus Embedding falsch,"keine Stimme für ein Fach, Vorschlag nur aus Embedding"
+https://d-nb.info/gnd/4037213-3,Malen,204,,Ergebnis bestätigt,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4012058-2,Dialektik,127,,Fach korrigiert,"keine Stimme für ein Fach, Vorschlag nur aus Embedding"
+https://d-nb.info/gnd/4041423-1,Naturwissenschaftler,-,,"Personengruppe, kein Lehrthema",Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4073817-6,Kriegführung,129|068,,Fach korrigiert,"keine Stimme für ein Fach, Vorschlag nur aus Embedding"
+https://d-nb.info/gnd/4113771-1,Goldschmiedekunst,159|007,vertiefung,Fach korrigiert,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4027580-2,Investiturstreit,273|068,,Fach korrigiert,keine Mehrheit für ein Fach
+https://d-nb.info/gnd/4217003-5,Generationswechsel,149,,Fach korrigiert,weicht vom Handmapping ab
+https://d-nb.info/gnd/4117161-5,Tabellenkalkulation,277|021,,Ergebnis bestätigt,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4166040-7,Kunstlied,230|114,,Fach korrigiert,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4121812-7,Umweltstrafrecht,135,,Fach korrigiert,keine Mehrheit für ein Fach
+https://d-nb.info/gnd/4215428-5,Operationstechnik,107,,Fach korrigiert,"keine Stimme für ein Fach, Vorschlag nur aus Embedding"
+https://d-nb.info/gnd/4047692-3,Psychobiologie,132|026,vertiefung,Fach korrigiert,keine Mehrheit für die Lehrebene
+https://d-nb.info/gnd/4050129-2,Risiko,312|021,,Fach korrigiert,weicht vom Handmapping ab
+https://d-nb.info/gnd/4034117-3,Laie,-,,zu allgemein,"keine Stimme für ein Fach, Vorschlag nur aus Embedding"
+https://d-nb.info/gnd/4136239-1,Keramikgefäß,216|012,,Fach korrigiert,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4074570-3,Marine,223|129,,Fach korrigiert,"keine Stimme für ein Fach, Vorschlag nur aus Embedding"
+https://d-nb.info/gnd/4116526-3,Softwarewerkzeug,079,,Ergebnis bestätigt,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4030102-3,Kausalität,127|312,,Fach korrigiert,keine Mehrheit für ein Fach
+https://d-nb.info/gnd/4284512-9,Heavy Metal,164|114,vertiefung,Fach korrigiert,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4185917-0,Transparenz,-,,mehrdeutig,weicht vom Handmapping ab
+https://d-nb.info/gnd/4123073-5,Diskriminierungsverbot,135,,Fach korrigiert,keine Mehrheit für ein Fach
+https://d-nb.info/gnd/4132378-6,Studienbedingungen,-,,zu allgemein,"keine Stimme für ein Fach, Vorschlag nur aus Embedding; Hochschulrelevanz nur mit Mehrheit"
+https://d-nb.info/gnd/4046223-7,Planimetrie,105,,Fach korrigiert,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4414630-9,Insolvenzanfechtung,135|042,,Fach korrigiert,"keine Stimme für ein Fach, Vorschlag nur aus Embedding"
+https://d-nb.info/gnd/4043928-8,Orthopädischer Schuh,215|233,vertiefung,Fach korrigiert,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4328181-3,Elektrizitätsmarkt,175|316,,Fach korrigiert,weicht vom Handmapping ab
+https://d-nb.info/gnd/4153242-9,Evaluationsforschung,148|052,,Ergebnis bestätigt,weicht vom Handmapping ab
+https://d-nb.info/gnd/4045673-0,Das @Fantastische,188,,Fach korrigiert,"keine Stimme für ein Fach, Vorschlag nur aus Embedding"
+https://d-nb.info/gnd/4030198-9,Kellerwirtschaft,227,,Ergebnis bestätigt,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4077614-1,Sozialplanung,208|149,,Ergebnis bestätigt,weicht vom Handmapping ab
+https://d-nb.info/gnd/4125926-9,Handlungskompetenz,270|052,,Fach korrigiert,weicht vom Handmapping ab
+https://d-nb.info/gnd/4134284-7,Kriminaltechnik,263,,Ergebnis bestätigt,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4132033-5,Edition,188|005,,Fach korrigiert,weicht vom Handmapping ab
+https://d-nb.info/gnd/4164054-8,Klausur,-,,mehrdeutig (Prüfung/Kloster),Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4366655-3,Kamera,305|054,,Fach korrigiert,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4845922-7,Smartphone,222|079,vertiefung,Fach korrigiert,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4187658-1,Vereinssport,029|166,,Fach korrigiert,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4016254-0,Färben,225|032,,Ergebnis bestätigt,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4025340-5,Höfische Literatur,067,,Ergebnis bestätigt,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4043173-3,Öffentlicher Haushalt,175|266|172,,Ergebnis bestätigt,weicht vom Handmapping ab
+https://d-nb.info/gnd/4016837-2,Fernsehprogramm,302|054,vertiefung,Fach korrigiert,keine Mehrheit für ein Fach
+https://d-nb.info/gnd/4063690-2,Völkermord,068|129|135,,Fach korrigiert,weicht vom Handmapping ab
+https://d-nb.info/gnd/4008774-8,Bürgerinitiative,129|149,,Fach korrigiert,keine Mehrheit für ein Fach
+https://d-nb.info/gnd/4010071-6,Christ,-,,"Personengruppe, kein Lehrthema",keine Mehrheit für ein Fach
+https://d-nb.info/gnd/4025356-9,Höhere Schule,361,,Ergebnis bestätigt,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4005252-7,Begründung,-,,zu allgemein,"keine Stimme für ein Fach, Vorschlag nur aus Embedding"
+https://d-nb.info/gnd/4192909-3,Neurolinguistisches Programmieren,-,,"umstrittenes Verfahren, kein gesichertes Lehrthema",Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4157026-1,Geschmack,097|096,,Ergebnis bestätigt,weicht vom Handmapping ab
+https://d-nb.info/gnd/4224911-9,Zusammenfassung,-,,zu allgemein,"keine Stimme für ein Fach, Vorschlag nur aus Embedding; Hochschulrelevanz nur mit Mehrheit"
+https://d-nb.info/gnd/4063852-2,Volkslied,174|114,,Fach korrigiert,weicht vom Handmapping ab
+https://d-nb.info/gnd/4063618-5,Vision,-,,mehrdeutig,"keine Stimme für ein Fach, Vorschlag nur aus Embedding"
+https://d-nb.info/gnd/4116485-4,Sexualverhalten,132|026,vertiefung,Fach korrigiert,keine Mehrheit für die Lehrebene
+https://d-nb.info/gnd/4136533-1,Allgemein bildende Schule,361,,Fach korrigiert,keine Mehrheit für ein Fach
+https://d-nb.info/gnd/4006244-2,Betriebswirtschaftliches Studium,-,,"Studiengang, kein Lehrthema",Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4069225-5,Befestigung,-,,mehrdeutig,"keine Stimme für ein Fach, Vorschlag nur aus Embedding"
+https://d-nb.info/gnd/4131123-1,Fußballfan,149|029,vertiefung,Fach korrigiert,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4050133-4,Risikoverhalten,132|098,,Fach korrigiert,weicht vom Handmapping ab
+https://d-nb.info/gnd/4007524-2,Das @Böse,127|053,,Fach korrigiert,"keine Stimme für ein Fach, Vorschlag nur aus Embedding"
+https://d-nb.info/gnd/4568154-5,Finanzleiter,-,,"Berufsbezeichnung, kein Lehrthema",Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4198756-1,Entwicklungszusammenarbeit,178|129|175,,Fach korrigiert,weicht vom Handmapping ab
+https://d-nb.info/gnd/4018348-8,Freimaurerei,273|136,vertiefung,Fach korrigiert,"keine Stimme für ein Fach, Vorschlag nur aus Embedding"
+https://d-nb.info/gnd/4064314-1,Wahrheit,127,,Fach korrigiert,keine Mehrheit für ein Fach
+https://d-nb.info/gnd/4006447-5,Bibliotheksbestand,022,vertiefung,Fach korrigiert,keine Mehrheit für die Lehrebene
+https://d-nb.info/gnd/4316613-1,Schülerversuch,186|254,,Ergebnis bestätigt,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4193816-1,Kommunale Sozialpolitik,208|149|148,,Ergebnis bestätigt,weicht vom Handmapping ab
+https://d-nb.info/gnd/4004343-5,Ballade,188|067|114,,Fach korrigiert,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4156907-6,Geruchswahrnehmung,132|026,vertiefung,Fach korrigiert,keine Mehrheit für die Lehrebene
+https://d-nb.info/gnd/4303518-8,Rap,164,,Ergebnis bestätigt,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4176991-0,Raster,-,,mehrdeutig,keine Mehrheit für die Lehrebene; Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4056908-1,Stand der Technik,-,,zu allgemein,weicht vom Handmapping ab
+https://d-nb.info/gnd/4027274-6,Interdisziplinäre Forschung,-,,zu allgemein,keine Mehrheit für ein Fach
+https://d-nb.info/gnd/1068304251,Meroitistik,122|001,,Fach korrigiert,keine Mehrheit für ein Fach
+https://d-nb.info/gnd/4053870-9,Schweißen,202|108,,Ergebnis bestätigt,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4124801-6,Drucktechnik,231,,Ergebnis bestätigt,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4333049-6,Holzbauteil,197,vertiefung,Fach korrigiert,keine Mehrheit für die Lehrebene
+https://d-nb.info/gnd/4129507-9,Kompetenz,-,,mehrdeutig,weicht vom Handmapping ab
+https://d-nb.info/gnd/4153373-2,Exploration,-,,mehrdeutig,"keine Stimme für ein Fach, Vorschlag nur aus Embedding"
+https://d-nb.info/gnd/4126324-8,Fantastische Literatur,188,,Ergebnis bestätigt,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4040801-2,Musical,155|114,,Ergebnis bestätigt,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4127996-7,Nachricht,303|302,,Ergebnis bestätigt,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4115646-8,Projektarbeit,052,,Fach korrigiert,keine Mehrheit für ein Fach
+https://d-nb.info/gnd/4129863-9,Geometrischer Körper,105,,Ergebnis bestätigt,weicht vom Handmapping ab; Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4048689-8,Realschule,361,,Ersatz aus Embedding falsch,"keine Stimme für ein Fach, Vorschlag nur aus Embedding"
+https://d-nb.info/gnd/4129964-4,Bestandserhaltung,022|037,,Ergebnis bestätigt,weicht vom Handmapping ab
+https://d-nb.info/gnd/4027955-8,Jagd,058,,Fach korrigiert,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4128669-8,Schleifen,202|108,,Ergebnis bestätigt,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4028423-2,Jahrmarkt,174|024,vertiefung,Fach korrigiert,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4064760-2,Wassermühle,275|104,vertiefung,Fach korrigiert,weicht vom Handmapping ab
+https://d-nb.info/gnd/4359141-3,Vernetzung,-,,zu allgemein,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4128080-5,Erweiterung,-,,zu allgemein,keine Mehrheit für die Lehrebene; Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4489421-1,Folgenutzung,-,,zu allgemein,keine Mehrheit für ein Fach; Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4066279-2,Windmühle,275|310,vertiefung,Fach korrigiert,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4188905-8,Multiple-Choice-Verfahren,052|132,,Fach korrigiert,weicht vom Handmapping ab
+https://d-nb.info/gnd/4203086-9,Unterstützung,-,,zu allgemein,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/1025881303,Prokrastination <Psychologie>,132,vertiefung,Fach korrigiert,keine Mehrheit für ein Fach
+https://d-nb.info/gnd/4077146-5,Schnitzerei,205|007,vertiefung,Fach korrigiert,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4133595-8,Formel,-,,mehrdeutig,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4032326-2,Konvergenz,-,,mehrdeutig,keine Mehrheit für ein Fach; Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4033203-2,Krise,-,,zu allgemein,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/7559345-2,Setting <Sozialwissenschaften>,-,,zu allgemein,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4751734-7,Freeware,079,grundlagen,Fach korrigiert,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4203217-9,Operation <Militär>,-,,mehrdeutig,"keine Stimme für ein Fach, Vorschlag nur aus Embedding"
+https://d-nb.info/gnd/4128003-9,Gefäß,-,,mehrdeutig,"keine Stimme für ein Fach, Vorschlag nur aus Embedding; keine Mehrheit für die Lehrebene; Hochschulrelevanz nur mit Mehrheit"
+https://d-nb.info/gnd/4039789-0,Modalität,-,,mehrdeutig,"keine Stimme für ein Fach, Vorschlag nur aus Embedding"
+https://d-nb.info/gnd/4129116-5,Expedition,-,,zu allgemein,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4026765-9,Induktion,-,,mehrdeutig (Logik/Physik),"keine Stimme für ein Fach, Vorschlag nur aus Embedding"
+https://d-nb.info/gnd/4017521-2,Flexion,152|067,,Fach korrigiert,"keine Stimme für ein Fach, Vorschlag nur aus Embedding"
+https://d-nb.info/gnd/4125695-5,Insemination,371|156,,Fach korrigiert,keine Mehrheit für ein Fach
+https://d-nb.info/gnd/4160198-1,Hochschulbildung,052,,Fach korrigiert,keine Mehrheit für ein Fach
+https://d-nb.info/gnd/4065972-0,Wiederholung,-,,zu allgemein,keine Mehrheit für die Lehrebene
+https://d-nb.info/gnd/4005560-7,Beobachtung,132|148,,Fach korrigiert,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4185376-3,Thylakoidmembran,026|025,vertiefung,Fach korrigiert,keine Mehrheit für die Lehrebene
+https://d-nb.info/gnd/4027532-2,Intuition,132|127,vertiefung,Fach korrigiert,keine Mehrheit für die Lehrebene
+https://d-nb.info/gnd/4139901-8,Attribut,-,,mehrdeutig,keine Mehrheit für ein Fach
+https://d-nb.info/gnd/4172495-1,Offenheit,-,,zu allgemein,keine Mehrheit für die Lehrebene
+https://d-nb.info/gnd/4536859-4,Kameraarbeit,054,,Ergebnis bestätigt,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4248522-8,Periodizität,-,,zu allgemein,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4153521-2,Fähigkeit,-,,zu allgemein,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4190777-2,Ziegelei,216,vertiefung,Fach korrigiert,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4187231-9,Urlauber,274,vertiefung,Fach korrigiert,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4725173-6,Cookie <Internet>,079,,Ergebnis bestätigt,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4130216-3,Fastenzeit,086|053,vertiefung,Fach korrigiert,keine Mehrheit für die Lehrebene
+https://d-nb.info/gnd/4137441-1,Abstinenz,-,,mehrdeutig,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4022498-3,Gütezeichen,021,,Fach korrigiert,keine Mehrheit für ein Fach
+https://d-nb.info/gnd/4059665-5,Textur,-,,mehrdeutig,keine Mehrheit für die Lehrebene
+https://d-nb.info/gnd/4179673-1,Schlager,164|114,vertiefung,Fach korrigiert,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4140265-0,Individualität,127|132,vertiefung,Fach korrigiert,keine Mehrheit für die Lehrebene
+https://d-nb.info/gnd/4390573-0,Fluidität,-,,mehrdeutig,keine Mehrheit für die Lehrebene
+https://d-nb.info/gnd/4145812-6,Blase,-,,mehrdeutig,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4053305-0,Schriftsatz,256|135,,Fach korrigiert,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4297550-5,Mittelschule,361,grundlagen,Fach korrigiert,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/1038691184,Postproduktion,054,,Ergebnis bestätigt,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4177356-1,Refrain,114|188,,Fach korrigiert,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4186996-5,Unterhaltung,303|302,vertiefung,Fach korrigiert,keine Mehrheit für die Lehrebene; Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4146801-6,Buchdrucker,273|022,vertiefung,Fach korrigiert,keine Mehrheit für ein Fach
+https://d-nb.info/gnd/4535907-6,Online-Medien,302|303,,Ergebnis bestätigt,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4182249-3,Spiegelbild,128,,Ergebnis bestätigt,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4001988-3,Anfang,-,,zu allgemein,"keine Stimme für ein Fach, Vorschlag nur aus Embedding; Hochschulrelevanz nur mit Mehrheit"
+https://d-nb.info/gnd/4144239-8,Beatmusik,164|114,vertiefung,Fach korrigiert,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4137829-5,Urheber,135,,Urheberrecht,"keine Stimme für ein Fach, Vorschlag nur aus Embedding"
+https://d-nb.info/gnd/4148217-7,College,-,,"Einrichtung, kein Lehrthema",keine Mehrheit für ein Fach
+https://d-nb.info/gnd/1314965875,Gender Pay Gap,175|149,,Fach korrigiert,weicht vom Handmapping ab
+https://d-nb.info/gnd/7705788-0,Ökologischer Fußabdruck,458,grundlagen,Fach korrigiert,keine Mehrheit für die Lehrebene
+https://d-nb.info/gnd/4388375-8,Thallus,026,vertiefung,Fach korrigiert,keine Mehrheit für die Lehrebene
+https://d-nb.info/gnd/4032776-0,Rollstuhl,215|233,vertiefung,Fach korrigiert,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4042861-8,Oase,050,vertiefung,Fach korrigiert,keine Mehrheit für ein Fach
+https://d-nb.info/gnd/4398783-7,LHC,128,,Ergebnis bestätigt,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4115613-4,Praxisbezug,-,,zu allgemein,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4073048-7,Joghurt,220|097,vertiefung,Fach korrigiert,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4215086-3,Sammelrohr,107|300,vertiefung,Fach korrigiert,keine Mehrheit für die Lehrebene
+https://d-nb.info/gnd/4316062-1,Riechepithel,300|107,vertiefung,Fach korrigiert,keine Mehrheit für die Lehrebene
+https://d-nb.info/gnd/7715100-8,Bodypercussion,163|113,,Ergebnis bestätigt,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4200172-9,Bedarfsermittlung,-,,zu allgemein,weicht vom Handmapping ab
+https://d-nb.info/gnd/4132427-4,Kreuzung,089,,Ergebnis bestätigt,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4057571-8,Stille,-,,zu allgemein,keine Mehrheit für ein Fach
+https://d-nb.info/gnd/7679337-0,Facebook,-,,Produkt/Firma,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4138283-3,Zwerg,-,,kein Lehrthema,"keine Stimme für ein Fach, Vorschlag nur aus Embedding; Hochschulrelevanz nur mit Mehrheit"
+https://d-nb.info/gnd/4162155-4,Intervalltraining,029,vertiefung,Ersatz aus Embedding falsch,"keine Stimme für ein Fach, Vorschlag nur aus Embedding"
+https://d-nb.info/gnd/4219411-8,Dauer,-,,zu allgemein,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4056099-5,Speicher,-,,mehrdeutig,"keine Stimme für ein Fach, Vorschlag nur aus Embedding"
+https://d-nb.info/gnd/4297610-8,Transmissionssonographie,107|215,,Fach korrigiert,"keine Stimme für ein Fach, Vorschlag nur aus Embedding"
+https://d-nb.info/gnd/4138025-3,Epoche,-,,zu allgemein,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4130203-5,Verstärkung,-,,mehrdeutig,weicht vom Handmapping ab
+https://d-nb.info/gnd/4389228-0,Löschen <Datenverarbeitung>,079,,Ergebnis bestätigt,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4016969-8,Feuer,-,,zu allgemein,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/7657141-5,Deeskalation,129|132|263,vertiefung,Fach korrigiert,keine Mehrheit für die Lehrebene
+https://d-nb.info/gnd/4170995-0,Nachbarschaftshilfe,208,,Ergebnis bestätigt,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4144588-0,Beobachtungsfehler,312|128,grundlagen,Fach korrigiert,weicht vom Handmapping ab
+https://d-nb.info/gnd/4347788-4,Entscheidungsbaum,079|312,grundlagen,Fach korrigiert,keine Mehrheit für die Lehrebene
+https://d-nb.info/gnd/4122813-3,Antrag,135|172,,Ergebnis bestätigt,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4161958-4,Intension,127|152,,Fach korrigiert,weicht vom Handmapping ab
+https://d-nb.info/gnd/4164255-7,Klub,-,,zu allgemein,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4132568-0,Blues,164|114,,Ergebnis bestätigt,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4179463-1,Schein,-,,mehrdeutig,"keine Stimme für ein Fach, Vorschlag nur aus Embedding"
+https://d-nb.info/gnd/4191427-2,E-Mail,079|200,,Ergebnis bestätigt,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4570106-4,Mind mapping,052,grundlagen,Fach korrigiert,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4132797-4,Privileg,-,,zu allgemein,keine Mehrheit für ein Fach
+https://d-nb.info/gnd/4166827-3,Last,-,,mehrdeutig,keine Mehrheit für ein Fach
+https://d-nb.info/gnd/4268907-7,List,-,,mehrdeutig,"keine Stimme für ein Fach, Vorschlag nur aus Embedding"
+https://d-nb.info/gnd/4158111-8,Gravimeter,066|171,vertiefung,Fach korrigiert,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4014917-1,Entspannung,132|233,,Ergebnis bestätigt,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4130843-8,Spezifität,-,,mehrdeutig,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4300430-1,Homogenität,-,,mehrdeutig,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4317292-1,Heimtiere,156,,Ergebnis bestätigt,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4132678-7,Dialekt <Verhaltensforschung>,026,,Fach korrigiert,"keine Stimme für ein Fach, Vorschlag nur aus Embedding"
+https://d-nb.info/gnd/4195641-2,Differenz,-,,zu allgemein,keine Mehrheit für ein Fach
+https://d-nb.info/gnd/4173618-7,Pelagial,124|026,vertiefung,Fach korrigiert,keine Mehrheit für die Lehrebene
+https://d-nb.info/gnd/4039257-0,Mikrozirkulation,300|107,vertiefung,Fach korrigiert,keine Mehrheit für die Lehrebene
+https://d-nb.info/gnd/4173248-0,Parabraunerde,385|003,vertiefung,Fach korrigiert,keine Mehrheit für die Lehrebene
+https://d-nb.info/gnd/4007889-9,Boxen,029,,Ergebnis bestätigt,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4158267-6,Großfamilie,149|173,vertiefung,Fach korrigiert,keine Mehrheit für die Lehrebene
+https://d-nb.info/gnd/4064751-1,Wasserleitung,213|077|017,vertiefung,Fach korrigiert,Hochschulrelevanz nur mit Mehrheit
+https://d-nb.info/gnd/4049514-0,Rentner,264|149,vertiefung,Fach korrigiert,weicht vom Handmapping ab
+https://d-nb.info/gnd/4201129-2,Hilfsmittel,215,,Ergebnis bestätigt,Hochschulrelevanz nur mit Mehrheit

@@ -19,7 +19,7 @@ Je Vokabular eine Datei `<name>.json`:
 | `themen_openalex.jsonl` | ein Thema je Zeile, siehe unten |
 | `studienfach_profile.jsonl` | je Studienfach Kurzbeschreibung, typische Themen, Abgrenzung (LLM) |
 | `pruefliste_themen.csv` | Zuordnungen mit Grund für eine Durchsicht, leere Korrekturspalten |
-| `korrekturen.csv` | optional: redaktionelle Korrekturen (Spalten `id`, `korrektur_codes`, `korrektur_lehrebene`, `kommentar`), Vorrang vor dem LLM |
+| `korrekturen.csv` | redaktionelle Durchsicht beider Prüflisten (Spalten `id`, `label_de`, `korrektur_codes` mit `|`, `-` = ausschließen, `korrektur_lehrebene`, `kommentar`, `prueflistengrund`), Vorrang vor dem LLM |
 | `themen_gnd.jsonl` | Themen aus GND und hbz-Katalog, gleiche Struktur, zusätzlich `gnd` (GND-ID, Typ, Sachgruppe, Oberbegriffe), `belege.katalog`, ggf. `belege.wlo`, `mapping.hochschulrelevanz` |
 | `pruefliste_gnd.csv` | GND-Themen, die eine Durchsicht brauchen |
 | `gnd_ausgeschlossen.csv` | GND-Begriffe, die nicht als Hochschul-Lehrinhalt eingestuft wurden (mit Bereich und Stimmen) |

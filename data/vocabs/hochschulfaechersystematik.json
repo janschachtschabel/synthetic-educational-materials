@@ -6,7 +6,8 @@
   "source": "https://raw.githubusercontent.com/openeduhub/oeh-metadata-vocabs/master/hochschulfaechersystematik.ttl",
   "public_url": "https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/hochschulfaechersystematik/",
   "license": "CC0-1.0",
-  "retrieved": "2026-10-29"
+  "retrieved": "2026-10-29",
+  "quellenangabe": "Quelle: Statistisches Bundesamt (Destatis), Systematik der Fächergruppen, Studienbereiche und Studienfächer; ausgelesen aus dem OpenEduHub-Vokabular hochschulfaechersystematik (github.com/openeduhub/oeh-metadata-vocabs)"
  },
  "concepts": [
   {

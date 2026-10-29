@@ -24,7 +24,7 @@ offene Vokabulare und Taxonomien ──► Mappings (Themen mit Fachzuordnung) �
 | Quelle | Verwendung | Lizenz |
 |---|---|---|
 | [OpenEduHub-Vokabulare](https://github.com/openeduhub/oeh-metadata-vocabs) (`educationalContext`, `new_lrt`, `intendedEndUserRole`, `hochschulfaechersystematik`) | Bildungsstufe, Inhaltstyp, Zielgruppe, Hochschulfächer | CC0 1.0 |
-| Destatis-Systematik der Fächergruppen, Studienbereiche und Studienfächer | Ursprung der Hochschulfächersystematik | Statistisches Bundesamt; Quelle nennen |
+| Destatis-Systematik der Fächergruppen, Studienbereiche und Studienfächer | Ursprung der Hochschulfächersystematik; ausgelesen aus dem OpenEduHub-Vokabular `hochschulfaechersystematik`, nicht direkt bei Destatis | „Quelle: Statistisches Bundesamt (Destatis)“, steht im Vokabular (`quellenangabe`) und in der Herkunft jedes Seeds |
 | [OpenAlex Topics](https://github.com/ourresearch/openalex-topic-classification) (4.516 Themen mit Beschreibung und Keywords) | Themen Hochschule (Vertiefung/Forschung) | CC0 1.0 |
 | [Gemeinsame Normdatei (GND)](https://lobid.org/gnd) über lobid-gnd, [GND-Sachgruppen](https://d-nb.info/standards/vocab/gnd/gnd-sc.html) | GND-Themen Hochschule (Label, Synonyme, Oberbegriffe, Sachgruppe) | CC0 1.0 |
 | [hbz-Verbundkatalog](https://lobid.org/resources) über lobid-resources | Kandidaten und Belege: Häufigkeit eines Schlagworts in Lehrbüchern und Hochschulschriften | CC0 1.0 |
@@ -36,7 +36,8 @@ der Datei).
 
 ## Mappings Hochschule
 
-**Fächer.** Die Fächer folgen der Destatis-Systematik in der OEH-Fassung
+**Fächer.** Die Fächer folgen der Destatis-Systematik (Quelle: Statistisches Bundesamt (Destatis)), ausgelesen
+aus der OEH-Fassung
 (`http://w3id.org/openeduhub/vocabs/hochschulfaechersystematik/…`): Fächergruppe → Studienbereich →
 Studienfach. Jedes Thema bekommt ein bis drei Studienfächer. Studienbereich und Fächergruppe werden daraus
 abgeleitet.
@@ -68,16 +69,28 @@ abgeleitet.
 
    Unsichere Fälle, Abweichungen vom Handmapping und Hauptfächer ohne Beleg im Text stehen in
    `pruefliste_themen.csv`. Wer dort Korrekturen einträgt (`korrektur_codes` als Notationen mit `|`,
-   `korrektur_lehrebene`) und die Datei als `korrekturen.csv` speichert, überschreibt beim nächsten
-   Zusammenführen das LLM-Ergebnis.
+   `korrektur_lehrebene`; `-` schließt das Thema aus) und die Datei als `korrekturen.csv` speichert,
+   überschreibt beim nächsten Zusammenführen das LLM-Ergebnis. Eine Zeile mit den bisherigen Codes
+   bestätigt das Ergebnis. Der Schritt `korrekturen` wendet die Datei direkt auf die fertigen
+   Themendateien an, ohne die Zwischenergebnisse (Stimmen, Kandidaten) zu brauchen.
+
+   **Durchsicht (29.10.2026).** Beide Prüflisten (101 OpenAlex-Themen, 352 GND-Begriffe) sind
+   redaktionell durchgesehen, das Ergebnis steht mit Kommentar in `korrekturen.csv`: 101 Ergebnisse
+   bestätigt, 249 Fächer oder Lehrebenen korrigiert, 103 Themen ausgeschlossen. Ausgeschlossen wurden vor
+   allem GND-Begriffe, die zu allgemein oder mehrdeutig für ein Lehrmaterial sind („Allgemeiner Teil“,
+   „Erweiterung“, „List“), Einrichtungen und Personengruppen („Universität“, „Student“) sowie zwei
+   unspezifische OpenAlex-Themen. Korrigiert wurden häufig Ersatzzuordnungen aus dem Embedding (etwa
+   organische Chemie auf „Holz-/Fasertechnik“) und Fachdidaktik- oder Hochschullehre-Themen.
 
 Seeds übernehmen `status` und `konfidenz` in die Herkunftsangabe des Fachs.
 
 Stand der mitgelieferten Datei (gpt-6-luna, multilingual-e5-small, drei Stimmen, 4.516 Themen):
-Fach 4.205 gesichert, 297 wahrscheinlich, 14 unsicher; Lehrebene 3.436 gesichert, 1.079 wahrscheinlich,
-1 unsicher; Handmapping bei 3.629 Themen bestätigt; 101 Themen auf der Prüfliste. Sechs Themen erhielten
-in keiner Stimme ein Fach; sie tragen das ähnlichste Fach laut Embedding (`mapping.ersatz`) und stehen
-auf der Prüfliste.
+vor der Durchsicht Fach 4.205 gesichert, 297 wahrscheinlich, 14 unsicher; Lehrebene 3.436 gesichert,
+1.079 wahrscheinlich, 1 unsicher; Handmapping bei 3.629 Themen bestätigt; 101 Themen auf der Prüfliste.
+Sechs Themen erhielten in keiner Stimme ein Fach; sie trugen das ähnlichste Fach laut Embedding
+(`mapping.ersatz`). Nach der Durchsicht: 4.514 Themen, Fach 4.205 gesichert, 210 wahrscheinlich,
+99 redaktionell, kein Thema mehr unsicher. GND nach der Durchsicht: 4.616 Themen, Fach 4.123 gesichert,
+242 wahrscheinlich, 251 redaktionell. Zusammen decken die Themen 256 von 273 Studienfächern ab.
 
 **Themen aus GND und Katalog** (`themen_gnd.jsonl`, Folge `gnd`). OpenAlex beschreibt Forschungsfelder;
 Grundlagen und klassische Lehrthemen fehlen dort weitgehend. Deshalb kommen weitere Themen aus der GND:
@@ -167,8 +180,9 @@ seltenste passende Typ.
 | `hochschulrelevanz` (nur GND) | `gesichert`, `wahrscheinlich`, `unsicher` | ohne `unsicher` |
 | `belege` (mindestens einer) | `lehrbuch` (≥ 1 Lehrbuch im hbz-Katalog), `hochschulschrift` (≥ 3), `wlo` (WLO-Keyword mit passendem Hochschulfach), `handmapping` (Fach durch Handmapping bzw. Sachgruppen-Brücke bestätigt) | keine Anforderung |
 
-`unsicher` bleibt standardmäßig draußen, bis die Prüfliste durchgesehen ist; eine Korrektur macht ein
-Thema `redaktionell`, und es ist wieder dabei. Mit der Voreinstellung sind es 9.070 von 9.233 Themen.
+`unsicher` bleibt standardmäßig draußen, bis die Prüfliste durchgesehen ist; eine Korrektur oder
+Bestätigung macht ein Thema `redaktionell`, und es ist wieder dabei. Nach der Durchsicht sind mit der
+Voreinstellung alle 9.130 Themen dabei.
 Jeder Seed trägt in `synth:provenance` → `synth:thema` den Status je Zuordnung und seine Belege:
 Katalogzahlen mit Abfrage-URI (lobid), WLO-Datensätze mit Verweis auf WirLernenOnline.de und, wo der
 Export sie enthält, Links auf die Node-IDs. Von WLO werden nur Keywords in Verbindung mit

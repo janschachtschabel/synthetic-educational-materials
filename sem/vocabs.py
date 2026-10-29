@@ -21,6 +21,11 @@ OEH_VOCABS_PUBLIC = "https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/{na
 # Vokabulare, die das Repo aufbereitet mitliefert (Dateiname = OEH-Vokabularname)
 OEH_VOCABS = ["educationalContext", "new_lrt", "hochschulfaechersystematik", "intendedEndUserRole"]
 
+# Quellenangabe für Vokabulare, die auf einer fremden Systematik beruhen
+QUELLENANGABEN = {
+    "hochschulfaechersystematik": "Quelle: Statistisches Bundesamt (Destatis), Systematik der Fächergruppen, Studienbereiche und Studienfächer; ausgelesen aus dem OpenEduHub-Vokabular hochschulfaechersystematik (github.com/openeduhub/oeh-metadata-vocabs)",
+}
+
 
 @dataclass
 class Vocab:
@@ -103,6 +108,7 @@ def skos_to_json(ttl_path: Path, name: str, source_url: str, lang: str = "de") -
             "public_url": OEH_VOCABS_PUBLIC.format(name=name),
             "license": "CC0-1.0",
             "retrieved": date.today().isoformat(),
+            **({"quellenangabe": QUELLENANGABEN[name]} if name in QUELLENANGABEN else {}),
         },
         "concepts": sorted(concepts.values(), key=lambda c: (c["level"], c.get("notation") or "", c["label"] or "")),
     }

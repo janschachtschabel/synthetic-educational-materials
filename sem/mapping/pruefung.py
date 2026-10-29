@@ -3,6 +3,8 @@
 Die Prüfliste (CSV) enthält nur Zuordnungen, die eine Durchsicht brauchen, mit leeren
 Korrekturspalten. Wer Zeilen korrigiert, speichert sie als korrekturen.csv im selben Ordner;
 beim nächsten Zusammenführen haben Korrekturen Vorrang vor dem LLM-Ergebnis.
+korrektur_codes: Codes mit | getrennt, „-“ = Thema ausschließen. Eine Zeile mit den bisherigen
+Codes bestätigt das Ergebnis (Status redaktionell).
 """
 
 from __future__ import annotations
@@ -23,7 +25,8 @@ def schreibe_pruefliste(path: Path, rows: list[dict]):
 
 
 def lade_korrekturen(path: Path) -> dict[str, dict]:
-    """id -> {"codes": [...] | None, "lehrebene": str | None, "kommentar": str}. Leere Zeilen zählen nicht."""
+    """id -> {"codes": [...] | None, "lehrebene": str | None, "ausschliessen": bool, "kommentar": str}.
+    Leere Zeilen zählen nicht."""
     if not Path(path).exists():
         return {}
     out = {}
@@ -31,7 +34,8 @@ def lade_korrekturen(path: Path) -> dict[str, dict]:
         for r in csv.DictReader(f):
             codes = [c.strip() for c in (r.get("korrektur_codes") or "").split("|") if c.strip()]
             ebene = (r.get("korrektur_lehrebene") or "").strip() or None
+            aus = codes == ["-"]
             if r.get("id") and (codes or ebene):
-                out[r["id"].strip()] = {"codes": codes or None, "lehrebene": ebene,
-                                        "kommentar": (r.get("kommentar") or "").strip()}
+                out[r["id"].strip()] = {"codes": None if aus else codes or None, "lehrebene": ebene,
+                                        "ausschliessen": aus, "kommentar": (r.get("kommentar") or "").strip()}
     return out

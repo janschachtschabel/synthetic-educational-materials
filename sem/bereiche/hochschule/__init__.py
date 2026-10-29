@@ -58,6 +58,7 @@ class Hochschule(Bildungsbereich):
         "wlo": ["wlo", "wlo_belege"],
         "gnd": ["gnd_sachgruppen", "bruecke", "gnd_pool", "gnd_relevanz", "gnd_kandidaten", "gnd_faecher",
                 "gnd_lehrebene", "gnd_zusammenfuehren"],
+        "korrekturen": ["korrekturen"],
     }
 
     def mapping_schritte(self) -> list[MappingSchritt]:
@@ -74,6 +75,8 @@ class Hochschule(Bildungsbereich):
             S_("lehrebene", "Lehrebene abstimmen", "drei Stimmen je OpenAlex-Thema nach festen Kriterien", b.build_lehrebene),
             S_("zusammenfuehren", "Zusammenführen", "OpenAlex: Auswertung, Konfidenz, Prüfliste, Korrekturen",
                b.zusammenfuehren, llm=False),
+            S_("korrekturen", "Korrekturen anwenden", "korrekturen.csv auf die fertigen Themen anwenden "
+               "(ohne Zwischenergebnisse)", b.korrekturen, llm=False),
             S_("wlo", "WLO-Keywords", "Keyword-Fach-Kombinationen aus WLO-Exporten (--wlo)", g.build_wlo, llm=False),
             S_("wlo_belege", "WLO-Belege", "WLO-Keywords exakt auf OpenAlex-Themen, Fachabgleich", g.build_wlo_belege,
                llm=False),
@@ -108,8 +111,9 @@ class Hochschule(Bildungsbereich):
             "hochschulrelevanz": {"label": "Hochschulrelevanz (nur GND)",
                                   "beschreibung": "Abstimmung, ob der Begriff an Hochschulen gelehrt wird; "
                                                   "OpenAlex-Themen gelten als hochschulrelevant",
-                                  "werte": {k: status[k] for k in ("gesichert", "wahrscheinlich", "unsicher")},
-                                  "standard": ["gesichert", "wahrscheinlich"]},
+                                  "werte": {k: status[k] for k in ("gesichert", "wahrscheinlich", "unsicher",
+                                                                   "redaktionell")},
+                                  "standard": ["gesichert", "wahrscheinlich", "redaktionell"]},
             "belege": {"label": "Belege (mindestens einer)",
                        "beschreibung": "leer = keine Anforderung; sonst muss das Thema mindestens einen der "
                                        "gewählten Belege haben",
@@ -262,6 +266,8 @@ class Hochschule(Bildungsbereich):
         prov = S.provenance("OpenEduHub-Hochschulfächersystematik (Destatis)", uri=vocab_hfs["uri"],
                             license=vocab_hfs["license"], method=m.get("methode", "aus dem Thema übernommen"))
         prov.update({k: m[k] for k in ("status", "konfidenz") if k in m})
+        if vocab_hfs.get("quellenangabe"):
+            prov["quellenangabe"] = vocab_hfs["quellenangabe"]
         S.set_controlled(seed, S.F_TAXON_UNI, topic["studienfach"], prov)
         S.set_controlled(seed, S.F_LRT, [{"uri": typ["uri"], "label": typ["label"]}], S.provenance(
             lrt_src["name"], uri=lrt_src["uri"], license=lrt_src["lizenz"],

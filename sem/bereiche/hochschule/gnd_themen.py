@@ -381,12 +381,12 @@ def build_gnd_zusammenfuehren(cfg: LLMConfig | None = None, stimmen: int = B.N_S
     rows, pruef = [], []
     for o in objekte:
         tid = o["id"]
-        if tid not in sf or tid not in kand:
+        if tid not in sf or tid not in kand or korr.get(tid, {}).get("ausschliessen"):
             continue
         codes, ebene, mapping, gruende = B.bewerte(tid, o["text"], kand[tid], sf[tid], le.get(tid, {}), korr,
                                                    stimmen, voc, by_not, meta)
         rel = bewertung[tid]
-        mapping["hochschulrelevanz"] = {"status": rel["status"], "stimmen": {**{d["code"]: d["stimmen"] for d in rel["details"]},
+        mapping["hochschulrelevanz"] = {"status": "redaktionell" if tid in korr else rel["status"], "stimmen": {**{d["code"]: d["stimmen"] for d in rel["details"]},
                                                                              **rel["verworfen"]},
                                         "begruendungen": rel["details"][0]["begruendungen"]}
         p, g = o["pool"], o["pool"]["gnd"]
@@ -405,7 +405,7 @@ def build_gnd_zusammenfuehren(cfg: LLMConfig | None = None, stimmen: int = B.N_S
             "quelle": {"name": "Gemeinsame Normdatei (GND)", "uri": tid, "lizenz": "CC0-1.0"},
             "belege": belege, "mapping": mapping,
         })
-        if rel["status"] != "gesichert":
+        if rel["status"] != "gesichert" and tid not in korr:
             gruende.append("Hochschulrelevanz nur mit Mehrheit")
         if gruende:
             pruef.append(B.pruefzeile(rows[-1], gruende, stimmen, lehrbuecher=p["katalog"]["lehrbuecher"],

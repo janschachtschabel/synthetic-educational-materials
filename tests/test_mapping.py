@@ -197,3 +197,20 @@ def test_wlo_belege_an_openalex_themen(pipeline, monkeypatch, tmp_path):
     assert "1 OpenAlex-Themen mit WLO-Beleg, davon 1 mit passendem Fach (studienfach: 1)" in G.build_wlo_belege().status
     r0 = json.loads(B.THEMEN_PATH.read_text(encoding="utf-8").splitlines()[0])
     assert r0["belege"]["wlo"]["fach_passt"] == "studienfach" and r0["belege"]["wlo"]["keywords"] == ["kw0"]  # „science“ zu unspezifisch
+
+
+def test_korrekturen_ausschliessen_und_bestaetigen(tmp_path):
+    from sem.bereiche.hochschule.build import faecher_by_not, korrektur_anwenden
+    from sem.mapping.pruefung import lade_korrekturen
+    from sem.vocabs import load
+
+    p = tmp_path / "korrekturen.csv"
+    p.write_text("id,korrektur_codes,korrektur_lehrebene,kommentar\na,-,,zu allgemein\nb,032|126,vertiefung,\nc,,,\n",
+                 encoding="utf-8")
+    k = lade_korrekturen(p)
+    assert set(k) == {"a", "b"} and k["a"]["ausschliessen"] and not k["b"]["ausschliessen"]
+    voc = load("hochschulfaechersystematik")
+    row = korrektur_anwenden({"id": "b", "mapping": {"status": "unsicher", "hochschulrelevanz": {"status": "wahrscheinlich"}}},
+                             k["b"], voc, faecher_by_not(voc))
+    assert [f["notation"] for f in row["studienfach"]] == ["032", "126"] and row["lehrebene"] == "vertiefung"
+    assert row["mapping"]["status"] == row["mapping"]["hochschulrelevanz"]["status"] == "redaktionell"
