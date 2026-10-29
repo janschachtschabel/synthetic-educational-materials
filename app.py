@@ -98,6 +98,18 @@ with st.sidebar:
                     reasoning_effort=None if effort == "Modellstandard" else effort)
 
 # --- Vorschau-Helfer --------------------------------------------------------------------------
+@st.cache_data(max_entries=64)
+def _dateiart(path: str, mtime: float) -> str:
+    return vorschau.dateiart(path)
+
+
+def ausgabedateien(art: str) -> list:
+    """Dateien in output/ einer Art („seeds“ oder „materialien“), neueste zuerst."""
+    ps = [p for p in OUTPUT_DIR.glob("*.jsonl") if ".fehler" not in p.name]
+    return sorted((p for p in ps if _dateiart(str(p), p.stat().st_mtime) == art),
+                  key=lambda p: p.stat().st_mtime, reverse=True)
+
+
 @st.cache_data(max_entries=4)
 def _lade(path: str, mtime: float) -> list[dict]:
     return vorschau.lade(path)
@@ -181,8 +193,7 @@ with tab_mat:
     st.subheader("Materialien erzeugen")
     st.caption("Pro Seed: Volltext, dann je ein Aufruf für Titel, Beschreibung, Keywords, Inhaltstyp-Prüfung und "
                "Frage-Antwort-Paare. Ein erneuter Start setzt fort und überspringt Fertiges.")
-    files = sorted(p.name for p in OUTPUT_DIR.glob("*.jsonl")
-                   if not p.name.startswith("materialien") and ".fehler" not in p.name)
+    files = [p.name for p in ausgabedateien("seeds")]
     if not files:
         st.info("Erst Seeds erzeugen.")
     else:
@@ -208,12 +219,14 @@ with tab_mat:
 # --- Vorschau ---------------------------------------------------------------------------------
 with tab_vorschau:
     st.subheader("Vorschau")
-    dateien = sorted((p for p in OUTPUT_DIR.glob("*.jsonl") if ".fehler" not in p.name),
-                     key=lambda p: p.stat().st_mtime, reverse=True)
+    art = st.radio("Anzeigen", ["materialien", "seeds"], horizontal=True, key="v-art",
+                   format_func=lambda a: {"materialien": "Erzeugte Materialien", "seeds": "Seeds"}[a])
+    dateien = ausgabedateien(art)
     if not dateien:
-        st.info("Noch keine Seeds oder Materialien in output/.")
+        st.info("Noch keine erzeugten Materialien in output/ – erst im Reiter „Materialien“ starten."
+                if art == "materialien" else "Noch keine Seeds in output/.")
     else:
-        datei = st.selectbox("Datei", dateien, format_func=lambda p: p.name, key="v-datei")
+        datei = st.selectbox("Datei (neueste zuerst)", dateien, format_func=lambda p: p.name, key=f"v-datei-{art}")
         rows = _lade(str(datei), datei.stat().st_mtime)
         c1, c2 = st.columns([2, 1])
         such = c1.text_input("Suchen (Thema, Fach, Inhaltstyp, Titel, Keyword, id)", key="v-such").casefold()

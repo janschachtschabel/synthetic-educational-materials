@@ -19,6 +19,18 @@ def lade(path: Path, limit: int | None = None) -> list[dict]:
     return out
 
 
+def dateiart(path: Path) -> str:
+    """„materialien“, wenn der erste Datensatz einen Volltext hat, sonst „seeds“."""
+    try:
+        with Path(path).open(encoding="utf-8") as f:
+            for line in f:
+                if line.strip():
+                    return "materialien" if ist_material(json.loads(line)) else "seeds"
+    except (OSError, json.JSONDecodeError):
+        pass
+    return "seeds"
+
+
 def ist_material(rec: dict) -> bool:
     return S.F_FULLTEXT in rec
 
