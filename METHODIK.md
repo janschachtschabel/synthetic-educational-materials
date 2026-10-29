@@ -45,6 +45,12 @@ abgeleitet.
    Studienfächer aus der vollständigen Fächerliste (der Studienbereich aus Schritt 1 ist nur ein Hinweis)
    und die Lehrebene `grundlagen`, `vertiefung` oder `forschung`. Ungültige Notationen werden verworfen
    und die Anfrage wird wiederholt.
+3. Prüfung (Stand der mitgelieferten Datei, Modell gpt-6-luna): alle Fach-URIs gültig, Studienbereich und
+   Fächergruppe konsistent abgeleitet. Bei 562 Themen liegt kein Fach im handgemappten Studienbereich. In
+   der Stichprobe sind das meist Themen, die OpenAlex einem unpassenden Teilgebiet zuordnet (z. B.
+   „Educational Assessment“ unter Information Systems), und die LLM-Zuordnung ist dort besser. In
+   Stichproben von 100 Themen war das erste Fach stets passend, beim zweiten und dritten Fach waren
+   etwa 5–10 % schwach (z. B. Tourismusmanagement → Wirtschaftspädagogik).
 
 **Grundlagenthemen** (`themen_grundlagen.jsonl`): OpenAlex beschreibt Forschungsfelder, Grundlagen des
 Grundstudiums fehlen dort weitgehend. Deshalb schlägt ein LLM je Studienfach Grundlagenthemen vor
@@ -140,6 +146,9 @@ Bedingte Abschnitte `{{#name}}…{{/name}}` erscheinen nur, wenn der Wert gesetz
 - LLM-Zuordnungen sind nicht deterministisch. In Stichproben schwankte die Lehrebene bei etwa 10 % der
   Themen zwischen zwei Läufen, die Fächer überlappten meist. Die Zuordnungen sind deshalb als Vorschlag
   zu verstehen und in den JSONL-Dateien prüfbar.
+- Die Lehrebene ist ungleich verteilt (25 grundlagen, 3.714 vertiefung, 777 forschung). Weil Forschungs-
+  themen im 1.–2. Studienjahr ausgeschlossen sind, ist dieses Niveau bei Gleichverteilung nach Thema
+  etwas seltener (bei 30.000 Seeds rund 28 % statt 33 %).
 - Synthetische Texte können fachliche Fehler enthalten. Für Trainingszwecke ist die Abbildung Text →
   Metadaten wichtiger als die fachliche Tiefe. Für eine Veröffentlichung als Lernmaterial sind sie nicht
   geprüft.
