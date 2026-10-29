@@ -8,7 +8,7 @@ from pathlib import Path
 from . import schema as S
 
 
-def lade(path: Path, limit: int | None = None) -> list[dict]:
+def lade(path: Path | str, limit: int | None = None) -> list[dict]:
     out = []
     with Path(path).open(encoding="utf-8") as f:
         for line in f:

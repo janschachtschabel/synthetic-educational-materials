@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import threading
+from pathlib import Path
 
 import pandas as pd
 import streamlit as st
@@ -28,9 +29,10 @@ def bereich(key):
     return BEREICHE[key]()
 
 
+@st.cache_resource
 def jobs() -> dict:
-    """Laufende Hintergrundjobs, über Reloads hinweg."""
-    return st.session_state.setdefault("jobs", {})
+    """Laufende Hintergrundjobs, app-weit: bleiben nach Neuladen oder in einem neuen Tab sichtbar."""
+    return {}
 
 
 def start_job(name: str, fn, *args, **kwargs):
@@ -105,6 +107,10 @@ def _zeilen(path: str, mtime: float) -> int:
         return sum(1 for l in f if l.strip())
 
 
+def anzahl(n: int, eins: str, viele: str) -> str:
+    return f"{n} {eins if n == 1 else viele}"
+
+
 def zeilen(p) -> int:
     return _zeilen(str(p), p.stat().st_mtime) if p.exists() else 0
 
@@ -134,16 +140,15 @@ def dateiname_feld(label: str, art: str, vorschlag: str, key: str, hilfe: str):
 
 
 def download(p, label: str, key: str):
+    """Download-Knopf; die Datei wird erst beim Klick gelesen."""
     groesse = p.stat().st_size
-    if groesse <= 200 * 1024 ** 2:
-        st.download_button(f"{label} ({groesse / 1024 ** 2:.1f} MB)", p.read_bytes(), file_name=p.name, key=key)
-    else:
-        st.caption(f"{p.name} ist {groesse / 1024 ** 2:.0f} MB groß und liegt unter output/{p.name}.")
+    st.download_button(f"{label} ({groesse / 1024 ** 2:.1f} MB)", lambda: Path(p).read_bytes(), file_name=p.name,
+                       key=key, on_click="ignore")
 
 
 @st.cache_data(max_entries=4)
-def _lade(path: str, mtime: float) -> list[dict]:
-    return vorschau.lade(path)
+def _lade(path: str, mtime: float, limit: int | None) -> list[dict]:
+    return vorschau.lade(path, limit)
 
 
 def zeige(rec: dict):
@@ -189,7 +194,7 @@ tab_seeds, tab_mat, tab_vorschau, tab_prompts, tab_map, tab_meth = st.tabs(
 # --- Seeds ----------------------------------------------------------------------------------
 with tab_seeds:
     st.subheader("Seeds erzeugen")
-    st.caption("Ohne LLM. Gleicher Zufalls-Seed und gleiche Einstellungen ergeben dieselben Seeds.")
+    st.caption("Ohne LLM. Gleicher Startwert für den Zufall und gleiche Einstellungen ergeben dieselben Seeds.")
     counts, balance, auswahl = {}, {}, {}
     for key in BEREICHE:
         b = bereich(key)
@@ -215,7 +220,8 @@ with tab_seeds:
                           "Frei wählbar, z. B. hochschule30000_s42")
     vorhanden = ziel.exists()
     if vorhanden:
-        st.warning(f"{ziel.name} gibt es schon ({zeilen(ziel)} Seeds) und wird beim Erzeugen überschrieben.")
+        st.warning(f"{ziel.name} gibt es schon ({anzahl(zeilen(ziel), 'Seed', 'Seeds')}) und wird beim Erzeugen "
+                   "überschrieben.")
     if st.button("Seeds erzeugen", type="primary", disabled=sum(counts.values()) == 0):
         with st.spinner("erzeuge …"):
             data = seedlib.build(counts, balance, int(rnd), auswahl)
@@ -236,7 +242,7 @@ with tab_mat:
         st.info("Noch keine Seed-Dateien (seeds_…) in output/. Erst im Reiter „Seeds“ erzeugen.")
     else:
         src = st.selectbox("Seed-Datei (neueste zuerst)", seed_dateien, key="m-src",
-                           format_func=lambda p: f"{p.name} – {zeilen(p)} Seeds",
+                           format_func=lambda p: f"{p.name} – {anzahl(zeilen(p), 'Seed', 'Seeds')}",
                            help="Hier stehen nur Dateien, die mit seeds_ beginnen.")
         n_seeds = zeilen(src)
         limit = st.number_input(f"Wie viele Seeds verarbeiten? (0 = alle {n_seeds})", 0, n_seeds, 0,
@@ -245,7 +251,7 @@ with tab_mat:
                              f"m-out-{src.name}", "Standard: derselbe Name wie die Seed-Datei")
         fertig_n = zeilen(out)
         if fertig_n:
-            st.info(f"{out.name} enthält schon {fertig_n} {'Material' if fertig_n == 1 else 'Materialien'}. Start setzt fort und überspringt Fertiges. "
+            st.info(f"{out.name} enthält schon {anzahl(fertig_n, 'Material', 'Materialien')}. Start setzt fort und überspringt Fertiges. "
                     "Für einen neuen Lauf einen anderen Namen wählen.")
         lrt_check = st.checkbox("Inhaltstyp am fertigen Material prüfen", value=True,
                                 help="Bestimmt den Inhaltstyp ohne Kenntnis des Seeds und protokolliert, ob er "
@@ -274,10 +280,16 @@ with tab_vorschau:
         st.info("Noch keine erzeugten Materialien in output/ – erst im Reiter „Materialien“ starten."
                 if art == "materialien" else "Noch keine Seeds in output/.")
     else:
-        einheit = "Materialien" if art == "materialien" else "Seeds"
+        einheit = ("Material", "Materialien") if art == "materialien" else ("Seed", "Seeds")
         datei = st.selectbox("Datei (neueste zuerst)", dateien, key=f"v-datei-{art}",
-                             format_func=lambda p: f"{p.name} – {zeilen(p)} {einheit}")
-        rows = _lade(str(datei), datei.stat().st_mtime)
+                             format_func=lambda p: f"{p.name} – {anzahl(zeilen(p), *einheit)}")
+        gesamt = zeilen(datei)
+        limit = None
+        if gesamt > 5000:
+            limit = st.number_input(f"Datensätze laden (von {gesamt}; große Dateien brauchen Zeit)", 100, gesamt,
+                                    5000, step=1000, key=f"v-limit-{art}",
+                                    help="Suche und Blättern beziehen sich auf die geladenen Datensätze.")
+        rows = _lade(str(datei), datei.stat().st_mtime, limit)
         c1, c2 = st.columns([2, 1])
         such = c1.text_input("Suchen (Thema, Fach, Inhaltstyp, Titel, Keyword, id)", key="v-such").casefold()
         treffer = [r for r in rows if such in vorschau.suchtext(r)] if such else rows
@@ -321,6 +333,9 @@ with tab_map:
         st.markdown(f"**{title}**")
         for p in paths:
             with st.expander(f"{p.name} ({p.stat().st_size // 1024} KB)"):
+                download(p, "Herunterladen", f"dl-{p}")
+                if not st.toggle("Inhalt anzeigen", key=f"show-{p}"):
+                    continue
                 if p.suffix == ".csv":
                     st.dataframe(pd.read_csv(p), height=250)
                 elif p.suffix == ".jsonl":
@@ -330,7 +345,6 @@ with tab_map:
                     data = json.loads(p.read_text(encoding="utf-8"))
                     items = data.get("concepts") or data.get("inhaltstypen") or data.get("niveaus")
                     st.dataframe(pd.DataFrame(items)) if items else st.json(data, expanded=False)
-                st.download_button("Herunterladen", p.read_bytes(), file_name=p.name, key=f"dl-{p}")
 
     st.markdown("**Mappings neu bauen** (fortsetzbar; bereits Erledigtes wird übersprungen)")
     for key in BEREICHE:
@@ -340,10 +354,8 @@ with tab_map:
             continue
         with st.container(border=True):
             st.markdown(f"**{b.label}**")
-            stat = b.mapping_statistik()
-            if stat:
-                with st.expander("Aktueller Stand des Mappings"):
-                    st.json(stat)
+            if st.toggle("Aktuellen Stand des Mappings anzeigen", key=f"stat-{key}"):
+                st.json(b.mapping_statistik())
             wahl = st.multiselect("Schritte", list(schritte), default=[], key=f"ms-{key}",
                                   placeholder="Schritte wählen (die Daten im Repo sind fertig gebaut)",
                                   format_func=lambda k, s=schritte: f"{s[k].label}{' (LLM)' if s[k].llm else ''}")
