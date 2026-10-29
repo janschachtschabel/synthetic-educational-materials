@@ -207,6 +207,8 @@ def load_bruecke() -> dict[str, list[str]]:
 
 def build_gnd_pool(cfg=None, on_progress=None, limit: int | None = None, min_lehrbuch: int = 3,
                    min_hochschulschrift: int = 10, min_wlo: int = 3, **_):
+    """Kandidaten aus Katalog und WLO. Jeder Begriff braucht einen Katalogbeleg (mindestens ein Lehrbuch
+    oder drei Hochschulschriften); WLO allein reicht nicht."""
     sg = {c["uri"]: c for c in load_vocab("gnd_sachgruppen").concepts}
     lb, hs = Counter(), Counter()
     for art, ziel in (("lehrbuch", lb), ("hochschulschrift", hs)):
@@ -225,21 +227,29 @@ def build_gnd_pool(cfg=None, on_progress=None, limit: int | None = None, min_leh
     recs.update({u: hits[0]["_rec"] for u, hits in wlo_hits.items()})
 
     def zulassen(r):
-        if not gnd.ist_thema(r) or r["uri"] in LEHRBUCH_FORMEN:
+        if not gnd.ist_thema(r) or r["uri"] in LEHRBUCH_FORMEN or "Motiv>" in (r["label"] or ""):
             return False
         arten = {sg[s["uri"]]["art"] for s in r["sachgruppen"] if s["uri"] in sg}
         return "sache" in arten or not arten
 
+    def wlo_n(r):
+        return sum(h["anzahl"] for h in wlo_hits.get(r["uri"], []))
+
     pool = [r for r in recs.values() if zulassen(r)]
-    pool.sort(key=lambda r: -(lb[r["uri"]] + hs[r["uri"]] / 3 + 5 * sum(h["anzahl"] for h in wlo_hits.get(r["uri"], []))))
+    pool.sort(key=lambda r: -(lb[r["uri"]] + hs[r["uri"]] / 3 + wlo_n(r) / 5))
     if limit:
-        pool = pool[:limit]
+        pool = pool[:limit * 2]
     zahlen = _parallel(lambda r: gnd.katalog_zaehlen(r["uri"]), pool, on_progress=on_progress, label="Katalog zählen")
+    behalten = [(r, z) for r, z in zip(pool, zahlen) if z["lehrbuecher"] >= 1 or z["hochschulschriften"] >= 3]
+    if limit:
+        behalten = behalten[:limit]
     with POOL_PATH.open("w", encoding="utf-8") as f:
-        for r, z in zip(pool, zahlen):
+        for r, z in behalten:
             hits = [{k: v for k, v in h.items() if k != "_rec"} for h in wlo_hits.get(r["uri"], [])]
             f.write(json.dumps({"id": r["uri"], "gnd": r, "katalog": z, "wlo": hits}, ensure_ascii=False) + "\n")
-    return fertig(f"{len(pool)} GND-Sachbegriffe im Pool ({len(wlo_hits)} mit WLO-Beleg)")
+    mit_wlo = sum(1 for r, _ in behalten if r["uri"] in wlo_hits)
+    return fertig(f"{len(behalten)} GND-Sachbegriffe im Pool, davon {mit_wlo} mit WLO-Beleg "
+                  f"({len(pool) - len(behalten)} ohne Katalogbeleg verworfen)")
 
 
 def load_pool() -> list[dict]:
@@ -268,7 +278,7 @@ def _objekt(p: dict, voc=None) -> dict:
 
 RELEVANZ_ZIELE = {
     "hochschule": Ziel("hochschule", "hochschule", "Hochschule", "Gegenstand von Lehrveranstaltungen eines Studiengangs"),
-    "schule": Ziel("schule", "schule", "Schule", "typischer Unterrichtsinhalt allgemeinbildender Schulen, an Hochschulen kaum eigenständig"),
+    "schule": Ziel("schule", "schule", "Schule", "praktisch nur im Schulunterricht, an Hochschulen nicht als eigener Inhalt"),
     "berufsbildung": Ziel("berufsbildung", "berufsbildung", "Berufsbildung", "praktische Tätigkeit oder Inhalt einer Berufsausbildung"),
     "allgemein": Ziel("allgemein", "allgemein", "Alltag", "Alltag, Freizeit, Hobby, Lebensführung"),
     "kein_lehrthema": Ziel("kein_lehrthema", "kein_lehrthema", "kein Lehrthema",
@@ -276,9 +286,11 @@ RELEVANZ_ZIELE = {
                            "zu allgemein (z. B. Theorie, Methode) oder ohne Lehrbezug"),
 }
 
-RELEVANZ_REGELN = """Entscheide je Begriff (GND-Schlagwort mit Oberbegriffen und Zahlen aus dem Bibliothekskatalog), in welchem Bildungsbereich er überwiegend als Lehrinhalt vorkommt. Wähle genau einen code aus den Kandidaten.
-- "hochschule" nur, wenn der Begriff als Thema in Vorlesungen, Seminaren oder Modulen eines Studiengangs vorkommt.
-- Begriffe, die nur als Form oder Medium dienen, sind "kein_lehrthema".
+RELEVANZ_REGELN = """Entscheide je Begriff (GND-Schlagwort mit Oberbegriffen und Zahlen aus dem Katalog der Hochschulbibliotheken), ob er Lehrinhalt an Hochschulen ist. Wähle genau einen code aus den Kandidaten.
+- "hochschule", wenn der Begriff als Thema in Vorlesungen, Seminaren, Modulen oder Studienlehrbüchern eines Studiengangs vorkommt. Das gilt auch, wenn er außerdem in der Schule vorkommt (z. B. Chemie, Algorithmus, Grammatik, Globalisierung).
+- "schule" nur für Inhalte, die praktisch nur im Schulunterricht behandelt werden (z. B. Einmaleins, Schreibenlernen).
+- "berufsbildung" für praktische Tätigkeiten, die vor allem in einer Ausbildung gelernt werden; "allgemein" für Alltag und Freizeit.
+- Begriffe, die nur als Form, Medium, Veranstaltungsart oder Gattung dienen (z. B. Video, Vorlesung, Kurs, Anleitung), sind "kein_lehrthema".
 Gib eine kurze "begruendung" und 1 bis 3 "belegbegriffe" aus den Angaben zum Begriff an."""
 
 RELEVANZ_PERSPEKTIVEN = ["Du gestaltest Studiengänge an deutschen Hochschulen.",

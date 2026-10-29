@@ -88,12 +88,15 @@ Grundlagen und klassische Lehrthemen fehlen dort weitgehend. Deshalb kommen weit
 2. `gnd_pool`: Kandidaten sind GND-Schlagwörter, die im hbz-Katalog häufig an **Lehrbüchern**
    (`natureOfContent` Lehrbuch, mindestens 3) oder **Hochschulschriften** (`type:Thesis`, mindestens 10)
    hängen, abgefragt je Notations-Präfix 000–999, sowie WLO-Keywords (siehe unten), die **exakt** dem
-   Vorzugs- oder Synonymnamen eines GND-Schlagworts entsprechen. Zugelassen sind nur die GND-Typen
-   Sachschlagwort, Nomenklatur (Biologie/Chemie) und historisches Ereignis. Personen, Körperschaften,
+   Vorzugs- oder Synonymnamen eines GND-Schlagworts entsprechen. Jeder Begriff braucht einen
+   Katalogbeleg (mindestens ein Lehrbuch oder drei Hochschulschriften), WLO allein reicht nicht.
+   Zugelassen sind nur die GND-Typen Sachschlagwort und historisches Ereignis; Nomenklaturen (einzelne
+   Stoffe, Arten) und Motiv-Schlagwörter (`<Motiv>`) werden ausgeschlossen. Personen, Körperschaften,
    Firmen, Orte, Werke, Produkte und Software haben in der GND eigene Typen und fallen dadurch heraus.
    Was nicht exakt passt, wird verworfen.
-3. `gnd_relevanz`: drei Stimmen, ob der Begriff an der Hochschule, in der Schule, in der Berufsbildung,
-   im Alltag oder gar nicht als Lehrinhalt vorkommt (Form- und Medienbegriffe wie „Video“). Nur Begriffe mit
+3. `gnd_relevanz`: drei Stimmen, ob der Begriff Lehrinhalt an Hochschulen ist (auch wenn er außerdem in
+   der Schule vorkommt, z. B. Chemie) oder nur in der Schule, in der Berufsbildung, im Alltag oder gar nicht
+   (Form- und Medienbegriffe wie „Video“, „Vorlesung“). Nur Begriffe mit
    mindestens zwei Stimmen für Hochschule werden Themen; die übrigen stehen mit Stimmen und Begründung in
    `gnd_ausgeschlossen.csv` und sind für andere Bildungsbereiche nachnutzbar.
 4. `gnd_kandidaten`, `gnd_faecher`, `gnd_lehrebene`, `gnd_zusammenfuehren`: wie bei OpenAlex. Hinweise

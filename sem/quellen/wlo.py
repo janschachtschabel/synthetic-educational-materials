@@ -18,7 +18,8 @@ from pathlib import Path
 from ..paths import DATA_DIR
 
 QUELLE = {"name": "WirLernenOnline", "uri": "https://wirlernenonline.de",
-          "hinweis": "nur Keywords in Verbindung mit Fächern und Bildungsstufe, Beleg über die Node-ID"}
+          "hinweis": "nur Keywords in Verbindung mit Hochschulfächern genutzt; Beleg als Zahl der Datensätze "
+                     "und, wo der Export sie enthält, Node-IDs"}
 NODE_URI = "https://redaktion.openeduhub.net/edu-sharing/components/render/{}"
 FELDER = {"node": "sys:node-uuid", "kontext": "ccm:educationalcontext_DISPLAYNAME", "fach": "ccm:taxonid",
           "fach_uni": "ccm:oeh_taxonid_university", "keywords": "cclom:general_keyword"}

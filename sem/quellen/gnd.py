@@ -30,8 +30,9 @@ LEHRBUCH = "https://d-nb.info/gnd/4123623-3"
 CACHE_DIR = DATA_DIR / "cache" / "lobid"
 
 # Typen, die als Thema taugen. Personen, Körperschaften, Orte, Werke, Produkte, Software und
-# Personengruppen haben in der GND eigene Typen und fallen damit heraus.
-THEMEN_TYPEN = {"SubjectHeadingSensoStricto", "NomenclatureInBiologyOrChemistry", "HistoricSingleEventOrEra"}
+# Personengruppen haben in der GND eigene Typen und fallen damit heraus; Nomenklaturen (einzelne
+# Stoffe, Arten) sind als Lehrthemen zu speziell.
+THEMEN_TYPEN = {"SubjectHeadingSensoStricto", "HistoricSingleEventOrEra"}
 
 _lock = threading.Lock()
 
@@ -77,7 +78,7 @@ def kompakt(m: dict) -> dict:
 
 
 def ist_thema(rec: dict) -> bool:
-    return bool(THEMEN_TYPEN & set(rec["typen"]))
+    return bool(THEMEN_TYPEN & set(rec["typen"])) and "NomenclatureInBiologyOrChemistry" not in rec["typen"]
 
 
 def suche_exakt(label: str) -> dict | None:

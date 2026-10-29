@@ -37,7 +37,7 @@ class FakeClient:
         res = []
         for i in items:
             codes = sorted(k.split(" | ")[0] for k in i["kandidaten"])
-            if "Bildungsbereich" in system:
+            if "Lehrinhalt an Hochschulen" in system:
                 wahl = ["kein_lehrthema" if i["label"] == "Video" else "hochschule"]
             else:
                 wahl = codes[:1] if "Lehrebene" in system else codes[:2]

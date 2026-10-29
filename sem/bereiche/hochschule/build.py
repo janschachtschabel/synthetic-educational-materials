@@ -228,6 +228,8 @@ def kandidaten_berechnen(objekte: list[dict], emb: Embedder, hinweise: dict[str,
                          n_kandidaten: int = N_KANDIDATEN) -> dict:
     """Je Objekt die ähnlichsten Studienfächer; aus jedem Hinweis (Studienbereich- oder Studienfach-URI)
     kommen die zwei ähnlichsten passenden Fächer dazu."""
+    if not objekte:
+        return {}
     faecher, fv = fach_vektoren(emb)
     ov = emb.encode([o["text"] for o in objekte], art="anfrage")
     idx, sims = top_k(ov, fv, len(faecher))
