@@ -25,3 +25,13 @@ def test_allocate_weniger_seeds_als_gruppen():
 def test_render_platzhalter_und_abschnitte():
     t = "A {{x}}{{#y}} Y={{y}}{{/y}}{{#z}} Z{{/z}}"
     assert render(t, {"x": 1, "y": "ja", "z": ""}) == "A 1 Y=ja"
+
+
+def test_ausgabe_pfad_festes_praefix(tmp_path):
+    from sem.paths import ausgabe_pfad, ausgabedateien
+
+    assert ausgabe_pfad("seeds", "test", tmp_path).name == "seeds_test.jsonl"
+    assert ausgabe_pfad("materialien", "seeds_s42.jsonl", tmp_path).name == "materialien_s42.jsonl"
+    for n in ("seeds_a.jsonl", "materialien_a.jsonl", "materialien_a.fehler.jsonl", "alt.jsonl"):
+        (tmp_path / n).write_text("{}\n")
+    assert [p.name for p in ausgabedateien("materialien", tmp_path)] == ["materialien_a.jsonl"]

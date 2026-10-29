@@ -32,6 +32,10 @@ durchblättern und durchsuchen: Titel, Beschreibung, Keywords, Volltext, Frage-A
 Inhaltstyp-Prüfung, Metadaten und Herkunft), **Prompts** (bearbeiten und speichern),
 **Mappings** (ansehen, herunterladen, neu bauen), **Methodik**.
 
+Seed-Dateien beginnen immer mit `seeds_`, erzeugte Materialien mit `materialien_` (beides unter
+`output/`). Oberfläche und Kommandozeile ergänzen das Präfix selbst; die Auswahllisten zeigen nur die
+passenden Dateien.
+
 ## Kommandozeile
 
 ```

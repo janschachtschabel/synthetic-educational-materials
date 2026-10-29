@@ -15,7 +15,8 @@ from sem.bereiche import BEREICHE
 from sem.generate import generate
 from sem.llm import DEFAULT_MODEL, DEFAULT_WORKERS, LLMConfig, Progress
 from sem.mapping.embeddings import DEFAULT_EMBEDDING_MODEL
-from sem.paths import MAPPING_DIR, OUTPUT_DIR, PROMPT_DIR, ROOT, VOCAB_DIR
+from sem.paths import (MAPPING_DIR, OUTPUT_DIR, PRAEFIX, PROMPT_DIR, ROOT, VOCAB_DIR, ausgabe_pfad,
+                       ausgabedateien)
 from sem.prompts import PROMPT_FILES, placeholders, prompt_path
 
 st.set_page_config(page_title="Synthetische Bildungsmaterialien", layout="wide")
@@ -97,17 +98,47 @@ with st.sidebar:
                     max_retries=int(retries), outage_minutes=float(outage),
                     reasoning_effort=None if effort == "Modellstandard" else effort)
 
-# --- Vorschau-Helfer --------------------------------------------------------------------------
+# --- Helfer für Dateien in output/ ------------------------------------------------------------
 @st.cache_data(max_entries=64)
-def _dateiart(path: str, mtime: float) -> str:
-    return vorschau.dateiart(path)
+def _zeilen(path: str, mtime: float) -> int:
+    with open(path, encoding="utf-8") as f:
+        return sum(1 for l in f if l.strip())
 
 
-def ausgabedateien(art: str) -> list:
-    """Dateien in output/ einer Art („seeds“ oder „materialien“), neueste zuerst."""
-    ps = [p for p in OUTPUT_DIR.glob("*.jsonl") if ".fehler" not in p.name]
-    return sorted((p for p in ps if _dateiart(str(p), p.stat().st_mtime) == art),
-                  key=lambda p: p.stat().st_mtime, reverse=True)
+def zeilen(p) -> int:
+    return _zeilen(str(p), p.stat().st_mtime) if p.exists() else 0
+
+
+def letzter_datensatz(p) -> dict | None:
+    """Letzte Zeile einer JSONL-Datei, ohne die ganze Datei zu lesen."""
+    with open(p, "rb") as f:
+        f.seek(0, 2)
+        pos = f.tell()
+        f.seek(max(0, pos - 2_000_000))
+        lines = [l for l in f.read().splitlines() if l.strip()]
+    try:
+        return json.loads(lines[-1]) if lines else None
+    except json.JSONDecodeError:
+        return None
+
+
+def dateiname_feld(label: str, art: str, vorschlag: str, key: str, hilfe: str):
+    """Eingabe nur für den freien Teil des Namens; Präfix und Endung sind fest."""
+    c1, c2, c3 = st.columns([2, 5, 1])
+    c1.text_input(label, PRAEFIX[art], disabled=True, key=f"{key}-praefix",
+                  help="Feste Namensanfänge: seeds_ für Seed-Dateien, materialien_ für erzeugte Materialien. "
+                       "Daran erkennt die App, welche Dateien in welche Auswahl gehören.")
+    frei = c2.text_input("Name", vorschlag, key=key, help=hilfe)
+    c3.text_input("Endung", ".jsonl", disabled=True, key=f"{key}-endung")
+    return ausgabe_pfad(art, frei)
+
+
+def download(p, label: str, key: str):
+    groesse = p.stat().st_size
+    if groesse <= 200 * 1024 ** 2:
+        st.download_button(f"{label} ({groesse / 1024 ** 2:.1f} MB)", p.read_bytes(), file_name=p.name, key=key)
+    else:
+        st.caption(f"{p.name} ist {groesse / 1024 ** 2:.0f} MB groß und liegt unter output/{p.name}.")
 
 
 @st.cache_data(max_entries=4)
@@ -127,7 +158,8 @@ def zeige(rec: dict):
             (st.success if chk["uebereinstimmung"] else st.warning)(
                 text + (" – passt zum Seed" if chk["uebereinstimmung"] else " – weicht vom Seed ab"))
     else:
-        st.info("Seed (noch kein Material erzeugt)")
+        st.info("Das ist ein Seed: die Vorgaben für ein Material. Erzeugte Materialien zeigt der Umschalter "
+                "„Erzeugte Materialien“.")
     c1, c2 = st.columns([3, 2]) if vorschau.ist_material(rec) else (None, st.container())
     if c1 is not None:
         with c1:
@@ -177,56 +209,74 @@ with tab_seeds:
                 auswahl[key] = wahl
                 st.caption(f"{len(b.themen_auswahl(wahl))} von {len(b.topics())} Themen ausgewählt. "
                            "Voreinstellung: gesichert, wahrscheinlich und redaktionell; unsicher erst nach Prüfung.")
-    rnd = st.number_input("Zufalls-Seed", 0, 2**31 - 1, 42)
-    name = st.text_input("Dateiname", value=f"seeds_s{rnd}.jsonl")
-    if st.button("Seeds erzeugen", type="primary"):
+    rnd = st.number_input("Startwert für den Zufall", 0, 2**31 - 1, 42,
+                          help="Gleicher Startwert und gleiche Einstellungen ergeben dieselben Seeds.")
+    ziel = dateiname_feld("Dateiname", "seeds", f"hochschule{sum(counts.values())}_s{rnd}", "s-name",
+                          "Frei wählbar, z. B. hochschule30000_s42")
+    vorhanden = ziel.exists()
+    if vorhanden:
+        st.warning(f"{ziel.name} gibt es schon ({zeilen(ziel)} Seeds) und wird beim Erzeugen überschrieben.")
+    if st.button("Seeds erzeugen", type="primary", disabled=sum(counts.values()) == 0):
         with st.spinner("erzeuge …"):
             data = seedlib.build(counts, balance, int(rnd), auswahl)
-            stats = seedlib.write(data, OUTPUT_DIR / name, {"anzahl": counts, "gleichverteilung": balance,
-                                                            "zufalls_seed": int(rnd), "auswahl": auswahl})
-        st.success(f"{stats['anzahl']} Seeds → output/{name}")
-        st.json(stats, expanded=False)
-        st.download_button("Herunterladen", (OUTPUT_DIR / name).read_bytes(), file_name=name)
+            stats = seedlib.write(data, ziel, {"anzahl": counts, "gleichverteilung": balance,
+                                               "zufalls_seed": int(rnd), "auswahl": auswahl})
+        st.success(f"{stats['anzahl']} Seeds in output/{ziel.name}. Weiter im Reiter „Materialien“.")
+        with st.expander("Statistik"):
+            st.json(stats, expanded=False)
+        download(ziel, "Seeds herunterladen", "dl-seeds")
 
 # --- Materialien ----------------------------------------------------------------------------
 with tab_mat:
     st.subheader("Materialien erzeugen")
     st.caption("Pro Seed: Volltext, dann je ein Aufruf für Titel, Beschreibung, Keywords, Inhaltstyp-Prüfung und "
                "Frage-Antwort-Paare. Ein erneuter Start setzt fort und überspringt Fertiges.")
-    files = [p.name for p in ausgabedateien("seeds")]
-    if not files:
-        st.info("Erst Seeds erzeugen.")
+    seed_dateien = ausgabedateien("seeds")
+    if not seed_dateien:
+        st.info("Noch keine Seed-Dateien (seeds_…) in output/. Erst im Reiter „Seeds“ erzeugen.")
     else:
-        src = st.selectbox("Seed-Datei", files)
-        n_seeds = sum(1 for _ in (OUTPUT_DIR / src).open(encoding="utf-8"))
-        limit = st.number_input(f"Anzahl (von {n_seeds} Seeds, 0 = alle)", 0, n_seeds, 0)
-        out = st.text_input("Ausgabedatei", value="materialien_" + src.removeprefix("seeds_"))
+        src = st.selectbox("Seed-Datei (neueste zuerst)", seed_dateien, key="m-src",
+                           format_func=lambda p: f"{p.name} – {zeilen(p)} Seeds",
+                           help="Hier stehen nur Dateien, die mit seeds_ beginnen.")
+        n_seeds = zeilen(src)
+        limit = st.number_input(f"Wie viele Seeds verarbeiten? (0 = alle {n_seeds})", 0, n_seeds, 0,
+                                help="Es werden die ersten N Seeds der Datei genommen.")
+        out = dateiname_feld("Ausgabedatei", "materialien", src.stem.removeprefix(PRAEFIX["seeds"]),
+                             f"m-out-{src.name}", "Standard: derselbe Name wie die Seed-Datei")
+        fertig_n = zeilen(out)
+        if fertig_n:
+            st.info(f"{out.name} enthält schon {fertig_n} {'Material' if fertig_n == 1 else 'Materialien'}. Start setzt fort und überspringt Fertiges. "
+                    "Für einen neuen Lauf einen anderen Namen wählen.")
         lrt_check = st.checkbox("Inhaltstyp am fertigen Material prüfen", value=True,
-                                help="Bestimmt den Inhaltstyp ohne Kenntnis des Seeds und protokolliert, ob er passt.")
-        if st.button("Start / Fortsetzen", type="primary", disabled=bool(jobs().get("mat") and not jobs()["mat"]["done"])):
-            start_job("mat", generate, OUTPUT_DIR / src, OUTPUT_DIR / out, cfg, limit=int(limit) or None,
-                      inhaltstyp_pruefen=lrt_check)
+                                help="Bestimmt den Inhaltstyp ohne Kenntnis des Seeds und protokolliert, ob er "
+                                     "passt. Ein Aufruf mehr je Material.")
+        laeuft = bool(jobs().get("mat") and not jobs()["mat"]["done"])
+        st.caption(f"Einstellungen aus der Seitenleiste: {cfg.model}, {cfg.workers} Worker, "
+                   f"Reasoning-Aufwand {cfg.reasoning_effort or 'Modellstandard'}.")
+        if st.button("Start / Fortsetzen", type="primary", disabled=laeuft):
+            start_job("mat", generate, src, out, cfg, limit=int(limit) or None, inhaltstyp_pruefen=lrt_check)
         job_status("mat")
-        if (OUTPUT_DIR / out).exists():
-            letzte = vorschau.lade(OUTPUT_DIR / out)[-1:]
-            if letzte:
-                if st.toggle("Zuletzt erzeugtes Material zeigen (alle im Reiter „Vorschau“)", key="mat-letzte"):
-                    with st.container(border=True):
-                        zeige(letzte[0])
-        if (OUTPUT_DIR / out).exists():
-            st.download_button("Ergebnis herunterladen", (OUTPUT_DIR / out).read_bytes(), file_name=out)
+        if out.exists() and not laeuft:
+            letzte = letzter_datensatz(out)
+            if letzte and st.toggle("Zuletzt erzeugtes Material zeigen (alle im Reiter „Vorschau“)", key="mat-letzte"):
+                with st.container(border=True):
+                    zeige(letzte)
+            download(out, "Materialien herunterladen", "dl-mat")
 
 # --- Vorschau ---------------------------------------------------------------------------------
 with tab_vorschau:
     st.subheader("Vorschau")
     art = st.radio("Anzeigen", ["materialien", "seeds"], horizontal=True, key="v-art",
-                   format_func=lambda a: {"materialien": "Erzeugte Materialien", "seeds": "Seeds"}[a])
+                   format_func=lambda a: {"materialien": "Erzeugte Materialien (materialien_…)",
+                                          "seeds": "Seeds (seeds_…)"}[a])
     dateien = ausgabedateien(art)
     if not dateien:
         st.info("Noch keine erzeugten Materialien in output/ – erst im Reiter „Materialien“ starten."
                 if art == "materialien" else "Noch keine Seeds in output/.")
     else:
-        datei = st.selectbox("Datei (neueste zuerst)", dateien, format_func=lambda p: p.name, key=f"v-datei-{art}")
+        einheit = "Materialien" if art == "materialien" else "Seeds"
+        datei = st.selectbox("Datei (neueste zuerst)", dateien, key=f"v-datei-{art}",
+                             format_func=lambda p: f"{p.name} – {zeilen(p)} {einheit}")
         rows = _lade(str(datei), datei.stat().st_mtime)
         c1, c2 = st.columns([2, 1])
         such = c1.text_input("Suchen (Thema, Fach, Inhaltstyp, Titel, Keyword, id)", key="v-such").casefold()
@@ -253,7 +303,8 @@ with tab_prompts:
     target = PROMPT_DIR / f"{which}.md" if bkey is None else PROMPT_DIR / bkey / f"{which}.md"
     st.caption(f"Quelle: {path.relative_to(ROOT)} · speichert nach: {target.relative_to(ROOT)}")
     text = st.text_area("Text", path.read_text(encoding="utf-8"), height=320, key=f"p-{scope}-{which}")
-    st.caption("Platzhalter: " + (", ".join(placeholders(text)) or "keine"))
+    st.caption("Platzhalter: " + (", ".join(placeholders(text)) or "keine") + " · Jedes Material speichert den "
+               "Hash der verwendeten Prompts, Änderungen bleiben so nachvollziehbar.")
     if st.button("Speichern"):
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(text.strip() + "\n", encoding="utf-8")
@@ -293,8 +344,12 @@ with tab_map:
             if stat:
                 with st.expander("Aktueller Stand des Mappings"):
                     st.json(stat)
-            wahl = st.multiselect("Schritte", list(schritte), default=b.mapping_folge, key=f"ms-{key}",
+            wahl = st.multiselect("Schritte", list(schritte), default=[], key=f"ms-{key}",
+                                  placeholder="Schritte wählen (die Daten im Repo sind fertig gebaut)",
                                   format_func=lambda k, s=schritte: f"{s[k].label}{' (LLM)' if s[k].llm else ''}")
+            if any(schritte[k].llm for k in wahl):
+                st.warning("Ausgewählte Schritte rufen das LLM auf und verursachen Kosten. Bereits Erledigtes "
+                           "wird übersprungen.")
             c1, c2 = st.columns(2)
             lim = c1.number_input("Nur die ersten N Themen (0 = alle)", 0, 100_000, 0, key=f"ml-{key}")
             stimmen = c2.number_input("Stimmen je Zuordnung", 1, 7, 3, key=f"mv-{key}")
@@ -302,7 +357,7 @@ with tab_map:
             job = f"map-{key}"
             laeuft = bool(jobs().get(job) and not jobs()[job]["done"])
             if st.button("Start / Fortsetzen", key=f"mb-{key}", disabled=laeuft or not wahl):
-                start_job(job, b.mapping_ausfuehren, [k for k in schritte if k in wahl], cfg,
+                start_job(job, b.mapping_ausfuehren, b.schritte_aufloesen([k for k in schritte if k in wahl]), cfg,
                           limit=int(lim) or None, stimmen=int(stimmen), embedding_modell=emb_model,
                           wlo_dateien=[x.strip() for x in wlo_txt.split(",") if x.strip()] or None)
             job_status(job)

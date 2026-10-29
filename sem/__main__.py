@@ -16,7 +16,7 @@ import json
 import sys
 from pathlib import Path
 
-from .paths import OUTPUT_DIR
+from .paths import ausgabe_pfad
 
 
 def _pairs(values: list[str], cast=str) -> dict:
@@ -73,7 +73,7 @@ def main(argv=None):
     p.add_argument("--seed", type=int, default=42, help="Zufalls-Seed (gleicher Wert = gleiche Seeds)")
     p.add_argument("--auswahl", nargs="*", metavar="BEREICH.FILTER=W1,W2",
                    help="welche Themen einbezogen werden (Status, Quellen, Belege); fehlende Filter = Standard")
-    p.add_argument("--out", type=Path)
+    p.add_argument("--out", type=Path, help="Dateiname; das Präfix seeds_ wird ergänzt")
 
     p = sub.add_parser("auswahl", help="Filter eines Bildungsbereichs mit Standardwerten und Themenzahl")
     p.add_argument("bereich")
@@ -81,7 +81,8 @@ def main(argv=None):
 
     p = sub.add_parser("materialien", help="Materialien aus Seeds erzeugen (LLM, fortsetzbar)")
     p.add_argument("--seeds", type=Path, required=True)
-    p.add_argument("--out", type=Path)
+    p.add_argument("--out", type=Path, help="Dateiname; das Präfix materialien_ wird ergänzt "
+                                            "(Standard: Name der Seed-Datei)")
     p.add_argument("--limit", type=int)
     p.add_argument("--ohne-inhaltstyp-pruefung", action="store_true",
                    help="Inhaltstyp nicht am fertigen Material prüfen (spart einen Aufruf je Material)")
@@ -115,7 +116,7 @@ def main(argv=None):
         balance = _pairs(a.gleichverteilung)
         auswahl = {k: get(k).auswahl_pruefen(v) for k, v in _auswahl(a.auswahl).items()}
         auswahl = {k: auswahl.get(k) or get(k).standard_auswahl() for k in counts}
-        out = a.out or OUTPUT_DIR / ("seeds_" + "_".join(f"{k}{v}" for k, v in counts.items()) + f"_s{a.seed}.jsonl")
+        out = ausgabe_pfad("seeds", a.out or "_".join(f"{k}{v}" for k, v in counts.items()) + f"_s{a.seed}")
         st = seeds.write(seeds.build(counts, balance, a.seed, auswahl), out,
                          {"anzahl": counts, "gleichverteilung": balance, "zufalls_seed": a.seed, "auswahl": auswahl})
         print(f"{st['anzahl']} Seeds → {out}")
@@ -136,7 +137,7 @@ def main(argv=None):
     elif a.cmd == "materialien":
         from .generate import generate
 
-        out = a.out or a.seeds.with_name(a.seeds.stem.replace("seeds", "materialien") + ".jsonl")
+        out = ausgabe_pfad("materialien", a.out or a.seeds)
         prog = generate(a.seeds, out, _cfg(a), limit=a.limit, inhaltstyp_pruefen=not a.ohne_inhaltstyp_pruefung)
         print(f"{prog.done} neu, {prog.skipped} schon vorhanden, {prog.failed} fehlgeschlagen → {out}")
         if prog.status != "fertig":
