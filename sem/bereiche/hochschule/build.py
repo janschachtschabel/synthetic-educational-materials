@@ -349,14 +349,14 @@ def zusammenfuehren(cfg: LLMConfig | None = None, stimmen: int = N_STIMMEN, mode
     neu = behalten = 0
     for o in _objekte():
         tid, t = o["id"], o["topic"]
-        if tid not in sf_stimmen or tid not in le_stimmen or tid not in kand:
+        if tid not in sf_stimmen or tid not in kand:
             if tid in alt:
                 rows.append(alt[tid])
                 behalten += 1
             continue
         sims = kand[tid]["kandidaten"]
         fa = abstimmung.auswerten(sf_stimmen[tid], stimmen, o["text"], aehnlichkeit=sims)
-        le = abstimmung.auswerten(le_stimmen[tid], stimmen, o["text"], max_auswahl=1)
+        le = abstimmung.auswerten(le_stimmen.get(tid, {}), stimmen, o["text"], max_auswahl=1)
         codes = fa["auswahl"]
         ebene = le["auswahl"][0] if le["auswahl"] else "vertiefung"
         hinweis = set(kand[tid]["handmapping"])
@@ -372,6 +372,12 @@ def zusammenfuehren(cfg: LLMConfig | None = None, stimmen: int = N_STIMMEN, mode
                                  "stimmen": {**{e: 0 for e in LEHREBENEN}, **{d["code"]: d["stimmen"] for d in le["details"]},
                                              **le["verworfen"]},
                                  "begruendungen": le["details"][0]["begruendungen"] if le["details"] else []}}
+        if not codes:
+            # keine Stimme für irgendein Fach: Thema behalten, ähnlichstes Fach laut Embedding, zur Prüfung
+            codes = [max(sims, key=sims.get)]
+            bestaetigt = voc.by_uri[by_not[codes[0]]]["broader"] in hinweis
+            mapping.update({"status": "unsicher", "konfidenz": 0.0, "handmapping_bestaetigt": bestaetigt,
+                            "ersatz": "kein Fach gewählt; ähnlichstes Fach laut Embedding"})
         k = korr.get(tid)
         if k:
             if k["codes"]:
@@ -381,8 +387,6 @@ def zusammenfuehren(cfg: LLMConfig | None = None, stimmen: int = N_STIMMEN, mode
                 ebene = k["lehrebene"]
                 mapping["lehrebene"]["status"] = "redaktionell"
             mapping["korrektur"] = k
-        if not codes:
-            continue
         d = o["de"]
         rows.append({
             "id": tid, "art": "openalex",
@@ -397,7 +401,9 @@ def zusammenfuehren(cfg: LLMConfig | None = None, stimmen: int = N_STIMMEN, mode
         })
         neu += 1
         gruende = []
-        if mapping["status"] == "unsicher":
+        if mapping.get("ersatz"):
+            gruende.append("keine Stimme für ein Fach, Vorschlag nur aus Embedding")
+        elif mapping["status"] == "unsicher":
             gruende.append("keine Mehrheit für ein Fach")
         if mapping["lehrebene"]["status"] == "unsicher":
             gruende.append("keine Mehrheit für die Lehrebene")
@@ -409,7 +415,8 @@ def zusammenfuehren(cfg: LLMConfig | None = None, stimmen: int = N_STIMMEN, mode
             pruef.append({
                 "id": tid, "label_de": rows[-1]["label_de"], "grund": "; ".join(gruende),
                 "faecher": " | ".join(f"{x['notation']} {clean_label(x['label'])} ({x['stimmen']}/{stimmen})"
-                                      for x in mapping["faecher"]),
+                                      for x in mapping["faecher"])
+                or " | ".join(f"{f['notation']} {clean_label(f['label'])} (Embedding)" for f in rows[-1]["studienfach"]),
                 "verworfen": " | ".join(f"{l} ({n})" for l, n in mapping["verworfen"].items()),
                 "lehrebene": f"{ebene} ({mapping['lehrebene']['stimmen']})",
                 "openalex_teilgebiet": t["subfield"]["display_name"],

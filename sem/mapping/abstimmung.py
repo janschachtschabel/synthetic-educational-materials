@@ -46,6 +46,7 @@ def abstimmen(objekte: list[dict], kandidaten: dict[str, list[str]], ziele: dict
 
     Schreibt je Batch und Stimme eine Zeile nach out_path (fortsetzbar über run_tasks).
     """
+    vorhanden = lade_stimmen(out_path)
     tasks = []
     for v, system in enumerate(systeme):
         order = sorted(objekte, key=lambda o: o["id"])
@@ -54,6 +55,10 @@ def abstimmen(objekte: list[dict], kandidaten: dict[str, list[str]], ziele: dict
             chunk = order[i:i + batch]
             tid = f"v{v}:" + hashlib.sha256("|".join(o["id"] for o in chunk).encode()).hexdigest()[:16]
             tasks.append({"id": tid, "stimme": v, "objekte": chunk})
+            # Batch schon erledigt, aber einzelne Objekte ohne Antwort: einzeln nachfragen
+            for o in chunk:
+                if v not in vorhanden.get(o["id"], {}) and any(v in vorhanden.get(x["id"], {}) for x in chunk):
+                    tasks.append({"id": f"v{v}:einzeln:{o['id']}", "stimme": v, "objekte": [o]})
 
     def worker(client: LLMClient, task: dict) -> dict:
         v = task["stimme"]
@@ -65,10 +70,13 @@ def abstimmen(objekte: list[dict], kandidaten: dict[str, list[str]], ziele: dict
         res = client.chat_json(systeme[v] + "\n\n" + FORMAT, json.dumps(items, ensure_ascii=False))
         by_id = {str(r.get("id")): r for r in res.get("ergebnisse", []) if isinstance(r, dict)}
         antworten = {}
+        fehlend = [o["id"] for o in task["objekte"] if o["id"] not in by_id]
+        if len(fehlend) * 2 > len(task["objekte"]):
+            raise ValueError(f"keine Antwort für {', '.join(fehlend)}")
         for o in task["objekte"]:
             r = by_id.get(o["id"])
             if r is None:
-                raise ValueError(f"keine Antwort für {o['id']}")
+                continue  # wird beim nächsten Lauf einzeln nachgefragt
             erlaubt = set(kandidaten[o["id"]])
             wahl = []
             for a in r.get("auswahl") or []:

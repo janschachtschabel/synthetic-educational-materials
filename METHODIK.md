@@ -41,14 +41,14 @@ abgeleitet.
 **Themen aus OpenAlex** (`themen_openalex.jsonl`). Jeder Schritt ist einzeln aufrufbar und fortsetzbar
 (`python -m sem mappings hochschule --liste`):
 
-1. `fachprofile`: Das LLM beschreibt jedes der 272 Studienfächer in zwei Sätzen, nennt typische Themen
+1. `fachprofile`: Das LLM beschreibt jedes der 273 Studienfächer in zwei Sätzen, nennt typische Themen
    und grenzt es von Nachbarfächern ab (`studienfach_profile.jsonl`, auch für sich nutzbar).
 2. `uebersetzen`: deutsches Label, Kurzbeschreibung und Keywords je Thema. Vorhandene Übersetzungen
    werden übernommen.
 3. `kandidaten`: Ein lokales, mehrsprachiges Embedding-Modell (Standard `intfloat/multilingual-e5-small`,
    CPU) vergleicht jedes Thema mit allen Fachprofilen. Kandidaten sind die 15 ähnlichsten Fächer plus je
    Studienbereich aus dem Handmapping (`openalex_teilgebiet_studienbereich.csv`) dessen zwei ähnlichste
-   Fächer. So wählt das LLM aus einer kurzen, plausiblen Liste statt aus 272 Fächern.
+   Fächer. So wählt das LLM aus einer kurzen, plausiblen Liste statt aus 273 Fächern.
 4. `faecher`: drei unabhängige Stimmen je Thema. Jede Stimme nutzt eine andere Perspektive (Fachsystematik,
    Studienberatung, Bibliothek), eine andere Reihenfolge der Kandidaten und andere Nachbarthemen im
    Batch. Je gewähltem Fach nennt das LLM eine Begründung und Belegbegriffe aus dem Thementext.

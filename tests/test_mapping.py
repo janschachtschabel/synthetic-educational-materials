@@ -97,3 +97,35 @@ def test_auswerten_mehrheit_und_unsicher():
     assert r["status"] == "unsicher" and len(r["auswahl"]) == 1
     assert auswerten({0: w("a", "b"), 1: w("a"), 2: w("c", "a")}, 3)["status"] == "gesichert"
     assert auswerten({0: [], 1: [], 2: []}, 3)["status"] == "unsicher"
+
+
+def test_thema_ohne_stimme_bleibt_und_fehlende_antwort_wird_nachgefragt(pipeline, monkeypatch):
+    b = get("hochschule")
+    cfg = llm.LLMConfig(api_key="x", workers=2)
+    real = FakeClient.chat_json
+    aufrufe = []
+
+    def launisch(self, system, user):
+        res = real(self, system, user)
+        if not user.startswith("["):
+            return res
+        items = json.loads(user)
+        aufrufe.append(len(items))
+        if "Lehrebene" in system:
+            if len(items) > 1:  # im Batch fehlt T100, einzeln kommt sie
+                res["ergebnisse"] = [r for r in res["ergebnisse"] if not r["id"].endswith("T100")]
+        elif "kandidaten" in user:
+            for r in res["ergebnisse"]:
+                if r["id"].endswith("T101"):
+                    r["auswahl"] = []
+        return res
+
+    monkeypatch.setattr(FakeClient, "chat_json", launisch)
+    b.mapping_ausfuehren(b.mapping_folge, cfg)
+    b.mapping_ausfuehren(["lehrebene", "zusammenfuehren"], cfg)  # zweiter Lauf fragt T100 einzeln nach
+    rows = {json.loads(l)["id"]: json.loads(l) for l in B.THEMEN_PATH.read_text(encoding="utf-8").splitlines()}
+    assert len(rows) == 12
+    r101 = rows["https://openalex.org/T101"]
+    assert r101["mapping"]["status"] == "unsicher" and r101["mapping"]["ersatz"] and len(r101["studienfach"]) == 1
+    assert sum(rows["https://openalex.org/T100"]["mapping"]["lehrebene"]["stimmen"].values()) == 3
+    assert "T101" in B.PRUEFLISTE_PATH.read_text(encoding="utf-8")
