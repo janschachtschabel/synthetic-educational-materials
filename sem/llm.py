@@ -145,8 +145,9 @@ class Progress:
     def line(self) -> str:
         eta = self.eta_seconds
         eta_s = f"{int(eta // 60)}:{int(eta % 60):02d} min" if eta is not None else "–"
-        line = (f"{self.done + self.failed}/{self.total}  ok {self.done}  fehler {self.failed}  "
-                f"wiederholt {self.retries}  {self.rate:.2f}/s  Rest {eta_s}  [{self.status}]")
+        line = (f"{self.done + self.failed} von {self.total} bearbeitet: {self.done} erfolgreich, "
+                f"{self.failed} fehlgeschlagen, {self.retries} Wiederholungen · {self.rate * 60:.1f} pro Minute · "
+                f"Rest {eta_s} · {self.status}")
         if self.last_error and self.status == "läuft":
             line += f"  letzte Meldung: {self.last_error[:120]}"
         return line
