@@ -27,7 +27,9 @@ streamlit run app.py
 
 Reiter: **Seeds** (Anzahl je Bildungsbereich, Feld für die Gleichverteilung, Auswahl der Themen nach
 Status, Quelle und Belegen, Zufalls-Seed),
-**Materialien** (Start/Fortsetzen mit Fortschrittsanzeige), **Prompts** (bearbeiten und speichern),
+**Materialien** (Start/Fortsetzen mit Fortschrittsanzeige), **Vorschau** (Seeds und fertige Materialien
+durchblättern und durchsuchen: Titel, Beschreibung, Keywords, Volltext, Frage-Antwort-Paare,
+Inhaltstyp-Prüfung, Metadaten und Herkunft), **Prompts** (bearbeiten und speichern),
 **Mappings** (ansehen, herunterladen, neu bauen), **Methodik**.
 
 ## Kommandozeile

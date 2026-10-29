@@ -8,7 +8,9 @@ import threading
 import pandas as pd
 import streamlit as st
 
+from sem import schema as S
 from sem import seeds as seedlib
+from sem import vorschau
 from sem.bereiche import BEREICHE
 from sem.generate import generate
 from sem.llm import DEFAULT_MODEL, DEFAULT_WORKERS, LLMConfig, Progress
@@ -85,8 +87,50 @@ with st.sidebar:
     cfg = LLMConfig(base_url=base_url or None, api_key=api_key or env.api_key, model=model, workers=int(workers),
                     max_retries=int(retries), outage_minutes=float(outage))
 
-tab_seeds, tab_mat, tab_prompts, tab_map, tab_meth = st.tabs(
-    ["Seeds", "Materialien", "Prompts", "Mappings", "Methodik"])
+# --- Vorschau-Helfer --------------------------------------------------------------------------
+@st.cache_data(max_entries=4)
+def _lade(path: str, mtime: float) -> list[dict]:
+    return vorschau.lade(path)
+
+
+def zeige(rec: dict):
+    """Ein Seed oder Material: erzeugte Inhalte, Metadaten, Herkunft."""
+    if vorschau.ist_material(rec):
+        st.markdown(f"### {rec.get(S.F_TITLE, '')}")
+        st.write(rec.get(S.F_DESCRIPTION, ""))
+        st.markdown(" ".join(f"`{k}`" for k in rec.get(S.F_KEYWORD, [])))
+        chk = rec.get(S.F_LRT_CHECK)
+        if chk:
+            text = f"Inhaltstyp-Prüfung: erkannt „{chk['erkannt_label']}“"
+            (st.success if chk["uebereinstimmung"] else st.warning)(
+                text + (" – passt zum Seed" if chk["uebereinstimmung"] else " – weicht vom Seed ab"))
+    else:
+        st.info("Seed (noch kein Material erzeugt)")
+    c1, c2 = st.columns([3, 2]) if vorschau.ist_material(rec) else (None, st.container())
+    if c1 is not None:
+        with c1:
+            st.markdown("**Volltext**")
+            with st.container(border=True, height=520):
+                st.markdown(rec[S.F_FULLTEXT])
+    with c2:
+        st.markdown("**Metadaten aus dem Seed**")
+        st.table(pd.DataFrame(vorschau.metadaten(rec).items(), columns=["Feld", "Wert"]).set_index("Feld"))
+        t = rec.get(S.F_THEMA, {})
+        if t.get("beschreibung_de") or t.get("keywords_de"):
+            with st.expander("Thema aus dem Seed"):
+                st.write(t.get("beschreibung_de", ""))
+                st.caption(", ".join(t.get("keywords_de", [])))
+    if rec.get(S.F_QA):
+        st.markdown("**Frage-Antwort-Paare**")
+        st.dataframe(pd.DataFrame(rec[S.F_QA]), hide_index=True, width="stretch")
+    with st.expander("Herkunft je Feld"):
+        st.json(rec.get(S.F_PROVENANCE, {}), expanded=False)
+    with st.expander("Rohdaten (JSON)"):
+        st.json(rec, expanded=False)
+
+
+tab_seeds, tab_mat, tab_vorschau, tab_prompts, tab_map, tab_meth = st.tabs(
+    ["Seeds", "Materialien", "Vorschau", "Prompts", "Mappings", "Methodik"])
 
 # --- Seeds ----------------------------------------------------------------------------------
 with tab_seeds:
@@ -143,7 +187,38 @@ with tab_mat:
                       inhaltstyp_pruefen=lrt_check)
         job_status("mat")
         if (OUTPUT_DIR / out).exists():
+            letzte = vorschau.lade(OUTPUT_DIR / out)[-1:]
+            if letzte:
+                if st.toggle("Zuletzt erzeugtes Material zeigen (alle im Reiter „Vorschau“)", key="mat-letzte"):
+                    with st.container(border=True):
+                        zeige(letzte[0])
+        if (OUTPUT_DIR / out).exists():
             st.download_button("Ergebnis herunterladen", (OUTPUT_DIR / out).read_bytes(), file_name=out)
+
+# --- Vorschau ---------------------------------------------------------------------------------
+with tab_vorschau:
+    st.subheader("Vorschau")
+    dateien = sorted((p for p in OUTPUT_DIR.glob("*.jsonl") if ".fehler" not in p.name),
+                     key=lambda p: p.stat().st_mtime, reverse=True)
+    if not dateien:
+        st.info("Noch keine Seeds oder Materialien in output/.")
+    else:
+        datei = st.selectbox("Datei", dateien, format_func=lambda p: p.name, key="v-datei")
+        rows = _lade(str(datei), datei.stat().st_mtime)
+        c1, c2 = st.columns([2, 1])
+        such = c1.text_input("Suchen (Thema, Fach, Inhaltstyp, Titel, Keyword, id)", key="v-such").casefold()
+        treffer = [r for r in rows if such in vorschau.suchtext(r)] if such else rows
+        c2.metric("Datensätze", f"{len(treffer)} / {len(rows)}")
+        if treffer:
+            if st.session_state.get("v-nr", 1) > len(treffer):
+                st.session_state["v-nr"] = 1
+            b1, b2 = st.columns([1, 4])
+            if b1.button("Zufällig", key="v-zufall"):
+                import random
+
+                st.session_state["v-nr"] = random.randint(1, len(treffer))
+            nr = b2.number_input("Nr.", 1, len(treffer), key="v-nr")
+            zeige(treffer[int(nr) - 1])
 
 # --- Prompts --------------------------------------------------------------------------------
 with tab_prompts:
