@@ -42,7 +42,12 @@ aus der OEH-Fassung
 Studienfach. Jedes Thema bekommt ein bis drei Studienfächer. Studienbereich und Fächergruppe werden daraus
 abgeleitet.
 
-**Themen aus OpenAlex** (`themen_openalex.jsonl`). Jeder Schritt ist einzeln aufrufbar und fortsetzbar
+Alle Themen stehen in einem Gesamtset, `themen_hochschule.jsonl` (9.130 Themen: 4.514 aus OpenAlex,
+4.616 aus GND). Jedes Thema trägt seine Herkunft (`art`, `quelle`), Status und Belege; die Seeds lassen
+sich danach filtern (siehe „Auswahl der Themen“). Die Teilergebnisse je Quelle entstehen beim Bauen im
+Zwischenspeicher; der Schritt `themen` führt sie zusammen und läuft nach jeder Auswahl von Schritten zuletzt.
+
+**Themen aus OpenAlex** (Folge `openalex`). Jeder Schritt ist einzeln aufrufbar und fortsetzbar
 (`python -m sem mappings hochschule --liste`):
 
 1. `fachprofile`: Das LLM beschreibt jedes der 273 Studienfächer in zwei Sätzen, nennt typische Themen
@@ -92,7 +97,7 @@ Sechs Themen erhielten in keiner Stimme ein Fach; sie trugen das ähnlichste Fac
 99 redaktionell, kein Thema mehr unsicher. GND nach der Durchsicht: 4.616 Themen, Fach 4.123 gesichert,
 242 wahrscheinlich, 251 redaktionell. Zusammen decken die Themen 256 von 273 Studienfächern ab.
 
-**Themen aus GND und Katalog** (`themen_gnd.jsonl`, Folge `gnd`). OpenAlex beschreibt Forschungsfelder;
+**Themen aus GND und Katalog** (Folge `gnd`). OpenAlex beschreibt Forschungsfelder;
 Grundlagen und klassische Lehrthemen fehlen dort weitgehend. Deshalb kommen weitere Themen aus der GND:
 
 1. `bruecke`: Jedes Studienfach bekommt per Embedding-Kandidaten und drei Stimmen 1–3 GND-Sachgruppen

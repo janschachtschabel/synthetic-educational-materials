@@ -14,7 +14,7 @@ Schritte:
   gnd_kandidaten    ähnlichste Studienfächer, plus Hinweise aus WLO-Fächern und der Brücke
   gnd_faecher       drei Stimmen je Begriff
   gnd_lehrebene     drei Stimmen je Begriff, mit Katalogzahlen als Hinweis
-  gnd_zusammenfuehren → themen_gnd.jsonl, pruefliste_gnd.csv, gnd_ausgeschlossen.csv
+  gnd_zusammenfuehren → GND-Teilergebnis (Zwischenspeicher), pruefliste_gnd.csv, gnd_ausgeschlossen.csv
 """
 
 from __future__ import annotations
@@ -44,7 +44,7 @@ KANDIDATEN_GND = CACHE / "hochschule_gnd_kandidaten.json"
 STIMMEN_GND_FAECHER = CACHE / "hochschule_stimmen_gnd_faecher.jsonl"
 STIMMEN_GND_LEHREBENE = CACHE / "hochschule_stimmen_gnd_lehrebene.jsonl"
 BRUECKE_PATH = DIR / "studienfach_gnd_sachgruppe.jsonl"
-THEMEN_GND = DIR / "themen_gnd.jsonl"
+THEMEN_GND = B.CACHE / "hochschule_themen_gnd.jsonl"  # Teilergebnis, Gesamtset: B.THEMEN_HOCHSCHULE
 PRUEF_GND = DIR / "pruefliste_gnd.csv"
 AUSGESCHLOSSEN = DIR / "gnd_ausgeschlossen.csv"
 LEHRBUCH_FORMEN = {gnd.LEHRBUCH, "https://d-nb.info/gnd/4113937-9"}  # Lehrbuch, Hochschulschrift
@@ -105,10 +105,10 @@ def build_wlo_belege(cfg=None, **_):
     """WLO-Keywords exakt auf Label und Keywords der OpenAlex-Themen; nur Keywords, die zu höchstens
     drei Themen passen. Prüft, ob ein WLO-Fach im selben Studienbereich liegt wie das abgestimmte Fach."""
     kws = load_wlo()
-    if not kws or not B.THEMEN_PATH.exists():
+    rows = B.teil_laden(B.THEMEN_PATH, "openalex")
+    if not kws or not rows:
         return fertig("keine WLO-Keywords oder keine OpenAlex-Themen, übersprungen")
     voc = load_vocab("hochschulfaechersystematik")
-    rows = load_jsonl(B.THEMEN_PATH)
     index: dict[str, list[int]] = {}
     for i, r in enumerate(rows):
         for k in {wlo._norm(x) for x in [r["label_de"], r["label_en"], *r.get("keywords_en", []), *r.get("keywords_de", [])]}:

@@ -65,17 +65,23 @@ class Bildungsbereich(ABC):
 
     # benannte Schrittfolgen, z. B. {"openalex": [...], "gnd": [...]}; „alle“ = alle nacheinander
     mapping_folgen: dict[str, list[str]] = {}
+    # Schritte, die nach jeder Auswahl zuletzt laufen (z. B. Teilergebnisse zum Gesamtset zusammenführen)
+    mapping_abschluss: list[str] = []
 
     @property
     def mapping_folge(self) -> list[str]:
-        return list(dict.fromkeys(k for f in self.mapping_folgen.values() for k in f))
+        return self._mit_abschluss([k for f in self.mapping_folgen.values() for k in f])
+
+    def _mit_abschluss(self, keys: list[str]) -> list[str]:
+        keys = [k for k in dict.fromkeys(keys) if k not in self.mapping_abschluss]
+        return keys + list(self.mapping_abschluss) if keys else list(self.mapping_abschluss)
 
     def schritte_aufloesen(self, namen: list[str]) -> list[str]:
-        """Expandiert „alle“ und Folgennamen zu Schritten."""
+        """Expandiert „alle“ und Folgennamen zu Schritten; Abschlussschritte kommen ans Ende."""
         out = []
         for n in namen:
             out += self.mapping_folge if n == "alle" else self.mapping_folgen.get(n, [n])
-        return list(dict.fromkeys(out))
+        return self._mit_abschluss(out)
 
     def mapping_schritte(self) -> list[MappingSchritt]:
         """Schritte, mit denen der Bereich seine Mappings neu baut. Standard: keine."""

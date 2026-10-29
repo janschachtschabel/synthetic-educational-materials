@@ -58,12 +58,12 @@ LLM-Optionen für `materialien` und `mappings`: `--base-url`, `--api-key`, `--mo
 Alles unter `data/` ist ohne den Code nutzbar (JSON, JSONL, CSV, UTF-8):
 
 - `data/vocabs/*.json`: OEH-Vokabulare flach aufbereitet (URI, Notation, Label, Oberbegriff, Ebene)
-- `data/mappings/hochschule/themen_openalex.jsonl`: OpenAlex-Themen mit Destatis-Studienfach,
-  -bereich und -fächergruppe, deutschen Labels, Keywords, Lehrebene sowie Status, Konfidenz und Belegen
-  der Zuordnung
+- `data/mappings/hochschule/themen_hochschule.jsonl`: alle Hochschulthemen in einer Datei (9.130:
+  OpenAlex-Themen und GND-Lehrthemen) mit Destatis-Studienfach, -bereich und -fächergruppe, deutschen
+  Labels, Keywords, Lehrebene sowie Herkunft (`art`, `quelle`), Status, Konfidenz und Belegen der
+  Zuordnung; nach diesen Angaben filterbar (`python -m sem auswahl hochschule`)
 - `data/mappings/hochschule/studienfach_profile.jsonl`: Kurzprofil je Studienfach
-- `data/mappings/hochschule/pruefliste_themen.csv`: Zuordnungen, die eine Durchsicht brauchen
-- `data/mappings/hochschule/themen_gnd.jsonl`: Lehrthemen aus GND und hbz-Katalog mit Belegen
+- `data/mappings/hochschule/pruefliste_*.csv`, `korrekturen.csv`: Zuordnungen für die Durchsicht und deren Ergebnis
 - `data/mappings/hochschule/studienfach_gnd_sachgruppe.jsonl`: Studienfach → GND-Sachgruppen
 - `data/mappings/hochschule/openalex_teilgebiet_studienbereich.csv`: Handmapping der OpenAlex-Teilgebiete
 

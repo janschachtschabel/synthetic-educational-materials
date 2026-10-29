@@ -151,6 +151,8 @@ def main(argv=None):
             for name, folge in b.mapping_folgen.items():
                 print(f"{name} = " + " → ".join(folge))
             print("alle = " + " + ".join(b.mapping_folgen))
+            if b.mapping_abschluss:
+                print("zuletzt immer: " + ", ".join(b.mapping_abschluss))
             return
         keys = b.schritte_aufloesen(a.schritte)
         unbekannt = [k for k in keys if k not in schritte]

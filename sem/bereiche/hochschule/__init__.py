@@ -1,8 +1,9 @@
 """Bildungsbereich Hochschule.
 
-Themen: OpenAlex Topics (Forschungs- und Vertiefungsthemen) und Grundlagenthemen je Studienfach
-(LLM-Vorschlag, über die GND belegt). Fächer: Destatis-Systematik in der Fassung der
-OpenEduHub-Hochschulfächersystematik. Inhaltstypen: Auswahl aus OEH new_lrt.
+Themen: ein Gesamtset (themen_hochschule.jsonl) aus OpenAlex Topics (Forschungs- und
+Vertiefungsthemen) und GND-Sachschlagwörtern aus Lehrbüchern, Hochschulschriften und WLO-Keywords;
+Herkunft, Status und Belege je Thema sind über auswahl_optionen filterbar. Fächer: Destatis-Systematik,
+ausgelesen aus der OpenEduHub-Hochschulfächersystematik. Inhaltstypen: Auswahl aus OEH new_lrt.
 """
 
 from __future__ import annotations
@@ -18,7 +19,7 @@ from ...vocabs import load as load_vocab
 from ..base import Bildungsbereich, MappingSchritt, SeedState
 
 DIR = MAPPING_DIR / "hochschule"
-THEMEN_FILES = ["themen_openalex.jsonl", "themen_gnd.jsonl"]
+THEMEN_DATEI = "themen_hochschule.jsonl"  # Gesamtset aus OpenAlex- und GND-Themen
 CONTEXT_URI = "http://w3id.org/openeduhub/vocabs/educationalContext/hochschule"
 
 _PREFIX = re.compile(r"^Studienbereich\s+")
@@ -60,6 +61,7 @@ class Hochschule(Bildungsbereich):
                 "gnd_lehrebene", "gnd_zusammenfuehren"],
         "korrekturen": ["korrekturen"],
     }
+    mapping_abschluss = ["themen"]
 
     def mapping_schritte(self) -> list[MappingSchritt]:
         from . import build as b
@@ -77,6 +79,8 @@ class Hochschule(Bildungsbereich):
                b.zusammenfuehren, llm=False),
             S_("korrekturen", "Korrekturen anwenden", "korrekturen.csv auf die fertigen Themen anwenden "
                "(ohne Zwischenergebnisse)", b.korrekturen, llm=False),
+            S_("themen", "Gesamtset", "OpenAlex- und GND-Themen zu themen_hochschule.jsonl zusammenführen "
+               "(läuft zuletzt)", b.build_themen, llm=False),
             S_("wlo", "WLO-Keywords", "Keyword-Fach-Kombinationen aus WLO-Exporten (--wlo)", g.build_wlo, llm=False),
             S_("wlo_belege", "WLO-Belege", "WLO-Keywords exakt auf OpenAlex-Themen, Fachabgleich", g.build_wlo_belege,
                llm=False),
@@ -89,7 +93,7 @@ class Hochschule(Bildungsbereich):
             S_("gnd_kandidaten", "GND-Kandidaten", "ähnlichste Studienfächer je Begriff", g.build_gnd_kandidaten, llm=False),
             S_("gnd_faecher", "GND-Fächer", "drei Stimmen je Begriff", g.build_gnd_faecher),
             S_("gnd_lehrebene", "GND-Lehrebene", "drei Stimmen je Begriff", g.build_gnd_lehrebene),
-            S_("gnd_zusammenfuehren", "GND zusammenführen", "themen_gnd.jsonl, Prüfliste, Ausschlüsse",
+            S_("gnd_zusammenfuehren", "GND zusammenführen", "GND-Teilergebnis, Prüfliste, Ausschlüsse",
                g.build_gnd_zusammenfuehren, llm=False),
         ]
 
@@ -163,9 +167,11 @@ class Hochschule(Bildungsbereich):
     def mapping_statistik(self) -> dict:
         from . import build, gnd_themen
 
-        out = {"openalex": build.statistik()}
-        if gnd_themen.THEMEN_GND.exists():
-            out["gnd"] = build.statistik(load_jsonl(gnd_themen.THEMEN_GND))
+        out = {}
+        for art, teil in (("openalex", build.THEMEN_PATH), ("gnd", gnd_themen.THEMEN_GND)):
+            rows = build.teil_laden(teil, art)
+            if rows:
+                out[art] = build.statistik(rows)
         return out
 
     @cached_property
@@ -197,10 +203,7 @@ class Hochschule(Bildungsbereich):
 
     @cached_property
     def _topics(self) -> list[dict]:
-        out = []
-        for name in THEMEN_FILES:
-            if (DIR / name).exists():
-                out += load_jsonl(DIR / name)
+        out = load_jsonl(DIR / THEMEN_DATEI) if (DIR / THEMEN_DATEI).exists() else []
         if not out:
             raise FileNotFoundError(
                 f"Keine Themen in {DIR}. Erst die Mappings bauen: python -m sem mappings hochschule")

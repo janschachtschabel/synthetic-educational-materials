@@ -57,7 +57,7 @@ def pipeline(tmp_path, monkeypatch):
                "field": {"id": "1", "display_name": "F"}, "domain": {"id": "1", "display_name": "D"}}
               for i in range(12)]
     monkeypatch.setattr(B, "load_openalex_topics", lambda: topics)
-    for name in ("THEMEN_PATH", "PROFILE_PATH", "PRUEFLISTE_PATH", "KORREKTUREN_PATH", "KANDIDATEN_PATH",
+    for name in ("THEMEN_PATH", "THEMEN_HOCHSCHULE", "PROFILE_PATH", "PRUEFLISTE_PATH", "KORREKTUREN_PATH", "KANDIDATEN_PATH",
                  "STIMMEN_FAECHER", "STIMMEN_LEHREBENE", "UEBERSETZUNG_PATH"):
         monkeypatch.setattr(B, name, tmp_path / getattr(B, name).name)
     monkeypatch.setattr(B, "CACHE", tmp_path)

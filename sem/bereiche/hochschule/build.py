@@ -7,7 +7,7 @@ Schritte (einzeln oder als Folge aufrufbar, siehe METHODIK.md):
                    Handmapping Teilgebiet → Studienbereich
   faecher          drei Stimmen je Thema aus den Kandidaten, mit Begründung und Belegbegriffen (LLM)
   lehrebene        drei Stimmen je Thema nach festen Kriterien (LLM)
-  zusammenfuehren  Auswertung → themen_openalex.jsonl, pruefliste_themen.csv; korrekturen.csv hat Vorrang
+  zusammenfuehren  Auswertung → OpenAlex-Teilergebnis (Zwischenspeicher), pruefliste_themen.csv; korrekturen.csv hat Vorrang
 
 GND-Themen (Grundlagen und weitere Lehrthemen aus GND und Bibliothekskatalog): siehe gnd_themen.py.
 """
@@ -34,7 +34,9 @@ OPENALEX_TOPICS_URL = ("https://raw.githubusercontent.com/ourresearch/openalex-t
                        "main/v2/data/topics/topics.json")
 CACHE = DATA_DIR / "cache"
 LEHREBENEN = ["grundlagen", "vertiefung", "forschung"]
-THEMEN_PATH = DIR / "themen_openalex.jsonl"
+# Gesamtset aller Hochschulthemen (Seed-Grundlage); die Teilergebnisse je Quelle liegen im Zwischenspeicher
+THEMEN_HOCHSCHULE = DIR / "themen_hochschule.jsonl"
+THEMEN_PATH = CACHE / "hochschule_themen_openalex.jsonl"
 PROFILE_PATH = DIR / "studienfach_profile.jsonl"
 PRUEFLISTE_PATH = DIR / "pruefliste_themen.csv"
 KORREKTUREN_PATH = DIR / "korrekturen.csv"
@@ -65,6 +67,33 @@ def _faecher(voc) -> list[dict]:
 
 def _write_jsonl(path: Path, rows: list[dict]):
     path.write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows), encoding="utf-8")
+
+
+def teil_laden(path: Path, art: str) -> list[dict]:
+    """Teilergebnis einer Quelle; fehlt es (z. B. frischer Klon), aus dem Gesamtset."""
+    if path.exists():
+        return load_jsonl(path)
+    if THEMEN_HOCHSCHULE.exists():
+        return [r for r in load_jsonl(THEMEN_HOCHSCHULE) if r.get("art") == art]
+    return []
+
+
+def build_themen(cfg: LLMConfig | None = None, **_):
+    """Führt die Teilergebnisse (OpenAlex, GND) zum Gesamtset themen_hochschule.jsonl zusammen.
+    Herkunft bleibt je Thema erhalten (art, quelle, mapping, belege) und ist filterbar."""
+    from . import gnd_themen as G
+
+    teile = {"openalex": teil_laden(THEMEN_PATH, "openalex"), "gnd": teil_laden(G.THEMEN_GND, "gnd")}
+    rows, ids = [], set()
+    for art, teil in teile.items():
+        for r in teil:
+            if r["id"] not in ids:
+                ids.add(r["id"])
+                rows.append({**r, "art": r.get("art") or art})
+    rows.sort(key=lambda r: (r["studienfach"][0]["notation"], r["art"], r["label_de"]))
+    _write_jsonl(THEMEN_HOCHSCHULE, rows)
+    return fertig(f"{len(rows)} Themen in {THEMEN_HOCHSCHULE.name} "
+                  f"({', '.join(f'{a}: {len(t)}' for a, t in teile.items())})")
 
 
 def _topic_num(tid: str) -> int:
@@ -147,10 +176,9 @@ Antworte ausschließlich mit JSON: {"ergebnisse": [{"id": "...", "label_de": "..
 def load_uebersetzungen() -> dict[str, dict]:
     """Übersetzungen aus dem Zwischenspeicher, sonst aus der vorhandenen Themendatei."""
     out = {}
-    if THEMEN_PATH.exists():
-        for r in load_jsonl(THEMEN_PATH):
-            if r.get("label_de"):
-                out[r["id"]] = {k: r.get(k) for k in ("label_de", "beschreibung_de", "keywords_de")}
+    for r in teil_laden(THEMEN_PATH, "openalex"):
+        if r.get("label_de"):
+            out[r["id"]] = {k: r.get(k) for k in ("label_de", "beschreibung_de", "keywords_de")}
     if UEBERSETZUNG_PATH.exists():
         for b in load_jsonl(UEBERSETZUNG_PATH):
             out.update(b["themen"])
@@ -424,7 +452,7 @@ def korrektur_anwenden(row: dict, k: dict, voc, by_not: dict) -> dict:
 
 
 def korrekturen(cfg: LLMConfig | None = None, **_):
-    """korrekturen.csv auf themen_openalex.jsonl und themen_gnd.jsonl anwenden und die Prüflisten
+    """korrekturen.csv auf die Teilergebnisse (OpenAlex, GND) anwenden und die Prüflisten
     um erledigte Zeilen kürzen. Braucht keine Zwischenergebnisse (Stimmen, Kandidaten)."""
     import csv
 
@@ -434,11 +462,12 @@ def korrekturen(cfg: LLMConfig | None = None, **_):
     by_not = faecher_by_not(voc)
     korr = pruefung.lade_korrekturen(KORREKTUREN_PATH)
     n = {"korrigiert": 0, "ausgeschlossen": 0}
-    for themen, pruef in ((THEMEN_PATH, PRUEFLISTE_PATH), (G.THEMEN_GND, G.PRUEF_GND)):
-        if not themen.exists():
+    for themen, art, pruef in ((THEMEN_PATH, "openalex", PRUEFLISTE_PATH), (G.THEMEN_GND, "gnd", G.PRUEF_GND)):
+        teil = teil_laden(themen, art)
+        if not teil:
             continue
         rows = []
-        for r in load_jsonl(themen):
+        for r in teil:
             k = korr.get(r["id"])
             if k and k["ausschliessen"]:
                 n["ausgeschlossen"] += 1
@@ -469,7 +498,7 @@ def zusammenfuehren(cfg: LLMConfig | None = None, stimmen: int = N_STIMMEN, mode
     sf_stimmen = abstimmung.lade_stimmen(STIMMEN_FAECHER)
     le_stimmen = abstimmung.lade_stimmen(STIMMEN_LEHREBENE)
     korr = pruefung.lade_korrekturen(KORREKTUREN_PATH)
-    alt = {r["id"]: r for r in load_jsonl(THEMEN_PATH)} if THEMEN_PATH.exists() else {}
+    alt = {r["id"]: r for r in teil_laden(THEMEN_PATH, "openalex")}
     meta = _meta(cfg, modell, kand_all, stimmen, METHODE, "".join(FAECHER_PERSPEKTIVEN) + FAECHER_REGELN
                  + "".join(LEHREBENE_PERSPEKTIVEN) + LEHREBENE_REGELN)
     rows, pruef = [], []
@@ -512,7 +541,7 @@ def statistik(rows: list[dict] | None = None) -> dict:
     """Kennzahlen zur Güte des Mappings (für Oberfläche und Doku)."""
     from collections import Counter
 
-    rows = rows if rows is not None else (load_jsonl(THEMEN_PATH) if THEMEN_PATH.exists() else [])
+    rows = rows if rows is not None else teil_laden(THEMEN_PATH, "openalex")
     m = [r.get("mapping", {}) for r in rows]
     return {
         "themen": len(rows),
