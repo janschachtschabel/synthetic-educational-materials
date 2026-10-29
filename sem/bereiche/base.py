@@ -56,8 +56,19 @@ class Bildungsbereich(ABC):
     def prompt_values(self, seed: dict) -> dict:
         """Werte für die Platzhalter der Prompt-Vorlagen aus einem Seed."""
 
-    # Reihenfolge für „alle Schritte“
-    mapping_folge: list[str] = []
+    # benannte Schrittfolgen, z. B. {"openalex": [...], "gnd": [...]}; „alle“ = alle nacheinander
+    mapping_folgen: dict[str, list[str]] = {}
+
+    @property
+    def mapping_folge(self) -> list[str]:
+        return list(dict.fromkeys(k for f in self.mapping_folgen.values() for k in f))
+
+    def schritte_aufloesen(self, namen: list[str]) -> list[str]:
+        """Expandiert „alle“ und Folgennamen zu Schritten."""
+        out = []
+        for n in namen:
+            out += self.mapping_folge if n == "alle" else self.mapping_folgen.get(n, [n])
+        return list(dict.fromkeys(out))
 
     def mapping_schritte(self) -> list[MappingSchritt]:
         """Schritte, mit denen der Bereich seine Mappings neu baut. Standard: keine."""

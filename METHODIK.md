@@ -8,7 +8,8 @@ jedes Feldes.
 
 ```
 offene Vokabulare und Taxonomien ──► Mappings (Themen mit Fachzuordnung) ──► Seeds ──► Materialien
-     (OEH, Destatis, OpenAlex, GND)      data/mappings/<bereich>/            ohne LLM     mit LLM
+     (OEH, Destatis, OpenAlex, GND,      data/mappings/<bereich>/            ohne LLM     mit LLM
+      hbz-Katalog, WLO-Keywords)
 ```
 
 1. **Mappings** ordnen Themen aus offenen Quellen den Fächern eines Bildungsbereichs zu. Sie werden
@@ -25,7 +26,9 @@ offene Vokabulare und Taxonomien ──► Mappings (Themen mit Fachzuordnung) �
 | [OpenEduHub-Vokabulare](https://github.com/openeduhub/oeh-metadata-vocabs) (`educationalContext`, `new_lrt`, `intendedEndUserRole`, `hochschulfaechersystematik`) | Bildungsstufe, Inhaltstyp, Zielgruppe, Hochschulfächer | CC0 1.0 |
 | Destatis-Systematik der Fächergruppen, Studienbereiche und Studienfächer | Ursprung der Hochschulfächersystematik | Statistisches Bundesamt; Quelle nennen |
 | [OpenAlex Topics](https://github.com/ourresearch/openalex-topic-classification) (4.516 Themen mit Beschreibung und Keywords) | Themen Hochschule (Vertiefung/Forschung) | CC0 1.0 |
-| [Gemeinsame Normdatei (GND)](https://lobid.org/gnd) über lobid-gnd | Beleg und Label der Grundlagenthemen Hochschule | CC0 1.0 |
+| [Gemeinsame Normdatei (GND)](https://lobid.org/gnd) über lobid-gnd, [GND-Sachgruppen](https://d-nb.info/standards/vocab/gnd/gnd-sc.html) | GND-Themen Hochschule (Label, Synonyme, Oberbegriffe, Sachgruppe) | CC0 1.0 |
+| [hbz-Verbundkatalog](https://lobid.org/resources) über lobid-resources | Kandidaten und Belege: Häufigkeit eines Schlagworts in Lehrbüchern und Hochschulschriften | CC0 1.0 |
+| [WirLernenOnline](https://wirlernenonline.de) (Export der Redaktion) | nur Keywords in Verbindung mit Hochschulfächern, als Kandidaten und Belege; keine Titel, Beschreibungen oder Inhalte | Keywords nur als Häufigkeiten bzw. Abgleich auf GND/OpenAlex |
 | [KIM-Bildungsstufen](https://w3id.org/kim/educationalLevel/) | `exactMatch` der Niveaustufen | CC0 1.0 |
 
 Die Vokabulare liegen aufbereitet unter `data/vocabs/` (Abruf mit `scripts/fetch_vocabs.py`, Datum in
@@ -76,12 +79,39 @@ Fach 4.205 gesichert, 297 wahrscheinlich, 14 unsicher; Lehrebene 3.436 gesichert
 in keiner Stimme ein Fach; sie tragen das ähnlichste Fach laut Embedding (`mapping.ersatz`) und stehen
 auf der Prüfliste.
 
-**Grundlagenthemen** (`themen_grundlagen.jsonl`): OpenAlex beschreibt Forschungsfelder, Grundlagen des
-Grundstudiums fehlen dort weitgehend. Deshalb schlägt ein LLM je Studienfach Grundlagenthemen vor
-(Standard 12). Übernommen werden nur Vorschläge, die als GND-Sachschlagwort existieren, also mit gleichem
-Namen oder Synonym. Das Label stammt dann aus der GND, Quelle ist die GND-URI. Vorschläge ohne Treffer
-stehen in `grundlagen_ohne_gnd.csv`. Taucht dasselbe Schlagwort bei mehreren Fächern auf, wird es
-zusammengeführt (höchstens drei Fächer).
+**Themen aus GND und Katalog** (`themen_gnd.jsonl`, Folge `gnd`). OpenAlex beschreibt Forschungsfelder;
+Grundlagen und klassische Lehrthemen fehlen dort weitgehend. Deshalb kommen weitere Themen aus der GND:
+
+1. `bruecke`: Jedes Studienfach bekommt per Embedding-Kandidaten und drei Stimmen 1–3 GND-Sachgruppen
+   (`studienfach_gnd_sachgruppe.jsonl`). Sachgruppen für Personen (`…p`) und Produkte (`…m`) sind
+   ausgenommen.
+2. `gnd_pool`: Kandidaten sind GND-Schlagwörter, die im hbz-Katalog häufig an **Lehrbüchern**
+   (`natureOfContent` Lehrbuch, mindestens 3) oder **Hochschulschriften** (`type:Thesis`, mindestens 10)
+   hängen, abgefragt je Notations-Präfix 000–999, sowie WLO-Keywords (siehe unten), die **exakt** dem
+   Vorzugs- oder Synonymnamen eines GND-Schlagworts entsprechen. Zugelassen sind nur die GND-Typen
+   Sachschlagwort, Nomenklatur (Biologie/Chemie) und historisches Ereignis. Personen, Körperschaften,
+   Firmen, Orte, Werke, Produkte und Software haben in der GND eigene Typen und fallen dadurch heraus.
+   Was nicht exakt passt, wird verworfen.
+3. `gnd_relevanz`: drei Stimmen, ob der Begriff an der Hochschule, in der Schule, in der Berufsbildung,
+   im Alltag oder gar nicht als Lehrinhalt vorkommt (Form- und Medienbegriffe wie „Video“). Nur Begriffe mit
+   mindestens zwei Stimmen für Hochschule werden Themen; die übrigen stehen mit Stimmen und Begründung in
+   `gnd_ausgeschlossen.csv` und sind für andere Bildungsbereiche nachnutzbar.
+4. `gnd_kandidaten`, `gnd_faecher`, `gnd_lehrebene`, `gnd_zusammenfuehren`: wie bei OpenAlex. Hinweise
+   für die Kandidaten kommen aus der Brücke und aus den Fächern der WLO-Belege; die Lehrebene sieht die
+   Katalogzahlen als Hinweis. Unter `belege` stehen die Katalogzahlen (Titel, Lehrbücher,
+   Hochschulschriften) mit Abfrage-Link und gegebenenfalls der WLO-Beleg; unter
+   `mapping.hochschulrelevanz` die Stimmen. Unsichere Fälle stehen in `pruefliste_gnd.csv`.
+
+**WLO-Keywords** (Folge `wlo`, Option `--wlo <export.csv> …`). Aus Exporten der WLO-Redaktion werden nur
+Keywords, Hochschulfächer und, falls vorhanden, die Node-ID gelesen. Hochschulfächer sind die URIs der
+Hochschulfächersystematik in `ccm:taxonid` (dort stehen auch Schulfächer) und in
+`ccm:oeh_taxonid_university`. Gezählt wird je Keyword, in wie vielen Datensätzen es mit welchem Fach
+vorkommt; berücksichtigt werden Keywords ab drei Datensätzen. Der Export und diese Zählung bleiben lokal
+(`data/cache`). Ins Repo gelangen nur Keywords, die exakt einem GND-Sachschlagwort (GND-Themen) oder einem
+Label bzw. Keyword von höchstens drei OpenAlex-Themen entsprechen (`wlo_belege`), jeweils als Beleg mit
+Zahl der Datensätze, häufigsten Fächern und, wo vorhanden, Links auf die Nodes. Bei OpenAlex-Themen wird
+zusätzlich geprüft, ob ein WLO-Fach im selben Studienbereich liegt wie das abgestimmte Fach
+(`belege.wlo.fach_passt`), eine unabhängige Gegenprobe der Fachzuordnung.
 
 **Inhaltstypen** (`inhaltstypen.json`): redaktionelle Auswahl textfähiger Typen aus OEH `new_lrt`. Je Typ
 ist festgelegt, welche Textsorte erzeugt wird, welche Medienform der Volltext hat (Text, Folien, Video-
@@ -165,14 +195,14 @@ Bedingte Abschnitte `{{#name}}…{{/name}}` erscheinen nur, wenn der Wert gesetz
 ## Bekannte Grenzen
 
 - OpenAlex-Themen stammen aus der Forschungsliteratur. Medizin, Biologie und Ingenieurwesen sind dort
-  stark, Philologien, Kunst und Musik schwach vertreten. Die Grundlagenthemen und die Gleichverteilung
+  stark, Philologien, Kunst und Musik schwach vertreten. Die GND-Themen und die Gleichverteilung
   nach Fach gleichen das teilweise aus.
 - LLM-Zuordnungen sind nicht deterministisch. Die Mehrfachabstimmung macht die Schwankung sichtbar
   (Status und Konfidenz), beseitigt sie aber nicht. Drei Stimmen desselben Modells können sich
   gemeinsam irren; Embedding-Ähnlichkeit und Handmapping dienen als unabhängige Gegenprobe.
 - Die Lehrebene ist ungleich verteilt (94 grundlagen, 2.810 vertiefung, 1.612 forschung). Weil Forschungs-
   themen im 1.–2. Studienjahr ausgeschlossen sind, ist dieses Niveau bei Gleichverteilung nach Thema
-  seltener (bei 30.000 Seeds rund 22 % statt 33 %). Die Grundlagenthemen gleichen das aus.
+  seltener (bei 30.000 Seeds rund 22 % statt 33 %). Die GND-Themen aus Lehrbüchern gleichen das aus.
 - Synthetische Texte können fachliche Fehler enthalten. Für Trainingszwecke ist die Abbildung Text →
   Metadaten wichtiger als die fachliche Tiefe. Für eine Veröffentlichung als Lernmaterial sind sie nicht
   geprüft.

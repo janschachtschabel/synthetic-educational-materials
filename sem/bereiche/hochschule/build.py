@@ -8,8 +8,8 @@ Schritte (einzeln oder als Folge aufrufbar, siehe METHODIK.md):
   faecher          drei Stimmen je Thema aus den Kandidaten, mit Begründung und Belegbegriffen (LLM)
   lehrebene        drei Stimmen je Thema nach festen Kriterien (LLM)
   zusammenfuehren  Auswertung → themen_openalex.jsonl, pruefliste_themen.csv; korrekturen.csv hat Vorrang
-  grundlagen       je Studienfach Grundlagenthemen per LLM, über die GND belegt → themen_grundlagen.jsonl
-  gnd              nur den GND-Abgleich der Grundlagen-Vorschläge wiederholen
+
+GND-Themen (Grundlagen und weitere Lehrthemen aus GND und Bibliothekskatalog): siehe gnd_themen.py.
 """
 
 from __future__ import annotations
@@ -17,14 +17,11 @@ from __future__ import annotations
 import csv
 import hashlib
 import json
-import re
-import time
-import urllib.parse
 import urllib.request
 from datetime import date
 from pathlib import Path
 
-from ...llm import LLMClient, LLMConfig, Progress, run_tasks
+from ...llm import LLMClient, LLMConfig, run_tasks
 from ...mapping import abstimmung, pruefung
 from ...mapping.abstimmung import Ziel
 from ...mapping.embeddings import DEFAULT_EMBEDDING_MODEL, Embedder, top_k
@@ -211,40 +208,52 @@ def _fach_ziele(voc) -> dict[str, Ziel]:
 
 # --- 3. Kandidaten -------------------------------------------------------------------------
 
-def build_kandidaten(cfg: LLMConfig | None = None, limit: int | None = None, on_progress=None,
-                     embedding_modell: str | None = None, embedder: Embedder | None = None,
-                     n_kandidaten: int = N_KANDIDATEN, **_):
+def fach_vektoren(emb: Embedder):
+    """Embeddings der Studienfächer aus Name, Studienbereich und Fachprofil."""
     voc = load_vocab("hochschulfaechersystematik")
     faecher = _faecher(voc)
     profile = load_profile()
-    emb = embedder or Embedder(embedding_modell or DEFAULT_EMBEDDING_MODEL)
-    prog = Progress(total=2, status="Embeddings")
 
-    def fach_text(f):
+    def text(f):
         sb = voc.by_uri[f["broader"]]
         p = profile.get(f["uri"], {})
         return ". ".join(x for x in [f"Studienfach {clean_label(f['label'])}", f"Studienbereich {clean_label(sb['label'])}",
                                      p.get("beschreibung_de", ""),
                                      "Typische Themen: " + ", ".join(p.get("typische_themen", []))] if x)
 
-    fv = emb.encode([fach_text(f) for f in faecher], art="ziel")
-    prog.done = 1
-    on_progress and on_progress(prog)
-    objekte = _objekte(limit)
+    return faecher, emb.encode([text(f) for f in faecher], art="ziel")
+
+
+def kandidaten_berechnen(objekte: list[dict], emb: Embedder, hinweise: dict[str, set[str]] | None = None,
+                         n_kandidaten: int = N_KANDIDATEN) -> dict:
+    """Je Objekt die ähnlichsten Studienfächer; aus jedem Hinweis (Studienbereich- oder Studienfach-URI)
+    kommen die zwei ähnlichsten passenden Fächer dazu."""
+    faecher, fv = fach_vektoren(emb)
     ov = emb.encode([o["text"] for o in objekte], art="anfrage")
     idx, sims = top_k(ov, fv, len(faecher))
-    sf_map = load_subfield_mapping()
     bereich_von = {f["notation"]: f["broader"] for f in faecher}
+    uri_von = {f["notation"]: f["uri"] for f in faecher}
+    hinweise = hinweise or {}
     out = {}
     for o, row_idx, row_sim in zip(objekte, idx, sims):
         ranked = [(faecher[i]["notation"], float(s)) for i, s in zip(row_idx, row_sim)]
         wahl = dict(ranked[:n_kandidaten])
-        # aus jedem handgemappten Studienbereich die zwei ähnlichsten Fächer dazunehmen
-        hinweis = set(sf_map.get(o["topic"]["subfield"]["id"], []))
-        for sb in hinweis:
-            for n, s in [x for x in ranked if bereich_von[x[0]] == sb][:2]:
+        h = hinweise.get(o["id"], set())
+        for u in h:
+            for n, s in [x for x in ranked if u in (bereich_von[x[0]], uri_von[x[0]])][:2]:
                 wahl.setdefault(n, s)
-        out[o["id"]] = {"kandidaten": wahl, "handmapping": sorted(hinweis)}
+        out[o["id"]] = {"kandidaten": wahl, "handmapping": sorted(h)}
+    return out
+
+
+def build_kandidaten(cfg: LLMConfig | None = None, limit: int | None = None, on_progress=None,
+                     embedding_modell: str | None = None, embedder: Embedder | None = None,
+                     n_kandidaten: int = N_KANDIDATEN, **_):
+    emb = embedder or Embedder(embedding_modell or DEFAULT_EMBEDDING_MODEL)
+    objekte = _objekte(limit)
+    sf_map = load_subfield_mapping()
+    hinweise = {o["id"]: set(sf_map.get(o["topic"]["subfield"]["id"], [])) for o in objekte}
+    out = kandidaten_berechnen(objekte, emb, hinweise, n_kandidaten)
     KANDIDATEN_PATH.parent.mkdir(parents=True, exist_ok=True)
     KANDIDATEN_PATH.write_text(json.dumps({"embedding_modell": emb.model, "themen": out}, ensure_ascii=False),
                                encoding="utf-8")
@@ -255,10 +264,11 @@ def faecher_by_not(voc) -> dict[str, str]:
     return {f["notation"]: f["uri"] for f in _faecher(voc)}
 
 
-def load_kandidaten() -> dict:
-    if not KANDIDATEN_PATH.exists():
-        raise FileNotFoundError("Erst den Schritt „kandidaten“ ausführen.")
-    return json.loads(KANDIDATEN_PATH.read_text(encoding="utf-8"))
+def load_kandidaten(path: Path | None = None) -> dict:
+    path = path or KANDIDATEN_PATH
+    if not path.exists():
+        raise FileNotFoundError(f"{path.name} fehlt: erst den Kandidaten-Schritt ausführen.")
+    return json.loads(path.read_text(encoding="utf-8"))
 
 
 # --- 4. Fächer abstimmen --------------------------------------------------------------------
@@ -331,6 +341,76 @@ METHODE = ("Kandidaten per Embedding-Ähnlichkeit und Handmapping Teilgebiet →
            "dann LLM-Mehrfachabstimmung mit Begründung und Belegbegriffen")
 
 
+def bewerte(tid: str, text: str, kand: dict, sf: dict, le: dict, korr: dict, stimmen: int, voc, by_not: dict,
+            meta: dict) -> tuple[list[str], str, dict, list[str]]:
+    """Wertet Fach- und Lehrebenen-Stimmen eines Themas aus. Liefert Fach-Notationen, Lehrebene,
+    mapping-Angaben und Gründe für die Prüfliste."""
+    sims = kand["kandidaten"]
+    fa = abstimmung.auswerten(sf, stimmen, text, aehnlichkeit=sims)
+    lv = abstimmung.auswerten(le, stimmen, text, max_auswahl=1)
+    codes = fa["auswahl"]
+    ebene = lv["auswahl"][0] if lv["auswahl"] else "vertiefung"
+    hinweis = set(kand.get("handmapping", []))
+
+    def bestaetigt(cs):
+        return any(voc.by_uri[by_not[c]]["broader"] in hinweis or by_not[c] in hinweis for c in cs)
+
+    mapping = {**meta, "status": fa["status"],
+               "konfidenz": fa["details"][0]["konfidenz"] if fa["details"] else 0.0,
+               "handmapping_bestaetigt": bestaetigt(codes), "kandidaten": len(sims),
+               "faecher": [{**voc.ref(by_not[d["code"]]), **{k: v for k, v in d.items() if k != "code"}}
+                           for d in fa["details"]],
+               "verworfen": {voc.by_uri[by_not[c]]["label"]: n for c, n in fa["verworfen"].items()},
+               "lehrebene": {"status": lv["status"],
+                             "konfidenz": lv["details"][0]["konfidenz"] if lv["details"] else 0.0,
+                             "stimmen": {**{e: 0 for e in LEHREBENEN}, **{d["code"]: d["stimmen"] for d in lv["details"]},
+                                         **lv["verworfen"]},
+                             "begruendungen": lv["details"][0]["begruendungen"] if lv["details"] else []}}
+    if not codes:
+        # keine Stimme für irgendein Fach: Thema behalten, ähnlichstes Fach laut Embedding, zur Prüfung
+        codes = [max(sims, key=sims.get)]
+        mapping.update({"status": "unsicher", "konfidenz": 0.0, "handmapping_bestaetigt": bestaetigt(codes),
+                        "ersatz": "kein Fach gewählt; ähnlichstes Fach laut Embedding"})
+    k = korr.get(tid)
+    if k:
+        if k["codes"]:
+            codes = [c for c in k["codes"] if c in by_not][:3] or codes
+            mapping["status"], mapping["konfidenz"] = "redaktionell", 1.0
+        if k["lehrebene"] in LEHREBENEN:
+            ebene = k["lehrebene"]
+            mapping["lehrebene"]["status"] = "redaktionell"
+        mapping["korrektur"] = k
+        return codes, ebene, mapping, []
+    gruende = []
+    if mapping.get("ersatz"):
+        gruende.append("keine Stimme für ein Fach, Vorschlag nur aus Embedding")
+    elif mapping["status"] == "unsicher":
+        gruende.append("keine Mehrheit für ein Fach")
+    if mapping["lehrebene"]["status"] == "unsicher":
+        gruende.append("keine Mehrheit für die Lehrebene")
+    if hinweis and not mapping["handmapping_bestaetigt"] and mapping["status"] == "wahrscheinlich":
+        gruende.append("weicht vom Handmapping ab")
+    if fa["details"] and not fa["details"][0]["belegbegriffe_im_text"]:
+        gruende.append("Hauptfach ohne Beleg im Text")
+    return codes, ebene, mapping, gruende
+
+
+def pruefzeile(row: dict, gruende: list[str], stimmen: int, **extra) -> dict:
+    m = row["mapping"]
+    return {"id": row["id"], "label_de": row["label_de"], "grund": "; ".join(gruende),
+            "faecher": " | ".join(f"{x['notation']} {clean_label(x['label'])} ({x['stimmen']}/{stimmen})"
+                                  for x in m["faecher"])
+            or " | ".join(f"{f['notation']} {clean_label(f['label'])} (Embedding)" for f in row["studienfach"]),
+            "verworfen": " | ".join(f"{l} ({n})" for l, n in m["verworfen"].items()),
+            "lehrebene": f"{row['lehrebene']} ({m['lehrebene']['stimmen']})", **extra}
+
+
+def _meta(cfg, modell, kand_all, stimmen, methode, prompts: str) -> dict:
+    return {"methode": methode, "modell": modell or (cfg.model if cfg else None),
+            "embedding_modell": kand_all.get("embedding_modell"), "stimmen": stimmen,
+            "datum": date.today().isoformat(), "prompt_hash": _hash(prompts)}
+
+
 def zusammenfuehren(cfg: LLMConfig | None = None, stimmen: int = N_STIMMEN, modell: str | None = None, **_):
     voc = load_vocab("hochschulfaechersystematik")
     by_not = faecher_by_not(voc)
@@ -340,11 +420,8 @@ def zusammenfuehren(cfg: LLMConfig | None = None, stimmen: int = N_STIMMEN, mode
     le_stimmen = abstimmung.lade_stimmen(STIMMEN_LEHREBENE)
     korr = pruefung.lade_korrekturen(KORREKTUREN_PATH)
     alt = {r["id"]: r for r in load_jsonl(THEMEN_PATH)} if THEMEN_PATH.exists() else {}
-    meta = {"methode": METHODE, "modell": modell or (cfg.model if cfg else None),
-            "embedding_modell": kand_all.get("embedding_modell"), "stimmen": stimmen,
-            "datum": date.today().isoformat(),
-            "prompt_hash": _hash("".join(FAECHER_PERSPEKTIVEN) + FAECHER_REGELN + "".join(LEHREBENE_PERSPEKTIVEN)
-                                 + LEHREBENE_REGELN)}
+    meta = _meta(cfg, modell, kand_all, stimmen, METHODE, "".join(FAECHER_PERSPEKTIVEN) + FAECHER_REGELN
+                 + "".join(LEHREBENE_PERSPEKTIVEN) + LEHREBENE_REGELN)
     rows, pruef = [], []
     neu = behalten = 0
     for o in _objekte():
@@ -354,39 +431,8 @@ def zusammenfuehren(cfg: LLMConfig | None = None, stimmen: int = N_STIMMEN, mode
                 rows.append(alt[tid])
                 behalten += 1
             continue
-        sims = kand[tid]["kandidaten"]
-        fa = abstimmung.auswerten(sf_stimmen[tid], stimmen, o["text"], aehnlichkeit=sims)
-        le = abstimmung.auswerten(le_stimmen.get(tid, {}), stimmen, o["text"], max_auswahl=1)
-        codes = fa["auswahl"]
-        ebene = le["auswahl"][0] if le["auswahl"] else "vertiefung"
-        hinweis = set(kand[tid]["handmapping"])
-        bestaetigt = any(voc.by_uri[by_not[c]]["broader"] in hinweis for c in codes)
-        mapping = {**meta, "status": fa["status"],
-                   "konfidenz": fa["details"][0]["konfidenz"] if fa["details"] else 0.0,
-                   "handmapping_bestaetigt": bestaetigt, "kandidaten": len(sims),
-                   "faecher": [{**voc.ref(by_not[d["code"]]), **{k: v for k, v in d.items() if k != "code"}}
-                               for d in fa["details"]],
-                   "verworfen": {voc.by_uri[by_not[c]]["label"]: n for c, n in fa["verworfen"].items()},
-                   "lehrebene": {"status": le["status"],
-                                 "konfidenz": le["details"][0]["konfidenz"] if le["details"] else 0.0,
-                                 "stimmen": {**{e: 0 for e in LEHREBENEN}, **{d["code"]: d["stimmen"] for d in le["details"]},
-                                             **le["verworfen"]},
-                                 "begruendungen": le["details"][0]["begruendungen"] if le["details"] else []}}
-        if not codes:
-            # keine Stimme für irgendein Fach: Thema behalten, ähnlichstes Fach laut Embedding, zur Prüfung
-            codes = [max(sims, key=sims.get)]
-            bestaetigt = voc.by_uri[by_not[codes[0]]]["broader"] in hinweis
-            mapping.update({"status": "unsicher", "konfidenz": 0.0, "handmapping_bestaetigt": bestaetigt,
-                            "ersatz": "kein Fach gewählt; ähnlichstes Fach laut Embedding"})
-        k = korr.get(tid)
-        if k:
-            if k["codes"]:
-                codes = [c for c in k["codes"] if c in by_not][:3] or codes
-                mapping["status"], mapping["konfidenz"] = "redaktionell", 1.0
-            if k["lehrebene"] in LEHREBENEN:
-                ebene = k["lehrebene"]
-                mapping["lehrebene"]["status"] = "redaktionell"
-            mapping["korrektur"] = k
+        codes, ebene, mapping, gruende = bewerte(tid, o["text"], kand[tid], sf_stimmen[tid], le_stimmen.get(tid, {}),
+                                                 korr, stimmen, voc, by_not, meta)
         d = o["de"]
         rows.append({
             "id": tid, "art": "openalex",
@@ -399,28 +445,11 @@ def zusammenfuehren(cfg: LLMConfig | None = None, stimmen: int = N_STIMMEN, mode
             "quelle": {"name": "OpenAlex Topics", "uri": tid, "lizenz": "CC0-1.0"},
             "mapping": mapping,
         })
+        if tid in alt and alt[tid].get("belege"):
+            rows[-1]["belege"] = alt[tid]["belege"]
         neu += 1
-        gruende = []
-        if mapping.get("ersatz"):
-            gruende.append("keine Stimme für ein Fach, Vorschlag nur aus Embedding")
-        elif mapping["status"] == "unsicher":
-            gruende.append("keine Mehrheit für ein Fach")
-        if mapping["lehrebene"]["status"] == "unsicher":
-            gruende.append("keine Mehrheit für die Lehrebene")
-        if not bestaetigt and mapping["status"] == "wahrscheinlich":
-            gruende.append("weicht vom Handmapping ab")
-        if fa["details"] and not fa["details"][0]["belegbegriffe_im_text"] and not k:
-            gruende.append("Hauptfach ohne Beleg im Text")
-        if gruende and not k:
-            pruef.append({
-                "id": tid, "label_de": rows[-1]["label_de"], "grund": "; ".join(gruende),
-                "faecher": " | ".join(f"{x['notation']} {clean_label(x['label'])} ({x['stimmen']}/{stimmen})"
-                                      for x in mapping["faecher"])
-                or " | ".join(f"{f['notation']} {clean_label(f['label'])} (Embedding)" for f in rows[-1]["studienfach"]),
-                "verworfen": " | ".join(f"{l} ({n})" for l, n in mapping["verworfen"].items()),
-                "lehrebene": f"{ebene} ({mapping['lehrebene']['stimmen']})",
-                "openalex_teilgebiet": t["subfield"]["display_name"],
-            })
+        if gruende:
+            pruef.append(pruefzeile(rows[-1], gruende, stimmen, openalex_teilgebiet=t["subfield"]["display_name"]))
     rows.sort(key=lambda r: _topic_num(r["id"]))
     _write_jsonl(THEMEN_PATH, rows)
     pruefung.schreibe_pruefliste(PRUEFLISTE_PATH, pruef)
@@ -442,123 +471,3 @@ def statistik(rows: list[dict] | None = None) -> dict:
         "handmapping_bestaetigt": sum(1 for x in m if x.get("handmapping_bestaetigt")),
         "faecher_je_thema": dict(Counter(len(r["studienfach"]) for r in rows)),
     }
-
-
-# --- Grundlagen über GND -------------------------------------------------------------------
-
-GRUNDLAGEN_SYSTEM = """Du planst ein Bachelorstudium. Für ein Studienfach nennst du die Grundlagenthemen, die in den ersten Semestern typischerweise gelehrt werden: Einführungs- und Grundlagenmodule, zentrale Methoden, Basiskonzepte.
-
-Regeln:
-- "label_de" ist ein kurzer deutscher Fachbegriff, wie er als Schlagwort in einer Bibliothek stehen würde (z. B. "Lineare Algebra", "Thermodynamik", "Qualitative Sozialforschung"), keine Sätze, keine Modulnummern.
-- Keine Überschneidungen untereinander, keine sehr speziellen Forschungsthemen.
-- "beschreibung_de": 1-2 Sätze, was das Thema im Grundstudium umfasst. "keywords_de": 5-8 Fachbegriffe. "label_en": englischer Fachbegriff.
-
-Antworte ausschließlich mit JSON: {"themen": [{"label_de": "...", "label_en": "...", "beschreibung_de": "...", "keywords_de": [...]}]}"""
-
-
-def gnd_lookup(label: str, pause: float = 0.2) -> dict | None:
-    """Sucht ein GND-Sachschlagwort mit genau diesem Namen oder Synonym (lobid-gnd)."""
-    norm = _norm(label)
-    for q in (f'preferredName:"{label}"', f'variantName:"{label}"', label):
-        url = "https://lobid.org/gnd/search?" + urllib.parse.urlencode(
-            {"q": q, "filter": "type:SubjectHeading", "format": "json", "size": 10})
-        for attempt in range(4):
-            try:
-                with urllib.request.urlopen(url, timeout=30) as r:
-                    data = json.load(r)
-                break
-            except Exception:  # noqa: BLE001
-                time.sleep(2 ** attempt)
-        else:
-            raise RuntimeError("lobid-gnd nicht erreichbar")
-        time.sleep(pause)
-        for m in data.get("member", []):
-            names = [m.get("preferredName", "")] + m.get("variantName", [])
-            if any(_norm(n) == norm for n in names):
-                return {
-                    "uri": m["id"], "gnd_id": m.get("gndIdentifier"), "label": m.get("preferredName"),
-                    "sachgruppe": [{"uri": s["id"], "label": s.get("label")} for s in m.get("gndSubjectCategory", [])],
-                    "oberbegriff": [{"uri": b["id"], "label": b.get("label")} for b in m.get("broaderTermGeneral", [])],
-                }
-    return None
-
-
-def _norm(s: str) -> str:
-    return re.sub(r"\s+", " ", re.sub(r"<.*?>", "", s)).strip().casefold()
-
-
-def build_grundlagen(cfg: LLMConfig, pro_fach: int = 12, faecher: list[str] | None = None, on_progress=None,
-                     stop_event=None, **_):
-    voc = load_vocab("hochschulfaechersystematik")
-    alle = _faecher(voc)
-    if faecher:
-        alle = [c for c in alle if c["notation"] in faecher]
-    raw_path = CACHE / "grundlagen_vorschlaege.jsonl"
-    meta = {"modell": cfg.model, "datum": date.today().isoformat(), "prompt_hash": _hash(GRUNDLAGEN_SYSTEM)}
-
-    def worker(client: LLMClient, task: dict) -> dict:
-        f = voc.by_uri[task["fach"]]
-        sb = voc.by_uri[f["broader"]]
-        user = (f"Studienfach: {clean_label(f['label'])} (Studienbereich {clean_label(sb['label'])}). "
-                f"Nenne {pro_fach} Grundlagenthemen.")
-        res = client.chat_json(GRUNDLAGEN_SYSTEM, user)
-        themen = [t for t in res.get("themen", []) if t.get("label_de")]
-        if not themen:
-            raise ValueError("keine Themen")
-        return {"id": task["id"], "fach": task["fach"], "themen": themen[:pro_fach]}
-
-    tasks = [{"id": "fach:" + c["notation"], "fach": c["uri"]} for c in alle]
-    prog = run_tasks(tasks, worker, raw_path, cfg, on_progress=on_progress, stop_event=stop_event)
-    resolve_grundlagen(meta)
-    return prog
-
-
-def build_gnd(cfg=None, **_):
-    n, miss = resolve_grundlagen()
-    return fertig(f"{n} Grundlagenthemen mit GND-Beleg, {miss} Vorschläge ohne Treffer")
-
-
-def resolve_grundlagen(meta: dict | None = None):
-    """Belegt die LLM-Vorschläge über die GND. Nur Treffer werden zu Themen."""
-    voc = load_vocab("hochschulfaechersystematik")
-    raw = load_jsonl(CACHE / "grundlagen_vorschlaege.jsonl")
-    cache_path = CACHE / "gnd_lookup.json"
-    cache = json.loads(cache_path.read_text(encoding="utf-8")) if cache_path.exists() else {}
-    meta = meta or {"datum": date.today().isoformat()}
-    by_gnd: dict[str, dict] = {}
-    misses = []
-    for entry in raw:
-        for t in entry["themen"]:
-            label = t["label_de"].strip()
-            if label not in cache:
-                cache[label] = gnd_lookup(label)
-                cache_path.write_text(json.dumps(cache, ensure_ascii=False), encoding="utf-8")
-            hit = cache[label]
-            if not hit:
-                misses.append((label, entry["fach"], voc.by_uri[entry["fach"]]["label"]))
-                continue
-            row = by_gnd.get(hit["uri"])
-            if row is None:
-                by_gnd[hit["uri"]] = row = {
-                    "id": hit["uri"], "art": "grundlagen", "label_de": hit["label"], "label_en": t.get("label_en", ""),
-                    "beschreibung_de": t.get("beschreibung_de", ""), "keywords_de": t.get("keywords_de", [])[:8],
-                    "faecher_uris": [], "lehrebene": "grundlagen",
-                    "gnd": {k: hit[k] for k in ("gnd_id", "sachgruppe", "oberbegriff")},
-                    "quelle": {"name": "Gemeinsame Normdatei (GND)", "uri": hit["uri"], "lizenz": "CC0-1.0"},
-                    "mapping": {"methode": "Grundlagenthema per LLM für das Studienfach vorgeschlagen, "
-                                           "über GND-Sachschlagwort belegt (Label aus der GND)",
-                                "status": "gesichert", **meta},
-                }
-            if entry["fach"] not in row["faecher_uris"] and len(row["faecher_uris"]) < 3:
-                row["faecher_uris"].append(entry["fach"])
-    rows = []
-    for r in by_gnd.values():
-        r.update(_derive(voc, r.pop("faecher_uris")))
-        rows.append(r)
-    rows.sort(key=lambda r: (r["studienfach"][0]["notation"], r["label_de"]))
-    _write_jsonl(DIR / "themen_grundlagen.jsonl", rows)
-    with (DIR / "grundlagen_ohne_gnd.csv").open("w", newline="", encoding="utf-8") as f:
-        w = csv.writer(f)
-        w.writerow(["vorschlag", "studienfach_uri", "studienfach"])
-        w.writerows(misses)
-    return len(rows), len(misses)

@@ -3,7 +3,7 @@
     python -m sem info
     python -m sem seeds --anzahl hochschule=30000 [--gleichverteilung hochschule=thema] [--seed 42] [--out …]
     python -m sem materialien --seeds output/seeds.jsonl [--out …] [--limit N] [--workers 20] [--model …]
-    python -m sem mappings hochschule [alle|schritt …] [--limit N] [--stimmen 3] [--embedding-modell …]
+    python -m sem mappings hochschule [alle|openalex|gnd|schritt …] [--limit N] [--stimmen 3] [--wlo export.csv …]
     python -m sem mappings hochschule --liste
 """
 
@@ -64,12 +64,13 @@ def main(argv=None):
 
     p = sub.add_parser("mappings", help="Mappings eines Bildungsbereichs neu bauen (Schritte siehe --liste)")
     p.add_argument("bereich")
-    p.add_argument("schritte", nargs="*", default=["alle"], help="Schritte in dieser Reihenfolge, Standard: alle")
+    p.add_argument("schritte", nargs="*", default=["alle"],
+                   help="Schritte oder Folgen (z. B. openalex, gnd) in dieser Reihenfolge, Standard: alle")
     p.add_argument("--liste", action="store_true", help="Schritte des Bereichs anzeigen")
     p.add_argument("--limit", type=int, help="nur die ersten N Themen (zum Testen)")
     p.add_argument("--stimmen", type=int, default=3, help="LLM-Stimmen je Zuordnung")
     p.add_argument("--embedding-modell", help="lokales Embedding-Modell (Standard intfloat/multilingual-e5-small)")
-    p.add_argument("--pro-fach", type=int, default=12, help="Grundlagenthemen je Studienfach")
+    p.add_argument("--wlo", nargs="+", metavar="CSV", help="WLO-Exporte für Keyword-Fach-Belege (bleiben lokal)")
     _llm_args(p)
 
     a = ap.parse_args(argv)
@@ -110,14 +111,17 @@ def main(argv=None):
         if a.liste or not schritte:
             for x in schritte.values():
                 print(f"{x.key:16} {'LLM ' if x.llm else '    '}{x.beschreibung}")
-            print("alle = " + " → ".join(b.mapping_folge))
+            for name, folge in b.mapping_folgen.items():
+                print(f"{name} = " + " → ".join(folge))
+            print("alle = " + " + ".join(b.mapping_folgen))
             return
-        keys = b.mapping_folge if a.schritte == ["alle"] else a.schritte
+        keys = b.schritte_aufloesen(a.schritte)
         unbekannt = [k for k in keys if k not in schritte]
         if unbekannt:
-            raise SystemExit(f"Unbekannte Schritte {unbekannt}. Möglich: {', '.join(schritte)}, alle")
+            raise SystemExit(f"Unbekannte Schritte {unbekannt}. Möglich: {', '.join(schritte)}, "
+                             f"{', '.join(b.mapping_folgen)}, alle")
         prog = b.mapping_ausfuehren(keys, _cfg(a), on_progress=print_progress, limit=a.limit, stimmen=a.stimmen,
-                                    embedding_modell=a.embedding_modell, pro_fach=a.pro_fach)
+                                    embedding_modell=a.embedding_modell, wlo_dateien=a.wlo)
         print("\n" + prog.line())
         if "fertig" not in prog.status:
             sys.exit(2)

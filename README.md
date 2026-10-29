@@ -5,7 +5,7 @@ didaktische Frage-Antwort-Paare) aus offenen Vokabularen und Taxonomien. Struktu
 dem OpenEduHub/edu-sharing-Metadatenschema. Jeder Wert trägt URI, Label und Herkunft.
 
 Bildungsbereiche sind Module. Enthalten ist bisher **Hochschule** (Destatis-Fächersystematik,
-OpenAlex-Themen, Grundlagenthemen mit GND-Beleg). Weitere Bereiche lassen sich ergänzen.
+OpenAlex-Themen, Lehrthemen aus GND und hbz-Katalog, Keyword-Belege aus WirLernenOnline). Weitere Bereiche lassen sich ergänzen.
 
 Wie alles entsteht: [METHODIK.md](METHODIK.md). Die Daten im Einzelnen: [data/README.md](data/README.md).
 
@@ -40,7 +40,8 @@ python -m sem mappings hochschule --liste       # Mapping-Schritte anzeigen
 python -m sem mappings hochschule --limit 50    # Probelauf aller Schritte mit 50 Themen
 python -m sem mappings hochschule               # alle Schritte (LLM + lokale Embeddings), fortsetzbar
 python -m sem mappings hochschule zusammenfuehren   # nur neu auswerten, z. B. nach Korrekturen
-python -m sem mappings hochschule grundlagen    # Grundlagenthemen (LLM + GND)
+python -m sem mappings hochschule wlo --wlo export.csv   # WLO-Keywords als Belege (Export bleibt lokal)
+python -m sem mappings hochschule gnd           # Themen aus GND und hbz-Katalog
 ```
 
 LLM-Optionen für `materialien` und `mappings`: `--base-url`, `--api-key`, `--model`, `--workers`,
@@ -57,7 +58,8 @@ Alles unter `data/` ist ohne den Code nutzbar (JSON, JSONL, CSV, UTF-8):
   der Zuordnung
 - `data/mappings/hochschule/studienfach_profile.jsonl`: Kurzprofil je Studienfach
 - `data/mappings/hochschule/pruefliste_themen.csv`: Zuordnungen, die eine Durchsicht brauchen
-- `data/mappings/hochschule/themen_grundlagen.jsonl`: Grundlagenthemen je Studienfach mit GND-URI
+- `data/mappings/hochschule/themen_gnd.jsonl`: Lehrthemen aus GND und hbz-Katalog mit Belegen
+- `data/mappings/hochschule/studienfach_gnd_sachgruppe.jsonl`: Studienfach → GND-Sachgruppen
 - `data/mappings/hochschule/openalex_teilgebiet_studienbereich.csv`: Handmapping der OpenAlex-Teilgebiete
 
 ## Aufbau

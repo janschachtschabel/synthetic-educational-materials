@@ -20,8 +20,10 @@ Je Vokabular eine Datei `<name>.json`:
 | `studienfach_profile.jsonl` | je Studienfach Kurzbeschreibung, typische Themen, Abgrenzung (LLM) |
 | `pruefliste_themen.csv` | Zuordnungen mit Grund für eine Durchsicht, leere Korrekturspalten |
 | `korrekturen.csv` | optional: redaktionelle Korrekturen (Spalten `id`, `korrektur_codes`, `korrektur_lehrebene`, `kommentar`), Vorrang vor dem LLM |
-| `themen_grundlagen.jsonl` | Grundlagenthemen, gleiche Struktur, zusätzlich `gnd` (GND-ID, Sachgruppe, Oberbegriff) |
-| `grundlagen_ohne_gnd.csv` | LLM-Vorschläge ohne GND-Treffer (nicht verwendet) |
+| `themen_gnd.jsonl` | Themen aus GND und hbz-Katalog, gleiche Struktur, zusätzlich `gnd` (GND-ID, Typ, Sachgruppe, Oberbegriffe), `belege.katalog`, ggf. `belege.wlo`, `mapping.hochschulrelevanz` |
+| `pruefliste_gnd.csv` | GND-Themen, die eine Durchsicht brauchen |
+| `gnd_ausgeschlossen.csv` | GND-Begriffe, die nicht als Hochschul-Lehrinhalt eingestuft wurden (mit Bereich und Stimmen) |
+| `studienfach_gnd_sachgruppe.jsonl` | Brücke Studienfach → GND-Sachgruppen mit Stimmen |
 | `openalex_teilgebiet_studienbereich.csv` | Handmapping OpenAlex-Teilgebiet → Studienbereich(e) |
 | `inhaltstypen.json` | genutzte Inhaltstypen aus OEH `new_lrt` mit Textsorte, Medienform, Lehrebenen |
 | `niveaus.json` | Niveaustufen innerhalb der Hochschule |
@@ -36,6 +38,9 @@ Themen-Struktur:
  "studienbereich": [{"uri", "notation", "label"}], "faechergruppe": [{"uri", "notation", "label"}],
  "lehrebene": "grundlagen | vertiefung | forschung",
  "quelle":  {"name", "uri", "lizenz"},
+ "belege": {"katalog": {"titel", "lehrbuecher", "hochschulschriften", "quelle"},
+            "wlo": {"quelle", "datensaetze", "faecher": [{"uri", "label", "datensaetze"}], "nodes": ["…"],
+                    "keywords": ["…"], "fach_passt": true}},
  "mapping": {"methode", "modell", "embedding_modell", "stimmen", "datum", "prompt_hash",
              "status": "gesichert | wahrscheinlich | unsicher | redaktionell", "konfidenz": 1.0,
              "handmapping_bestaetigt": true, "kandidaten": 17,

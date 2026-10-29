@@ -37,9 +37,13 @@ class FakeClient:
         res = []
         for i in items:
             codes = sorted(k.split(" | ")[0] for k in i["kandidaten"])
-            wahl = codes[:1] if "Lehrebene" in system else codes[:2]
+            if "Bildungsbereich" in system:
+                wahl = ["kein_lehrthema" if i["label"] == "Video" else "hochschule"]
+            else:
+                wahl = codes[:1] if "Lehrebene" in system else codes[:2]
+            name = i.get("label_en") or i.get("label") or i.get("studienfach")
             res.append({"id": i["id"], "auswahl": [{"code": c, "begruendung": "passt",
-                                                    "belegbegriffe": [i["label_en"].split()[0], "erfunden"]}
+                                                    "belegbegriffe": [name.split()[0], "erfunden"]}
                                                    for c in wahl]})
         return {"ergebnisse": res}
 
@@ -66,7 +70,7 @@ def pipeline(tmp_path, monkeypatch):
 
 def test_pipeline_ergibt_belegte_zuordnungen(pipeline):
     b = get("hochschule")
-    prog = b.mapping_ausfuehren(b.mapping_folge, llm.LLMConfig(api_key="x", workers=2), on_progress=None)
+    prog = b.mapping_ausfuehren(b.mapping_folgen["openalex"], llm.LLMConfig(api_key="x", workers=2), on_progress=None)
     assert "fertig" in prog.status
     rows = [json.loads(l) for l in B.THEMEN_PATH.read_text(encoding="utf-8").splitlines()]
     assert len(rows) == 12
@@ -121,7 +125,7 @@ def test_thema_ohne_stimme_bleibt_und_fehlende_antwort_wird_nachgefragt(pipeline
         return res
 
     monkeypatch.setattr(FakeClient, "chat_json", launisch)
-    b.mapping_ausfuehren(b.mapping_folge, cfg)
+    b.mapping_ausfuehren(b.mapping_folgen["openalex"], cfg)
     b.mapping_ausfuehren(["lehrebene", "zusammenfuehren"], cfg)  # zweiter Lauf fragt T100 einzeln nach
     rows = {json.loads(l)["id"]: json.loads(l) for l in B.THEMEN_PATH.read_text(encoding="utf-8").splitlines()}
     assert len(rows) == 12
@@ -129,3 +133,67 @@ def test_thema_ohne_stimme_bleibt_und_fehlende_antwort_wird_nachgefragt(pipeline
     assert r101["mapping"]["status"] == "unsicher" and r101["mapping"]["ersatz"] and len(r101["studienfach"]) == 1
     assert sum(rows["https://openalex.org/T100"]["mapping"]["lehrebene"]["stimmen"].values()) == 3
     assert "T101" in B.PRUEFLISTE_PATH.read_text(encoding="utf-8")
+
+
+def test_gnd_pipeline_nur_sachbegriffe_mit_belegen(pipeline, monkeypatch, tmp_path):
+    from sem.bereiche.hochschule import gnd_themen as G
+    from sem.quellen import gnd
+
+    for name in ("WLO_PATH", "POOL_PATH", "STIMMEN_RELEVANZ", "STIMMEN_BRUECKE", "KANDIDATEN_GND",
+                 "STIMMEN_GND_FAECHER", "STIMMEN_GND_LEHREBENE", "BRUECKE_PATH", "THEMEN_GND", "PRUEF_GND",
+                 "AUSGESCHLOSSEN"):
+        monkeypatch.setattr(G, name, tmp_path / getattr(G, name).name)
+    sc = "https://d-nb.info/standards/vocab/gnd/gnd-sc#"
+    vocab = {"scheme": {}, "concepts": [
+        {"uri": sc + "21.2", "notation": "21.2", "label": "Physik", "broader": None, "level": 0, "art": "sache"},
+        {"uri": sc + "13.5", "notation": "13.5", "label": "Medien", "broader": None, "level": 0, "art": "sache"},
+        {"uri": sc + "28p", "notation": "28p", "label": "Personen", "broader": None, "level": 0, "art": "personen"}]}
+    from sem import vocabs
+    real_load = G.load_vocab
+    monkeypatch.setattr(G, "load_vocab", lambda n: vocabs.Vocab(n, {}, vocab["concepts"]) if n == "gnd_sachgruppen"
+                        else real_load(n))
+
+    def rec(i, label, typ="SubjectHeadingSensoStricto", sg="21.2"):
+        return {"uri": f"https://d-nb.info/gnd/{i}", "gnd_id": str(i), "label": label, "typen": [typ],
+                "synonyme": [], "sachgruppen": [{"uri": sc + sg, "label": "x"}], "oberbegriffe": [], "definition": ""}
+    recs = {r["uri"]: r for r in [rec(1, "Thermodynamik"), rec(2, "Video", sg="13.5"),
+                                  rec(3, "Max Planck", typ="DifferentiatedPerson", sg="28p"), rec(4, "Optik")]}
+    monkeypatch.setattr(gnd, "katalog_top", lambda p, a: [(u, 5) for u in recs if u != "https://d-nb.info/gnd/4"]
+                        if p == "530" else [])
+    monkeypatch.setattr(gnd, "hole", lambda uris: {u: recs[u] for u in uris if u in recs})
+    monkeypatch.setattr(gnd, "suche_exakt", lambda kw: recs["https://d-nb.info/gnd/4"] if kw == "Optik" else None)
+    monkeypatch.setattr(gnd, "katalog_zaehlen", lambda u: {"titel": 50, "lehrbuecher": 7, "hochschulschriften": 3})
+    (tmp_path / "wlo_keywords_hochschule.json").write_text(json.dumps({"keywords": {
+        "optik": {"schreibweisen": {"Optik": 4}, "anzahl": 4, "nodes": ["abc"],
+                  "faecher": {"http://w3id.org/openeduhub/vocabs/hochschulfaechersystematik/n128": 4}},
+        "lmu münchen": {"schreibweisen": {"LMU München": 9}, "anzahl": 9, "nodes": [], "faecher": {}}}}),
+        encoding="utf-8")
+    b = get("hochschule")
+    cfg = llm.LLMConfig(api_key="x", workers=2)
+    prog = b.mapping_ausfuehren(["fachprofile"] + b.mapping_folgen["gnd"][1:], cfg)
+    assert "fertig" in prog.status, prog.status
+    rows = [json.loads(l) for l in G.THEMEN_GND.read_text(encoding="utf-8").splitlines()]
+    assert sorted(r["label_de"] for r in rows) == ["Optik", "Thermodynamik"]  # Person raus, Video nicht Hochschule
+    optik = next(r for r in rows if r["label_de"] == "Optik")
+    assert optik["belege"]["wlo"]["datensaetze"] == 4 and optik["belege"]["wlo"]["nodes"][0].endswith("/abc")
+    assert optik["belege"]["katalog"]["lehrbuecher"] == 7 and optik["quelle"]["lizenz"] == "CC0-1.0"
+    assert optik["mapping"]["hochschulrelevanz"]["stimmen"]["hochschule"] == 3
+    assert "Video" in G.AUSGESCHLOSSEN.read_text(encoding="utf-8")
+    assert G.BRUECKE_PATH.exists()
+
+
+def test_wlo_belege_an_openalex_themen(pipeline, monkeypatch, tmp_path):
+    from sem.bereiche.hochschule import gnd_themen as G
+
+    monkeypatch.setattr(G, "WLO_PATH", tmp_path / "wlo.json")
+    b = get("hochschule")
+    b.mapping_ausfuehren(b.mapping_folgen["openalex"], llm.LLMConfig(api_key="x", workers=2))
+    r0 = json.loads(B.THEMEN_PATH.read_text(encoding="utf-8").splitlines()[0])
+    fach = r0["studienfach"][0]["uri"]
+    G.WLO_PATH.write_text(json.dumps({"keywords": {
+        "kw0": {"schreibweisen": {"kw0": 3}, "anzahl": 3, "nodes": [], "faecher": {fach: 3}},
+        "science": {"schreibweisen": {"science": 50}, "anzahl": 50, "nodes": [], "faecher": {fach: 50}}}}),
+        encoding="utf-8")
+    assert "1 OpenAlex-Themen mit WLO-Beleg, davon 1" in G.build_wlo_belege().status
+    r0 = json.loads(B.THEMEN_PATH.read_text(encoding="utf-8").splitlines()[0])
+    assert r0["belege"]["wlo"]["fach_passt"] and r0["belege"]["wlo"]["keywords"] == ["kw0"]  # „science“ zu unspezifisch

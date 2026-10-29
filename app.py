@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import json
 import threading
-from pathlib import Path
 
 import pandas as pd
 import streamlit as st
@@ -187,11 +186,13 @@ with tab_map:
             c1, c2 = st.columns(2)
             lim = c1.number_input("Nur die ersten N Themen (0 = alle)", 0, 100_000, 0, key=f"ml-{key}")
             stimmen = c2.number_input("Stimmen je Zuordnung", 1, 7, 3, key=f"mv-{key}")
+            wlo_txt = st.text_input("WLO-Exporte (CSV-Pfade, durch Komma getrennt; bleiben lokal)", key=f"mw-{key}")
             job = f"map-{key}"
             laeuft = bool(jobs().get(job) and not jobs()[job]["done"])
             if st.button("Start / Fortsetzen", key=f"mb-{key}", disabled=laeuft or not wahl):
                 start_job(job, b.mapping_ausfuehren, [k for k in schritte if k in wahl], cfg,
-                          limit=int(lim) or None, stimmen=int(stimmen), embedding_modell=emb_model)
+                          limit=int(lim) or None, stimmen=int(stimmen), embedding_modell=emb_model,
+                          wlo_dateien=[x.strip() for x in wlo_txt.split(",") if x.strip()] or None)
             job_status(job)
 
 # --- Methodik -------------------------------------------------------------------------------

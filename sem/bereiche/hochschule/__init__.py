@@ -18,7 +18,7 @@ from ...vocabs import load as load_vocab
 from ..base import Bildungsbereich, MappingSchritt, SeedState
 
 DIR = MAPPING_DIR / "hochschule"
-THEMEN_FILES = ["themen_openalex.jsonl", "themen_grundlagen.jsonl"]
+THEMEN_FILES = ["themen_openalex.jsonl", "themen_gnd.jsonl"]
 CONTEXT_URI = "http://w3id.org/openeduhub/vocabs/educationalContext/hochschule"
 
 _PREFIX = re.compile(r"^Studienbereich\s+")
@@ -45,32 +45,50 @@ class Hochschule(Bildungsbereich):
         "lehrebene": "Grundlagen, Vertiefung und Forschung etwa gleich oft",
     }
     default_balance = "thema"
-    mapping_folge = ["fachprofile", "uebersetzen", "kandidaten", "faecher", "lehrebene", "zusammenfuehren"]
+    mapping_folgen = {
+        "openalex": ["fachprofile", "uebersetzen", "kandidaten", "faecher", "lehrebene", "zusammenfuehren"],
+        "wlo": ["wlo", "wlo_belege"],
+        "gnd": ["gnd_sachgruppen", "bruecke", "gnd_pool", "gnd_relevanz", "gnd_kandidaten", "gnd_faecher",
+                "gnd_lehrebene", "gnd_zusammenfuehren"],
+    }
 
     def mapping_schritte(self) -> list[MappingSchritt]:
         from . import build as b
+        from . import gnd_themen as g
 
+        S_ = MappingSchritt
         return [
-            MappingSchritt("fachprofile", "Fachprofile", "Kurzbeschreibung und typische Themen je Studienfach", b.build_fachprofile),
-            MappingSchritt("uebersetzen", "Übersetzen", "OpenAlex-Themen ins Deutsche (Vorhandenes wird übernommen)",
-                           b.build_uebersetzen),
-            MappingSchritt("kandidaten", "Kandidaten", "ähnlichste Studienfächer je Thema (lokale Embeddings)",
-                           b.build_kandidaten, llm=False),
-            MappingSchritt("faecher", "Fächer abstimmen", "drei Stimmen je Thema mit Begründung und Belegen", b.build_faecher),
-            MappingSchritt("lehrebene", "Lehrebene abstimmen", "drei Stimmen je Thema nach festen Kriterien",
-                           b.build_lehrebene),
-            MappingSchritt("zusammenfuehren", "Zusammenführen", "Auswertung, Konfidenz, Prüfliste, Korrekturen",
-                           b.zusammenfuehren, llm=False),
-            MappingSchritt("grundlagen", "Grundlagenthemen", "je Studienfach per LLM, über die GND belegt",
-                           b.build_grundlagen),
-            MappingSchritt("gnd", "GND-Abgleich", "GND-Abgleich der Grundlagen-Vorschläge wiederholen", b.build_gnd,
-                           llm=False),
+            S_("fachprofile", "Fachprofile", "Kurzbeschreibung und typische Themen je Studienfach", b.build_fachprofile),
+            S_("uebersetzen", "Übersetzen", "OpenAlex-Themen ins Deutsche (Vorhandenes wird übernommen)", b.build_uebersetzen),
+            S_("kandidaten", "Kandidaten", "ähnlichste Studienfächer je OpenAlex-Thema (lokale Embeddings)",
+               b.build_kandidaten, llm=False),
+            S_("faecher", "Fächer abstimmen", "drei Stimmen je OpenAlex-Thema mit Begründung und Belegen", b.build_faecher),
+            S_("lehrebene", "Lehrebene abstimmen", "drei Stimmen je OpenAlex-Thema nach festen Kriterien", b.build_lehrebene),
+            S_("zusammenfuehren", "Zusammenführen", "OpenAlex: Auswertung, Konfidenz, Prüfliste, Korrekturen",
+               b.zusammenfuehren, llm=False),
+            S_("wlo", "WLO-Keywords", "Keyword-Fach-Kombinationen aus WLO-Exporten (--wlo)", g.build_wlo, llm=False),
+            S_("wlo_belege", "WLO-Belege", "WLO-Keywords exakt auf OpenAlex-Themen, Fachabgleich", g.build_wlo_belege,
+               llm=False),
+            S_("gnd_sachgruppen", "GND-Sachgruppen", "Vokabular der GND-Sachgruppen laden", g.build_gnd_sachgruppen,
+               llm=False),
+            S_("bruecke", "Brücke Fach → Sachgruppe", "Studienfach → GND-Sachgruppen (drei Stimmen)", g.build_bruecke),
+            S_("gnd_pool", "GND-Pool", "Sachbegriffe aus Lehrbüchern, Hochschulschriften und WLO-Keywords (lobid)",
+               g.build_gnd_pool, llm=False),
+            S_("gnd_relevanz", "Hochschulrelevanz", "drei Stimmen: Lehrinhalt an Hochschulen?", g.build_gnd_relevanz),
+            S_("gnd_kandidaten", "GND-Kandidaten", "ähnlichste Studienfächer je Begriff", g.build_gnd_kandidaten, llm=False),
+            S_("gnd_faecher", "GND-Fächer", "drei Stimmen je Begriff", g.build_gnd_faecher),
+            S_("gnd_lehrebene", "GND-Lehrebene", "drei Stimmen je Begriff", g.build_gnd_lehrebene),
+            S_("gnd_zusammenfuehren", "GND zusammenführen", "themen_gnd.jsonl, Prüfliste, Ausschlüsse",
+               g.build_gnd_zusammenfuehren, llm=False),
         ]
 
     def mapping_statistik(self) -> dict:
-        from . import build
+        from . import build, gnd_themen
 
-        return build.statistik()
+        out = {"openalex": build.statistik()}
+        if gnd_themen.THEMEN_GND.exists():
+            out["gnd"] = build.statistik(load_jsonl(gnd_themen.THEMEN_GND))
+        return out
 
     @cached_property
     def faecher(self):
