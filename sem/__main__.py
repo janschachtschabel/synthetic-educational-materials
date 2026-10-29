@@ -48,8 +48,9 @@ def _llm_args(p):
     g.add_argument("--model")
     g.add_argument("--workers", type=int)
     g.add_argument("--retries", type=int, dest="max_retries")
-    g.add_argument("--reasoning-effort", choices=["minimal", "low", "medium", "high"],
-                   help="nur für Reasoning-Modelle: weniger Denkaufwand = schneller (Standard: Modellstandard)")
+    g.add_argument("--reasoning-effort", choices=["standard", "minimal", "low", "medium", "high"],
+                   help="nur für Reasoning-Modelle: weniger Denkaufwand = schneller; Standard low "
+                        "(LLM_REASONING_EFFORT), „standard“ = Parameter nicht senden")
 
 
 def _cfg(a):

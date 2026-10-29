@@ -49,8 +49,10 @@ python -m sem mappings hochschule wlo --wlo export.csv   # WLO-Keywords als Bele
 python -m sem mappings hochschule gnd           # Themen aus GND und hbz-Katalog
 ```
 
-LLM-Optionen für `materialien` und `mappings`: `--base-url`, `--api-key`, `--model`, `--workers`,
-`--retries`. Für `mappings` zusätzlich `--stimmen` (Standard 3) und `--embedding-modell` (Standard
+LLM-Optionen für `materialien` und `mappings`: `--base-url`, `--api-key`, `--model`, `--workers`
+(Standard 20, `LLM_WORKERS`), `--reasoning-effort` (Standard `low`, `LLM_REASONING_EFFORT`; `standard`
+sendet den Parameter nicht), `--retries`. In der Oberfläche stehen Worker und Reasoning-Aufwand in der
+Seitenleiste unter „Geschwindigkeit“. Für `mappings` zusätzlich `--stimmen` (Standard 3) und `--embedding-modell` (Standard
 `intfloat/multilingual-e5-small`, läuft auf der CPU; wird beim ersten Lauf von Hugging Face geladen).
 
 ## Nur die Mappings nutzen
