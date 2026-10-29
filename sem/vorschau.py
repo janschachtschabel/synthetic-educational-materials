@@ -44,7 +44,6 @@ def metadaten(rec: dict) -> dict[str, str]:
     t = rec.get(S.F_THEMA, {})
     p = rec.get(S.F_PROVENANCE, {}).get(S.F_THEMA, {})
     zeilen = {
-        "Bildungsbereich": rec.get(S.F_BEREICH, ""),
         "Bildungsstufe": _labels(rec, S.F_CONTEXT),
         "Studienfach": _labels(rec, S.F_TAXON_UNI),
         "Schulfach": _labels(rec, S.F_TAXON),
