@@ -1,31 +1,33 @@
-# Daten
+# Data
+
+*English · [Deutsch](README.de.md)*
 
 ## `vocabs/`
 
-Je Vokabular eine Datei `<name>.json`:
+One file `<name>.json` per vocabulary:
 
 ```json
 {"scheme": {"name", "uri", "title", "source", "public_url", "license", "retrieved"},
  "concepts": [{"uri", "notation", "label", "broader", "level"}]}
 ```
 
-`broader` ist die URI des Oberbegriffs, `level` die Tiefe (0 = oberste Ebene). Wo das Vokabular sie hat,
-stehen zusätzlich `definition` und `note` (KldB: Kurzbeschreibung und typische Tätigkeiten). Neu laden mit
-`python scripts/fetch_vocabs.py` (alle) oder `python scripts/fetch_vocabs.py kldb` (einzelne).
+`broader` is the URI of the broader concept, and `level` is the depth (0 = top level). Where the vocabulary provides them,
+`definition` and `note` are also included (KldB: short description and typical activities). Reload with
+`python scripts/fetch_vocabs.py` (all) or `python scripts/fetch_vocabs.py kldb` (one).
 
 ## `mappings/berufsbildung/`
 
-| Datei | Inhalt |
+| File | Contents |
 |---|---|
-| `berufe.jsonl` | ein ESCO-Beruf je Zeile, siehe unten |
-| `kompetenzen.jsonl` | eine ESCO-Kompetenz je Zeile: `uri`, `label`, `alt_labels`, `beschreibung`, `art` (`wissen`, `faehigkeit`), `reichweite` (`berufsspezifisch`, `branchenspezifisch`, `branchenuebergreifend`, `querschnitt`), `isced_f`, `essenziell_fuer`/`optional_fuer` (Zahl der Berufe), `oeh_uri` (OEH escoSkills), `belege.wlo` |
-| `pruefliste_berufe.csv` | Berufe mit Grund für eine Durchsicht, leere Korrekturspalten |
-| `korrekturen.csv` | redaktionelle Korrekturen (`korrektur_codes` = KldB-Kennziffern mit `|`, `-` = ausschließen, `korrektur_qualifizierung`, `kommentar`), Vorrang vor dem LLM |
-| `inhaltstypen.json` | genutzte Inhaltstypen aus OEH `new_lrt` mit Textsorte, Medienform, Kompetenzarten, Zielgruppen |
-| `niveaus.json` | DQR-Niveaus mit Qualifizierungsweg und Bildungsstufe |
-| `optionale_felder.json` | Werte und Anteile der optionalen Steuerfelder (Lernort, Querschnittsthema …) |
+| `berufe.jsonl` | one ESCO occupation per line, see below |
+| `kompetenzen.jsonl` | one ESCO skill per line: `uri`, `label`, `alt_labels`, `beschreibung`, `art` (`wissen`, `faehigkeit`), `reichweite` (`berufsspezifisch`, `branchenspezifisch`, `branchenuebergreifend`, `querschnitt`), `isced_f`, `essenziell_fuer`/`optional_fuer` (number of occupations), `oeh_uri` (OEH escoSkills), `belege.wlo` |
+| `pruefliste_berufe.csv` | occupations with a reason for review, empty correction columns |
+| `korrekturen.csv` | editorial corrections (`korrektur_codes` = KldB (Classification of Occupations) codes separated by `|`, `-` = exclude, `korrektur_qualifizierung`, `kommentar`), take precedence over the LLM |
+| `inhaltstypen.json` | content types used from OEH `new_lrt`, with text type, media format, skill types, and target groups |
+| `niveaus.json` | DQR levels with qualification pathway and educational level |
+| `optionale_felder.json` | values and proportions of the optional control fields (learning location, cross-cutting topic …) |
 
-Beruf-Struktur:
+Occupation structure:
 
 ```json
 {"uri": "http://data.europa.eu/esco/occupation/…", "label": "…", "alt_labels": ["…"], "beschreibung": "…",
@@ -42,52 +44,52 @@ Beruf-Struktur:
              "qualifizierung": {"status", "konfidenz", "stimmen": {"ausbildung": 3, …}, "begruendungen"}}}
 ```
 
-Die Themen (Beruf × Kompetenz) entstehen beim Laden aus beiden Dateien und werden nicht gespeichert.
+Topics (occupation × skill) are generated when loading from both files and are not stored.
 
 ## `mappings/elementar/`
 
-| Datei | Inhalt |
+| File | Contents |
 |---|---|
-| `bildungsbereiche.json` | die sieben Bildungsbereiche des Gemeinsamen Rahmens (Fassung 2022) mit `id`, Label, Kurzbeschreibung und `closeMatch` auf OEH `discipline` |
-| `themen_elementar.jsonl` | ein Thema je Zeile: `id` (GND-URI), `label_de` (ohne GND-Qualifikator), `label_gnd`, `synonyme`, `definition`, `oberbegriffe`, `gnd_sachgruppen`, `art` (`kinderthema`, `fachthema`), `altersgruppe` (`u3`, `ue3`, `beide`), `bildungsbereich` [{`id`, `uri`, `label`}], `herkunft` (`llm`, `wlo`), `quelle`, `belege.wlo`, `mapping` (Status, Konfidenz und Stimmen zu Bereich, Eignung und Alter) |
-| `pruefliste_themen.csv`, `korrekturen.csv` | Durchsicht (`korrektur_codes` = Bildungsbereich-IDs, optional `kinderthema`/`fachthema`, `-` = ausschließen; `korrektur_alter`) |
-| `inhaltstypen.json`, `niveaus.json`, `optionale_felder.json` | Inhaltstypen mit Themenart und Zielgruppen, Altersstufen, optionale Felder |
+| `bildungsbereiche.json` | the seven education sectors of the Gemeinsamer Rahmen der Länder (Common Framework of the Länder; 2022 edition), with `id`, label, short description, and `closeMatch` to OEH `discipline` |
+| `themen_elementar.jsonl` | one topic per line: `id` (GND URI), `label_de` (without GND qualifier), `label_gnd`, `synonyme`, `definition`, `oberbegriffe`, `gnd_sachgruppen`, `art` (`kinderthema`, `fachthema`), `altersgruppe` (`u3`, `ue3`, `beide`), `bildungsbereich` [{`id`, `uri`, `label`}], `herkunft` (`llm`, `wlo`), `quelle`, `belege.wlo`, `mapping` (status, confidence, and votes for sector, suitability, and age) |
+| `pruefliste_themen.csv`, `korrekturen.csv` | review (`korrektur_codes` = education-sector IDs, optionally `kinderthema`/`fachthema`, `-` = exclude; `korrektur_alter`) |
+| `inhaltstypen.json`, `niveaus.json`, `optionale_felder.json` | content types with topic type and target groups, age levels, optional fields |
 
 ## `mappings/schule/`
 
-| Datei | Inhalt |
+| File | Contents |
 |---|---|
-| `themen_schule.jsonl` | ein Thema je Zeile: `id` (URI im OEH-Vokabular oehTopics), `label_de`, `portal`, `portal_uri`, `pfad`, `ebene`, `definition`, `keywords`, `faecher` (OEH discipline), `art` (`unterrichtsthema`, `lehrkraftthema`), `stufen` (`primar`, `sek1`, `sek2`), `gnd` (exakter GND-Treffer), `quelle`, `belege.wlo` (Datensätze je Stufe, Node-IDs), `mapping` (Status, Konfidenz, Stimmen, `wlo_bestaetigt`) |
-| `pruefliste_themen.csv`, `korrekturen.csv` | Durchsicht (`korrektur_codes` = Stufen mit `|`, `-` = ausschließen; `korrektur_art`) |
-| `inhaltstypen.json`, `niveaus.json`, `optionale_felder.json` | Inhaltstypen mit Themenart, Zielgruppen, Stufen und Fachportalen; Jahrgänge; optionale Felder (u. a. Anforderungsbereich) |
+| `themen_schule.jsonl` | one topic per line: `id` (URI in the OEH oehTopics vocabulary), `label_de`, `portal`, `portal_uri`, `pfad`, `ebene`, `definition`, `keywords`, `faecher` (OEH discipline), `art` (`unterrichtsthema`, `lehrkraftthema`), `stufen` (`primar`, `sek1`, `sek2`), `gnd` (exact GND match), `quelle`, `belege.wlo` (records per level, node IDs), `mapping` (status, confidence, votes, `wlo_bestaetigt`) |
+| `pruefliste_themen.csv`, `korrekturen.csv` | review (`korrektur_codes` = levels separated by `|`, `-` = exclude; `korrektur_art`) |
+| `inhaltstypen.json`, `niveaus.json`, `optionale_felder.json` | content types with topic type, target groups, levels, and subject portals; year groups; optional fields (including area of requirement) |
 
 ## `mappings/erwachsenenbildung/`
 
-| Datei | Inhalt |
+| File | Contents |
 |---|---|
-| `programmbereiche.json` | 7 Programmbereiche und 85 Fachgebiete der Volkshochschul-Statistik (`notation`, `label`, `uri`, `uebergreifend` für die Sammelpositionen x.00) |
-| `sprachkurs_themen.json` | Handlungsfelder und Lernzielbereiche des Rahmencurriculums für Integrationskurse (`code`, `handlungsfeld`, `titel`, `label`, `fachgebiete`) |
-| `themen_erwachsenenbildung.jsonl` | ein Thema je Zeile: `id` (GND-URI, Rahmencurriculum-Code oder oehTopics-URI), `label_de`, `art` (`kursthema`, `kursleitungsthema`), `herkunft` (`gnd`, `rahmencurriculum`, `schulthemen`), `fachgebiet` und `programmbereich` [{`notation`, `uri`, `label`}] (Fremdsprachen als `4.fs`), `quelle`, `belege.wlo`, `mapping` |
-| `pruefliste_themen.csv`, `korrekturen.csv` | Durchsicht (`korrektur_codes` = Fachgebiete, optional `kursthema`/`kursleitungsthema`, `-` = ausschließen) |
-| `inhaltstypen.json`, `niveaus.json`, `optionale_felder.json` | Inhaltstypen mit Themenart, Zielgruppen und Programmbereichen; Niveaus je Programmbereich (GER, Alpha-Level, Abschlüsse); optionale Felder und Zielsprachen je Fachgebiet |
+| `programmbereiche.json` | 7 programme areas and 85 subject areas from the Volkshochschul-Statistik (Adult Education Center Statistics) (`notation`, `label`, `uri`, `uebergreifend` for the collective entries x.00) |
+| `sprachkurs_themen.json` | fields of action and learning objective areas from the Rahmencurriculum für Integrationskurse (Framework Curriculum for Integration Courses) (`code`, `handlungsfeld`, `titel`, `label`, `fachgebiete`) |
+| `themen_erwachsenenbildung.jsonl` | one topic per line: `id` (GND URI, Rahmencurriculum code, or oehTopics URI), `label_de`, `art` (`kursthema`, `kursleitungsthema`), `herkunft` (`gnd`, `rahmencurriculum`, `schulthemen`), `fachgebiet` and `programmbereich` [{`notation`, `uri`, `label`}] (foreign languages as `4.fs`), `quelle`, `belege.wlo`, `mapping` |
+| `pruefliste_themen.csv`, `korrekturen.csv` | review (`korrektur_codes` = subject areas, optionally `kursthema`/`kursleitungsthema`, `-` = exclude) |
+| `inhaltstypen.json`, `niveaus.json`, `optionale_felder.json` | content types with topic type, target groups, and programme areas; levels per programme area (GER, Alpha-Level, qualifications); optional fields and target languages per subject area |
 
 ## `mappings/hochschule/`
 
-| Datei | Inhalt |
+| File | Contents |
 |---|---|
-| `themen_hochschule.jsonl` | Gesamtset: alle Themen, ein Thema je Zeile, siehe unten. `art` = `openalex` oder `gnd`; GND-Themen haben zusätzlich `gnd` (GND-ID, Typ, Sachgruppe, Oberbegriffe), `belege.katalog` und `mapping.hochschulrelevanz`; Themen mit WLO-Beleg `belege.wlo`. Die Teilergebnisse je Quelle entstehen beim Bauen im Zwischenspeicher (`data/cache/hochschule_themen_*.jsonl`) und werden im Schritt `themen` zusammengeführt |
-| `studienfach_profile.jsonl` | je Studienfach Kurzbeschreibung, typische Themen, Abgrenzung (LLM) |
-| `pruefliste_themen.csv` | Zuordnungen mit Grund für eine Durchsicht, leere Korrekturspalten |
-| `korrekturen.csv` | redaktionelle Durchsicht beider Prüflisten (Spalten `id`, `label_de`, `korrektur_codes` mit `|`, `-` = ausschließen, `korrektur_lehrebene`, `kommentar`, `prueflistengrund`), Vorrang vor dem LLM |
-| `pruefliste_gnd.csv` | GND-Themen, die eine Durchsicht brauchen |
-| `gnd_ausgeschlossen.csv` | GND-Begriffe, die nicht als Hochschul-Lehrinhalt eingestuft wurden (mit Bereich und Stimmen) |
-| `studienfach_gnd_sachgruppe.jsonl` | Brücke Studienfach → GND-Sachgruppen mit Stimmen |
-| `openalex_teilgebiet_studienbereich.csv` | Handmapping OpenAlex-Teilgebiet → Studienbereich(e) |
-| `inhaltstypen.json` | genutzte Inhaltstypen aus OEH `new_lrt` mit Textsorte, Medienform, Lehrebenen |
-| `niveaus.json` | Niveaustufen innerhalb der Hochschule |
-| `optionale_felder.json` | Werte und Anteile der optionalen Steuerfelder |
+| `themen_hochschule.jsonl` | complete set: all topics, one topic per line, see below. `art` = `openalex` or `gnd`; GND topics also have `gnd` (GND ID, type, subject group, broader concepts), `belege.katalog`, and `mapping.hochschulrelevanz`; topics with WLO evidence have `belege.wlo`. Intermediate results per source are generated during the build in the cache (`data/cache/hochschule_themen_*.jsonl`) and combined in the `themen` step |
+| `studienfach_profile.jsonl` | short description, typical topics, and distinction for each field of study (LLM) |
+| `pruefliste_themen.csv` | mappings with a reason for review, empty correction columns |
+| `korrekturen.csv` | editorial review of both review lists (columns `id`, `label_de`, `korrektur_codes` separated by `|`, `-` = exclude, `korrektur_lehrebene`, `kommentar`, `prueflistengrund`), take precedence over the LLM |
+| `pruefliste_gnd.csv` | GND topics requiring review |
+| `gnd_ausgeschlossen.csv` | GND terms not classified as higher education teaching content (with sector and votes) |
+| `studienfach_gnd_sachgruppe.jsonl` | bridge from field of study to GND subject groups, with votes |
+| `openalex_teilgebiet_studienbereich.csv` | manual mapping from OpenAlex subfield to study area(s) |
+| `inhaltstypen.json` | content types used from OEH `new_lrt`, with text type, media format, and teaching levels |
+| `niveaus.json` | levels within higher education |
+| `optionale_felder.json` | values and proportions of the optional control fields |
 
-Themen-Struktur:
+Topic structure:
 
 ```json
 {"id": "https://openalex.org/T10001", "art": "openalex | grundlagen",

@@ -1,5 +1,7 @@
 # Methodik
 
+*[English](METHODOLOGY.md) · Deutsch*
+
 Kurzbeschreibung, wie Seeds und synthetische Materialien entstehen, damit Ergebnisse nachvollziehbar
 und reproduzierbar sind. Jeder Datensatz trägt zusätzlich unter `synth:provenance` die Herkunft
 jedes Feldes.

@@ -1,20 +1,23 @@
 # synthetic-educational-materials
 
-Erzeugt **Seeds** und **synthetische Bildungsmaterialien** (Volltext, Titel, Beschreibung, Keywords,
-didaktische Frage-Antwort-Paare) aus offenen Vokabularen und Taxonomien. Struktur und Feldnamen folgen
-dem OpenEduHub/edu-sharing-Metadatenschema. Jeder Wert trägt URI, Label und Herkunft.
+*English · [Deutsch](README.de.md)*
 
-Bildungsbereiche sind Module. Enthalten sind **Hochschule** (Destatis-Fächersystematik,
-OpenAlex-Themen, Lehrthemen aus GND und hbz-Katalog, Keyword-Belege aus WirLernenOnline) und
-**Berufliche Bildung** (ESCO-Berufe × Kompetenzen, KldB-Berufsfelder, Qualifizierungsweg und DQR-Niveau,
-Handmapping über den BA-Umsteigeschlüssel ISCO → KldB) und **Elementarbereich** (sieben Bildungsbereiche
-des Gemeinsamen Rahmens der Länder, Kita-Themen als GND-Sachbegriffe aus LLM-Themenlisten und WLO-Keywords,
-Eignung und Altersgruppe per Abstimmung) und **Schule** (Themenbäume der WLO-Fachportale, Primarstufe,
-Sekundarstufe I und II als Metadatum und Filter) und **Erwachsenenbildung** (Programmbereiche und
-Fachgebiete der Volkshochschul-Statistik, Kursthemen aus GND, Sprachkursthemen aus dem Rahmencurriculum für
-Integrationskurse, Schulabschlusskurse). Weitere Bereiche lassen sich ergänzen.
+Generates **seeds** and **synthetic educational materials** (full text, titles, descriptions, keywords,
+didactic question-answer pairs) from open vocabularies and taxonomies. Structure and field names follow
+the OpenEduHub/edu-sharing metadata schema. Each value has a URI, label, and provenance.
 
-Wie alles entsteht: [METHODIK.md](METHODIK.md). Die Daten im Einzelnen: [data/README.md](data/README.md).
+Education sectors are modules. Included are **higher education** (Destatis-Fächersystematik,
+OpenAlex topics, teaching topics from GND and the hbz catalog, keyword evidence from WirLernenOnline),
+**vocational education and training** (ESCO occupations × skills, KldB occupational fields, qualification
+pathway and DQR level, manual mapping via the BA conversion key ISCO → KldB), **early childhood education**
+(seven educational areas of the Gemeinsamer Rahmen der Länder, daycare topics as GND subject headings from
+LLM topic lists and WLO keywords, suitability and age group determined by vote), **school** (topic trees
+from WLO subject portals, primary, lower secondary and upper secondary levels as metadata and filters),
+and **adult education** (program areas and subject areas from the Volkshochschul-Statistik, course topics
+from GND, language course topics from the Rahmencurriculum für Integrationskurse, school-leaving
+qualification courses). More sectors can be added.
+
+How everything is created: [METHODOLOGY.md](METHODOLOGY.md). The data in detail: [data/README.md](data/README.md).
 
 ## Installation
 
@@ -22,97 +25,104 @@ Wie alles entsteht: [METHODIK.md](METHODIK.md). Die Daten im Einzelnen: [data/RE
 python -m pip install -r requirements.txt
 ```
 
-Für die LLM-Schritte: `OPENAI_API_KEY` setzen, optional `OPENAI_BASE_URL` (jeder OpenAI-kompatible
-Endpunkt), `LLM_MODEL` (Standard `gpt-6-luna`) und `LLM_WORKERS` (Standard 20). Alles lässt sich auch in
-der Oberfläche oder per Parameter setzen.
+For the LLM steps: set `OPENAI_API_KEY`; optionally set `OPENAI_BASE_URL` (any OpenAI-compatible
+endpoint), `LLM_MODEL` (default `gpt-6-luna`), and `LLM_WORKERS` (default 20). Everything can also be set
+in the user interface or via parameters.
 
-## Oberfläche
+## User interface
 
 ```
 streamlit run app.py
 ```
 
-Reiter: **Seeds** (Anzahl je Bildungsbereich, Feld für die Gleichverteilung, Auswahl der Themen nach
-Status, Quelle und Belegen, Zufalls-Seed),
-**Materialien** (Start/Fortsetzen mit Fortschrittsanzeige), **Vorschau** (Seeds und fertige Materialien
-durchblättern und durchsuchen: Titel, Beschreibung, Keywords, Volltext, Frage-Antwort-Paare,
-Inhaltstyp-Prüfung, Metadaten und Herkunft), **Prompts** (bearbeiten und speichern),
-**Mappings** (ansehen, herunterladen, neu bauen), **Methodik**.
+Tabs: **Seeds** (number per education sector, field for even distribution, topic selection by
+status, source, and evidence, random seed),
+**Materials** (start/resume with progress indicator), **Preview** (browse and search seeds and completed
+materials: titles, descriptions, keywords, full text, question-answer pairs,
+content type check, metadata, and provenance), **Prompts** (edit and save),
+**Mappings** (view, download, rebuild), **Methodology**. The prompt templates themselves are in German.
 
-Seed-Dateien beginnen immer mit `seeds_`, erzeugte Materialien mit `materialien_` (beides unter
-`output/`). Oberfläche und Kommandozeile ergänzen das Präfix selbst; die Auswahllisten zeigen nur die
-passenden Dateien.
+**Interface language:** German or English, switchable at the top of the sidebar (“Sprache / Language”);
+default can be set with `SEM_UI_SPRACHE=en`. This affects only the interface; the language of generated
+content is selected separately in the “Materials” tab (output language). The translations are in
+`i18n/en.json` (German text as keys). To find new interface text, run `python scripts/i18n_texte.py`;
+`--uebersetzen` adds missing translations using an LLM.
 
-## Kommandozeile
+Seed files always start with `seeds_`, generated materials with `materialien_` (both under
+`output/`). The user interface and command line add the prefix themselves; the selection lists show only
+the matching files.
+
+## Command line
 
 ```
 python -m sem info
 python -m sem seeds --anzahl hochschule=30000 --gleichverteilung hochschule=thema --seed 42
-python -m sem auswahl hochschule                # Filter (Status, Quellen, Belege) und Themenzahl
+python -m sem auswahl hochschule                # Filters (status, sources, evidence) and number of topics
 python -m sem seeds --anzahl hochschule=5000 --auswahl hochschule.fach_status=gesichert hochschule.belege=lehrbuch,wlo
 python -m sem materialien --seeds output/seeds_hochschule30000_s42.jsonl --limit 100
-python -m sem materialien --seeds output/seeds_hochschule30000_s42.jsonl          # setzt fort
-python -m sem mappings hochschule --liste       # Mapping-Schritte anzeigen
-python -m sem mappings hochschule --limit 50    # Probelauf aller Schritte mit 50 Themen
-python -m sem mappings hochschule               # alle Schritte (LLM + lokale Embeddings), fortsetzbar
-python -m sem mappings hochschule zusammenfuehren   # nur neu auswerten, z. B. nach Korrekturen
-python -m sem mappings hochschule wlo --wlo export.csv   # WLO-Keywords als Belege (Export bleibt lokal)
-python -m sem mappings hochschule gnd           # Themen aus GND und hbz-Katalog
-python -m sem auswahl berufsbildung             # Filter Berufsbildung (Qualifizierungsweg, Kompetenzart …)
+python -m sem materialien --seeds output/seeds_hochschule30000_s42.jsonl          # resumes
+python -m sem mappings hochschule --liste       # Show mapping steps
+python -m sem mappings hochschule --limit 50    # Test run of all steps with 50 topics
+python -m sem mappings hochschule               # All steps (LLM + local embeddings), resumable
+python -m sem mappings hochschule zusammenfuehren   # Re-evaluate only, e.g. after corrections
+python -m sem mappings hochschule wlo --wlo export.csv   # WLO keywords as evidence (export stays local)
+python -m sem mappings hochschule gnd           # Topics from GND and the hbz catalog
+python -m sem auswahl berufsbildung             # Vocational education and training filters (qualification pathway, skill type …)
 python -m sem seeds --anzahl berufsbildung=10000 --gleichverteilung berufsbildung=beruf --seed 42
-python -m sem mappings berufsbildung --wlo export.csv   # ESCO laden, KldB und Qualifizierung abstimmen, WLO-Belege
-python -m sem seeds --anzahl schule=5000 --auswahl schule.stufen=sek1 --seed 42   # nur Sekundarstufe I
+python -m sem mappings berufsbildung --wlo export.csv   # Load ESCO, vote on KldB and qualification, WLO evidence
+python -m sem seeds --anzahl schule=5000 --auswahl schule.stufen=sek1 --seed 42   # Secondary level I only
 python -m sem seeds --anzahl elementar=1000 schule=3000 berufsbildung=3000 hochschule=3000 --seed 42
 ```
 
-LLM-Optionen für `materialien` und `mappings`: `--base-url`, `--api-key`, `--model`, `--workers`
-(Standard 20, `LLM_WORKERS`), `--reasoning-effort` (Standard `low`, `LLM_REASONING_EFFORT`; `standard`
-sendet den Parameter nicht), `--retries`. In der Oberfläche stehen Worker und Reasoning-Aufwand in der
-Seitenleiste unter „Geschwindigkeit“. Für `mappings` zusätzlich `--stimmen` (Standard 3) und `--embedding-modell` (Standard
-`intfloat/multilingual-e5-small`, läuft auf der CPU; wird beim ersten Lauf von Hugging Face geladen).
+LLM options for `materialien` and `mappings`: `--base-url`, `--api-key`, `--model`, `--workers`
+(default 20, `LLM_WORKERS`), `--reasoning-effort` (default `low`, `LLM_REASONING_EFFORT`; `standard`
+does not send the parameter), `--retries`. In the user interface, workers and reasoning effort are in the
+sidebar under “Geschwindigkeit” (“Speed”). For `mappings`, also: `--stimmen` (default 3) and `--embedding-modell` (default
+`intfloat/multilingual-e5-small`, runs on the CPU; downloaded from Hugging Face on the first run).
 
-## Nur die Mappings nutzen
+## Using the mappings only
 
-Alles unter `data/` ist ohne den Code nutzbar (JSON, JSONL, CSV, UTF-8):
+Everything under `data/` can be used without the code (JSON, JSONL, CSV, UTF-8):
 
-- `data/vocabs/*.json`: OEH-Vokabulare flach aufbereitet (URI, Notation, Label, Oberbegriff, Ebene)
-- `data/mappings/hochschule/themen_hochschule.jsonl`: alle Hochschulthemen in einer Datei (9.130:
-  OpenAlex-Themen und GND-Lehrthemen) mit Destatis-Studienfach, -bereich und -fächergruppe, deutschen
-  Labels, Keywords, Lehrebene sowie Herkunft (`art`, `quelle`), Status, Konfidenz und Belegen der
-  Zuordnung; nach diesen Angaben filterbar (`python -m sem auswahl hochschule`)
-- `data/mappings/hochschule/studienfach_profile.jsonl`: Kurzprofil je Studienfach
-- `data/mappings/hochschule/pruefliste_*.csv`, `korrekturen.csv`: Zuordnungen für die Durchsicht und deren Ergebnis
-- `data/mappings/hochschule/studienfach_gnd_sachgruppe.jsonl`: Studienfach → GND-Sachgruppen
-- `data/mappings/hochschule/openalex_teilgebiet_studienbereich.csv`: Handmapping der OpenAlex-Teilgebiete
-- `data/mappings/berufsbildung/berufe.jsonl`: 2.930 ESCO-Berufe mit KldB-Berufsuntergruppe (und Oberebenen),
-  Qualifizierungsweg, Status, Konfidenz, Handmapping-Bestätigung und den URIs ihrer essenziellen und
-  optionalen Kompetenzen
-- `data/mappings/berufsbildung/kompetenzen.jsonl`: 12.539 ESCO-Kompetenzen (Label, Beschreibung, Art,
-  Reichweite, ISCED-F-Feld, `oeh_uri` im OEH-Vokabular escoSkills, WLO-Belege)
-- `data/mappings/elementar/themen_elementar.jsonl`: 1.033 Kita-Themen (GND-URI, Synonyme, Definition,
-  Themenart, Altersgruppe, Bildungsbereich, Herkunft, Status, WLO-Belege); `bildungsbereiche.json`: die
-  sieben Bildungsbereiche mit closeMatch auf OEH-Schulfächer
-- `data/mappings/schule/themen_schule.jsonl`: 3.153 Themen der WLO-Themenbäume mit Fachportal, Pfad, Fach,
-  Themenart, Schulstufen, Status, WLO-Stufenbelegen und GND-Abgleich
-- `data/mappings/erwachsenenbildung/themen_erwachsenenbildung.jsonl`: 1.557 Kursthemen mit Fachgebiet und
-  Programmbereich der Volkshochschul-Statistik, Herkunft (`gnd`, `rahmencurriculum`, `schulthemen`), Status;
-  `programmbereiche.json`: die Systematik mit 85 Fachgebieten
+- `data/vocabs/*.json`: OEH vocabularies prepared as flat files (URI, notation, label, broader term, level)
+- `data/mappings/hochschule/themen_hochschule.jsonl`: all higher education topics in one file (9,130:
+  OpenAlex topics and GND teaching topics) with Destatis study subject, subject area and subject group, German
+  labels, keywords, teaching level, and mapping provenance (`art`, `quelle`), status, confidence, and evidence;
+  filterable by these fields (`python -m sem auswahl hochschule`)
+- `data/mappings/hochschule/studienfach_profile.jsonl`: short profile for each study subject
+- `data/mappings/hochschule/pruefliste_*.csv`, `korrekturen.csv`: mappings for review and their outcomes
+- `data/mappings/hochschule/studienfach_gnd_sachgruppe.jsonl`: study subject → GND subject groups
+- `data/mappings/hochschule/openalex_teilgebiet_studienbereich.csv`: manual mapping of OpenAlex subfields
+- `data/mappings/berufsbildung/berufe.jsonl`: 2,930 ESCO occupations with KldB occupational unit group (and higher-level groups),
+  qualification pathway, status, confidence, manual mapping confirmation, and the URIs of their essential and
+  optional skills
+- `data/mappings/berufsbildung/kompetenzen.jsonl`: 12,539 ESCO skills (label, description, type,
+  scope, ISCED-F field, `oeh_uri` in the OEH vocabulary escoSkills, WLO evidence)
+- `data/mappings/elementar/themen_elementar.jsonl`: 1,033 daycare topics (GND URI, synonyms, definition,
+  topic type, age group, education sector, provenance, status, WLO evidence); `bildungsbereiche.json`: the seven
+  educational areas with closeMatch to OEH school subjects
+- `data/mappings/schule/themen_schule.jsonl`: 3,153 topics from WLO topic trees with subject portal, path, subject,
+  topic type, school levels, status, WLO level evidence, and GND alignment
+- `data/mappings/erwachsenenbildung/themen_erwachsenenbildung.jsonl`: 1,557 course topics with subject area and
+  program area from the Volkshochschul-Statistik, provenance (`gnd`, `rahmencurriculum`, `schulthemen`), status;
+  `programmbereiche.json`: the classification system with 85 subject areas
 
-## Aufbau
+## Structure
 
 ```
-app.py                     Oberfläche (Streamlit)
-sem/                       Paket: llm, seeds, generate, prompts, schema, vocabs
-sem/mapping/               bereichsunabhängige Mapping-Bausteine (Embeddings, Abstimmung, Prüfliste)
-sem/bereiche/<bereich>/    ein Modul je Bildungsbereich (Themen, Seeds, Mapping-Bau)
-data/vocabs/               aufbereitete Vokabulare
-data/mappings/<bereich>/   Mappings und Konfiguration je Bereich
-prompts/                   editierbare Prompt-Vorlagen
-output/                    erzeugte Seeds und Materialien (nicht versioniert)
+app.py                     User interface (Streamlit)
+i18n/                      User interface translations (en.json)
+sem/                       Package: llm, seeds, generate, prompts, schema, vocabs
+sem/mapping/               Sector-independent mapping components (embeddings, vote, review list)
+sem/bereiche/<bereich>/    One module per education sector (topics, seeds, mapping build)
+data/vocabs/               Prepared vocabularies
+data/mappings/<bereich>/   Mappings and configuration for each sector
+prompts/                   Editable prompt templates
+output/                    Generated seeds and materials (not versioned)
 ```
 
-## Lizenz
+## License
 
-Code: Apache 2.0. Daten unter `data/`: aus CC0-Quellen abgeleitet; ESCO-Labels und -Beschreibungen unter
-den Weiterverwendungsbedingungen der EU-Kommission (Quelle: ESCO, Europäische Kommission), KldB mit
-Quellenangabe der Bundesagentur für Arbeit. Herkunft siehe METHODIK.md.
+Code: Apache 2.0. Data under `data/`: derived from CC0 sources; ESCO labels and descriptions are subject to
+the European Commission's reuse conditions (source: ESCO, European Commission), KldB with
+attribution to the Bundesagentur für Arbeit. See METHODOLOGY.md for provenance.

@@ -1,8 +1,9 @@
-"""Einfache Oberfläche: streamlit run app.py"""
+"""Einfache Oberfläche: streamlit run app.py (Menüsprache Deutsch oder Englisch, Umschalter in der Seitenleiste)"""
 
 from __future__ import annotations
 
 import json
+import os
 import threading
 from pathlib import Path
 
@@ -14,14 +15,40 @@ from sem import seeds as seedlib
 from sem import vorschau
 from sem.bereiche import BEREICHE
 from sem.generate import generate
+from sem.i18n import UI_SPRACHEN, t
 from sem.llm import DEFAULT_MODEL, DEFAULT_WORKERS, LLMConfig, Progress
 from sem.mapping.embeddings import DEFAULT_EMBEDDING_MODEL
 from sem.paths import (MAPPING_DIR, OUTPUT_DIR, PRAEFIX, PROMPT_DIR, ROOT, VOCAB_DIR, ausgabe_pfad,
                        ausgabedateien)
 from sem.prompts import PROMPT_FILES, placeholders, prompt_path
 
-st.set_page_config(page_title="Synthetische Bildungsmaterialien", layout="wide")
+st.set_page_config(page_title="Synthetic educational materials", layout="wide")
 OUTPUT_DIR.mkdir(exist_ok=True)
+
+# --- Menüsprache --------------------------------------------------------------------------------
+_UI_STANDARD = os.environ.get("SEM_UI_SPRACHE", "de")
+UI = st.sidebar.radio("Sprache / Language", list(UI_SPRACHEN), horizontal=True, format_func=UI_SPRACHEN.get,
+                      index=list(UI_SPRACHEN).index(_UI_STANDARD) if _UI_STANDARD in UI_SPRACHEN else 0,
+                      key="ui-sprache")
+
+
+def T(text: str, **werte) -> str:
+    """Text in der Menüsprache; Platzhalter {name} werden danach gefüllt."""
+    out = t(text, UI)
+    return out.format(**werte) if werte else out
+
+
+def uk(name: str) -> str:
+    """Schlüssel für Auswahlfelder mit übersetzten Optionen: Streamlit zeichnet die Beschriftung sonst nach dem
+    Sprachwechsel nicht neu. Die bisherige Auswahl wird beim Wechsel übernommen."""
+    return f"{name}@{UI}"
+
+
+_ui_alt = st.session_state.get("_ui-alt")
+if _ui_alt and _ui_alt != UI:
+    for _k in [k for k in st.session_state if isinstance(k, str) and k.endswith(f"@{_ui_alt}")]:
+        st.session_state[_k[:-len(_ui_alt)] + UI] = st.session_state.pop(_k)
+st.session_state["_ui-alt"] = UI
 
 
 @st.cache_resource
@@ -64,38 +91,39 @@ def job_status(name: str):
     elif p:
         st.info(p.line())
     else:
-        st.info("startet …")
+        st.info(T("startet …"))
     if job["error"]:
         st.error(job["error"])
-    if not job["done"] and st.button("Anhalten", key=f"stop-{name}"):
+    if not job["done"] and st.button(T("Anhalten"), key=f"stop-{name}"):
         job["stop"].set()
 
 
 # --- Seitenleiste: LLM ---------------------------------------------------------------------
 with st.sidebar:
-    st.header("LLM-Anbindung")
-    st.caption("OpenAI-kompatibel. Leere Felder: Werte aus OPENAI_BASE_URL, OPENAI_API_KEY, LLM_MODEL.")
+    st.header(T("LLM-Anbindung"))
+    st.caption(T("OpenAI-kompatibel. Leere Felder: Werte aus OPENAI_BASE_URL, OPENAI_API_KEY, LLM_MODEL."))
     env = LLMConfig.from_env()
     base_url = st.text_input("Base-URL", value=env.base_url or "", placeholder="https://api.openai.com/v1")
-    model = st.text_input("Modell", value=env.model or DEFAULT_MODEL)
-    api_key = st.text_input("API-Key", type="password", placeholder="aus OPENAI_API_KEY" if env.api_key else "")
-    st.header("Geschwindigkeit")
-    workers = st.number_input("Worker (parallel)", 1, 1000, env.workers or DEFAULT_WORKERS,
-                              help="Materialien, die gleichzeitig erzeugt werden. Mehr Worker = schneller, "
-                                   "solange das Rate-Limit des Anbieters reicht.")
+    model = st.text_input(T("Modell"), value=env.model or DEFAULT_MODEL)
+    api_key = st.text_input("API-Key", type="password", placeholder=T("aus OPENAI_API_KEY") if env.api_key else "")
+    st.header(T("Geschwindigkeit"))
+    workers = st.number_input(T("Worker (parallel)"), 1, 1000, env.workers or DEFAULT_WORKERS,
+                              help=T("Materialien, die gleichzeitig erzeugt werden. Mehr Worker = schneller, "
+                                     "solange das Rate-Limit des Anbieters reicht."))
     efforts = ["minimal", "low", "medium", "high", "Modellstandard"]
-    effort = st.radio("Reasoning-Aufwand", efforts, horizontal=True,
+    effort = st.radio(T("Reasoning-Aufwand"), efforts, horizontal=True,
                       index=efforts.index(env.reasoning_effort or "Modellstandard"),
-                      help="Nur für Reasoning-Modelle. low ist Standard: gemessen ein Drittel schneller als "
-                           "der Modellstandard bei gleichen Prüfwerten. „Modellstandard“ sendet den Parameter "
-                           "nicht (für Modelle, die ihn nicht kennen).")
-    retries = st.number_input("Versuche pro Aufgabe", 1, 20, 6)
-    outage = st.number_input("Wartezeit bei API-Ausfall (Minuten)", 1, 240, 10,
-                             help="Danach pausiert der Lauf und lässt sich später fortsetzen.")
+                      format_func=lambda e: T(e) if e == "Modellstandard" else e,
+                      help=T("Nur für Reasoning-Modelle. low ist Standard: gemessen ein Drittel schneller als "
+                             "der Modellstandard bei gleichen Prüfwerten. „Modellstandard“ sendet den Parameter "
+                             "nicht (für Modelle, die ihn nicht kennen)."))
+    retries = st.number_input(T("Versuche pro Aufgabe"), 1, 20, 6)
+    outage = st.number_input(T("Wartezeit bei API-Ausfall (Minuten)"), 1, 240, 10,
+                             help=T("Danach pausiert der Lauf und lässt sich später fortsetzen."))
     st.header("Embeddings")
-    emb_model = st.text_input("Embedding-Modell (lokal, CPU)", value=DEFAULT_EMBEDDING_MODEL,
-                              help="z. B. intfloat/multilingual-e5-small oder "
-                                   "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2")
+    emb_model = st.text_input(T("Embedding-Modell (lokal, CPU)"), value=DEFAULT_EMBEDDING_MODEL,
+                              help=T("z. B. intfloat/multilingual-e5-small oder "
+                                     "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"))
     cfg = LLMConfig(base_url=base_url or None, api_key=api_key or env.api_key, model=model, workers=int(workers),
                     max_retries=int(retries), outage_minutes=float(outage),
                     reasoning_effort=None if effort == "Modellstandard" else effort)
@@ -108,7 +136,7 @@ def _zeilen(path: str, mtime: float) -> int:
 
 
 def anzahl(n: int, eins: str, viele: str) -> str:
-    return f"{n} {eins if n == 1 else viele}"
+    return f"{n} {T(eins) if n == 1 else T(viele)}"
 
 
 def zeilen(p) -> int:
@@ -132,10 +160,10 @@ def dateiname_feld(label: str, art: str, vorschlag: str, key: str, hilfe: str):
     """Eingabe nur für den freien Teil des Namens; Präfix und Endung sind fest."""
     c1, c2, c3 = st.columns([2, 5, 1])
     c1.text_input(label, PRAEFIX[art], disabled=True, key=f"{key}-praefix",
-                  help="Feste Namensanfänge: seeds_ für Seed-Dateien, materialien_ für erzeugte Materialien. "
-                       "Daran erkennt die App, welche Dateien in welche Auswahl gehören.")
+                  help=T("Feste Namensanfänge: seeds_ für Seed-Dateien, materialien_ für erzeugte Materialien. "
+                         "Daran erkennt die App, welche Dateien in welche Auswahl gehören."))
     frei = c2.text_input("Name", vorschlag, key=key, help=hilfe)
-    c3.text_input("Endung", ".jsonl", disabled=True, key=f"{key}-endung")
+    c3.text_input(T("Endung"), ".jsonl", disabled=True, key=f"{key}-endung")
     return ausgabe_pfad(art, frei)
 
 
@@ -159,190 +187,199 @@ def zeige(rec: dict):
         st.markdown(" ".join(f"`{k}`" for k in rec.get(S.F_KEYWORD, [])))
         chk = rec.get(S.F_LRT_CHECK)
         if chk:
-            text = f"Inhaltstyp-Prüfung: erkannt „{chk['erkannt_label']}“"
-            (st.success if chk["uebereinstimmung"] else st.warning)(
-                text + (" – passt zum Seed" if chk["uebereinstimmung"] else " – weicht vom Seed ab"))
+            if chk["uebereinstimmung"]:
+                st.success(T("Inhaltstyp-Prüfung: erkannt „{typ}“ – passt zum Seed", typ=chk["erkannt_label"]))
+            else:
+                st.warning(T("Inhaltstyp-Prüfung: erkannt „{typ}“ – weicht vom Seed ab", typ=chk["erkannt_label"]))
     else:
-        st.info("Das ist ein Seed: die Vorgaben für ein Material. Erzeugte Materialien zeigt der Umschalter "
-                "„Erzeugte Materialien“.")
+        st.info(T("Das ist ein Seed: die Vorgaben für ein Material. Erzeugte Materialien zeigt der Umschalter "
+                  "„Erzeugte Materialien“."))
     c1, c2 = st.columns([3, 2]) if vorschau.ist_material(rec) else (None, st.container())
     if c1 is not None:
         with c1:
-            st.markdown("**Volltext**")
+            st.markdown(f"**{T('Volltext')}**")
             with st.container(border=True, height=520):
                 st.markdown(rec[S.F_FULLTEXT])
     with c2:
-        st.markdown("**Metadaten aus dem Seed**")
-        st.table(pd.DataFrame(vorschau.metadaten(rec).items(), columns=["Feld", "Wert"]).set_index("Feld"))
-        t = rec.get(S.F_THEMA, {})
-        if t.get("beschreibung_de") or t.get("keywords_de"):
-            with st.expander("Thema aus dem Seed"):
-                st.write(t.get("beschreibung_de", ""))
-                st.caption(", ".join(t.get("keywords_de", [])))
+        st.markdown(f"**{T('Metadaten aus dem Seed')}**")
+        zeilen_meta = [(T(k), v) for k, v in vorschau.metadaten(rec).items()]
+        st.table(pd.DataFrame(zeilen_meta, columns=[T("Feld"), T("Wert")]).set_index(T("Feld")))
+        th = rec.get(S.F_THEMA, {})
+        if th.get("beschreibung_de") or th.get("keywords_de"):
+            with st.expander(T("Thema aus dem Seed")):
+                st.write(th.get("beschreibung_de", ""))
+                st.caption(", ".join(th.get("keywords_de", [])))
     if rec.get(S.F_QA):
-        st.markdown("**Frage-Antwort-Paare**")
+        st.markdown(f"**{T('Frage-Antwort-Paare')}**")
         st.dataframe(pd.DataFrame(rec[S.F_QA]), hide_index=True, width="stretch")
-    with st.expander("Herkunft je Feld"):
+    with st.expander(T("Herkunft je Feld")):
         st.json(rec.get(S.F_PROVENANCE, {}), expanded=False)
-    with st.expander("Rohdaten (JSON)"):
+    with st.expander(T("Rohdaten (JSON)")):
         st.json(rec, expanded=False)
 
 
 tab_seeds, tab_mat, tab_vorschau, tab_prompts, tab_map, tab_meth = st.tabs(
-    ["Seeds", "Materialien", "Vorschau", "Prompts", "Mappings", "Methodik"])
+    ["Seeds", T("Materialien"), T("Vorschau"), "Prompts", "Mappings", T("Methodik")])
 
 # --- Seeds ----------------------------------------------------------------------------------
 with tab_seeds:
-    st.subheader("Seeds erzeugen")
-    st.caption("Ohne LLM. Gleicher Startwert für den Zufall und gleiche Einstellungen ergeben dieselben Seeds.")
+    st.subheader(T("Seeds erzeugen"))
+    st.caption(T("Ohne LLM. Gleicher Startwert für den Zufall und gleiche Einstellungen ergeben dieselben Seeds."))
     counts, balance, auswahl = {}, {}, {}
     for i, key in enumerate(BEREICHE):
         b = bereich(key)
         c1, c2 = st.columns([1, 2])
-        counts[key] = c1.number_input(f"{b.label}: Anzahl", 0, 1_000_000, 1000 if i == 0 else 0, step=500,
-                                      key=f"n-{key}")
+        counts[key] = c1.number_input(T("{bereich}: Anzahl", bereich=T(b.label)), 0, 1_000_000,
+                                      1000 if i == 0 else 0, step=500, key=f"n-{key}")
         opts = list(b.balance_options)
-        balance[key] = c2.selectbox(f"{b.label}: gleich verteilen nach", opts, index=opts.index(b.default_balance),
-                                    format_func=lambda o, b=b: f"{o} – {b.balance_options[o]}", key=f"bal-{key}")
+        balance[key] = c2.selectbox(T("{bereich}: gleich verteilen nach", bereich=T(b.label)), opts,
+                                    index=opts.index(b.default_balance),
+                                    format_func=lambda o, b=b: f"{o} – {T(b.balance_options[o])}", key=uk(f"bal-{key}"))
         filt = b.auswahl_optionen()
         if filt:
-            with st.expander(f"{b.label}: welche Themen einbezogen werden (Status, Quellen, Belege)"):
+            with st.expander(T("{bereich}: welche Themen einbezogen werden (Status, Quellen, Belege)",
+                               bereich=T(b.label))):
                 wahl = {}
                 for name, o in filt.items():
-                    wahl[name] = st.multiselect(o["label"], list(o["werte"]), default=o["standard"],
-                                                key=f"f-{key}-{name}", help=o["beschreibung"],
-                                                format_func=lambda w, o=o: f"{w} – {o['werte'][w]}")
+                    wahl[name] = st.multiselect(T(o["label"]), list(o["werte"]), default=o["standard"],
+                                                key=uk(f"f-{key}-{name}"), help=T(o["beschreibung"]),
+                                                format_func=lambda w, o=o: f"{w} – {T(o['werte'][w])}")
                 auswahl[key] = wahl
-                st.caption(f"{len(b.themen_auswahl(wahl))} von {len(b.topics())} Themen ausgewählt. "
-                           "Voreinstellung: gesichert, wahrscheinlich und redaktionell; unsicher erst nach Prüfung.")
-    rnd = st.number_input("Startwert für den Zufall", 0, 2**31 - 1, 42,
-                          help="Gleicher Startwert und gleiche Einstellungen ergeben dieselben Seeds.")
-    ziel = dateiname_feld("Dateiname", "seeds", "_".join(f"{k}{v}" for k, v in counts.items() if v) + f"_s{rnd}",
-                          "s-name",
-                          "Frei wählbar, z. B. hochschule30000_s42")
+                st.caption(T("{n} von {gesamt} Themen ausgewählt. Voreinstellung: gesichert, wahrscheinlich und "
+                             "redaktionell; unsicher erst nach Prüfung.",
+                             n=len(b.themen_auswahl(wahl)), gesamt=len(b.topics())))
+    rnd = st.number_input(T("Startwert für den Zufall"), 0, 2**31 - 1, 42,
+                          help=T("Gleicher Startwert und gleiche Einstellungen ergeben dieselben Seeds."))
+    ziel = dateiname_feld(T("Dateiname"), "seeds", "_".join(f"{k}{v}" for k, v in counts.items() if v) + f"_s{rnd}",
+                          "s-name", T("Frei wählbar, z. B. hochschule30000_s42"))
     vorhanden = ziel.exists()
     if vorhanden:
-        st.warning(f"{ziel.name} gibt es schon ({anzahl(zeilen(ziel), 'Seed', 'Seeds')}) und wird beim Erzeugen "
-                   "überschrieben.")
-    if st.button("Seeds erzeugen", type="primary", disabled=sum(counts.values()) == 0):
-        with st.spinner("erzeuge …"):
+        st.warning(T("{datei} gibt es schon ({anzahl}) und wird beim Erzeugen überschrieben.",
+                     datei=ziel.name, anzahl=anzahl(zeilen(ziel), "Seed", "Seeds")))
+    if st.button(T("Seeds erzeugen"), type="primary", disabled=sum(counts.values()) == 0):
+        with st.spinner(T("erzeuge …")):
             data = seedlib.build(counts, balance, int(rnd), auswahl)
             stats = seedlib.write(data, ziel, {"anzahl": counts, "gleichverteilung": balance,
                                                "zufalls_seed": int(rnd), "auswahl": auswahl})
-        st.success(f"{stats['anzahl']} Seeds in output/{ziel.name}. Weiter im Reiter „Materialien“.")
-        with st.expander("Statistik"):
+        st.success(T("{n} Seeds in output/{datei}. Weiter im Reiter „Materialien“.", n=stats["anzahl"], datei=ziel.name))
+        with st.expander(T("Statistik")):
             st.json(stats, expanded=False)
-        download(ziel, "Seeds herunterladen", "dl-seeds")
+        download(ziel, T("Seeds herunterladen"), "dl-seeds")
 
 # --- Materialien ----------------------------------------------------------------------------
 with tab_mat:
-    st.subheader("Materialien erzeugen")
-    st.caption("Pro Seed: Volltext, dann je ein Aufruf für Titel, Beschreibung, Keywords, Inhaltstyp-Prüfung und "
-               "Frage-Antwort-Paare. Ein erneuter Start setzt fort und überspringt Fertiges.")
+    st.subheader(T("Materialien erzeugen"))
+    st.caption(T("Pro Seed: Volltext, dann je ein Aufruf für Titel, Beschreibung, Keywords, Inhaltstyp-Prüfung und "
+                 "Frage-Antwort-Paare. Ein erneuter Start setzt fort und überspringt Fertiges."))
     seed_dateien = ausgabedateien("seeds")
     if not seed_dateien:
-        st.info("Noch keine Seed-Dateien (seeds_…) in output/. Erst im Reiter „Seeds“ erzeugen.")
+        st.info(T("Noch keine Seed-Dateien (seeds_…) in output/. Erst im Reiter „Seeds“ erzeugen."))
     else:
-        src = st.selectbox("Seed-Datei (neueste zuerst)", seed_dateien, key="m-src",
+        src = st.selectbox(T("Seed-Datei (neueste zuerst)"), seed_dateien, key="m-src",
                            format_func=lambda p: f"{p.name} – {anzahl(zeilen(p), 'Seed', 'Seeds')}",
-                           help="Hier stehen nur Dateien, die mit seeds_ beginnen.")
+                           help=T("Hier stehen nur Dateien, die mit seeds_ beginnen."))
         n_seeds = zeilen(src)
-        limit = st.number_input(f"Wie viele Seeds verarbeiten? (0 = alle {n_seeds})", 0, n_seeds, 0,
-                                help="Es werden die ersten N Seeds der Datei genommen.")
-        out = dateiname_feld("Ausgabedatei", "materialien", src.stem.removeprefix(PRAEFIX["seeds"]),
-                             f"m-out-{src.name}", "Standard: derselbe Name wie die Seed-Datei")
+        limit = st.number_input(T("Wie viele Seeds verarbeiten? (0 = alle {n})", n=n_seeds), 0, n_seeds, 0,
+                                help=T("Es werden die ersten N Seeds der Datei genommen."))
+        out = dateiname_feld(T("Ausgabedatei"), "materialien", src.stem.removeprefix(PRAEFIX["seeds"]),
+                             f"m-out-{src.name}", T("Standard: derselbe Name wie die Seed-Datei"))
         fertig_n = zeilen(out)
         if fertig_n:
-            st.info(f"{out.name} enthält schon {anzahl(fertig_n, 'Material', 'Materialien')}. Start setzt fort und überspringt Fertiges. "
-                    "Für einen neuen Lauf einen anderen Namen wählen.")
-        lrt_check = st.checkbox("Inhaltstyp am fertigen Material prüfen", value=True,
-                                help="Bestimmt den Inhaltstyp ohne Kenntnis des Seeds und protokolliert, ob er "
-                                     "passt. Ein Aufruf mehr je Material.")
+            st.info(T("{datei} enthält schon {anzahl}. Start setzt fort und überspringt Fertiges. Für einen neuen Lauf "
+                      "einen anderen Namen wählen.", datei=out.name, anzahl=anzahl(fertig_n, "Material", "Materialien")))
+        lrt_check = st.checkbox(T("Inhaltstyp am fertigen Material prüfen"), value=True,
+                                help=T("Bestimmt den Inhaltstyp ohne Kenntnis des Seeds und protokolliert, ob er "
+                                       "passt. Ein Aufruf mehr je Material."))
         from sem.generate import SPRACHEN
-        sprache = st.selectbox("Ausgabesprache", list(SPRACHEN), format_func=SPRACHEN.get, key="m-sprache",
-                               help="Sprache von Volltext, Titel, Beschreibung, Keywords und Fragen. Die Vorgaben "
-                                    "bleiben deutsch; bei einer anderen Sprache wird der Hinweis aus der Vorlage "
-                                    "„ausgabesprache“ (Reiter „Prompts“) angehängt. Steht in cclom:general_language.")
+        sprache = st.selectbox(T("Ausgabesprache"), list(SPRACHEN), format_func=lambda c: T(SPRACHEN[c]),
+                               key=uk("m-sprache"),
+                               help=T("Sprache von Volltext, Titel, Beschreibung, Keywords und Fragen. Die Vorgaben "
+                                      "bleiben deutsch; bei einer anderen Sprache wird der Hinweis aus der Vorlage "
+                                      "„ausgabesprache“ (Reiter „Prompts“) angehängt. Steht in cclom:general_language."))
         laeuft = bool(jobs().get("mat") and not jobs()["mat"]["done"])
-        st.caption(f"Einstellungen aus der Seitenleiste: {cfg.model}, {cfg.workers} Worker, "
-                   f"Reasoning-Aufwand {cfg.reasoning_effort or 'Modellstandard'}.")
-        if st.button("Start / Fortsetzen", type="primary", disabled=laeuft):
+        st.caption(T("Einstellungen aus der Seitenleiste: {modell}, {worker} Worker, Reasoning-Aufwand {aufwand}.",
+                     modell=cfg.model, worker=cfg.workers, aufwand=cfg.reasoning_effort or T("Modellstandard")))
+        if st.button(T("Start / Fortsetzen"), type="primary", disabled=laeuft):
             start_job("mat", generate, src, out, cfg, limit=int(limit) or None, inhaltstyp_pruefen=lrt_check,
                       ausgabesprache=sprache)
         job_status("mat")
         if out.exists() and not laeuft:
             letzte = letzter_datensatz(out)
-            if letzte and st.toggle("Zuletzt erzeugtes Material zeigen (alle im Reiter „Vorschau“)", key="mat-letzte"):
+            if letzte and st.toggle(T("Zuletzt erzeugtes Material zeigen (alle im Reiter „Vorschau“)"), key="mat-letzte"):
                 with st.container(border=True):
                     zeige(letzte)
-            download(out, "Materialien herunterladen", "dl-mat")
+            download(out, T("Materialien herunterladen"), "dl-mat")
 
 # --- Vorschau ---------------------------------------------------------------------------------
 with tab_vorschau:
-    st.subheader("Vorschau")
-    art = st.radio("Anzeigen", ["materialien", "seeds"], horizontal=True, key="v-art",
-                   format_func=lambda a: {"materialien": "Erzeugte Materialien (materialien_…)",
+    st.subheader(T("Vorschau"))
+    art = st.radio(T("Anzeigen"), ["materialien", "seeds"], horizontal=True, key=uk("v-art"),
+                   format_func=lambda a: {"materialien": T("Erzeugte Materialien (materialien_…)"),
                                           "seeds": "Seeds (seeds_…)"}[a])
     dateien = ausgabedateien(art)
     if not dateien:
-        st.info("Noch keine erzeugten Materialien in output/ – erst im Reiter „Materialien“ starten."
-                if art == "materialien" else "Noch keine Seeds in output/.")
+        st.info(T("Noch keine erzeugten Materialien in output/ – erst im Reiter „Materialien“ starten.")
+                if art == "materialien" else T("Noch keine Seeds in output/."))
     else:
         einheit = ("Material", "Materialien") if art == "materialien" else ("Seed", "Seeds")
-        datei = st.selectbox("Datei (neueste zuerst)", dateien, key=f"v-datei-{art}",
+        datei = st.selectbox(T("Datei (neueste zuerst)"), dateien, key=f"v-datei-{art}",
                              format_func=lambda p: f"{p.name} – {anzahl(zeilen(p), *einheit)}")
         gesamt = zeilen(datei)
         limit = None
         if gesamt > 5000:
-            limit = st.number_input(f"Datensätze laden (von {gesamt}; große Dateien brauchen Zeit)", 100, gesamt,
-                                    5000, step=1000, key=f"v-limit-{art}",
-                                    help="Suche und Blättern beziehen sich auf die geladenen Datensätze.")
+            limit = st.number_input(T("Datensätze laden (von {n}; große Dateien brauchen Zeit)", n=gesamt), 100,
+                                    gesamt, 5000, step=1000, key=f"v-limit-{art}",
+                                    help=T("Suche und Blättern beziehen sich auf die geladenen Datensätze."))
         rows = _lade(str(datei), datei.stat().st_mtime, limit)
         c1, c2 = st.columns([2, 1])
-        such = c1.text_input("Suchen (Thema, Fach, Inhaltstyp, Titel, Keyword, id)", key="v-such").casefold()
+        such = c1.text_input(T("Suchen (Thema, Fach, Inhaltstyp, Titel, Keyword, id)"), key="v-such").casefold()
         treffer = [r for r in rows if such in vorschau.suchtext(r)] if such else rows
-        c2.metric("Datensätze", f"{len(treffer)} / {len(rows)}")
+        c2.metric(T("Datensätze"), f"{len(treffer)} / {len(rows)}")
         if treffer:
             if st.session_state.get("v-nr", 1) > len(treffer):
                 st.session_state["v-nr"] = 1
             b1, b2 = st.columns([1, 4])
-            if b1.button("Zufällig", key="v-zufall"):
+            if b1.button(T("Zufällig"), key="v-zufall"):
                 import random
 
                 st.session_state["v-nr"] = random.randint(1, len(treffer))
-            nr = b2.number_input("Nr.", 1, len(treffer), key="v-nr")
+            nr = b2.number_input(T("Nr."), 1, len(treffer), key="v-nr")
             zeige(treffer[int(nr) - 1])
 
 # --- Prompts --------------------------------------------------------------------------------
 with tab_prompts:
-    st.subheader("Prompts bearbeiten")
-    scope = st.selectbox("Gültig für", ["alle Bereiche"] + list(BEREICHE))
+    st.subheader(T("Prompts bearbeiten"))
+    st.caption(T("Die Prompts selbst sind deutsch; die Sprache der erzeugten Inhalte wählt man im Reiter "
+                 "„Materialien“ (Ausgabesprache)."))
+    scope = st.selectbox(T("Gültig für"), ["alle Bereiche"] + list(BEREICHE),
+                         format_func=lambda s: T("alle Bereiche") if s == "alle Bereiche" else T(bereich(s).label), key=uk("p-scope"))
     which = st.selectbox("Prompt", PROMPT_FILES)
     bkey = None if scope == "alle Bereiche" else scope
     path = prompt_path(which, bkey)
     target = PROMPT_DIR / f"{which}.md" if bkey is None else PROMPT_DIR / bkey / f"{which}.md"
-    st.caption(f"Quelle: {path.relative_to(ROOT)} · speichert nach: {target.relative_to(ROOT)}")
-    text = st.text_area("Text", path.read_text(encoding="utf-8"), height=320, key=f"p-{scope}-{which}")
-    st.caption("Platzhalter: " + (", ".join(placeholders(text)) or "keine") + " · Jedes Material speichert den "
-               "Hash der verwendeten Prompts, Änderungen bleiben so nachvollziehbar.")
-    if st.button("Speichern"):
+    st.caption(T("Quelle: {quelle} · speichert nach: {ziel}", quelle=path.relative_to(ROOT),
+                 ziel=target.relative_to(ROOT)))
+    text = st.text_area(T("Text"), path.read_text(encoding="utf-8"), height=320, key=f"p-{scope}-{which}")
+    st.caption(T("Platzhalter: {liste} · Jedes Material speichert den Hash der verwendeten Prompts, Änderungen "
+                 "bleiben so nachvollziehbar.", liste=", ".join(placeholders(text)) or T("keine")))
+    if st.button(T("Speichern")):
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(text.strip() + "\n", encoding="utf-8")
-        st.success("gespeichert – gilt für den nächsten Start")
+        st.success(T("gespeichert – gilt für den nächsten Start"))
 
 # --- Mappings -------------------------------------------------------------------------------
 with tab_map:
-    st.subheader("Vokabulare und Mappings")
-    st.caption("Alle Dateien sind auch einzeln nutzbar. Beschreibung der Felder: data/README.md")
-    groups = {"Vokabulare": sorted(VOCAB_DIR.glob("*.json"))}
+    st.subheader(T("Vokabulare und Mappings"))
+    st.caption(T("Alle Dateien sind auch einzeln nutzbar. Beschreibung der Felder: data/README.md"))
+    groups = {T("Vokabulare"): sorted(VOCAB_DIR.glob("*.json"))}
     for d in sorted(p for p in MAPPING_DIR.iterdir() if p.is_dir()):
         groups[f"Mappings {d.name}"] = sorted(p for p in d.iterdir() if p.suffix in (".json", ".jsonl", ".csv"))
     for title, paths in groups.items():
         st.markdown(f"**{title}**")
         for p in paths:
             with st.expander(f"{p.name} ({p.stat().st_size // 1024} KB)"):
-                download(p, "Herunterladen", f"dl-{p}")
-                if not st.toggle("Inhalt anzeigen", key=f"show-{p}"):
+                download(p, T("Herunterladen"), f"dl-{p}")
+                if not st.toggle(T("Inhalt anzeigen"), key=f"show-{p}"):
                     continue
                 if p.suffix == ".csv":
                     st.dataframe(pd.read_csv(p), height=250)
@@ -354,29 +391,29 @@ with tab_map:
                     items = data.get("concepts") or data.get("inhaltstypen") or data.get("niveaus")
                     st.dataframe(pd.DataFrame(items)) if items else st.json(data, expanded=False)
 
-    st.markdown("**Mappings neu bauen** (fortsetzbar; bereits Erledigtes wird übersprungen)")
+    st.markdown(T("**Mappings neu bauen** (fortsetzbar; bereits Erledigtes wird übersprungen)"))
     for key in BEREICHE:
         b = bereich(key)
         schritte = {x.key: x for x in b.mapping_schritte()}
         if not schritte:
             continue
         with st.container(border=True):
-            st.markdown(f"**{b.label}**")
-            if st.toggle("Aktuellen Stand des Mappings anzeigen", key=f"stat-{key}"):
+            st.markdown(f"**{T(b.label)}**")
+            if st.toggle(T("Aktuellen Stand des Mappings anzeigen"), key=f"stat-{key}"):
                 st.json(b.mapping_statistik())
-            wahl = st.multiselect("Schritte", list(schritte), default=[], key=f"ms-{key}",
-                                  placeholder="Schritte wählen (die Daten im Repo sind fertig gebaut)",
-                                  format_func=lambda k, s=schritte: f"{s[k].label}{' (LLM)' if s[k].llm else ''}")
+            wahl = st.multiselect(T("Schritte"), list(schritte), default=[], key=uk(f"ms-{key}"),
+                                  placeholder=T("Schritte wählen (die Daten im Repo sind fertig gebaut)"),
+                                  format_func=lambda k, s=schritte: f"{T(s[k].label)}{' (LLM)' if s[k].llm else ''}")
             if any(schritte[k].llm for k in wahl):
-                st.warning("Ausgewählte Schritte rufen das LLM auf und verursachen Kosten. Bereits Erledigtes "
-                           "wird übersprungen.")
+                st.warning(T("Ausgewählte Schritte rufen das LLM auf und verursachen Kosten. Bereits Erledigtes "
+                             "wird übersprungen."))
             c1, c2 = st.columns(2)
-            lim = c1.number_input("Nur die ersten N Themen (0 = alle)", 0, 100_000, 0, key=f"ml-{key}")
-            stimmen = c2.number_input("Stimmen je Zuordnung", 1, 7, 3, key=f"mv-{key}")
-            wlo_txt = st.text_input("WLO-Exporte (CSV-Pfade, durch Komma getrennt; bleiben lokal)", key=f"mw-{key}")
+            lim = c1.number_input(T("Nur die ersten N Themen (0 = alle)"), 0, 100_000, 0, key=f"ml-{key}")
+            stimmen = c2.number_input(T("Stimmen je Zuordnung"), 1, 7, 3, key=f"mv-{key}")
+            wlo_txt = st.text_input(T("WLO-Exporte (CSV-Pfade, durch Komma getrennt; bleiben lokal)"), key=f"mw-{key}")
             job = f"map-{key}"
             laeuft = bool(jobs().get(job) and not jobs()[job]["done"])
-            if st.button("Start / Fortsetzen", key=f"mb-{key}", disabled=laeuft or not wahl):
+            if st.button(T("Start / Fortsetzen"), key=f"mb-{key}", disabled=laeuft or not wahl):
                 start_job(job, b.mapping_ausfuehren, b.schritte_aufloesen([k for k in schritte if k in wahl]), cfg,
                           limit=int(lim) or None, stimmen=int(stimmen), embedding_modell=emb_model,
                           wlo_dateien=[x.strip() for x in wlo_txt.split(",") if x.strip()] or None)
@@ -384,4 +421,6 @@ with tab_map:
 
 # --- Methodik -------------------------------------------------------------------------------
 with tab_meth:
-    st.markdown((ROOT / "METHODIK.md").read_text(encoding="utf-8"))
+    methodik = ROOT / ("METHODIK.md" if UI == "de" else "METHODOLOGY.md")
+    text = (methodik if methodik.exists() else ROOT / "METHODIK.md").read_text(encoding="utf-8")
+    st.markdown("\n".join(z for z in text.splitlines() if not z.startswith(("*English ·", "*[English]"))))

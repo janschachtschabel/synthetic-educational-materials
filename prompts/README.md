@@ -1,27 +1,28 @@
 # Prompts
 
-Alle Prompts sind editierbar, entweder hier als Datei oder in der Oberfläche (Reiter „Prompts“).
-Platzhalter stehen in doppelten geschweiften Klammern, z. B. `{{thema}}`. Welche es gibt, steht in
-[`../METHODIK.md`](../METHODIK.md#platzhalter).
+*English · [Deutsch](README.de.md)*
 
-| Datei | Schritt | Ausgabe |
+All prompts are editable, either here as files or in the user interface (tab “Prompts”). The prompt templates themselves are in German.
+Placeholders use double curly braces, e.g. `{{thema}}`. See
+[`../METHODOLOGY.md`](../METHODOLOGY.md#placeholders) for the available placeholders.
+
+| File | Step | Output |
 |---|---|---|
-| `volltext_system.md` | Volltext erzeugen (Rolle, Grundregeln) | – |
-| `volltext.md` | Volltext erzeugen (Vorgaben aus dem Seed, Auftrag) | Fließtext/Markdown, etwa eine A4-Seite |
-| `system.md` | gemeinsamer Systemprompt für alle Metadatenfelder | – |
-| `material.md` | gemeinsame Vorlage: Volltext, vorhandene Felder, `{{auftrag}}` (Volltext zuerst, damit der Anbieter den gleichbleibenden Anfang zwischenspeichern kann) | – |
-| `titel.md` | Auftrag Titel | eine Zeile |
-| `beschreibung.md` | Auftrag Beschreibung | Text, 400–800 Zeichen |
-| `keywords.md` | Auftrag Schlagworte | kommagetrennte Liste, 5–8 |
-| `inhaltstyp.md` | Auftrag Inhaltstyp-Prüfung (ohne Seed-Wert) | eine id aus `{{kategorien}}` |
-| `fragen_antworten.md` | Auftrag Frage-Antwort-Paare | JSON `{"paare": [...]}` |
-| `ausgabesprache.md` | Hinweis an beide Systemprompts, nur wenn beim Erzeugen eine andere Ausgabesprache als Deutsch gewählt ist (App: „Ausgabesprache“, CLI: `--sprache en`) | – |
+| `volltext_system.md` | Generate full text (role, basic rules) | – |
+| `volltext.md` | Generate full text (instructions from the seed, task) | Prose/Markdown, about one A4 page |
+| `system.md` | Shared system prompt for all metadata fields | – |
+| `material.md` | Shared template: full text, existing fields, `{{auftrag}}` (full text first so the provider can cache the unchanged beginning) | – |
+| `titel.md` | Title task | one line |
+| `beschreibung.md` | Description task | text, 400–800 characters |
+| `keywords.md` | Keywords task | comma-separated list, 5–8 |
+| `inhaltstyp.md` | Content type verification task (without seed value) | one ID from `{{kategorien}}` |
+| `fragen_antworten.md` | Question-and-answer pairs task | JSON `{"paare": [...]}` |
+| `ausgabesprache.md` | Note for both system prompts, only when an output language other than German is selected during generation (app: “Ausgabesprache” (output language), CLI: `--sprache en`) | – |
 
-Die Felder werden nacheinander erzeugt: Titel, Beschreibung, Keywords, Inhaltstyp, Fragen. Jeder Aufruf
-setzt den Felddatei-Text als `{{auftrag}}` in `material.md` ein und sieht die zuvor erzeugten Felder.
-Das Thema aus dem Seed sieht nur der Volltext-Prompt; die Metadaten werden aus dem Text abgeleitet.
+The fields are generated sequentially: Title, Description, Keywords, Content type, Questions. Each call
+inserts the field file text as `{{auftrag}}` in `material.md` and sees the fields generated previously.
+The topic from the seed is visible only to the full-text prompt; the metadata is derived from the text.
 
-Titel, Beschreibung, Schlagworte, Inhaltstyp und der Systemprompt folgen den Prompts der
-WLO-Metadatenanreicherung (Beispiele und Terminologie-Hinweis für die Hochschule ergänzt).
+Title, Description, Keywords, Content type, and the system prompt follow the prompts for WLO metadata enrichment (with examples and a terminology note for higher education added).
 
-Ein Bildungsbereich kann eigene Fassungen mitbringen: `prompts/<bereich>/<datei>` hat Vorrang.
+An education sector can include its own versions: `prompts/<bereich>/<datei>` takes precedence.
