@@ -1,10 +1,12 @@
 """Registry der Bildungsbereiche. Ein neuer Bereich wird hier eingetragen."""
 
 from .base import Bildungsbereich
+from .berufsbildung import Berufsbildung
 from .hochschule import Hochschule
 
 BEREICHE: dict[str, type[Bildungsbereich]] = {
     Hochschule.key: Hochschule,
+    Berufsbildung.key: Berufsbildung,
 }
 
 

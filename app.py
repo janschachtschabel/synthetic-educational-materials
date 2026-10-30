@@ -196,10 +196,11 @@ with tab_seeds:
     st.subheader("Seeds erzeugen")
     st.caption("Ohne LLM. Gleicher Startwert für den Zufall und gleiche Einstellungen ergeben dieselben Seeds.")
     counts, balance, auswahl = {}, {}, {}
-    for key in BEREICHE:
+    for i, key in enumerate(BEREICHE):
         b = bereich(key)
         c1, c2 = st.columns([1, 2])
-        counts[key] = c1.number_input(f"{b.label}: Anzahl", 0, 1_000_000, 1000, step=500, key=f"n-{key}")
+        counts[key] = c1.number_input(f"{b.label}: Anzahl", 0, 1_000_000, 1000 if i == 0 else 0, step=500,
+                                      key=f"n-{key}")
         opts = list(b.balance_options)
         balance[key] = c2.selectbox(f"{b.label}: gleich verteilen nach", opts, index=opts.index(b.default_balance),
                                     format_func=lambda o, b=b: f"{o} – {b.balance_options[o]}", key=f"bal-{key}")
@@ -216,7 +217,8 @@ with tab_seeds:
                            "Voreinstellung: gesichert, wahrscheinlich und redaktionell; unsicher erst nach Prüfung.")
     rnd = st.number_input("Startwert für den Zufall", 0, 2**31 - 1, 42,
                           help="Gleicher Startwert und gleiche Einstellungen ergeben dieselben Seeds.")
-    ziel = dateiname_feld("Dateiname", "seeds", f"hochschule{sum(counts.values())}_s{rnd}", "s-name",
+    ziel = dateiname_feld("Dateiname", "seeds", "_".join(f"{k}{v}" for k, v in counts.items() if v) + f"_s{rnd}",
+                          "s-name",
                           "Frei wählbar, z. B. hochschule30000_s42")
     vorhanden = ziel.exists()
     if vorhanden:

@@ -15,25 +15,26 @@ from pathlib import Path
 KORREKTUR_SPALTEN = ["korrektur_codes", "korrektur_lehrebene", "kommentar"]
 
 
-def schreibe_pruefliste(path: Path, rows: list[dict]):
+def schreibe_pruefliste(path: Path, rows: list[dict], korrektur_spalten: list[str] = KORREKTUR_SPALTEN):
     spalten = list(dict.fromkeys(k for r in rows for k in r)) if rows else ["id", "grund"]
-    spalten += [s for s in KORREKTUR_SPALTEN if s not in spalten]
+    spalten += [s for s in korrektur_spalten if s not in spalten]
     with Path(path).open("w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=spalten)
         w.writeheader()
         w.writerows(rows)
 
 
-def lade_korrekturen(path: Path) -> dict[str, dict]:
+def lade_korrekturen(path: Path, ebene_spalte: str = "korrektur_lehrebene") -> dict[str, dict]:
     """id -> {"codes": [...] | None, "lehrebene": str | None, "ausschliessen": bool, "kommentar": str}.
-    Leere Zeilen zählen nicht."""
+    ebene_spalte: Spalte für die zweite Dimension (Hochschule: Lehrebene, Berufsbildung: Qualifizierungsweg);
+    ihr Wert steht immer unter "lehrebene". Leere Zeilen zählen nicht."""
     if not Path(path).exists():
         return {}
     out = {}
     with Path(path).open(encoding="utf-8-sig") as f:
         for r in csv.DictReader(f):
             codes = [c.strip() for c in (r.get("korrektur_codes") or "").split("|") if c.strip()]
-            ebene = (r.get("korrektur_lehrebene") or "").strip() or None
+            ebene = (r.get(ebene_spalte) or "").strip() or None
             aus = codes == ["-"]
             if r.get("id") and (codes or ebene):
                 out[r["id"].strip()] = {"codes": None if aus else codes or None, "lehrebene": ebene,

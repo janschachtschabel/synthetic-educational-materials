@@ -30,6 +30,9 @@ offene Vokabulare und Taxonomien ──► Mappings (Themen mit Fachzuordnung) �
 | [hbz-Verbundkatalog](https://lobid.org/resources) über lobid-resources | Kandidaten und Belege: Häufigkeit eines Schlagworts in Lehrbüchern und Hochschulschriften | CC0 1.0 |
 | [WirLernenOnline](https://wirlernenonline.de) (Export der Redaktion) | nur Keywords in Verbindung mit Hochschulfächern, als Kandidaten und Belege; keine Titel, Beschreibungen oder Inhalte | Keywords nur als Häufigkeiten bzw. Abgleich auf GND/OpenAlex |
 | [KIM-Bildungsstufen](https://w3id.org/kim/educationalLevel/) | `exactMatch` der Niveaustufen | CC0 1.0 |
+| [ESCO](https://esco.ec.europa.eu) über die öffentliche API (2.938 Berufe, 12.564 Kompetenzen, deutsche Labels und Beschreibungen) | Berufe und Kompetenzen Berufsbildung, ESCO-Original-URIs | EU-Weiterverwendung (Beschluss 2011/833/EU), „Quelle: ESCO, Europäische Kommission“ in jeder Herkunftsangabe |
+| OEH-Vokabulare `kldb` (KldB 2010, Fassung 2020, Ebenen 1–4 mit Kurzbeschreibungen), `escoSkills`, `dqrCompetenceLevels` | Berufsfeld (wie WLO-Feld `ccm:oeh_profession_group`), Abgleich der Kompetenzen, DQR-Niveaus | CC0 1.0; KldB: „Quelle: Statistik der Bundesagentur für Arbeit“ |
+| [Umsteigeschlüssel KldB 2020 → ISCO-08](https://statistik.arbeitsagentur.de/DE/Navigation/Grundlagen/Klassifikationen/Klassifikation-der-Berufe/KldB2010-Fassung2020/Arbeitsmittel/Arbeitsmittel-Nav.html) (BA, Stand 06.08.2021) | Handmapping-Hinweise ESCO-Beruf → KldB und Anforderungsniveaus | „Quelle: Statistik der Bundesagentur für Arbeit“; nur im Zwischenspeicher |
 
 Die Vokabulare liegen aufbereitet unter `data/vocabs/` (Abruf mit `scripts/fetch_vocabs.py`, Datum in
 der Datei).
@@ -143,6 +146,67 @@ oder Audio-Transkript), für welche Lehrebenen er passt und optional für welche
 Zuordnung zu den DQR- und KIM-Stufen ist dort hinterlegt. Ausgeschlossen werden Forschungsthemen im
 1.–2. Studienjahr und Grundlagenthemen im Master.
 
+## Mappings Berufsbildung
+
+**Themen** sind Kombinationen aus einem ESCO-Beruf und einer Kompetenz, die laut ESCO an diesem Beruf
+hängt (essenziell oder optional). ESCO hat 2.938 Berufe mit im Mittel 18 essenziellen und 16 optionalen
+Kompetenzen; das ergibt rund 60.000 essenzielle und 54.000 optionale Beruf-Kompetenz-Paare. Berufe und
+Kompetenzen tragen ihre ESCO-Original-URIs (`http://data.europa.eu/esco/…`) mit deutschem Label und
+Beschreibung, unverändert aus ESCO.
+
+**Berufsfeld** ist die Klassifikation der Berufe (KldB 2010, Fassung 2020) aus dem OEH-Vokabular `kldb`,
+das WLO für `ccm:oeh_profession_group` nutzt: Berufsbereich (10) → Berufshauptgruppe (37) → Berufsgruppe
+(144) → Berufsuntergruppe (703). Jeder Beruf bekommt ein bis zwei Berufsuntergruppen; die oberen Ebenen
+werden abgeleitet.
+
+Schritte (`python -m sem mappings berufsbildung --liste`), alle fortsetzbar:
+
+1. `esco`: Berufe und alle verknüpften Kompetenzen über die ESCO-API laden (Zwischenspeicher
+   `data/cache/esco/`). Vier Berufe und fünf Kompetenzen liefert die API mit Serverfehler nicht aus; sie
+   fehlen.
+2. `hinweise`: Der Umsteigeschlüssel der Bundesagentur für Arbeit ordnet jedem KldB-5-Steller ISCO-08-
+   Gruppen zu. Umgekehrt gelesen ergibt das je ISCO-Gruppe die passenden KldB-Berufsuntergruppen und
+   die Anforderungsniveaus (5. Stelle: Helfer, Fachkraft, Spezialist, Experte). Über den ISCO-Code des
+   ESCO-Berufs wird das zum Handmapping-Hinweis.
+3. `kandidaten`: Lokale Embeddings vergleichen Bezeichnung, Synonyme und Beschreibung des Berufs mit
+   Label, Definition und typischen Tätigkeiten aller 703 Berufsuntergruppen. Kandidaten: die 15
+   ähnlichsten plus bis zu vier aus dem Umsteigeschlüssel.
+4. `kldb`: drei Stimmen je Beruf (drei Perspektiven: KldB-Codierung, Berufsberatung, Arbeitsmarktstatistik)
+   wählen ein bis zwei Untergruppen nach der berufsfachlichen Tätigkeit, mit Begründung und Belegbegriffen.
+5. `qualifizierung`: drei Stimmen je Beruf zum üblichen Weg in den Beruf in Deutschland: `ausbildung`
+   (anerkannter Ausbildungsberuf, dual oder schulisch), `fortbildung` (Aufstiegsfortbildung nach einer
+   Ausbildung), `studium` oder `anlernen`. Als Hinweis sehen die Stimmen die KldB-Anforderungsniveaus der
+   ISCO-Gruppe.
+6. `wlo` (optional, `--wlo export.csv`): Keywords und Berufsgruppen der WLO-Datensätze mit Bildungsstufe
+   Berufliche Bildung oder Fortbildung. Exakt gleiche Labels werden als Beleg an Kompetenzen und Berufe
+   gehängt (Zahl der Datensätze, Node-IDs, KldB-Berufsgruppen der Datensätze). Titel, Beschreibungen und
+   URLs werden nicht gelesen; der Export bleibt lokal.
+7. `zusammenfuehren` (läuft zuletzt): Auswertung wie bei Hochschule (Status, Konfidenz,
+   `handmapping_bestaetigt` = gewählte Untergruppe steht im Umsteigeschlüssel), `berufe.jsonl`,
+   `kompetenzen.jsonl` und `pruefliste_berufe.csv`. `korrekturen.csv` hat Vorrang (Spalten
+   `korrektur_codes` = KldB-Kennziffern, `-` = Beruf ausschließen, `korrektur_qualifizierung`).
+
+Die Kompetenzen werden mit dem OEH-Vokabular `escoSkills` abgeglichen (`skos:exactMatch` auf die
+ESCO-URI): 12.332 von 12.548 Kompetenzen sind dort enthalten; deren OEH-URI steht als `exactMatch` im
+Seed, maßgeblich bleibt die ESCO-URI. 438 Kompetenzen haben einen WLO-Beleg.
+
+**Ergebnis** (2.935 Berufe nach drei redaktionellen Ausschlüssen: Escort, Wahrsager, Astrologe): KldB
+gesichert 2.114, wahrscheinlich 722, unsicher 99; in 2.017 Fällen bestätigt der Umsteigeschlüssel die
+gewählte Untergruppe. Qualifizierung: Ausbildung 1.192, Fortbildung 434, Studium 797, Anlernen 512
+(gesichert 2.322, unsicher 18). 418 Berufe stehen auf der Prüfliste. Mit der Voreinstellung (Ausbildung
+und Fortbildung, essenzielle Kompetenzen ohne Querschnittskompetenzen, ohne `unsicher`) gehen 32.389 von
+113.598 Beruf-Kompetenz-Themen in die Seeds ein.
+
+**Inhaltstypen** (`inhaltstypen.json`): 18 Typen aus OEH `new_lrt` mit Textsorten für die Berufsbildung,
+z. B. Lernsituation nach der vollständigen Handlung (als „Fallstudie“), Arbeitsanleitung, Checkliste,
+Prüfungsaufgaben, Unterweisungsentwurf nach der Vier-Stufen-Methode. Jeder Typ ist auf Kompetenzarten
+(Kenntnisse bzw. Fähigkeiten) und Zielgruppen beschränkt.
+
+**Niveaus** (`niveaus.json`) nach DQR mit `exactMatch` auf das OEH-Vokabular `dqrCompetenceLevels`:
+Anlernen (2), Ausbildung 1. Jahr (3), Ausbildung 2. und 3. Jahr (4), Fortbildung Berufsspezialist (5),
+Bachelor Professional (6), Master Professional (7). Gezogen wird nur, was zum Qualifizierungsweg passt;
+die Bildungsstufe folgt daraus (Berufliche Bildung bzw. Fortbildung).
+
 ## Seeds
 
 Ein Seed ist ein JSON-Objekt (eine Zeile in JSONL). Feldnamen folgen dem edu-sharing/OEH-Schema:
@@ -192,6 +256,28 @@ Jeder Seed trägt in `synth:provenance` → `synth:thema` den Status je Zuordnun
 Katalogzahlen mit Abfrage-URI (lobid), WLO-Datensätze mit Verweis auf WirLernenOnline.de und, wo der
 Export sie enthält, Links auf die Node-IDs. Von WLO werden nur Keywords in Verbindung mit
 Hochschulfächern genutzt. Die `.stats.json` zählt Themenquellen, Status und Belege.
+
+**Seeds Berufsbildung.** Statt `ccm:oeh_taxonid_university` tragen sie `ccm:oeh_profession_group`
+(KldB-Berufsuntergruppen, OEH-URIs), dazu `synth:beruf` (ESCO-URI, Label, ISCO-08, Beschreibung,
+Qualifizierungsweg, KldB-Oberebenen) und `synth:kompetenz` (ESCO-URI, Label, Beschreibung, Art,
+Reichweite, essenziell/optional, `exactMatch` auf OEH `escoSkills`). `synth:thema` ist die Kompetenz im
+Kontext des Berufs. Inhaltstyp passt zu Kompetenzart und Zielgruppe (80 % Lernende, 20 % Lehrende und
+Ausbildende); das Niveau passt zum Qualifizierungsweg. Optional: `synth:lernort` (40 %; Berufsschule,
+Ausbildungsbetrieb, überbetriebliche Ausbildungsstätte bzw. Fortbildungsorte) und
+`synth:querschnittsthema` (25 %; eine der vier Standardberufsbildpositionen). Gleichverteilung: `beruf`
+(Standard), `thema`, `kompetenz`, `berufsgruppe`, `berufshauptgruppe`, `berufsbereich`.
+
+| Filter (Berufsbildung) | Werte | Voreinstellung |
+|---|---|---|
+| `qualifizierung` | `ausbildung`, `fortbildung`, `studium`, `anlernen` | Ausbildung und Fortbildung |
+| `relation` | `essenziell`, `optional` | essenziell |
+| `kompetenzart` | `wissen`, `faehigkeit` | beide |
+| `reichweite` | `berufsspezifisch`, `branchenspezifisch`, `branchenuebergreifend`, `querschnitt` | ohne `querschnitt` |
+| `kldb_status`, `qualifizierung_status` | wie `fach_status` | ohne `unsicher` |
+| `belege` | `wlo` (Kompetenz als WLO-Keyword mit Datensätzen derselben KldB-Berufsgruppe), `wlo_beruf` (Beruf als WLO-Keyword), `handmapping` (KldB durch Umsteigeschlüssel bestätigt) | keine Anforderung |
+
+Der Volltext-Prompt der Berufsbildung (`prompts/berufsbildung/volltext.md`) nennt Beruf, Kompetenz,
+Berufsfeld, Lernort und Querschnittsthema und verlangt Bezug auf typische Arbeitsaufgaben im Beruf.
 
 **Reproduzierbarkeit.** Gleiche Mappings, gleiche Einstellungen und gleicher Zufalls-Seed ergeben
 identische Seeds. Neben jeder Seed-Datei liegt eine `.stats.json` mit Parametern und Verteilungen.
@@ -248,6 +334,7 @@ Bedingte Abschnitte `{{#name}}…{{/name}}` erscheinen nur, wenn der Wert gesetz
 | `thema`, `thema_beschreibung`, `thema_keywords` | aus dem Thema (deutsch) |
 | `fach`, `bildungsstufe`, `niveau`, `zielgruppe` | aus den Metadaten (bereinigte Labels) |
 | `didaktische_funktion`, `bearbeitungsdauer` | optional |
+| `beruf`, `beruf_beschreibung`, `kompetenzart`, `lernort`, `querschnittsthema` | nur Berufsbildung (`lernort`, `querschnittsthema` optional) |
 | `rolle`, `sprache` | Autorenrolle im Volltext-Prompt, Sprache als Wort |
 | `titel`, `beschreibung`, `keywords`, `volltext`, `auftrag` | nur in `material.md`: bisher erzeugte Felder („-“ = leer), Volltext, Auftrag aus der Felddatei |
 | `kategorien`, `beispiel_id` | nur in `inhaltstyp.md`: Liste „Name → id“ der Inhaltstypen |
@@ -263,6 +350,10 @@ Bedingte Abschnitte `{{#name}}…{{/name}}` erscheinen nur, wenn der Wert gesetz
 - Die Lehrebene ist ungleich verteilt (94 grundlagen, 2.810 vertiefung, 1.612 forschung). Weil Forschungs-
   themen im 1.–2. Studienjahr ausgeschlossen sind, ist dieses Niveau bei Gleichverteilung nach Thema
   seltener (bei 30.000 Seeds rund 22 % statt 33 %). Die GND-Themen aus Lehrbüchern gleichen das aus.
+- ESCO ist europäisch. Viele Berufe entsprechen keinem deutschen Ausbildungsberuf eins zu eins, manche
+  deutsche Übersetzungen sind holprig. Der Qualifizierungsweg ist eine Einschätzung per Abstimmung,
+  keine amtliche Zuordnung zu den anerkannten Ausbildungsberufen (deren Verzeichnis ist nicht offen
+  lizenziert). Lernfelder der Rahmenlehrpläne gibt es nicht maschinenlesbar; sie fehlen.
 - Synthetische Texte können fachliche Fehler enthalten. Für Trainingszwecke ist die Abbildung Text →
   Metadaten wichtiger als die fachliche Tiefe. Für eine Veröffentlichung als Lernmaterial sind sie nicht
   geprüft.

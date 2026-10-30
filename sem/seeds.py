@@ -36,6 +36,7 @@ def stats(seeds: list[dict]) -> dict:
 
     themen = Counter(s[S.F_THEMA]["id"] for s in seeds)
     per_group = Counter(s["synth:seed_parameter"]["gruppe"] for s in seeds)
+    status_keys = list(dict.fromkeys(k for s in seeds for k in _tp(s).get("status", {})))
     return {
         "anzahl": len(seeds),
         "bildungsbereiche": dict(Counter(s[S.F_BEREICH] for s in seeds)),
@@ -44,12 +45,12 @@ def stats(seeds: list[dict]) -> dict:
                             "max": max(per_group.values(), default=0)},
         "seeds_je_thema": {"min": min(themen.values(), default=0), "max": max(themen.values(), default=0)},
         "inhaltstyp": dict(count(S.F_LRT).most_common()),
-        "fach_primaer": dict(count(S.F_TAXON_UNI).most_common()),
+        "fach_primaer": dict((count(S.F_TAXON_UNI) + count(S.F_PROFESSION)).most_common()),
         "niveau": dict(Counter(s[S.F_NIVEAU]["label"] for s in seeds if S.F_NIVEAU in s)),
         "lehrebene": dict(Counter(s[S.F_THEMA].get("lehrebene") for s in seeds)),
         "themenquelle": dict(Counter(_tp(s).get("quelle") for s in seeds)),
-        "status": {k: dict(Counter(_tp(s)["status"][k] for s in seeds if k in _tp(s).get("status", {})))
-                   for k in ("fach", "lehrebene", "hochschulrelevanz")},
+        "status": {k: dict(Counter(_tp(s)["status"][k] for s in seeds if _tp(s).get("status", {}).get(k)))
+                   for k in status_keys},
         "belege": dict(Counter(b for s in seeds for b in _tp(s).get("belege", {}).get("erfuellt", []))),
     }
 

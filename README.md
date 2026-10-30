@@ -4,8 +4,10 @@ Erzeugt **Seeds** und **synthetische Bildungsmaterialien** (Volltext, Titel, Bes
 didaktische Frage-Antwort-Paare) aus offenen Vokabularen und Taxonomien. Struktur und Feldnamen folgen
 dem OpenEduHub/edu-sharing-Metadatenschema. Jeder Wert trägt URI, Label und Herkunft.
 
-Bildungsbereiche sind Module. Enthalten ist bisher **Hochschule** (Destatis-Fächersystematik,
-OpenAlex-Themen, Lehrthemen aus GND und hbz-Katalog, Keyword-Belege aus WirLernenOnline). Weitere Bereiche lassen sich ergänzen.
+Bildungsbereiche sind Module. Enthalten sind **Hochschule** (Destatis-Fächersystematik,
+OpenAlex-Themen, Lehrthemen aus GND und hbz-Katalog, Keyword-Belege aus WirLernenOnline) und
+**Berufliche Bildung** (ESCO-Berufe × Kompetenzen, KldB-Berufsfelder, Qualifizierungsweg und DQR-Niveau,
+Handmapping über den BA-Umsteigeschlüssel ISCO → KldB). Weitere Bereiche lassen sich ergänzen.
 
 Wie alles entsteht: [METHODIK.md](METHODIK.md). Die Daten im Einzelnen: [data/README.md](data/README.md).
 
@@ -51,6 +53,9 @@ python -m sem mappings hochschule               # alle Schritte (LLM + lokale Em
 python -m sem mappings hochschule zusammenfuehren   # nur neu auswerten, z. B. nach Korrekturen
 python -m sem mappings hochschule wlo --wlo export.csv   # WLO-Keywords als Belege (Export bleibt lokal)
 python -m sem mappings hochschule gnd           # Themen aus GND und hbz-Katalog
+python -m sem auswahl berufsbildung             # Filter Berufsbildung (Qualifizierungsweg, Kompetenzart …)
+python -m sem seeds --anzahl berufsbildung=10000 --gleichverteilung berufsbildung=beruf --seed 42
+python -m sem mappings berufsbildung --wlo export.csv   # ESCO laden, KldB und Qualifizierung abstimmen, WLO-Belege
 ```
 
 LLM-Optionen für `materialien` und `mappings`: `--base-url`, `--api-key`, `--model`, `--workers`
@@ -72,6 +77,11 @@ Alles unter `data/` ist ohne den Code nutzbar (JSON, JSONL, CSV, UTF-8):
 - `data/mappings/hochschule/pruefliste_*.csv`, `korrekturen.csv`: Zuordnungen für die Durchsicht und deren Ergebnis
 - `data/mappings/hochschule/studienfach_gnd_sachgruppe.jsonl`: Studienfach → GND-Sachgruppen
 - `data/mappings/hochschule/openalex_teilgebiet_studienbereich.csv`: Handmapping der OpenAlex-Teilgebiete
+- `data/mappings/berufsbildung/berufe.jsonl`: 2.935 ESCO-Berufe mit KldB-Berufsuntergruppe (und Oberebenen),
+  Qualifizierungsweg, Status, Konfidenz, Handmapping-Bestätigung und den URIs ihrer essenziellen und
+  optionalen Kompetenzen
+- `data/mappings/berufsbildung/kompetenzen.jsonl`: 12.548 ESCO-Kompetenzen (Label, Beschreibung, Art,
+  Reichweite, ISCED-F-Feld, `oeh_uri` im OEH-Vokabular escoSkills, WLO-Belege)
 
 ## Aufbau
 
@@ -88,4 +98,6 @@ output/                    erzeugte Seeds und Materialien (nicht versioniert)
 
 ## Lizenz
 
-Code: Apache 2.0. Daten unter `data/`: aus CC0-Quellen abgeleitet, Herkunft siehe METHODIK.md.
+Code: Apache 2.0. Daten unter `data/`: aus CC0-Quellen abgeleitet; ESCO-Labels und -Beschreibungen unter
+den Weiterverwendungsbedingungen der EU-Kommission (Quelle: ESCO, Europäische Kommission), KldB mit
+Quellenangabe der Bundesagentur für Arbeit. Herkunft siehe METHODIK.md.

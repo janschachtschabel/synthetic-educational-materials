@@ -9,8 +9,40 @@ Je Vokabular eine Datei `<name>.json`:
  "concepts": [{"uri", "notation", "label", "broader", "level"}]}
 ```
 
-`broader` ist die URI des Oberbegriffs, `level` die Tiefe (0 = oberste Ebene). Neu laden mit
-`python scripts/fetch_vocabs.py`.
+`broader` ist die URI des Oberbegriffs, `level` die Tiefe (0 = oberste Ebene). Wo das Vokabular sie hat,
+stehen zusätzlich `definition` und `note` (KldB: Kurzbeschreibung und typische Tätigkeiten). Neu laden mit
+`python scripts/fetch_vocabs.py` (alle) oder `python scripts/fetch_vocabs.py kldb` (einzelne).
+
+## `mappings/berufsbildung/`
+
+| Datei | Inhalt |
+|---|---|
+| `berufe.jsonl` | ein ESCO-Beruf je Zeile, siehe unten |
+| `kompetenzen.jsonl` | eine ESCO-Kompetenz je Zeile: `uri`, `label`, `alt_labels`, `beschreibung`, `art` (`wissen`, `faehigkeit`), `reichweite` (`berufsspezifisch`, `branchenspezifisch`, `branchenuebergreifend`, `querschnitt`), `isced_f`, `essenziell_fuer`/`optional_fuer` (Zahl der Berufe), `oeh_uri` (OEH escoSkills), `belege.wlo` |
+| `pruefliste_berufe.csv` | Berufe mit Grund für eine Durchsicht, leere Korrekturspalten |
+| `korrekturen.csv` | redaktionelle Korrekturen (`korrektur_codes` = KldB-Kennziffern mit `|`, `-` = ausschließen, `korrektur_qualifizierung`, `kommentar`), Vorrang vor dem LLM |
+| `inhaltstypen.json` | genutzte Inhaltstypen aus OEH `new_lrt` mit Textsorte, Medienform, Kompetenzarten, Zielgruppen |
+| `niveaus.json` | DQR-Niveaus mit Qualifizierungsweg und Bildungsstufe |
+| `optionale_felder.json` | Werte und Anteile der optionalen Steuerfelder (Lernort, Querschnittsthema …) |
+
+Beruf-Struktur:
+
+```json
+{"uri": "http://data.europa.eu/esco/occupation/…", "label": "…", "alt_labels": ["…"], "beschreibung": "…",
+ "isco": "7212", "esco_code": "7212.1",
+ "berufsuntergruppe": [{"uri": "http://w3id.org/openeduhub/vocabs/kldb/2442", "notation": "2442", "label": "…"}],
+ "berufsgruppe": [{"uri", "notation", "label"}], "berufshauptgruppe": […], "berufsbereich": […],
+ "qualifizierung": "ausbildung | fortbildung | studium | anlernen",
+ "essenziell": ["http://data.europa.eu/esco/skill/…"], "optional": ["…"],
+ "quelle": {"name": "ESCO", "uri", "lizenz"}, "belege": {"wlo": {"datensaetze", "nodes", "kldb"}},
+ "mapping": {"methode", "modell", "embedding_modell", "stimmen", "datum", "prompt_hash",
+             "status", "konfidenz", "handmapping_bestaetigt", "kandidaten",
+             "kldb": [{"uri", "notation", "label", "stimmen", "an_erster_stelle", "konfidenz", "aehnlichkeit",
+                       "begruendungen", "belegbegriffe_im_text"}], "verworfen": {},
+             "qualifizierung": {"status", "konfidenz", "stimmen": {"ausbildung": 3, …}, "begruendungen"}}}
+```
+
+Die Themen (Beruf × Kompetenz) entstehen beim Laden aus beiden Dateien und werden nicht gespeichert.
 
 ## `mappings/hochschule/`
 

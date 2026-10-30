@@ -1,6 +1,7 @@
 """Lädt die OpenEduHub-Vokabulare (SKOS/Turtle) und schreibt sie aufbereitet nach data/vocabs/.
 
-    python scripts/fetch_vocabs.py
+    python scripts/fetch_vocabs.py              # alle
+    python scripts/fetch_vocabs.py kldb         # nur die genannten
 """
 
 import json
@@ -17,7 +18,7 @@ from sem.vocabs import OEH_VOCABS, OEH_VOCABS_RAW, skos_to_json  # noqa: E402
 def main():
     VOCAB_DIR.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory() as tmp:
-        for name in OEH_VOCABS:
+        for name in sys.argv[1:] or OEH_VOCABS:
             url = OEH_VOCABS_RAW.format(name=name)
             ttl = Path(tmp) / f"{name}.ttl"
             urllib.request.urlretrieve(url, ttl)

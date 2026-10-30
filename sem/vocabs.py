@@ -19,12 +19,17 @@ OEH_VOCABS_RAW = "https://raw.githubusercontent.com/openeduhub/oeh-metadata-voca
 OEH_VOCABS_PUBLIC = "https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/{name}/"
 
 # Vokabulare, die das Repo aufbereitet mitliefert (Dateiname = OEH-Vokabularname)
-OEH_VOCABS = ["educationalContext", "new_lrt", "hochschulfaechersystematik", "intendedEndUserRole"]
+OEH_VOCABS = ["educationalContext", "new_lrt", "hochschulfaechersystematik", "intendedEndUserRole", "kldb",
+              "dqrCompetenceLevels"]
 
 # Quellenangabe für Vokabulare, die auf einer fremden Systematik beruhen
 QUELLENANGABEN = {
     "hochschulfaechersystematik": "Quelle: Statistisches Bundesamt (Destatis), Systematik der Fächergruppen, Studienbereiche und Studienfächer; ausgelesen aus dem OpenEduHub-Vokabular hochschulfaechersystematik (github.com/openeduhub/oeh-metadata-vocabs)",
+    "kldb": "Quelle: Statistik der Bundesagentur für Arbeit, Klassifikation der Berufe 2010 – überarbeitete Fassung 2020 (Ebenen 1–4 mit Kurzbeschreibungen); ausgelesen aus dem OpenEduHub-Vokabular kldb (github.com/openeduhub/oeh-metadata-vocabs)",
+    "dqrCompetenceLevels": "Quelle: Deutscher Qualifikationsrahmen (DQR), Niveaubeschreibungen; ausgelesen aus dem OpenEduHub-Vokabular dqrCompetenceLevels (github.com/openeduhub/oeh-metadata-vocabs)",
 }
+# Vokabulare ohne skos:notation, deren Code das letzte URI-Segment ist (z. B. KldB-Kennziffer)
+NOTATION_AUS_URI = {"kldb", "dqrCompetenceLevels"}
 
 
 @dataclass
@@ -75,14 +80,25 @@ def skos_to_json(ttl_path: Path, name: str, source_url: str, lang: str = "de") -
         labels = {o.language: str(o) for o in g.objects(s, SKOS.prefLabel)}
         return labels.get(lang) or labels.get("en") or next(iter(labels.values()), None)
 
+    def text(s, pred):
+        werte = {o.language: str(o) for o in g.objects(s, pred)}
+        return werte.get(lang) or werte.get("en")
+
     concepts = {}
     for s in g.subjects(rdflib.RDF.type, SKOS.Concept):
+        notation = str(g.value(s, SKOS.notation) or "") or None
+        if notation is None and name in NOTATION_AUS_URI:
+            notation = str(s).rstrip("/").rsplit("/", 1)[-1]
         concepts[str(s)] = {
             "uri": str(s),
-            "notation": str(g.value(s, SKOS.notation) or "") or None,
+            "notation": notation,
             "label": label(s),
             "broader": None,
         }
+        # Kurzbeschreibungen, wo das Vokabular sie hat (z. B. KldB: Definition und typische Tätigkeiten)
+        for key, pred in (("definition", SKOS.definition), ("note", SKOS.note)):
+            if (t := text(s, pred)):
+                concepts[str(s)][key] = t
     # Hierarchie aus broader und narrower zusammenführen (die Quellen sind nicht immer symmetrisch)
     for s, o in g.subject_objects(SKOS.broader):
         if str(s) in concepts:
