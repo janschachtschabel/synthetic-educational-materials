@@ -89,14 +89,38 @@ KANDIDATEN_PERSPEKTIVEN = [
 ]
 
 
+# Grundbildung: Alltagsfelder, in denen Erwachsene mit geringer Literalität Lesen, Schreiben und Rechnen brauchen
+# (Lebensbereiche der LEO-Studie, z. B. Geld, Behörden, Arbeit, Gesundheit) → Fachgebiet der Grundbildung
+GRUNDBILDUNG_FELDER = {
+    "geld": ("Geld und Finanzen (Einkaufen, Rechnungen, Konto, Verträge, Schulden)", "7.03"),
+    "behoerden": ("Behörden und Ämter (Formulare, Anträge, Bescheide, Termine)", "7.03"),
+    "gesundheit": ("Gesundheit (Arztbesuch, Medikamente, Beipackzettel, Krankenkasse, Ernährung)", "7.03"),
+    "arbeit": ("Arbeit (Arbeitsplatz, Arbeitsvertrag, Lohnabrechnung, Arbeitsanweisungen, Bewerbung)", "7.04"),
+}
+
+GRUNDBILDUNG_SYSTEM = """Du sammelst Themen für Grundbildungskurse an Volkshochschulen in Deutschland: Erwachsene, die nicht ausreichend lesen, schreiben oder rechnen können, üben diese Fähigkeiten an Situationen ihres Alltags.
+
+Antworte ausschließlich mit JSON: {"themen": ["…"]}
+- 30 bis 40 Themen für das genannte Alltagsfeld, je ein kurzer deutscher Begriff, wie er als Schlagwort in einem Bibliothekskatalog stehen könnte (Substantiv oder etablierter Begriff, z. B. "Kontoauszug", "Mietvertrag", "Beipackzettel", "Lohnabrechnung").
+- Konkrete Gegenstände und Situationen des Alltags, an denen gelesen, geschrieben oder gerechnet wird.
+- Keine Sätze, keine Kursnamen, keine Eigennamen."""
+
+
 def build_kandidaten_llm(cfg: LLMConfig, on_progress=None, stop_event=None, **_):
     tasks = [{"id": f"{z['notation']}:{i}", "ziel": z, "perspektive": p}
              for z in ziele().values() for i, p in enumerate(KANDIDATEN_PERSPEKTIVEN)]
+    zl = ziele()
+    tasks += [{"id": f"{fg}:{key}:{i}", "ziel": zl[fg], "perspektive": p, "alltagsfeld": feld}
+              for key, (feld, fg) in GRUNDBILDUNG_FELDER.items() for i, p in enumerate(KANDIDATEN_PERSPEKTIVEN)]
 
     def worker(client: LLMClient, task: dict) -> dict:
         z = task["ziel"]
-        res = client.chat_json(task["perspektive"] + "\n\n" + KANDIDATEN_SYSTEM,
-                               f"Programmbereich: {z['programmbereich']}\nFachgebiet: {z['label']}")
+        if task.get("alltagsfeld"):
+            res = client.chat_json(task["perspektive"] + "\n\n" + GRUNDBILDUNG_SYSTEM,
+                                   f"Programmbereich: Grundbildung\nAlltagsfeld: {task['alltagsfeld']}")
+        else:
+            res = client.chat_json(task["perspektive"] + "\n\n" + KANDIDATEN_SYSTEM,
+                                   f"Programmbereich: {z['programmbereich']}\nFachgebiet: {z['label']}")
         themen = [str(t).strip() for t in res.get("themen", []) if 2 < len(str(t).strip()) <= 60]
         if len(themen) < 15:
             raise ValueError(f"nur {len(themen)} Themen")
@@ -352,7 +376,7 @@ def zusammenfuehren(cfg: LLMConfig | None = None, stimmen: int = N_STIMMEN, mode
     s = systematik()
     meta = {"methode": METHODE, "modell": modell or (cfg.model if cfg else None),
             "embedding_modell": kand_all.get("embedding_modell"), "stimmen": stimmen, "datum": date.today().isoformat(),
-            "prompt_hash": _hash(KANDIDATEN_SYSTEM + EIGNUNG_REGELN + FG_REGELN + "".join(PERSPEKTIVEN))}
+            "prompt_hash": _hash(KANDIDATEN_SYSTEM + GRUNDBILDUNG_SYSTEM + EIGNUNG_REGELN + FG_REGELN + "".join(PERSPEKTIVEN))}
     rows, pruef = [], []
     ungeeignet = 0
     for o in _objekte():
@@ -387,7 +411,7 @@ def zusammenfuehren(cfg: LLMConfig | None = None, stimmen: int = N_STIMMEN, mode
                           "fachgebiete": " | ".join(f"{f['notation']} {f['label']} ({f['stimmen']}/{stimmen})"
                                                     for f in mapping["fachgebiete"]) or " | ".join(codes) + " (Ersatz)",
                           "herkunft": " | ".join(p["llm_fachgebiete"])})
-    rows += sprachkurs_themen(s) + schulabschluss_themen(s)
+    rows += sprachkurs_themen(s) + schulabschluss_themen(s) + grundbildung_themen(s)
     rows.sort(key=lambda r: (r["fachgebiet"][0]["notation"], r["label_de"].casefold()))
     _write_jsonl(THEMEN_PATH, rows)
     pruefung.schreibe_pruefliste(PRUEFLISTE_PATH, pruef, ["korrektur_codes", "korrektur_art", "kommentar"])
@@ -419,6 +443,31 @@ def sprachkurs_themen(s: dict) -> list[dict]:
                     "quelle": {k: q[k] for k in ("name", "uri", "lizenz", "quellenangabe") if k in q},
                     "mapping": {"methode": "aus der Gliederung des Rahmencurriculums übernommen (Handlungsfeld und "
                                           "Lernzielbereich)", "status": "gesichert",
+                                "eignung": {"status": "gesichert", "art": "kursthema"}}})
+    return out
+
+
+def grundbildung_themen(s: dict) -> list[dict]:
+    """Grundbildungs-Themen aus Gliederung und Titeln der lea.-Alpha-Levels und der DVV-Rahmencurricula
+    (grundbildung_themen.json): Kompetenzbereiche und Themenfelder des Lesens, Schreibens und Rechnens."""
+    path = DIR / "grundbildung_themen.json"
+    if not path.exists():
+        return []
+    d = json.loads(path.read_text(encoding="utf-8"))
+    quellen = {q["key"]: q for q in d["quellen"]}
+    out = []
+    for t in d["themen"]:
+        q = quellen[t["quelle"]]
+        fg, pb = _fg_ref(s, [t["fachgebiet"]])
+        einordnung = " > ".join(t.get("pfad", []))
+        out.append({"id": f"{q['uri']}#{t['code']}", "label_de": t["label"], "pfad": t.get("pfad", []),
+                    "definition": f"Grundbildung, {t['bereich']}: {einordnung}" + (f" ({t['niveau']})" if t.get("niveau") else ""),
+                    "grundbildung": {k: t[k] for k in ("bereich", "niveau") if t.get(k)},
+                    "art": "kursthema", "fachgebiet": fg, "programmbereich": pb, "herkunft": "grundbildung",
+                    "quelle": {k: q[k] for k in ("name", "uri", "lizenz", "quellenangabe") if k in q},
+                    "mapping": {"methode": "aus der Gliederung übernommen (Kompetenzbereich bzw. Themenfeld; "
+                                          "Lesen und Schreiben → Alphabetisierung, Rechnen → Rechnen, "
+                                          "Alltagsfelder → Alltagskompetenzen)", "status": "gesichert",
                                 "eignung": {"status": "gesichert", "art": "kursthema"}}})
     return out
 
