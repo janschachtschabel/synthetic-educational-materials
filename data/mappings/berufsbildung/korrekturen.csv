@@ -1,0 +1,422 @@
+id,label,korrektur_codes,korrektur_qualifizierung,kommentar,prueflistengrund
+http://data.europa.eu/esco/occupation/db20c08e-819e-4410-91e2-6ac06add4e27,Escort,-,,für Bildungsmaterialien ungeeignet,
+http://data.europa.eu/esco/occupation/a1d0eb6b-20ac-4a2c-a7c1-9b016ea92b24,Wahrsager/Wahrsagerin,-,,esoterische Tätigkeit ohne fachliche Grundlage,
+http://data.europa.eu/esco/occupation/6b0ad7c0-a37f-45c6-a486-ee943a11429e,Astrologe/Astrologin,-,,esoterische Tätigkeit ohne fachliche Grundlage,
+http://data.europa.eu/esco/occupation/e4c915ff-6c9c-4fa9-a8fb-09d0c67e30d4,Major/Majorin,0110,studium,Offizierslaufbahn mit Studium,keine Mehrheit für den Qualifizierungsweg
+http://data.europa.eu/esco/occupation/86c892cf-09a3-44c8-b9d1-814d93dbcbb4,Kampfführungsspezialist/Kampfführungsspezialistin,0120,ausbildung,"Unteroffizier, ISCO 0210",weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/fdc8adfb-1807-4146-98ae-3a26fbe19996,Angehöriger des Kampfmittelräumdienstes/Angehörige des Kampfmittelräumdienstes,0140,ausbildung,militärischer Kampfmittelräumdienst,keine Mehrheit für den Qualifizierungsweg; weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/d63789ac-74b5-40e3-b890-685513c38e12,Landrat/Landrätin,7329,studium,politisches Amt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/0ee67d5e-8de9-48f0-97c5-ba23d486b1e9,Staatssekretär/Staatssekretärin,7329,studium,Spitzenbeamter der Ministerialverwaltung,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/1fb92021-9576-4c85-8759-f6918e9f0ad4,Diplomat/Diplomatin,7321,studium,"auswärtiger Dienst, öffentliche Verwaltung","keine Stimme für eine KldB-Untergruppe, Vorschlag nur aus Embedding"
+http://data.europa.eu/esco/occupation/2ae275fe-4f11-4a38-9e95-d466d74b42a3,Polizeipräsident/Polizeipräsidentin,5321,studium,Polizeivollzug bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/0917ab6b-18a8-4cfd-8e7a-843b88cf9457,Niederlassungsleiter/Niederlassungsleiterin,7139,fortbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/b680251e-b3c7-4029-9849-66a95081801c,Bankangestellter/Bankangestellte,7211,ausbildung,Bankkaufleute,keine Mehrheit für den Qualifizierungsweg
+http://data.europa.eu/esco/occupation/44e0c015-309d-4f67-98a3-1e036966ed7f,Budgetverantwortlicher/Budgetverantwortliche,7223,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/3e1a2f3c-20d6-4d33-aa6f-63cd2a32698d,Schatzmeister/Schatzmeisterin,7219,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/8b26eec6-7497-4218-8364-9b5983b04ae7,Verwaltungsangestellter im Bereich Verteidigung/Verwaltungsangestellte im Bereich Verteidigung,7321,ausbildung,Verwaltungsfachangestellte,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/04b52c04-0620-4558-8f89-e252de2963ff,Auktionshausleiter/Auktionshausleiterin,6113,fortbildung,bestätigt,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/c530b0ee-46f8-40fb-818c-d9b44b891cb9,Bank-Produktmanager/Bank-Produktmanagerin,9213,studium,bestätigt,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/dab60fc6-c16e-4de7-b969-b323784f5a49,Warengruppenmanager/Warengruppenmanagerin,6119,fortbildung,Handelsfachwirt,keine Mehrheit für den Qualifizierungsweg
+http://data.europa.eu/esco/occupation/01bcac9f-7881-4664-bd63-dea700e3b117,Bekleidungsentwickler/Bekleidungsentwicklerin,2821,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/62001bb7-4611-4b61-903e-d98589c0821a,Spieleentwickler/Spieleentwicklerin,4341,studium,Softwareentwicklung,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/9db7d74c-b46d-45c0-b611-6bcb7456ecc6,IT-Innovationsmanager/IT-Innovationsmanagerin,4329,studium,bestätigt,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/0368c4d4-94cf-4168-a84d-283a25880e0d,Leiter in der Metallproduktion/Leiterin in der Metallproduktion,2429,fortbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/b9711647-463f-4991-a858-d5de66ff2f83,Bauunternehmer/Bauunternehmerin,3119,fortbildung,"Bauunternehmer, Meister/Führung Bau",weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/fc35b7ca-ecec-40d7-91b5-5065f662d955,Flughafendirektor/Flughafendirektorin,7110,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/0d442b70-5413-4820-bebf-36dd5ce437ac,Luftverkehrsleiter/Luftverkehrsleiterin,5119,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/b87a7a27-ee74-4e5e-b274-84a3cab27bf4,Import-/Exportmanager/Import-/Exportmanagerin,6121,fortbildung,"Groß- und Außenhandel, leitend",weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/e997358a-f6ed-4b5d-bebe-2a33b01ea3d2,Import-/Exportmanager für elektrische Haushaltsgeräte/Import-/Exportmanagerin für elektrische Haushaltsgeräte,6121,fortbildung,"Groß- und Außenhandel, leitend",weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/b2826761-6fc4-4344-9d36-d8455cb6b185,"Import-/Exportmanager für Fisch, Krustentiere und Weichtiere/Import-/Exportmanagerin für Fisch, Krustentiere und Weichtiere",6121,fortbildung,"Groß- und Außenhandel, leitend",keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/1ee8dfca-19b0-4e1a-88ed-68548f80951b,Import-/Exportmanager für Blumen und Pflanzen/Import-/Exportmanagerin für Blumen und Pflanzen,6121,fortbildung,"Groß- und Außenhandel, leitend",weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/dc29cd23-d6ba-46b0-bc2f-424e20270099,Import-/Exportmanager für Obst und Gemüse/Import-/Exportmanagerin für Obst und Gemüse,6121,fortbildung,"Groß- und Außenhandel, leitend",keine Mehrheit für den Qualifizierungsweg; weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/a70315e3-ae41-44a9-9fe5-7fe668469ee0,"Import-/Exportmanager für Möbel, Teppiche und Beleuchtungseinrichtungen/Import-/Exportmanagerin für Möbel, Teppiche und Beleuchtungseinrichtungen",6121,fortbildung,"Groß- und Außenhandel, leitend",keine Mehrheit für den Qualifizierungsweg; weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/173a882d-0a14-4919-ac1b-23e8ee8273de,"Import-/Exportmanager für Eisenwaren, Sanitär- und Heizungsanlagen und -zubehör/Import-/Exportmanagerin für Eisenwaren, Sanitär- und Heizungsanlagen und -zubehör",6121,fortbildung,"Groß- und Außenhandel, leitend",weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/d7a12ff0-7e25-4dab-98c5-1f5a781da8ad,"Import-/Exportmanager für Felle, Häute und Lederwaren/Import-/Exportmanagerin für Felle, Häute und Lederwaren",6121,fortbildung,"Groß- und Außenhandel, leitend",keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/b49f95f8-c1c8-428f-9f1f-5f5abae55e51,Import-/Exportmanager für lebende Tiere/Import-/Exportmanagerin für lebende Tiere,6121,fortbildung,"Groß- und Außenhandel, leitend",weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/dc2a924c-653a-4922-9226-f6909dd64580,"Import-/Exportmanager für landwirtschaftliche Rohstoffe, Saatgut und Tierfutter/Import-/Exportmanagerin für landwirtschaftliche Rohstoffe, Saatgut und Tierfutter",6121,fortbildung,"Groß- und Außenhandel, leitend",weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/00fdad73-4551-4e43-b256-1d4a3759db1e,Import-/Exportmanager für Fleisch- und Fleischerzeugnisse/Import-/Exportmanagerin für Fleisch- und Fleischerzeugnisse,6121,fortbildung,"Groß- und Außenhandel, leitend",weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/8c0cc417-6b09-4082-8062-2f0f7123a573,Import-/Exportmanager für Büromaschinen und -geräte/Import-/Exportmanagerin für Büromaschinen und -geräte,6121,fortbildung,"Groß- und Außenhandel, leitend",weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/42abcbcb-721b-4da6-9c06-f6951969d056,Import-/Exportmanager für Parfüm und Kosmetika/Import-/Exportmanagerin für Parfüm und Kosmetika,6121,fortbildung,"Groß- und Außenhandel, leitend",weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/afcf9d03-6e51-4548-8cec-cfa50972929d,"Import-/Exportmanager für Zucker, Schokolade und Süßwaren/Import-/Exportmanagerin für Zucker, Schokolade und Süßwaren",6121,fortbildung,"Groß- und Außenhandel, leitend",weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/9faaae26-804d-48f3-97b0-84f7e1aceae8,Import-/Exportmanager für Getränke/Import-/Exportmanagerin für Getränke,6121,fortbildung,"Groß- und Außenhandel, leitend",keine Mehrheit für den Qualifizierungsweg
+http://data.europa.eu/esco/occupation/c430500d-0b8b-4ef5-8f91-3e98cff32356,Import-/Exportmanager für Tabakerzeugnisse/Import-/Exportmanagerin für Tabakerzeugnisse,6121,fortbildung,"Groß- und Außenhandel, leitend",keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/c71ee6a5-ce48-4afd-aa1e-eaabf17ccbc0,Import-/Exportmanager für Müll und Schrott/Import-/Exportmanagerin für Müll und Schrott,6121,fortbildung,"Groß- und Außenhandel, leitend",keine Mehrheit für den Qualifizierungsweg
+http://data.europa.eu/esco/occupation/63c92723-ee86-42cb-89bf-d93b65398bef,Import-/Exportmanager für Armbanduhren und Schmuck/Import-/Exportmanagerin für Armbanduhren und Schmuck,6121,fortbildung,"Groß- und Außenhandel, leitend",weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/ccbb7213-79f7-489e-9dad-f90091e550d0,Import-/Exportmanager für Bekleidung und Schuhe/Import-/Exportmanagerin für Bekleidung und Schuhe,6121,fortbildung,"Groß- und Außenhandel, leitend",weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/65beb253-61b0-4f8f-9c3c-49419913fd18,Import-/Exportmanager für Milchprodukte und Speiseöle/Import-/Exportmanagerin für Milchprodukte und Speiseöle,6121,fortbildung,"Groß- und Außenhandel, leitend",weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/aeb7c6bd-22c9-43c2-8551-a1cc2560584f,Prognosemanager/Prognosemanagerin,2730,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/9f12704c-5e6c-47b0-a866-3b92663e6a4b,Ressourcenmanager/Ressourcenmanagerin,5169,studium,Ressourcenplanung Logistik,"keine Stimme für eine KldB-Untergruppe, Vorschlag nur aus Embedding"
+http://data.europa.eu/esco/occupation/810e5e67-acd5-499a-b307-cf5bea330859,Informations- und Wissensmanager/Informations- und Wissensmanagerin (IKT),4311,studium,bestätigt,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/a79170ad-0b7b-4697-864f-1748359aa10a,IT-Produktmanager/IT-Produktmanagerin,4329,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/8b6388a4-4904-471b-9331-d3b1211f5525,IT-Projektmanager/IT-Projektmanagerin,4332,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/526ba8e1-fc71-4657-8d27-52f03e8ca81d,Koordinator für Kinderbetreuungsdienste/Koordinatorin für Kinderbetreuungsdienste,8319,fortbildung,Leitung Kinderbetreuung,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/5cff1eee-9027-4064-8a26-35b1877e4eb3,Manager für öffentlichen und sozialen Wohnungsbau/Managerin für öffentlichen und sozialen Wohnungsbau,6139,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/6db9eeae-aef5-4f56-913d-4650e4c720c6,Gefängnisdirektor/Gefängnisdirektorin,7329,studium,Anstaltsleitung Justizvollzug,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/3f6fc9db-18c1-45e8-819e-baf7b6cfe372,Gerichtsverwalter/Gerichtsverwalterin,7325,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/a005f8a2-2d8a-433e-8d89-13575f822fd4,Energiemanager/Energiemanagerin,6132,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/cfda19c9-c7e1-497d-a18b-66e29c773745,Luftraummanager/Luftraummanagerin,5119,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/bcc2c1db-f969-4355-bebf-4878ff6c2a94,Service-Manager/Service-Managerin,5149,studium,bestätigt,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/2f8acdc5-76f5-498b-9818-df075e324eaa,Koordinator für Flugverkehrskommunikation und -frequenzen/Koordinatorin für Flugverkehrskommunikation und -frequenzen,5159,studium,Flugsicherung,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/8c8ec7a2-adbb-4d1a-9a56-a7048d66c00b,Kontrolleur der Flugüberwachung und der Einhaltung des Luftverkehrsgesetzes/Kontrolleurin der Flugüberwachung und der Einhaltung des Luftverkehrsgesetzes,5159,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/2c8a4b72-21f4-4ab1-9dbd-1cae779211b7,Leiter einer kommerziellen Kunstgalerie/Leiterin einer kommerziellen Kunstgalerie,6252,studium,Galerieleitung,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/e7f6e98a-cef5-41be-b65c-70cf1feed11d,Leiter eines Blumen- und Gartengeschäftes/Leiterin eines Blumen- und Gartengeschäftes,1229,fortbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/ce6230b8-154f-4e0b-ac03-dca3a269a19c,Kulturdirektor/Kulturdirektorin,9479,studium,bestätigt,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/f5166c6b-3467-4fc4-9343-d12e870d9def,Leiter des Kundendienstes/Leiterin des Kundendienstes,9213,fortbildung,Kundenmanagement,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/5c9dea76-c7da-4e58-857c-fc3cbe7b960a,Werkstattleiter/Werkstattleiterin,2529,fortbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/fa5b9075-3796-4e86-be0a-b5e6d725c25a,Metrologe/Metrologin,4148,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/55076d82-52a7-47eb-b882-f12322c42ecd,Textilchemiker/Textilchemikerin,2814,studium,Textilveredlung,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/1790c821-c582-4944-8597-d2d4a66f6a6d,Geologe im Bereich Montangeologie/Geologin im Bereich Montangeologie,4212,studium,bestätigt,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/4b759f0e-8fec-4cf5-80d4-d112a9fd4e51,Ozeanograf/Ozeanografin,4212,studium,Geowissenschaften,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/a92a3e24-93f0-42b3-9ebb-d2d7d8a72cc5,Geophysiker/Geophysikerin,4212,studium,bestätigt,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/18552245-3c36-4a52-b4c6-295cabb5c93b,Entwickler von Glücks- und Wettspielen/Entwicklerin von Glücks- und Wettspielen,9434,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/491cf76d-eb0d-4f15-90f0-3f5c9b11472a,Qualitätssicherungsingenieur für Glücks- und Wettspiele/Qualitätssicherungsingenieurin für Glücks- und Wettspiele,9434,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/68f4fdd9-182c-4c0d-a73d-f767b8a8355e,Biologe im Bereich Aquakultur/Biologin im Bereich Aquakultur,4123,studium,bestätigt,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/1738173e-ef9c-4222-88c8-b6aa9bad3cf7,Biophysiker/Biophysikerin,4148,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/c5328083-eda0-4ca8-b9cb-99a46e73a9bc,Pflanzenexperte/Pflanzenexpertin,4124,studium,Botanik,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/69e6db0b-30b4-4e0e-b95b-173f8bc3da73,Flughafen-Umweltschutzbeauftragter /Flughafen-Umweltschutzbeauftragte,4228,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/6a3d3d28-0ab6-49b0-9a32-697e5e104bf1,Bodenwissenschaftler/Bodenwissenschaftlerin,4212,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/e011f10f-e172-43ce-bfd9-fb56e426c0c9,Forstverwalter/Forstverwalterin,1179,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/2f26a52b-cf45-4282-9138-478252161f00,Lebensmittelproduktionstechniker/Lebensmittelproduktionstechnikerin,2928,fortbildung,bestätigt,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/615920c5-4f63-4eb3-8b60-afaaed3ab1ff,Wartungsingenieur/Wartungsingenieurin,2513,studium,bestätigt,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/8de99659-5b10-4825-ac67-0c50189bcc3c,Ingenieur Verpackungstechnik/Ingenieurin Verpackungstechnik,2310,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/bc1c82a5-0fc3-453f-8537-9d1a6e9e85aa,Planungsingenieur Flughafen/Planungsingenieurin Flughafen,3110,studium,Bauplanung,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/57ac359a-ae52-4aea-bc9c-93af7efa502e,Ingenieur Pipelinetechnik/Ingenieurin Pipelinetechnik,2518,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/32548f7e-8c25-4c49-9f22-78dee3543704,Umweltschutzingenieur Bergbau/Umweltschutzingenieurin Bergbau,4229,studium,bestätigt,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/c90e5009-37f2-4dcd-aea2-362fc817bc98,Umweltmanagementbeauftragter (IKT)/Umweltmanagementbeauftragte (IKT),4231,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/7a523273-9fff-4f11-beb6-110eeaec1436,Recycling-Fachkraft,3433,ausbildung,Fachkraft für Kreislauf- und Abfallwirtschaft,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/579254cf-6d69-4889-9000-9c79dc568644,Maschinenbauingenieur/Maschinenbauingenieurin,2510,studium,bestätigt,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/9e47c727-5718-48f1-a567-6a4c09397a21,Ingenieur Aerodynamik/Ingenieurin Aerodynamik,2520,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/ab360abd-32e2-4e03-967d-a10758efffa7,Ingenieur Mechatronik/Ingenieurin Mechatronik,2611,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/4e3fede9-5522-4624-91bc-b59c79fada02,Ingenieur Verpackungsmaschinen/Ingenieurin Verpackungsmaschinen,2519,studium,bestätigt,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/4d5bd738-9202-4fd7-bd8c-7dbe914048de,Ingenieur Agrarwirtschaft/Ingenieurin Agrarwirtschaft,1111,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/8d410283-865d-4cbb-acae-ac7f69d9cf26,Automobilingenieur/Automobilingenieurin,2520,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/93b11f0f-69af-4ece-b9da-f29aab7d38d3,Ingenieur Apparate- und Behälterbau/Ingenieurin Apparate- und Behälterbau,2510,studium,bestätigt,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/1f97f6e6-0ac7-4e77-88ab-2e3801c5a223,"Ingenieur Heizung, Klima, Lüftung/Ingenieurin Heizung, Klima, Lüftung",3421,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/8bc48c43-d976-458a-9e3c-ee784572351d,Entwicklungsingenieur Industriewerkzeug/Entwicklungsingenieurin Industriewerkzeug,2710,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/ec21ce88-ce14-49b6-be0a-cc53cf5a3a67,Chemieingenieur/Chemieingenieurin,2710,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/f3e23761-0663-4ae0-97a2-0b2dd3fa38a1,Ingenieur Biochemietechnik/Ingenieurin Biochemietechnik,4126,studium,bestätigt,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/d2df16f3-87d7-4c6e-a640-95cee39a8f4e,Apfelweinmeister/Apfelweinmeisterin,2919,fortbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/4b709f9e-6112-4d58-81b0-2d6e6a69d61b,Lebensmitteltechnologe/Lebensmitteltechnologin,2929,studium,bestätigt,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/89860c2a-d217-432a-8636-84aa17f09c15,Ingenieur Gasförderung/Ingenieurin Gasförderung,2718,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/40b77b1b-6f9c-4d25-8b08-8b3cb0aaf7e7,Ingenieur Sprengtechnik/Ingenieurin Sprengtechnik,2112,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/e047b8f5-9491-4da2-8816-7aa37ad2370d,Patentingenieur/Patentingenieurin,7310,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/836f0a96-7546-4003-9fc8-714fc79199d4,Vertragsingenieur/Vertragsingenieurin,2718,studium,bestätigt,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/58c30193-d29f-4d22-8bf0-fd87346b91dd,Ingenieur Gebäudetechnik und Facility-Management/Ingenieurin Gebäudetechnik und Facility-Management,3419,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/76abbb82-c103-4d7a-a4c0-14dba4d6199a,Inbetriebsetzungsingenieur/Inbetriebsetzungsingenieurin,2519,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/4be368e3-badb-4b9f-9d0a-4d0f7565540a,Brandschutzingenieur/Brandschutzingenieurin,5313,studium,bestätigt,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/2026adb2-62d7-4b92-9ccb-105abdebe37d,Ingenieur Elektromagnetik/Ingenieurin Elektromagnetik,2622,studium,bestätigt,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/e69697d0-2639-4aad-b73a-05e0b98357b1,Elektroingenieur Bergbau/Elektroingenieurin Bergbau,2639,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/0c7c9606-fde3-4658-8136-8fe0c9b8bd09,Ingenieur Medizintechnik/Ingenieurin Medizintechnik,8250,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/52207284-2681-40d3-a317-ec81ca1b3e41,Landschaftsarchitekt/Landschaftsarchitektin,3111,studium,Landschaftsarchitektur,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/a424aa0f-b3f1-41fb-901f-85e05fed83ed,Landschaftsgestalter/Landschaftsgestalterin,1214,ausbildung,Garten- und Landschaftsbau,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/6833077e-e521-4605-bc1a-893f4b3d811c,Entwickler von Textilprodukten/Entwicklerin von Textilprodukten,2810,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/30b25ee4-da97-4167-8592-460217f6bdcc,Animationsregisseur/Animationsregisseurin,9441,studium,Regie,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/4f2f2539-3e38-4393-9dac-a9a48af7cd32,Casting Director,9449,anlernen,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/6ba25e0f-7fb8-4879-a1f9-d4f8945966be,Kameramann/Kamerafrau,9452,ausbildung,Kameratechnik,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/4d4b243f-6c3b-48c3-a564-2e7f2d592a3c,Produktionsdesigner/Produktionsdesignerin,9461,studium,Bühnen- und Kostümbild,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/00030d09-2b3a-4efd-87cc-c4ea39d27c34,"Technischer Leiter für Bühne, Film und Fernsehen/Technische Leiterin für Bühne, Film und Fernsehen",9449,fortbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/d68ff35f-e34d-4e32-88ab-d6c06a6c25b9,Game-Designer/Game-Designerin,2328,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/d5a43cd3-230e-46d0-ba05-d67d61e5cfbb,Entwickler Digitale Medien/Entwicklerin Digitale Medien,2328|4315,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/36494988-69d2-4420-9db4-eb56605ac983,Akademischer Krankenpfleger/Akademische Krankenschwester,8138,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/72913ee1-1696-4d74-b26f-681d17887c58,Notfallkoordinator/Notfallkoordinatorin,5318,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/1d75ea5a-f902-4b47-8d63-5c6d2a5c0bb5,Ergonom/Ergonomin,5312,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/49e4e358-8ba3-4a05-8ef9-abb73156f5f7,Chiropraktiker/Chiropraktikerin,8175,studium,bestätigt,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/e777fb61-16f5-476b-8262-578edfdb4d9d,Ausbilder für Sportinstruktoren/Ausbilderin für Sportinstruktoren,8421,studium,bestätigt,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/35e42c87-faf7-465f-abe4-f26717996dd1,Lehrkraft für Religion Sekundarstufe,8412,studium,bestätigt,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/8befd482-70e2-4d1e-8a09-091e15fe85c3,Lehrkraft für Freinet-Schulen,8411,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/76a950cb-3def-47f4-895d-555ad138657e,Lehrkraft für Montessori-Schulen,8411,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/9b51a2d2-999a-43a6-a814-63dd30a585fa,Schulaufsichtsbeamter/Schulaufsichtsbeamtin,8419,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/46db7e2e-d44d-412a-9a80-02d43111aca8,Lehrkraft für Fotografie,8448,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/abab3d6a-82b9-49bd-8a4b-7bc678130558,Studierendenberater/Studierendenberaterin,8315,studium,Beratung,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/653374a9-a96e-4c5b-849f-62ae67b0ed62,Lehrkraft im Justizvollzug,8440,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/6e1b1bd7-9eec-4f10-bce7-94a27d9023e8,Zulassungskoordinator/Zulassungskoordinatorin,7320,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/a9c30651-ccbc-4a80-900c-7880615cdf6e,Instruktionsdesigner/Instruktionsdesignerin,2328,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/3d0f86c1-9bdd-4e84-bc62-93a716128c8d,Lerncoach,8315,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/78db356f-a96a-4456-ab29-2de62e52f830,Finanzreferent in der öffentlichen Verwaltung/Finanzreferentin in der öffentlichen Verwaltung,7321,studium,öffentliche Verwaltung,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/50760da6-abc3-424c-b159-8ddf0818e016,Unternehmensbewerter/Unternehmensbewerterin,7214,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/b09acdda-6680-49d1-a411-129610ee3bc0,Risikomanager/Risikomanagerin,7214,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/394a4bdd-7032-4d87-89a2-9d937cebdd09,Referent für Wirtschaftspolitik/Referentin für Wirtschaftspolitik,9148,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/d96de969-d43d-4082-8559-7fc35484a217,Kundenbeziehungsmanager/Kundenbeziehungsmanagerin,7211,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/38d9c76b-1a7b-4d65-879b-733ae7e9364e,Anlage- und Vermögensberater/Anlage- und Vermögensberaterin,7212,ausbildung,bestätigt,keine Mehrheit für den Qualifizierungsweg
+http://data.europa.eu/esco/occupation/0ecedad1-1144-45ff-83db-a3c4db393036,Investmentmanager/Investmentmanagerin,7214,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/f817aab2-ec8a-45ec-88ef-c11e0f19fd85,Referent für Bildungspolitik/Referentin für Bildungspolitik,9133,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/50e00fda-ac7c-4bc5-9f19-69a33ff3d6e7,Referent für Steuerpolitik/Referentin für Steuerpolitik,9131,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/1a46d0f0-93d7-44d1-bff9-58e3f21bd4c4,Berater im Bereich Sozialwesen/Beraterin im Bereich Sozialwesen,7322,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/7b629a14-09d0-417e-8181-7683923b4e5e,Koordinator für Sport und Freizeit/Koordinatorin für Sport und Freizeit,6312,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/65fb0b53-b8c4-4839-b099-c80b6de5a158,Koordinator für Beschäftigungsprogramme/Koordinatorin für Beschäftigungsprogramme,7133,studium,bestätigt,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/643a2225-6a01-4899-81b0-e867ca09b9c9,Staatlicher Planungsinspektor/Staatliche Planungsinspektorin,3112,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/61053604-8091-4a8e-9c63-5151051722e3,Berater im Gesundheitswesen/Beraterin im Gesundheitswesen,8224,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/3fa31588-2e4d-49c3-b839-4b615cc62742,Berater im Bereich humanitäre Hilfe/Beraterin im Bereich humanitäre Hilfe,8312,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/d9004a14-bda2-4c63-ab64-17ca163ac1bd,Parlamentarischer Assistent/Parlamentarische Assistentin,7140,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/20b9f370-6b56-4679-8c06-c23b866a5bd0,Beauftragter für Arbeitsbeziehungen/Beauftragte für Arbeitsbeziehungen,7159,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/e16c2422-1323-4d8a-bd0f-c7584de70be1,Spezialist für Preiskalkulation/Spezialistin für Preiskalkulation,7222,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/002da35b-7808-43f3-83bf-63596b8b351f,Ertragsmanager/Ertragsmanagerin,6321,fortbildung,bestätigt,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/903dc1bf-2da8-477d-83b2-687d360cf1da,Berater für interkulturelle Kommunikation/Beraterin für interkulturelle Kommunikation,8315,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/114e1eff-215e-47df-8e10-45a5b72f8197,Berater für erneuerbare Energien/Beraterin für erneuerbare Energien,2624,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/8529edc5-96ad-4cde-b34a-f86ad3753e4d,Vertriebstechniker/Vertriebstechnikerin,6112,fortbildung,Vertrieb,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/6e591f17-65c1-4a24-af2a-ca7862d4625e,Fachkraft technischer Vertrieb von elektronischen und Telekommunikationsgeräten,6112,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/a7c1d23d-aeca-4bee-9a08-5993ed98b135,IT-Systementwickler/IT-Systementwicklerin,4321,ausbildung,IT-Systemanalyse,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/cdd3d773-75a4-4f35-bd1d-1ac720afcf9d,IT-Prüfer/IT-Prüferin,7224,studium,bestätigt,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/9ebaf3f0-0be0-47b7-b2b1-b3b04130fa81,Game-Programmierer/Game-Programmiererin,4342,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/96e20037-0a25-4bf6-a25e-808d1605d890,Multimedia-Designer/Multimedia-Designerin,2328,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/a74f6c51-37e5-423e-aa5b-044e98663027,Web-Content-Manager/Web-Content-Managerin,9242,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/456ed487-02f2-45c9-9213-d0fd8e9a069d,IT-Anwendungskonfigurator/IT-Anwendungskonfiguratorin,4322,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/102e75c8-3b47-4964-9b47-30a980aed25c,Analytiker für IT-Notfallwiederherstellung/Analytikerin für IT-Notfallwiederherstellung,4334,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/731f38f1-b08f-4dd5-a25e-f8627c038273,IT-Integrationstester/IT-Integrationstesterin,4321,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/52d5edc9-7902-4cd3-8b06-6bd77c98d440,IT-Systemprüfer/IT-Systemprüferin,4310,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/276ba420-ef09-4a0e-b215-2c2e2f80ad28,IT-Sicherheitsleiter/IT-Sicherheitsleiterin,4339,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/0ce5a9f4-e00a-4bbe-b255-3c63407167a4,IKT-Sicherheitsberater/IKT-Sicherheitsberaterin,4322,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/7754d570-9519-48c2-b1c9-8e165f8bca0f,IT-Sicherheitsmanager/IT-Sicherheitsmanagerin,4339,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/779d13be-60b4-48f3-a339-fe483be96c7f,Regulatory-Affairs-Manager/Regulatory-Affairs-Managerin,7319,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/246dda29-70f6-408b-b205-aa17b2ffb168,Wahlbeobachter/Wahlbeobachterin,-,,kein Beruf mit eigenem Qualifizierungsweg,"keine Stimme für eine KldB-Untergruppe, Vorschlag nur aus Embedding"
+http://data.europa.eu/esco/occupation/7b89d3e0-c6fb-4c95-bf0d-3b4acf05f9d6,Redakteur von Legislativtexten/Redakteurin von Legislativtexten,9242,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/666846b2-01ce-43f6-8cb7-f3be09fac4a2,Ombudsmann/Ombudsfrau,7310,studium,bestätigt,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/b3e459a2-0103-4182-8882-c255d474a7ff,Analytiker Steuerpolitik/Analytikerin Steuerpolitik,9148,studium,bestätigt,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/7d9e2a65-758c-4cbd-b66d-3a595d3d63b1,Polygrafiesachverständiger/Polygrafiesachverständige,-,,in Deutschland kein anerkanntes Verfahren,keine Mehrheit für den Qualifizierungsweg
+http://data.europa.eu/esco/occupation/af69484e-b43f-4685-b22d-f3418df45c4d,Psychotherapeut/Psychotherapeutin,8163,studium,bestätigt,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/ed256ed0-0432-4969-8544-3e5e01a517a9,Geistlicher/Geistliche,8331,studium,Theologie,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/572c51ef-531b-4331-8e66-b1641173e54e,Dramaturg/Dramaturgin,9448,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/f3d8bc61-f812-4106-afd2-a356e4c11fce,Literaturwissenschaftler/Literaturwissenschaftlerin,9118,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/757da94f-d1f3-48ad-ac61-74e22bc18cca,Grafologe/Grafologin,-,,ohne wissenschaftliche Grundlage,"keine Stimme für eine KldB-Untergruppe, Vorschlag nur aus Embedding"
+http://data.europa.eu/esco/occupation/09a40a9a-2b60-422c-abe4-96d829bc27df,Kunstrestaurator/Kunstrestauratorin,9470,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/b2f5ed56-c83f-40d0-b861-f5253cd3d1d9,Kunstglaser/Kunstglaserin,9342,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/c05090e2-d599-46c8-a47b-3d52a893ca55,Maskengestalter/Maskengestalterin,8234,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/3b6bea7d-36f4-44fb-ac73-d1cc8a198dcb,Film- und Fernsehproduzent/Film- und Fernsehproduzentin,9449,studium,bestätigt,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/0dce2f9b-eda5-4dc4-ba74-36eeed8c9a44,Audiodeskriptor/Audiodeskriptorin,9243,anlernen,bestätigt,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/b176e5d7-1f94-495c-907f-80a7f61aed59,Fernerkundungstechniker/Fernerkundungstechnikerin,3121,ausbildung,bestätigt,keine Mehrheit für den Qualifizierungsweg
+http://data.europa.eu/esco/occupation/e8461d2e-3d75-477c-93a2-ea8d342bb55b,Umweltschutztechniker/Umweltschutztechnikerin,4228,fortbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/09e070ce-0afe-40bb-be90-530e5d42cdbd,Energieberater für Privathaushalte/Energieberaterin für Privathaushalte,8322,fortbildung,bestätigt,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/adf9257e-78cb-467d-b259-59ed65bd7aed,Werkstoffprüfer Feuerfestigkeit/Werkstoffprüferin Feuerfestigkeit,4142,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/6d1e2801-3ab0-4d74-ac27-918339e8db64,Kontrolleur Baustellensicherheit/Kontrolleurin Baustellensicherheit,5331,fortbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/23a61ff1-c954-4867-b982-a018b535f98b,Consultant im Bereich Energie,2623,fortbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/c332af81-4481-4494-9786-aea1f5c5ffcf,Kalibrierungstechniker/Kalibrierungstechnikerin,2638,ausbildung,bestätigt,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/b5e21e2b-ab0c-4c8d-8277-d98be4ad79c4,Avionikinspektor/Avionikinspektorin,2529,fortbildung,bestätigt,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/657eeac9-5bb9-449d-a353-aa7d5f47e2b5,Farbentechniker/Farbentechnikerin,4132,fortbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/fad4abdf-fe1b-4751-8253-aef40b49afe0,Entsalzungstechniker/Entsalzungstechnikerin,3431,ausbildung,Wasserversorgung,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/f83f19ca-b816-484a-b8be-92b7785121ea,Sicherheitsbeauftragter Bergbau/Sicherheitsbeauftragte Bergbau,5312,fortbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/30aef4c6-49ca-4464-bf82-78ed88b3eb9b,Bauzeichner/Bauzeichnerin,2721,ausbildung,technisches Zeichnen,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/8b828b9f-e41a-48d1-9d35-2c4378279a79,Compliance-Koordinator Rohrleitungen/Compliance-Koordinatorin Rohrleitungen,3116,fortbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/16bc69b8-5abc-49e4-a860-befb734d54d3,Chemietechniker Textilqualität/Chemietechnikerin Textilqualität,2814|4132,fortbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/3288a2fe-4934-47c8-ad0b-11b16c9cd461,Netzkontrolleur/Netzkontrolleurin,2626,fortbildung,bestätigt,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/c8ee6499-7613-4c02-9edf-2a0edcf47705,Sicherheitsbeauftragter Luftverkehr/Sicherheitsbeauftragte Luftverkehr,5312,fortbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/afee6a28-f654-4ac7-a665-f758616bc689,Lebensmitteltechniker/Lebensmitteltechnikerin,2928,fortbildung,bestätigt,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/a645b7e5-dfa8-4cce-938f-2d6395a6b51d,Produktionstechniker Lederwaren/Produktionstechnikerin Lederwaren,2832,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/c4046ba8-cfe0-4748-beac-22e865962d75,Mälzereileiter/Mälzereileiterin,2919,fortbildung,Getränkeherstellung (Mälzerei),"keine Stimme für eine KldB-Untergruppe, Vorschlag nur aus Embedding"
+http://data.europa.eu/esco/occupation/8862c29b-3810-4fbc-85c7-c9ee87535f73,Aufsichtskraft Elektroinstallation,2629,fortbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/6a67114c-60a3-4cec-af26-c7df6fe6e9b5,Bauleiter Maler- und Anstreicharbeiten/Bauleiterin Maler- und Anstreicharbeiten,3329,fortbildung,bestätigt,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/cbdbe324-81fe-48da-a8f7-0106dd94a05b,Aufsichtskraft Erd- und Industriegasanlagen,4134,fortbildung,bestätigt,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/f1c8c186-bef9-4d72-9257-90fc4f992ab7,Steuerer von Gasanlagen/Steuererin von Gasanlagen,4134,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/f444e8ec-5eed-4777-866e-7127aa06ce4f,Fertigungskontrolltechniker Textil/Fertigungskontrolltechnikerin Textil,2810,fortbildung,bestätigt,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/340b04fd-6312-47e5-80ff-28222a343864,Fischfroster/Fischfrosterin,1142,anlernen,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/cd19e8d1-6abd-4c99-a9bb-85e7c30aca31,Erster Technischer Schiffsoffizier/Erste Technische Schiffsoffizierin,5119,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/b0473a10-e3de-480c-a841-171f2356a074,Flugverkehrskontrolleur/Flugverkehrskontrolleurin,5153,ausbildung,Ausbildung zur Fluglotsin/zum Fluglotsen,keine Mehrheit für den Qualifizierungsweg
+http://data.europa.eu/esco/occupation/57a73b7c-cf10-4852-b067-c25833fa149e,Fachassistent Herz-Kreislauf-Funktionsdiagnostik/Fachassistentin Herz-Kreislauf-Funktionsdiagnostik,8122,fortbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/c1a86d6d-7785-43e1-994b-958eba58fff7,Pharmazeutisch-kaufmännischer Angestellter/Pharmazeutisch-kaufmännische Angestellte,8188,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/15cc27b1-7358-48ed-9fb8-69ffe9f1fc98,Besamungstechniker/Besamungstechnikerin,1128,fortbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/32ef07df-1b0a-439a-916e-8289eb9f4895,Pferdezahntechniker/Pferdezahntechnikerin,8158,fortbildung,Tierheilkunde,keine Mehrheit für eine KldB-Untergruppe; keine Mehrheit für den Qualifizierungsweg
+http://data.europa.eu/esco/occupation/32ac76f6-20a0-469e-8cac-e68634087dd3,PACS-Fachkraft,4334,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/b560456a-bc4d-41a9-94c8-bf8636147246,Erste-Hilfe-Ausbilder/Erste-Hilfe-Ausbilderin,8134,fortbildung,bestätigt,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/0b2d3242-22a3-4de5-bd29-efd39cdf2c31,Tiertherapeut/Tiertherapeutin,8158,anlernen,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/9487f835-b5a9-4742-8ecf-35520911e28c,Heilmasseur/Heilmasseurin,8178,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/b01affdd-c8a9-4121-bc50-a5be17f014eb,Shiatsu-Praktiker/Shiatsu-Praktikerin,8178,anlernen,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/de0856fe-21fa-46d6-88ee-f99d3b4946bc,Inspektor gefährliche Abfälle/Inspektorin gefährliche Abfälle,5331,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/a7198837-139d-49c7-8fd0-eb8d8c1ee844,Osteopath/Osteopathin,8175,fortbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/7b8b6118-6876-4a71-81a6-4b5fa9bfa221,Atemtherapietechniker/Atemtherapietechnikerin,8133,fortbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/60bc7374-9fa1-4bbd-b936-2676fca0bfb6,Trader am Finanzmarkt/Traderin am Finanzmarkt,7218,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/1f305576-f57c-42c7-a139-728c72393cd4,Energiehändler/Energiehändlerin,7214,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/075e4d25-74b3-46fb-9b6e-6b53cdb196e7,Kreditprüfer/Kreditprüferin,7212,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/b3ce981c-5b32-4de2-8e53-502a6357b2bc,Kreditrisikomanager/Kreditrisikomanagerin,7218,studium,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/01a83071-6533-4675-b2da-f0c6d02669f5,Versicherungsgutachter/Versicherungsgutachterin,7218,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/a2b81132-2147-4c8e-b250-e6290ed906ea,Versicherungsdetektiv/Versicherungsdetektivin,5315,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/bbefa1b2-521e-4d87-a7ad-9bbd0b32e271,Immobiliensachverständiger/Immobiliensachverständige,3116,fortbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/a5a4e4d6-e705-4b38-96b5-225f8ab01f2c,"Großhändler für Eisenwaren, Sanitär- und Heizungsanlagen und -zubehör/Großhändlerin für Eisenwaren, Sanitär- und Heizungsanalagen und -zubehör",6121,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/3f0093ab-651b-401a-b542-bba84ff46deb,"Großhändler für Felle, Häute und Lederwaren/Großhändlerin für Felle, Häute und Lederwaren",6121,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/de50b422-8700-4153-955c-131c3d277738,Großhändler für lebende Tiere/Großhändlerin für lebende Tiere,6121,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/650c4c7b-8cd8-4671-a38e-6e37e45e0c8e,"Großhändler für Maschinen- und Industrieanlagen, Schiffe und Luftfahrzeuge/Großhändlerin für Maschinen- und Industrieanlagen, Schiffe und Luftfahrzeuge",6121,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/7fddf2b5-1ba7-4327-86f9-e5da8ddb28a6,Großhändler für Büromaschinen und -geräte/Großhändlerin für Büromaschinen und -geräte,6121,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/6c2b32b4-2f62-4288-a359-3406022c3610,"Großhändler für Zucker, Schokolade und Süßwaren/Großhändlerin für Zucker, Schokolade und Süßwaren",6121,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/e0904e3f-d3e7-4313-8ff9-3facf9fce70d,Großhändler für Getränke/Großhändlerin für Getränke,6121,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/8022c821-1ed0-414e-b440-63cc88943a89,Großhändler für Armbanduhren und Schmuck/Großhändlerin für Armbanduhren und Schmuck,6121,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/a3ef0728-7540-4676-ad18-cf0a7913b3ce,Zolldeklarant/Zolldeklarantin,5162,ausbildung,Speditions- und Logistikkaufleute,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/b789dae6-6c77-4f46-9253-098c424c92f2,"Import-/Exportsachbearbeiter für Fisch, Krustentiere und Weichtiere/Import-/Exportsachbearbeiterin für Fisch, Krustentiere und Weichtiere",6121,ausbildung,Groß- und Außenhandel,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/ef937393-3382-438d-b570-399d44b5a41c,Import-/Exportsachbearbeiter für Werkzeugmaschinen/Import-/Exportsachbearbeiterin für Werkzeugmaschinen,6121,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/d907b046-682b-45fa-bdd0-d2ed7a382670,Import-/Exportsachbearbeiter für Tabakerzeugnisse/Import-/Exportsachbearbeiterin für Tabakerzeugnisse,6121,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/8bc845cb-0702-47e4-aabc-4036032b0a8d,Seehafenspediteur/Seehafenspediteurin,5162,ausbildung,Spedition,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/f5332f2d-3119-4194-8b5c-d0a5d97f55ef,Anzeigenverkäufer/Anzeigenverkäuferin,6112,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/2049d7ef-9ebe-41ae-b8b5-e97b77ee58a2,Relocation-Specialist,6131,anlernen,Immobilien- und Umzugsdienstleistung,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/3ae4fd99-814a-4d06-a7db-5ee680c22e26,Tourismushändler/Tourismushändlerin,6311,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/9d2aae3e-cbfe-409f-86cc-7cef9cd0435a,Kundenservice-Manager/Kundenservice-Managerin,9213,fortbildung,Kundenmanagement,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/0deaceea-69d8-4304-bc80-0b3d0491a241,Erhebungsleiter/Erhebungsleiterin,9134,fortbildung,Markt- und Meinungsforschung,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/c8b296be-54ae-48cf-be21-031fa8457937,Assistent für den Bereich Supply-Chain-Management/Assistentin für den Bereich Supply-Chain-Management,6111,ausbildung,bestätigt,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/bcba793e-44fe-45eb-b0fb-56772529cbab,Redaktionsassistent/Redaktionsassistentin,9242,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/e19fe26f-0759-4bb1-af71-5bbecf3df69f,Migrationsberater/Migrationsberaterin,8315,studium,Sozialberatung,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/6c7d333a-b2a9-4325-b25b-566d1ecc956d,Forstwirtschaftskontrolleur/Forstwirtschaftskontrolleurin,1179,fortbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/379a4f3f-4985-4764-8b2f-037946da855d,Spielhallenaufsicht,5311,anlernen,bestätigt,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/81309031-dad2-4a7a-bde6-7f6e518f89ff,Sozialbetreuer Betreuungseinrichtung/Sozialbetreuerin Betreuungseinrichtung,8312,ausbildung,bestätigt,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/58f3f9fc-c9f6-4e14-bedf-a71ace5f27c5,Trainer für künstlerische Performance/Trainerin für künstlerische Performance,8443|8453,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/388155cc-7ab8-46c7-8051-aefc7b276c84,Schiedsrichter/Schiedsrichterin,8458,anlernen,bestätigt,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/67d8c64f-e0d9-4e0b-be8b-510f9e20e698,Trainer für Outdoor-Aktivitäten/Trainerin für Outdoor-Aktivitäten,8450,anlernen,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/55af6be8-039a-419c-b278-55b3f7d9ef92,Instruktor für Outdoor-Aktivitäten/Instruktorin für Outdoor-Aktivitäten,8450|6314,anlernen,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/a1b32703-a2e5-4e0a-910f-7cdd0293b52d,Trainer für besondere Outdoor-Aktivitäten/Trainerin für besondere Outdoor-Aktivitäten,8450,fortbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/394bdd9b-3ee8-43a9-b943-442ce146bb21,Sporttherapeut/Sporttherapeutin,8178,studium,bestätigt,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/0c3672ed-450b-4fcd-a3d0-579a10004486,Reitlehrer/Reitlehrerin,1132,fortbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/88760821-9df4-47a6-a1c2-ac08b9759396,Miniaturbauer/Miniaturbauerin,2723,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/8f10ea9b-bfdf-4a4c-9fa7-b6e02daa93e5,Patissier/Patissière,2922,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/b10dc548-10e1-4447-8406-5101ff170bbf,Chefkonditor/Chefkonditorin,2929,fortbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/a256838b-0843-4ad2-a2fb-4531f94e63d8,Privatkoch/Privatköchin,2930,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/068df7d1-516f-4829-b339-294cb0cf6318,Lichtdesigner/Lichtdesignerin,9461,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/89a0af2a-edf4-4d1a-8526-f4a8f476cea2,Drehortmanager/Drehortmanagerin,9449,anlernen,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/a0ebd342-8f89-4947-893d-fee9468cf001,Spezialeffekt-Künstler Pyrotechnik/Spezialeffekt-Künstlerin Pyrotechnik,9458,fortbildung,bestätigt,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/1aa4bb15-c527-4a3b-9270-b3c71c4be111,Inspizient/Inspizientin,9449,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/d71eb4f9-2de3-4955-ba79-7b82ea3fe32c,Verfolgerfahrer/Verfolgerfahrerin,9458,ausbildung,Veranstaltungstechnik,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/9729c0f3-c9bc-482e-ac59-a82ec3b67ba3,Rechenzentrumsbetreiber/Rechenzentrumsbetreiberin,4339,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/1242d99a-47f1-4a62-b884-33746db8a6ca,IKT-Helpdesk-Manager/IKT-Helpdesk-Managerin,4329,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/a44a1dc5-be08-4840-8bd5-770c4ac1ca6d,IT-Sicherheitstechniker/IT-Sicherheitstechnikerin,4334,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/3e7bf729-4442-4b9f-ad5e-83111963795c,IKT-Techniker/IKT-Technikerin,4338,ausbildung,bestätigt,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/2cbb23b0-0bf1-4871-9e6d-18f005987310,Tontechniker/Tontechnikerin,9453,ausbildung,bestätigt,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/0da2ee5c-b480-498f-97a8-a292a0f4c54c,Soundtechniker/Soundtechnikerin,9453,ausbildung,bestätigt,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/6353b3e8-e8f2-4ecb-b230-186927139892,Datentypist/Datentypistin,7144,anlernen,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/6a6e174e-cffa-49a9-9f2f-aa39c81cdee5,Postschalterbediensteter/Postschalterbedienstete,6218,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/fde97584-d8e3-413e-a662-511c9055357e,Online-Kundenberater/Online-Kundenberaterin,7145,anlernen,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/0bf68df5-e808-4c27-abf2-6f85440f2d7f,Telefonist Telefonzentrale/Telefonistin Telefonzentrale,7145,anlernen,bestätigt,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/68450507-b4a0-40e0-895b-385fe705be10,Notruftelefonist/Notruftelefonistin,8134,anlernen,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/f7b04542-d8c7-42db-8475-e63b507cce82,Empfangssekretär/Empfangssekretärin,7140,anlernen,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/b2e81332-0972-4e0f-9a4d-1d15c9c9513b,Back-Office-Mitarbeiter/Back-Office-Mitarbeiterin,7221,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/35fbb8cd-c044-49a1-850c-010481c99b4a,Back-Office-Mitarbeiter im Maklergeschäft/Back-Office-Mitarbeiterin im Maklergeschäft,7221,ausbildung,bestätigt,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/fd0801c9-809a-4cfd-98ed-6c5860c163f2,Sachbearbeiter im Investmentbereich/Sachbearbeiterin im Investmentbereich,7218,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/f84dbfe2-fa6b-43ef-97f5-54c3ad9c631f,Rohstoffannahmeleiter/Rohstoffannahmeleiterin,2929,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/562dd713-5745-4457-929e-5b909da084ca,Fachkraft Rohrleitungstransport,5129,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/c3760388-d070-491a-9c1f-be305a576815,Einsatzleiter im Hafenlotsendienst/Einsatzleiterin im Hafenlotsendienst,5154,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/61ed67cd-67d7-44d8-bc2d-47fc79110a59,Funkbediener im Taxibetrieb/Funkbedienerin im Taxibetrieb,5158,anlernen,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/e9640041-ca34-4955-aa8c-629717d0dcda,Fahrdienstleiter Straßenbahn/Fahrdienstleiterin Straßenbahn,5159,ausbildung,bestätigt,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/656674ac-9d4e-4a91-963f-c0b6edfd55a4,Fahrdienstleiter Busverkehr/Fahrdienstleiterin Busverkehr,5150,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/555ad9ba-72cf-4bc0-9ea6-c36041462be5,Fachkraft Gastransport,2626,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/9ab0f0db-1128-4050-becd-b09db5eabdaa,Dokumentationsfachkraft,7333,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/1185cfe1-49a7-44a7-8dee-45b2f36727f9,Umweltpädagoge/Umweltpädagogin,8448,studium,außerschulische Bildung,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/26105840-8abb-4f91-a888-1211cb798b0b,Gästebetreuer Themenpark/Gästebetreuerin Themenpark,6314,anlernen,bestätigt,keine Mehrheit für den Qualifizierungsweg
+http://data.europa.eu/esco/occupation/7c5e4ca1-e8be-4297-9014-509d5ba57210,Zoopädagoge/Zoopädagogin,8448,studium,außerschulische Bildung,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/11e6d39e-1295-40e7-8eea-3eb042bc7e34,Industriekoch/Industrieköchin,2930,ausbildung,Köche,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/f60dc59b-7681-45d4-8114-b3a646e02ab2,Film- und Theaterfriseur/Film- und Theaterfriseurin,8234,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/d5ce0c23-6f8a-459f-9bf9-a7cb9768740a,"Farb-, Stil- und Imageberater/Farb-, Stil- und Imageberaterin",8322,anlernen,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/589efb6c-9080-40b2-ab6a-144955675967,Küster/Küsterin,8332,anlernen,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/31d0e6b8-64ae-4b04-b988-dbee03a4aaa9,Medium,-,,esoterische Tätigkeit ohne fachliche Grundlage,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/2b292d4d-1905-45ec-a7c0-1ca7b45a4162,Hundezüchter/Hundezüchterin,1150,anlernen,Tierpflege,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/d1fc31d2-38e1-4000-85b7-3f82d2fbed9e,Gästebetreuer Club/Gästebetreuerin Club,6313,anlernen,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/f84aae41-28cc-4aa0-a0df-e7c3030516fd,Partnervermittler/Partnervermittlerin,9425,anlernen,personenbezogene Dienstleistungen,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/38395ab3-766c-4c6c-8d96-430eff19ec8d,Kfz-Leasingberater/Kfz-Leasingberaterin,7212,ausbildung,bestätigt,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/73357956-f607-4baa-9ce6-03beb9b39da2,Mitarbeiter Verkaufsabwicklung/Mitarbeiterin Verkaufsabwicklung,6112,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/56a535ff-189b-45da-97d4-775f78744f83,Augenoptiker in Beratung und Verkauf/Augenoptikerin in Beratung und Verkauf,8252,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/b4bff870-5c8f-4c33-b07f-f04d79830633,Mitarbeiter Flugzeugcatering/Mitarbeiterin Flugzeugcatering,2930|6330,anlernen,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/3900b684-6b4b-4133-b134-e1d129d60383,Vermietungsdienstmitarbeiter/Vermietungsdienstmitarbeiterin,6116,anlernen,bestätigt,keine Mehrheit für den Qualifizierungsweg
+http://data.europa.eu/esco/occupation/79c2e54e-26e8-4cdc-a7f1-908e000bfb83,Lehrassistent Sekundarstufe/Lehrassistentin,8412,anlernen,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/7005c266-d1a9-42ac-8c36-b42d5d755463,Mitarbeiter Sterilgutversorgung/Mitarbeiterin Sterilgutversorgung,5334,anlernen,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/d4ccb6d4-ea97-47e5-a319-b72cffbf0631,Bergwerksretter/Bergwerksretterin,8134,fortbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/b8b98b65-7db2-43f8-8ac4-2f1903984e7b,Verkehrsüberwacher/Verkehrsüberwacherin,5151,anlernen,Verkehrsüberwachung,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/12da0bb1-26c8-46eb-9476-797f4f1c441e,Verkehrshelfer/Verkehrshelferin,5151,anlernen,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/4cbe5a17-056c-489a-9f10-f9d816905000,Ordnungshüter/Ordnungshüterin,5311,anlernen,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/0ee5a71a-3c85-48af-bf81-824d3561737a,Pelztierzüchter/Pelztierzüchterin,-,,in Deutschland faktisch nicht mehr zulässig,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/ff63fa99-c634-4e6f-a693-6a49482952e9,Kapitän Küstenfischerei/Kapitänin Küstenfischerei,5241,fortbildung,bestätigt,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/565987b2-b980-4881-891c-cc4d5ab61d07,Steingraveur/Steingraveurin,9353,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/ac7c07d1-bc11-4f19-bca5-e468e9b1a53c,Industriekletterer/Industriekletterin,3215,anlernen,bestätigt,keine Mehrheit für den Qualifizierungsweg
+http://data.europa.eu/esco/occupation/ef53663e-c295-43a4-a48e-84254270b138,Installateur für Bewässerungssysteme/Installateurin für Bewässerungssysteme,3226,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/fb4819db-03fa-4dc1-a471-2cdc24dcbe6f,Korrosionsschützer/Korrosionsschützerin,2438,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/c0ec3a06-1dac-4c21-9f08-4c9dfbc9d6cf,Dekontaminateur/Dekontaminateurin,5334,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/2d6d4cb2-5d46-4d1f-939b-7f55c02c64cb,Kupferschmied/Kupferschmiedin,3420,ausbildung,"Klempnerei, Kupferschmiede",weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/c44f9f8c-46a6-40da-9630-cc568a18cc51,Metallbauer Fachrichtung Metallgestaltung/Metallbauerin Fachrichtung Metallgestaltung,2441,ausbildung,Metallbau,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/5d46e448-b6bb-48e5-b245-5aad68e06085,Brennschneider/Brennschneiderin,2421,ausbildung,bestätigt,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/cb3432f8-bad7-4703-ba66-dc980a4ce4f7,Maschinenbediener in der Schrottzerkleinerung/Maschinenbedienerin in der Schrottzerkleinerung,2420,anlernen,bestätigt,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/77a25ee0-94ad-443e-91ea-3e6d3506181b,Maschinenbediener für Gewindewalze/Maschinenbedienerin für Gewindewalze,2412,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/264b00c9-84d0-4dc9-b590-aed2cea2b904,KfZ-Werkstattleiter/KfZ-Werkstattleiterin,2529,fortbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/6b46ea2f-403a-473c-b2e5-9fcf0c2bd634,Zweiter technischer Schiffsoffizier Fischereifahrzeug/Zweite technische Schiffsoffizierin Fischereifahrzeug,5113,fortbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/375137f7-5fc2-424e-9f63-d7ff4441c11e,Edelsteingraveur/Edelsteingraveurin,9353,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/cea4d5c9-7805-434a-8e6b-af5e9fa54c9e,Scanner-Operator/Scanner-Operatorin,2341,anlernen,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/b09ffdec-b04c-41a8-bacc-2c71d7a3e5ac,Schriftsetzer/Schriftsetzerin,2321,ausbildung,Mediengestaltung Digital und Print,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/fddb7bd8-f176-4dc8-9d12-32b6072452c9,Techniker für Stromzähler/Technikerin für Stromzähler,2625,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/6656337f-67eb-4f48-b1e4-ecccdfa44dd2,Kraftfahrzeugelektriker/Kraftfahrzeugelektrikerin,2633,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/8cf68522-dfc9-43c0-9f65-892703f4705e,Flugfeldbeleuchtungsinspektor/Flugfeldbeleuchtungsinspektorin,2621,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/f2ee2cda-9d02-49c3-8280-da5892d0055b,Straßenbeleuchtungstechniker/Straßenbeleuchtungstechnikerin,2621,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/b7aa4b4e-dbb6-4f58-b36c-35b9a7267972,Hardwaretechniker/Hardwaretechnikerin,2513,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/26852256-d423-41bb-8178-4d37ff2528b9,Nudelhersteller/Nudelherstellerin,2920,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/6a0b0c4f-b57a-4978-a637-2c0adff65996,Ölmüller/Ölmüllerin,2921,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/b4306d87-7992-47fc-914a-4485a4e7003c,Nahrungsmittelklassierer/Nahrungsmittelklassiererin,2920,anlernen,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/a2a126ac-d90d-4e9f-97d1-9b8dff2ff946,Kaffeeröstmeister/Kaffeeröstmeisterin,2920,fortbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/2dc86f3d-a90e-4e7a-8a94-0bd728f22d7b,Bildeinrahmer/Bildeinrahmerin,2230,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/6f8f1da1-9160-4b9f-ba30-e3396d3b2f92,Spielzeugmodellbauer/Spielzeugmodellbauerin,9333,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/77a05858-f682-4648-baa5-9b86deeffbc1,Holzmechaniker/Holzmechanikerin – Herstellen von Möbeln und Innenausbauteilen,2234,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/bd206ee9-61d6-45de-a369-0c71b8429efa,Perückenmacher/Perückenmacherin,8234,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/423f4021-322b-4257-9a4e-d6ee5d166fbc,Schiffsinnenausstatter/Schiffsinnenausstatterin,9323,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/1d188cae-90e9-4950-9666-3e1a9500de50,Lederzuschneider/Lederzuschneiderin,2830,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/204c8b13-f5de-4e39-bd23-86ff8cf89b4d,Berufstaucher für Erntearbeiten/Berufstaucherin für Erntearbeiten,2443,anlernen,bestätigt,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/3a75b477-e151-40fb-9909-b3641401bfed,Maschinenbediener für automatische optische Inspektionssysteme/Maschinenbedienerin für automatische optische Inspektionssysteme,2512,anlernen,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/295dbed9-0330-42af-8650-f9296c6eb195,Testfahrer in der Automobilindustrie/Testfahrerin in der Automobilindustrie,2521,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/2296fa07-98ae-4875-b18d-96ed86134ffb,Elektroniker Prüffeld/Elektronikerin Prüffeld,2630,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/ad7bbc92-d5cb-4b64-a1a3-efc593afd437,Holzklassierer/Holzklassiererin,2238,anlernen,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/371885b5-0f93-406f-b96a-58ecd5bbc3ce,Qualitätskontrolleur - Lederwaren/Qualitätskontrolleurin - Lederwaren,2832,anlernen,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/610bee9f-d7f0-4b18-918e-f2a4a91f8912,Steinbohrer/Steinbohrerin,2123,ausbildung,bestätigt,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/3e9c6f2a-dc20-4366-aeb9-99dffd635b4c,Naturwerksteinmechaniker/Naturwerksteinmechanikerin,2123,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/d3c1c718-a093-4e2e-80a0-2bd331266a8b,Maschinenführer auf Ölbohrinseln/Maschinenführerin auf Ölbohrinseln,2512,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/2a7d4b37-e831-4e20-827c-0682fe7e370e,Pipelinebediener/Pipelinebedienerin,4133,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/86c49d9c-b37d-4a14-8e9d-d0357005a48d,Deckarbeiter/Deckarbeiterin,2111,anlernen,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/7a0afb5e-f118-449a-82bd-d8b9230fd49f,Tunnelbaumaschinenführer/Tunnelbaumaschinenführerin,5252,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/c453886f-a8f0-434c-be0e-e6a12c49954f,Steinschleifer/Steinschleiferin,2123,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/a001cf0d-b0eb-420a-a110-9408448ba8b8,Steinspalter/Steinspalterin,2121,anlernen,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/1c5ec3d2-a241-4ba2-ba20-e4da565383a6,Rüttelscheuermaschinenbediener/Rüttelscheuermaschinenbedienerin,2422,anlernen,bestätigt,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/30cdbb0a-4f62-4d0e-811c-72e3f95d017b,Sprengstoffarbeiter/Sprengstoffarbeiterin,4133,anlernen,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/81f8ea60-41d4-434a-b0fc-f870e83e7e27,Düngemittelmischer/Düngemittelmischerin,4133,anlernen,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/237e21f1-a7fa-4273-91eb-28e7b5d72f60,Farben- und Lacktechniker/Farben- und Lacktechnikerin,2220,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/1999bdfa-f9c4-4a0b-8565-0305108ca65e,Sprengstoffaufseher/Sprengstoffaufseherin,2119,fortbildung,Befähigung als verantwortliche Person,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/3417aab3-8b87-4c3b-bee6-be03fe05be2b,Tufter/Tufterin,2812,ausbildung,Textilherstellung,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/ed096599-56a9-443d-9683-8a92f58aa894,Maschinsticker/Maschinstickerin,2812,anlernen,bestätigt,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/21a33619-1959-42e6-8478-64a930f7f225,Farbmusterhersteller/Farbmusterherstellerin,2220,anlernen,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/3e0b4b9b-b624-4ceb-9bc9-9627cdfb0b81,Fachkraft für maschinelle Lederverarbeitung,2832,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/0a9eb24a-13e7-4847-8f6e-a776771ac96b,Textilmustergestalter/Textilmustergestalterin,2811,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/5520bfd0-49d3-47e5-abe0-d72354711bc0,Kakaobohnenreinigungskraft,2926,anlernen,Süßwarenherstellung,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/e3713dd7-572d-4c6c-87ec-1944b3572175,Apfelweinproduktionsmitarbeiter/Apfelweinproduktionsmitarbeiterin,2912,ausbildung,bestätigt,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/62f53135-e091-4aa6-8895-5851d72271b9,Mitarbeiter am Absetzbecken/Mitarbeiterin am Absetzbecken,2928,anlernen,Lebensmittelherstellung,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/e0b347de-f88b-4f69-b7d0-0a965e41f0d5,Kakaomahler/Kakaomahlerin,2926,ausbildung,Süßwarenherstellung,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/36b11444-8634-4194-b679-ed302acdfb22,Kaffeeröster/Kaffeerösterin,2928,anlernen,Lebensmittelherstellung,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/9ae8251e-cb8e-4324-9d77-d967d43e6b46,Fettaufbereitungsmitarbeiter/Fettaufbereitungsmitarbeiterin,2928,anlernen,Lebensmittelherstellung,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/67f12d6c-295f-4315-8c5c-8e477c7f7019,Honigschleuder-Arbeiter/Honigschleuder-Arbeiterin,1123,anlernen,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/706e8b26-befb-429b-b71d-f72fad1bae12,Blanchieranlagenbediener/Blanchieranlagenbedienerin,2928,anlernen,Lebensmittelherstellung,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/1214a616-aaa5-4140-b82e-2cc5028b0fa4,Mischanlagenbediener/Mischanlagenbedienerin,2928,anlernen,Lebensmittelherstellung,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/3723d7a6-7e65-4735-8235-cb01fb661b2f,Papiermachéformer/Papiermachéoformerin,2312,anlernen,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/976c739f-fec7-45c2-b12e-e1b496aa816b,Hackschnitzelerzeuger/Hackschnitzelerzeugerin,2230,anlernen,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/bd378c4e-f656-46af-a728-fcfb40b113ef,Schrotsägenführer/Schrotsägenführerin,2238,anlernen,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/5e5522c5-4b09-4586-a8f0-3b6d66d99969,Entrindungsmaschinenführer/Entrindungsmaschinenführerin,2230,anlernen,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/865adac9-9bb7-4680-a13d-62b2942974ac,Sägewerksfacharbeiter/Sägewerksfacharbeiterin,2238,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/a945757e-e171-46a9-847a-13cf04f7cd27,Bandsägenführer/Bandsägenführerin,2238,anlernen,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/431f0055-43ca-406c-99f0-fb10a73d684e,Hobelmaschinenführer/Hobelmaschinenführerin,2232,anlernen,bestätigt,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/05ae3e87-36ad-428f-a086-8a2ed458db3b,Tischkreissägenführer/Tischkreissägenführerin,2230,anlernen,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/218e30f0-bd6c-4120-99ba-9a90665a314f,Furniersäger/Furniersägerin,2230,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/7109cdfd-1618-43b6-8317-8dc90fa583e6,Holzpellethersteller/Holzpelletherstellerin,2230,anlernen,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/ac401ec0-7ce0-423f-b8b5-167da9e046a7,Kunstfaserstreckmaschinenbediener/Kunstfaserstreckmaschinenbedienerin,2812,ausbildung,Textilherstellung (Chemiefasern),weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/9388a977-6f79-4509-81aa-026bc49e1919,Dosen- und Flaschenabfüllanlagenbediener/Dosen- und Flaschenabfüllanlagenbedienerin,2512,anlernen,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/b0fa69b4-998c-4e66-acd3-5f5d73cadb5c,Verpackungs- und Abfüllanlagenbediener/Verpackungs- und Abfüllanlagenbedienerin,2928,anlernen,bestätigt,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/48318e0f-b54b-4654-b296-47c8e544da23,Kantenanleimmaschinenbediener/Kantenanleimmaschinenbedienerin,2238,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/ffc292f1-89e2-4406-8eff-39096c94e731,Kfz-Monteur/Kfz-Monteurin,2521,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/c44a118d-18c1-46ac-985f-3e802a064b73,Schaltanlagenmonteur/Schaltanlagenmonteurin,2630,ausbildung,Elektrotechnik,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/cb8be514-9388-4ef0-a58d-cff496747610,Kabelbaumleger/Kabelbaumlegerin,2638,anlernen,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/d44c5eb0-fc6c-4f4a-9850-f2f29aaac505,Elektroanlageninstallateur/Elektroanlageninstallateurin,2638,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/f889dcbd-d058-4177-927f-5fe59d044fa6,Hersteller elektronischer Musikinstrumente/Herstellerin elektronischer Musikinstrumente,9360,anlernen,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/da00cd76-22fe-450d-aefc-f4e4a3864171,Leiterplattenbestücker/Leiterplattenbestückerin,2511,anlernen,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/52c25b47-c36e-49ff-92ce-8a8c5413fde6,SMD-Maschinenbediener/SMD-Maschinenbedienerin,2511,anlernen,bestätigt,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/31308b0c-a298-4802-a052-4020d22bad57,Maschinenbediener im Bereich Wellenlöten/Maschinenbedienerin im Bereich Wellenlöten,2510,anlernen,bestätigt,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/2231ed97-69dc-4b6e-93ee-8c0e5bb5dbb8,Metallmöbelhersteller/Metallmöbelherstellerin,2421|2420,ausbildung,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/c92a4851-9418-4fb5-8201-c7e03cc2b6e2,Schrankenwärter/Schrankenwärterin,5122,anlernen,bestätigt,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/af513bd8-4340-4452-aa30-05a073ecc49a,Leichenwagenfahrer/Leichenwagenfahrerin,8240,anlernen,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/1e9e18cb-80b6-4598-acdb-ae3b51047720,Flugzeugtankwart/Flugzeugtankwartin,2513,anlernen,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/1bb2aa65-1524-4961-8dba-ad25f34f195f,Fahrzeugführer Feuerwehr/Fahrzeugführerin Feuerwehr,5313,ausbildung,Feuerwehr,keine Mehrheit für den Qualifizierungsweg
+http://data.europa.eu/esco/occupation/eeac6251-1974-42f5-91ed-513c6c883755,Gabelstaplerfahrer/Gabelstaplerfahrerin,5133,anlernen,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/c9191f7f-28b5-4df8-991d-804c53009b83,Produktionsarbeiter im Bereich Pflanzenbau/Produktionsarbeiterin im Bereich Pflanzenbau,1118,anlernen,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/2e4b41dd-b63d-403d-a0ad-dd323cd3ddac,Hilfskraft für die Verankerung von Netzkäfigen in Aquakulturanlagen,1141,anlernen,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/f272a521-1a38-4d34-a78e-3adeca95b977,Straßenunterhaltungsarbeiter/Straßenunterhaltungsarbeiterin,3222,anlernen,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/79082f76-4b11-4594-8437-2db567331f41,Straßenmarkierer/Straßenmarkiererin,5121,anlernen,bestätigt,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/87afe3f0-c891-45de-a498-ad2608471c86,Textilverarbeiterhelfer/Textilverarbeiterhelferin,2810,anlernen,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/245be6d1-fe9a-4ac8-9f81-122a687e4724,Fabrikhilfsarbeiter/Fabrikhilfsarbeiterin,5414,anlernen,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/dddf9385-2939-4395-951a-70ef8a36cabe,Aufseher von Hafenarbeiten/Aufseherin von Hafenarbeiten,5131,anlernen,bestätigt,keine Mehrheit für den Qualifizierungsweg
+http://data.europa.eu/esco/occupation/96a0d8d3-d4a6-473d-80d6-b5dbadde940a,Imbissmitarbeiter/Imbissmitarbeiterin,6331,anlernen,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/f756fdab-7726-4c48-bfcc-94ff8810fc08,Küchenbediensteter/Küchenbedienstete,2930,anlernen,bestätigt,keine Mehrheit für eine KldB-Untergruppe
+http://data.europa.eu/esco/occupation/503ea267-93e9-4b8c-ae5e-817fe7e4a245,Straßenkehrer/Straßenkehrerin,5414,anlernen,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/2bdf0696-776c-47e6-9259-6460af224dac,Zählerableser/Zählerableserin,2621,anlernen,bestätigt,"keine Stimme für eine KldB-Untergruppe, Vorschlag nur aus Embedding"
+http://data.europa.eu/esco/occupation/c28cb56b-003e-499a-8dbf-b654864e7867,Plakatierer/Plakatiererin,9322,anlernen,bestätigt,weicht vom BA-Umsteigeschlüssel ab
+http://data.europa.eu/esco/occupation/1f1a45a8-8f5c-4b66-a8a1-e02490addc55,Kabinenwart/Kabinenwartin,3411,anlernen,bestätigt,weicht vom BA-Umsteigeschlüssel ab

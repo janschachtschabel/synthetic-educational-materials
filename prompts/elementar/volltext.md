@@ -1,0 +1,5 @@
+Material mit folgenden Vorgaben:
+Textsorte: {{textsorte}} / Inhaltstyp: {{inhaltstyp}} / Medienform: {{medienform}} / Thema: {{thema}} ({{themenart}}) / Bildungsbereich: {{fach}} / Bildungsstufe: {{bildungsstufe}} / Alter: {{niveau}} / Zielgruppe: {{zielgruppe}}{{#sozialform}} / Sozialform: {{sozialform}}{{/sozialform}}{{#didaktische_funktion}} / Einsatz: {{didaktische_funktion}}{{/didaktische_funktion}}{{#bearbeitungsdauer}} / Dauer: etwa {{bearbeitungsdauer}} Minuten{{/bearbeitungsdauer}}
+Worum es geht: {{thema_beschreibung}}
+Begriffe, die vorkommen können: {{thema_keywords}}
+Auftrag: Schreibe dieses Material. Umfang: etwa eine A4-Seite, 350 bis 500 Wörter. Richte Inhalt und Sprache am Alter der Kinder aus: anschaulich, spielerisch, mit allen Sinnen, ohne Leistungsdruck und ohne schulische Tests oder Noten. Achte auf Sicherheit (Material, Aufsicht, Allergien) und auf Vielfalt der Kinder und Familien. Texte für Kinder sind kurz, einfach und zum Vorlesen gedacht; Texte für Fachkräfte und Eltern sind sachlich und praxisnah.

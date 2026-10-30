@@ -1,0 +1,47 @@
+{
+ "beschreibung": "Optionale Steuerfelder der beruflichen Bildung. anteil: Wahrscheinlichkeit, dass das Feld in einem Seed gesetzt ist. lernort: Werte je Qualifizierungsweg (ausbildung gilt auch für anlernen, fortbildung auch für studium).",
+ "didaktische_funktion": {
+  "anteil": 0.6,
+  "werte": [
+   "Einstieg in eine Lernsituation",
+   "Erarbeitung",
+   "Übung und Anwendung",
+   "Vertiefung",
+   "Prüfungsvorbereitung"
+  ]
+ },
+ "bearbeitungsdauer_minuten": {
+  "anteil": 0.5,
+  "werte": [15, 30, 45, 90]
+ },
+ "lernort": {
+  "anteil": 0.4,
+  "werte": {
+   "ausbildung": ["Berufsschule", "Ausbildungsbetrieb", "überbetriebliche Ausbildungsstätte"],
+   "fortbildung": ["Fortbildungslehrgang", "Fachschule", "betriebliche Weiterbildung"]
+  }
+ },
+ "querschnittsthema": {
+  "anteil": 0.25,
+  "quelle": {
+   "name": "Standardberufsbildpositionen (Empfehlung des BIBB-Hauptausschusses, gültig für ab 1.8.2021 neu geordnete Ausbildungsberufe)"
+  },
+  "werte": [
+   "Organisation des Ausbildungsbetriebes, Berufsbildung sowie Arbeits- und Tarifrecht",
+   "Sicherheit und Gesundheit bei der Arbeit",
+   "Umweltschutz und Nachhaltigkeit",
+   "Digitalisierte Arbeitswelt"
+  ]
+ },
+ "zielgruppe": {
+  "anteil": 1.0,
+  "werte": [
+   {"uri": "http://w3id.org/openeduhub/vocabs/intendedEndUserRole/learner", "gewicht": 0.8},
+   {"uri": "http://w3id.org/openeduhub/vocabs/intendedEndUserRole/teacher", "gewicht": 0.2}
+  ]
+ },
+ "sprache": {
+  "anteil": 1.0,
+  "werte": ["de"]
+ }
+}

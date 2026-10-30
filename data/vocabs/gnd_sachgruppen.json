@@ -1,0 +1,3877 @@
+{
+ "scheme": {
+  "name": "gnd_sachgruppen",
+  "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc",
+  "title": "GND-Sachgruppen",
+  "source": "https://d-nb.info/standards/vocab/gnd/gnd-sc.ttl",
+  "public_url": "https://d-nb.info/standards/vocab/gnd/gnd-sc.html",
+  "license": "CC0-1.0",
+  "retrieved": "2026-10-29"
+ },
+ "concepts": [
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#00",
+   "notation": "00",
+   "label": "Unspezifische Allgemeinwörter",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#00m",
+   "notation": "00m",
+   "label": "Maschinell eingespielte Datensätze (Platzhalter)",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#00",
+   "level": 1,
+   "art": "produkte"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#00p",
+   "notation": "00p",
+   "label": "Sachlich nicht klassifizierbare Personen",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#00",
+   "level": 1,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#1",
+   "notation": "1",
+   "label": "Allgemeines, Interdisziplinäre Allgemeinwörter",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10*",
+   "notation": "10*",
+   "label": "Wirtschaft, Verkehr, Umweltschutz, Raumordnung",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.1",
+   "notation": "10.1",
+   "label": "Wirtschaftsgeschichte",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.10",
+   "notation": "10.10",
+   "label": "Genossenschaft, Gemeinwirtschaft, Alternative Wirtschaft",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.10p",
+   "notation": "10.10p",
+   "label": "Personen zu Genossenschaft, Gemeinwirtschaft, Alternativer Wirtschaft",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.10",
+   "level": 1,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.11*",
+   "notation": "10.11*",
+   "label": "Betriebswirtschaftslehre",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.11a",
+   "notation": "10.11a",
+   "label": "Betriebswirtschaftslehre (Allgemeines), Unternehmen, Management",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.11b",
+   "notation": "10.11b",
+   "label": "Mathematische Methoden, Information, Entscheidung",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.11c",
+   "notation": "10.11c",
+   "label": "Beschaffung, Produktion",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.11d",
+   "notation": "10.11d",
+   "label": "Kosten",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.11e",
+   "notation": "10.11e",
+   "label": "Marketing, Wettbewerb",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.11f",
+   "notation": "10.11f",
+   "label": "Rechnungswesen, Steuer, Revision",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.11g",
+   "notation": "10.11g",
+   "label": "Investition, Finanzierung",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.11h",
+   "notation": "10.11h",
+   "label": "Personalpolitik, Arbeitsgestaltung",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.11i",
+   "notation": "10.11i",
+   "label": "Büro, Bürokommunikation",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.11m",
+   "notation": "10.11m",
+   "label": "Spezielle Informationssysteme, Programme",
+   "broader": null,
+   "level": 0,
+   "art": "produkte"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.11p",
+   "notation": "10.11p",
+   "label": "Personen zu Betriebswirtschaftslehre",
+   "broader": null,
+   "level": 0,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.12",
+   "notation": "10.12",
+   "label": "Gewerbe allgemein, Industrie, Handwerk",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.12a",
+   "notation": "10.12a",
+   "label": "Industrie, Industriebetrieb, Handwerk",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.12",
+   "level": 1,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.12b",
+   "notation": "10.12b",
+   "label": "Einzelne Branchen der Industrie und des Handwerks",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.12",
+   "level": 1,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.12p",
+   "notation": "10.12p",
+   "label": "Personen zu Gewerbe allgemein, Industrie, Handwerk",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.12",
+   "level": 1,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.13*",
+   "notation": "10.13*",
+   "label": "Handel, Dienstleistung",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.13a",
+   "notation": "10.13a",
+   "label": "Handel allgemein, Dienstleistung allgemein",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.13b",
+   "notation": "10.13b",
+   "label": "Handel einzelner Branchen, Dienstleistung einzelner Branchen",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.13p",
+   "notation": "10.13p",
+   "label": "Personen zu Handel, Dienstleistung",
+   "broader": null,
+   "level": 0,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.14",
+   "notation": "10.14",
+   "label": "Versicherung",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.14p",
+   "notation": "10.14p",
+   "label": "Personen zur Versicherung",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.14",
+   "level": 1,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.15",
+   "notation": "10.15",
+   "label": "Werbewirtschaft, Öffentlichkeitsarbeit",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.15p",
+   "notation": "10.15p",
+   "label": "Personen zu Werbewirtschaft, Öffentlichkeitsarbeit",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.15",
+   "level": 1,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.1a",
+   "notation": "10.1a",
+   "label": "Wirtschaftsgeschichte: Altertum",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.1",
+   "level": 1,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.1b",
+   "notation": "10.1b",
+   "label": "Wirtschaftsgeschichte: Mittelalter",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.1",
+   "level": 1,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.1c",
+   "notation": "10.1c",
+   "label": "Wirtschaftsgeschichte: Neuzeit",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.1",
+   "level": 1,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.1p",
+   "notation": "10.1p",
+   "label": "Personen zu Wirtschaftsgeschichte (bis ca. 1900)",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.1",
+   "level": 1,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.2*",
+   "notation": "10.2*",
+   "label": "Wirtschaft, Volkswirtschaft",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.2a",
+   "notation": "10.2a",
+   "label": "Wirtschaft, Volkswirtschaft (Allgemeines)",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.2aa",
+   "notation": "10.2aa",
+   "label": "Volkswirtschaft",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.2a",
+   "level": 1,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.2ab",
+   "notation": "10.2ab",
+   "label": "Wirtschaftssystem",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.2a",
+   "level": 1,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.2ac",
+   "notation": "10.2ac",
+   "label": "Mathematische Methoden, Information, Entscheidung",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.2a",
+   "level": 1,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.2b",
+   "notation": "10.2b",
+   "label": "Haushalt, Verbraucher",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.2c",
+   "notation": "10.2c",
+   "label": "Mikroökonomie, Wettbewerb",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.2d",
+   "notation": "10.2d",
+   "label": "Konjunktur, Verteilung, Wirtschaftsstruktur",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.2da",
+   "notation": "10.2da",
+   "label": "Wirtschaftskreislauf, Konjunktur",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.2d",
+   "level": 1,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.2db",
+   "notation": "10.2db",
+   "label": "Verteilung",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.2d",
+   "level": 1,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.2dct",
+   "notation": "10.2dct",
+   "label": "Wirtschaftsstruktur",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.2d",
+   "level": 1,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.2dp",
+   "notation": "10.2dp",
+   "label": "Personen zu Wirtschaftswissenschaften",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.2d",
+   "level": 1,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.2e",
+   "notation": "10.2e",
+   "label": "Außenwirtschaft, Außenhandel",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.2ea",
+   "notation": "10.2ea",
+   "label": "Außenwirtschaft, Außenhandel gesamtwirtschaftlich",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.2e",
+   "level": 1,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.2eb",
+   "notation": "10.2eb",
+   "label": "Außenwirtschaft, Außenhandel betrieblich",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.2e",
+   "level": 1,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.2ep",
+   "notation": "10.2ep",
+   "label": "Personen zu Außenwirtschaft, Außenhandel",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.2e",
+   "level": 1,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.3*",
+   "notation": "10.3*",
+   "label": "Öffentliche Aufgaben, Öffentliche Wirtschaft, Energie- und Rohstoffwirtschaft",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.3a",
+   "notation": "10.3a",
+   "label": "Öffentliche Aufgaben",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.3b",
+   "notation": "10.3b",
+   "label": "Öffentliche Wirtschaft, Abfallwirtschaft, Gesundheitsökonomie",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.3c",
+   "notation": "10.3c",
+   "label": "Energie- und Wasserwirtschaft",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.3d",
+   "notation": "10.3d",
+   "label": "Rohstoffwirtschaft",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.3p",
+   "notation": "10.3p",
+   "label": "Personen zu öffentlichen Aufgaben, Öffentlicher Wirtschaft, Energie- und Rohstoffwirtschaft",
+   "broader": null,
+   "level": 0,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.4",
+   "notation": "10.4",
+   "label": "Wirtschaftspolitik",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.4p",
+   "notation": "10.4p",
+   "label": "Personen zu Wirtschaftspolitik",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.4",
+   "level": 1,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.5",
+   "notation": "10.5",
+   "label": "Finanzwirtschaft, Finanzpolitik",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.5p",
+   "notation": "10.5p",
+   "label": "Personen zu Finanzwirtschaft, Finanzpolitik",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.5",
+   "level": 1,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.6*",
+   "notation": "10.6*",
+   "label": "Telekommunikation und Verkehr, Fremdenverkehr",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.6a",
+   "notation": "10.6a",
+   "label": "Nachrichten- und Verkehrswesen",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.6b",
+   "notation": "10.6b",
+   "label": "Fremdenverkehr, Hotel- und Gaststättengewerbe",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.6p",
+   "notation": "10.6p",
+   "label": "Personen zu Telekommunikation und Verkehr, Fremdenverkehr",
+   "broader": null,
+   "level": 0,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.7*",
+   "notation": "10.7*",
+   "label": "Umweltschutz, Raumordnung, Landschaftsgestaltung",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.7a",
+   "notation": "10.7a",
+   "label": "Umweltschutz, Umweltbelastung",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.7b",
+   "notation": "10.7b",
+   "label": "Raumordnung, Stadtplanung, Landschaftsgestaltung",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.7p",
+   "notation": "10.7p",
+   "label": "Personen zu Umweltschutz, Raumordnung, Landschaftsgestaltung",
+   "broader": null,
+   "level": 0,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.8*",
+   "notation": "10.8*",
+   "label": "Bau und Boden",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.8a",
+   "notation": "10.8a",
+   "label": "Öffentliche und private Bautätigkeit, Bau- und Bodenpolitik",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.8b",
+   "notation": "10.8b",
+   "label": "Bauwirtschaft, Baubetrieb und Bodenmarkt",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.8p",
+   "notation": "10.8p",
+   "label": "Personen zu Bau, Boden",
+   "broader": null,
+   "level": 0,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.9*",
+   "notation": "10.9*",
+   "label": "Geld, Bank, Börse",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.9a",
+   "notation": "10.9a",
+   "label": "Geldtheorie, Geldpolitik, Währung",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.9b",
+   "notation": "10.9b",
+   "label": "Bank",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.9c",
+   "notation": "10.9c",
+   "label": "Kapitalmarkt, Börse, Kapitalanlage",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#10.9p",
+   "notation": "10.9p",
+   "label": "Personen zu Geld, Bank, Börse",
+   "broader": null,
+   "level": 0,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#11*",
+   "notation": "11*",
+   "label": "Sprache",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#11.1*",
+   "notation": "11.1*",
+   "label": "Sprache (Allgemeines), Historische Sprachwissenschaft, Sprachliche Technik",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#11.1a",
+   "notation": "11.1a",
+   "label": "Sprache (Allgemeines)",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#11.1b",
+   "notation": "11.1b",
+   "label": "Historische Sprachwissenschaft",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#11.1c",
+   "notation": "11.1c",
+   "label": "Sprachliche Technik",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#11.2*",
+   "notation": "11.2*",
+   "label": "Sprachtheorie",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#11.2a",
+   "notation": "11.2a",
+   "label": "Allgemeine Sprachtheorie",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#11.2b",
+   "notation": "11.2b",
+   "label": "Grammatik",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#11.2c",
+   "notation": "11.2c",
+   "label": "Phonetik, Phonologie",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#11.2p",
+   "notation": "11.2p",
+   "label": "Personen zu Sprache",
+   "broader": null,
+   "level": 0,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#11.3*",
+   "notation": "11.3*",
+   "label": "Lexikologie, Namenkunde, Fachsprache",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#11.3a",
+   "notation": "11.3a",
+   "label": "Lexikologie",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#11.3b",
+   "notation": "11.3b",
+   "label": "Namenkunde",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#11.3c",
+   "notation": "11.3c",
+   "label": "Fachsprache",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#11.3d",
+   "notation": "11.3d",
+   "label": "Anonymes Werk als Sprachdenkmal",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#12*",
+   "notation": "12*",
+   "label": "Literatur",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#12.1*",
+   "notation": "12.1*",
+   "label": "Literatur (Allgemeines)",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#12.1a",
+   "notation": "12.1a",
+   "label": "Allgemeine Literaturwissenschaft, Literaturtheorie",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#12.1b",
+   "notation": "12.1b",
+   "label": "Literarisches Leben",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#12.1p",
+   "notation": "12.1p",
+   "label": "Personen zu Literaturwissenschaft (Literaturwissenschaftler)",
+   "broader": null,
+   "level": 0,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#12.2a",
+   "notation": "12.2a",
+   "label": "Literaturgeschichte",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#12.2b",
+   "notation": "12.2b",
+   "label": "Anonyme literarische Werke",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#12.2p",
+   "notation": "12.2p",
+   "label": "Personen zu Literaturgeschichte (Schriftsteller)",
+   "broader": null,
+   "level": 0,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#12.3",
+   "notation": "12.3",
+   "label": "Literaturgattung",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#12.4",
+   "notation": "12.4",
+   "label": "Literarische Motive, Stoffe, Gestalten",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#12.4p",
+   "notation": "12.4p",
+   "label": "Personen als literarisches Motiv",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#12.4",
+   "level": 1,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#12.4y",
+   "notation": "12.4y",
+   "label": "Geografische Namen als literarisches Motiv",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#12.4",
+   "level": 1,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#13*",
+   "notation": "13*",
+   "label": "Bildende Kunst, Fotografie",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#13.1*",
+   "notation": "13.1*",
+   "label": "Bildende Kunst, Kunstgeschichte, Motive",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#13.1a",
+   "notation": "13.1a",
+   "label": "Bildende Kunst",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#13.1b",
+   "notation": "13.1b",
+   "label": "Kunstgeschichte",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#13.1bp",
+   "notation": "13.1bp",
+   "label": "Personen zu Kunstwissenschaft, Kunsthistoriker",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#13.1b",
+   "level": 1,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#13.1c",
+   "notation": "13.1c",
+   "label": "Sachliche Motive in der Kunst",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#13.1cp",
+   "notation": "13.1cp",
+   "label": "Personen als künstlerisches Motiv",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#13.1c",
+   "level": 1,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#13.1cy",
+   "notation": "13.1cy",
+   "label": "Geografische Namen als künstlerisches Motiv",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#13.1c",
+   "level": 1,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#13.2",
+   "notation": "13.2",
+   "label": "Plastik",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#13.2p",
+   "notation": "13.2p",
+   "label": "Personen zu Plastik",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#13.2",
+   "level": 1,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#13.3",
+   "notation": "13.3",
+   "label": "Malerei",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#13.4",
+   "notation": "13.4",
+   "label": "Zeichnung, Grafik",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#13.4p",
+   "notation": "13.4p",
+   "label": "Personen zu Malerei, Zeichnung, Grafik",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#13.4",
+   "level": 1,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#13.5",
+   "notation": "13.5",
+   "label": "Fotografie",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#13.5p",
+   "notation": "13.5p",
+   "label": "Personen zu Fotografie",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#13.5",
+   "level": 1,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#13.6",
+   "notation": "13.6",
+   "label": "Kunsthandwerk",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#13.6p",
+   "notation": "13.6p",
+   "label": "Personen zu Kunsthandwerk",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#13.6",
+   "level": 1,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#13.7",
+   "notation": "13.7",
+   "label": "Neue Formen der Kunst",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#13.7p",
+   "notation": "13.7p",
+   "label": "Personen zu neuen Formen der Kunst",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#13.7",
+   "level": 1,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#14*",
+   "notation": "14*",
+   "label": "Musik",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#14.1",
+   "notation": "14.1",
+   "label": "Musik (Allgemeines), Musikgeschichte",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#14.2",
+   "notation": "14.2",
+   "label": "Musikalische Form, Musikgattung",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#14.3",
+   "notation": "14.3",
+   "label": "Musikinstrumentenkunde, Musikinstrumentenbau",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#14.4",
+   "notation": "14.4",
+   "label": "Systematische und Angewandte Musikwissenschaft",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#14.4p",
+   "notation": "14.4p",
+   "label": "Personen zu Musik",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#14.4",
+   "level": 1,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#15*",
+   "notation": "15*",
+   "label": "Theater, Tanz, Film, Rundfunk",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#15.1",
+   "notation": "15.1",
+   "label": "Theater, Tanz",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#15.1p",
+   "notation": "15.1p",
+   "label": "Personen zu Theater, Tanz",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#15.1",
+   "level": 1,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#15.2",
+   "notation": "15.2",
+   "label": "Kabarett, Zirkus, Varieté",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#15.2p",
+   "notation": "15.2p",
+   "label": "Personen zu Kabarett, Zirkus, Varieté",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#15.2",
+   "level": 1,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#15.3",
+   "notation": "15.3",
+   "label": "Film",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#15.3p",
+   "notation": "15.3p",
+   "label": "Personen zu Film",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#15.3",
+   "level": 1,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#15.4",
+   "notation": "15.4",
+   "label": "Rundfunk, Neue Medien",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#15.4p",
+   "notation": "15.4p",
+   "label": "Personen zu Rundfunk, Neuen Medien",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#15.4",
+   "level": 1,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#16*",
+   "notation": "16*",
+   "label": "Geschichte",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#16.1",
+   "notation": "16.1",
+   "label": "Geschichte (Allgemeines)",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#16.1p",
+   "notation": "16.1p",
+   "label": "Personen der Geschichtswissenschaft (Historiker, Archäologen)",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#16.1",
+   "level": 1,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#16.2",
+   "notation": "16.2",
+   "label": "Quellen und Historische Hilfswissenschaften",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#16.3",
+   "notation": "16.3",
+   "label": "Archäologie, Vor- und Frühgeschichte",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#16.4",
+   "notation": "16.4",
+   "label": "Geschichte überregionaler Gebiete",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#16.4a",
+   "notation": "16.4a",
+   "label": "Geschichte überregionaler Gebiete: Altertum",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#16.4",
+   "level": 1,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#16.4b",
+   "notation": "16.4b",
+   "label": "Geschichte überregionaler Gebiete: Mittelalter",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#16.4",
+   "level": 1,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#16.4c",
+   "notation": "16.4c",
+   "label": "Geschichte überregionaler Gebiete: Neuzeit",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#16.4",
+   "level": 1,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#16.4d",
+   "notation": "16.4d",
+   "label": "Geschichte überregionaler Gebiete: Zeitgeschichte",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#16.4",
+   "level": 1,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#16.5",
+   "notation": "16.5",
+   "label": "Geschichte einzelner Länder und Völker",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#16.5p",
+   "notation": "16.5p",
+   "label": "Personen der Geschichte (Politiker und historische Persönlichkeiten)",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#16.5",
+   "level": 1,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#17*",
+   "notation": "17*",
+   "label": "Volkskunde, Ethnologie",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#17.1",
+   "notation": "17.1",
+   "label": "Volkskunde, Ethnologie (Allgemeines)",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#17.2",
+   "notation": "17.2",
+   "label": "Brauchtum, Volksglaube",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#17.3",
+   "notation": "17.3",
+   "label": "Sachkultur, Volkskunst",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#17.4",
+   "notation": "17.4",
+   "label": "Volksliteratur, Volksmusik",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#17.4p",
+   "notation": "17.4p",
+   "label": "Personen zu Volkskunde, Ethnologie",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#17.4",
+   "level": 1,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#18",
+   "notation": "18",
+   "label": "Natur, Naturwissenschaften allgemein",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#18p",
+   "notation": "18p",
+   "label": "Personen zu Natur, Naturwissenschaften allgemein",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#18",
+   "level": 1,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#19",
+   "notation": "19",
+   "label": "Geowissenschaften",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#19.1*",
+   "notation": "19.1*",
+   "label": "Geografie, Heimat- und Länderkunde",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#19",
+   "level": 1,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#19.1a",
+   "notation": "19.1a",
+   "label": "Geografie, Heimat- und Länderkunde (Allgemeines)",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#19",
+   "level": 1,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#19.1b",
+   "notation": "19.1b",
+   "label": "Physische Geografie",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#19",
+   "level": 1,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#19.1c",
+   "notation": "19.1c",
+   "label": "Anthropogeografie",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#19",
+   "level": 1,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#19.1d",
+   "notation": "19.1d",
+   "label": "Reise",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#19",
+   "level": 1,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#19.1dp",
+   "notation": "19.1dp",
+   "label": "Personen zu Geografie, Heimat- und Länderkunde",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#19.1d",
+   "level": 2,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#19.2",
+   "notation": "19.2",
+   "label": "Geodäsie, Kartografie",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#19",
+   "level": 1,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#19.2p",
+   "notation": "19.2p",
+   "label": "Personen zu Geodäsie, Kartografie",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#19.2",
+   "level": 2,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#19.3",
+   "notation": "19.3",
+   "label": "Hydrologie, Meereskunde",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#19",
+   "level": 1,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#19.3p",
+   "notation": "19.3p",
+   "label": "Personen zu Hydrologie, Meereskunde",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#19.3",
+   "level": 2,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#19.4*",
+   "notation": "19.4*",
+   "label": "Geologie, Mineralogie",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#19",
+   "level": 1,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#19.4a",
+   "notation": "19.4a",
+   "label": "Allgemeine Geologie, Geophysik",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#19",
+   "level": 1,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#19.4b",
+   "notation": "19.4b",
+   "label": "Historische Geologie",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#19",
+   "level": 1,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#19.4c",
+   "notation": "19.4c",
+   "label": "Mineralogie, Boden-, Gesteins- und Lagerstättenkunde",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#19",
+   "level": 1,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#19.4d",
+   "notation": "19.4d",
+   "label": "Paläontologie",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#19",
+   "level": 1,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#19.4p",
+   "notation": "19.4p",
+   "label": "Personen zu Geologie, Mineralogie, Historischer Geologie, Boden-, Gesteins- und Lagerstättenkunde, Paläontologie",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#19",
+   "level": 1,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#19.5",
+   "notation": "19.5",
+   "label": "Meteorologie, Klimatologie, Hochatmosphäre, Magnetosphäre",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#19",
+   "level": 1,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#19.5p",
+   "notation": "19.5p",
+   "label": "Personen zu Meteorologie, Klimatologie, Hochatmosphäre, Magnetosphäre",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#19.5",
+   "level": 2,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#2*",
+   "notation": "2*",
+   "label": "Schrift, Buch, Presse",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#2.1",
+   "notation": "2.1",
+   "label": "Schrift, Handschriftenkunde",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#2.1p",
+   "notation": "2.1p",
+   "label": "Personen zu Schrift, Handschriftenkunde",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#2.1",
+   "level": 1,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#2.2",
+   "notation": "2.2",
+   "label": "Buchwissenschaft, Buchhandel",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#2.2p",
+   "notation": "2.2p",
+   "label": "Personen zu Buchwissenschaft, Buchhandel",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#2.2",
+   "level": 1,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#2.3",
+   "notation": "2.3",
+   "label": "Presse",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#2.3p",
+   "notation": "2.3p",
+   "label": "Personen zu Presse",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#2.3",
+   "level": 1,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#20",
+   "notation": "20",
+   "label": "Astronomie, Weltraumforschung",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#20p",
+   "notation": "20p",
+   "label": "Personen zu Astronomie, Weltraumforschung",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#20",
+   "level": 1,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#21*",
+   "notation": "21*",
+   "label": "Physik",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#21.1",
+   "notation": "21.1",
+   "label": "Physik (Allgemeines), Mathematische Physik",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#21.2",
+   "notation": "21.2",
+   "label": "Mechanik, Wärme, Akustik",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#21.3",
+   "notation": "21.3",
+   "label": "Elektrizität, Magnetismus, Optik",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#21.4",
+   "notation": "21.4",
+   "label": "Elementarteilchen, Kern-, Atom-, Molekularphysik",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#21.5",
+   "notation": "21.5",
+   "label": "Plasma, Gas, Flüssigkeit, Festkörper",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#21.5p",
+   "notation": "21.5p",
+   "label": "Personen zu Physik",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#21.5",
+   "level": 1,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#22*",
+   "notation": "22*",
+   "label": "Chemie",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#22.1",
+   "notation": "22.1",
+   "label": "Chemie (Allgemeines)",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#22.2",
+   "notation": "22.2",
+   "label": "Theoretische und Physikalische Chemie",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#22.3",
+   "notation": "22.3",
+   "label": "Analytische Chemie und Untersuchungsmethoden",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#22.4",
+   "notation": "22.4",
+   "label": "Anorganische Chemie",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#22.5",
+   "notation": "22.5",
+   "label": "Organische Chemie",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#22.5p",
+   "notation": "22.5p",
+   "label": "Personen zu Chemie",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#22.5",
+   "level": 1,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#23*",
+   "notation": "23*",
+   "label": "Allgemeine Biologie, Mikrobiologie",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#23.1*",
+   "notation": "23.1*",
+   "label": "Allgemeine Biologie, Mikrobiologie (Allgemeines)",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#23.1a",
+   "notation": "23.1a",
+   "label": "Biologie (Allgemeines)",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#23.1b",
+   "notation": "23.1b",
+   "label": "Genetik, Evolution",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#23.2",
+   "notation": "23.2",
+   "label": "Biochemie, Biophysik, Zytologie",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#23.3",
+   "notation": "23.3",
+   "label": "Mikrobiologie",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#23.4",
+   "notation": "23.4",
+   "label": "Untersuchungsmethoden (Biologie)",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#23.4p",
+   "notation": "23.4p",
+   "label": "Personen zu allgemeiner Biologie, Mikrobiologie",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#23.4",
+   "level": 1,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#24*",
+   "notation": "24*",
+   "label": "Botanik",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#24.1",
+   "notation": "24.1",
+   "label": "Botanik (Allgemeines)",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#24.2",
+   "notation": "24.2",
+   "label": "Allgemeine Botanik",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#24.2a",
+   "notation": "24.2a",
+   "label": "Pflanzenanatomie, Pflanzenphysiologie",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#24.2",
+   "level": 1,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#24.2b",
+   "notation": "24.2b",
+   "label": "Pflanzensoziologie, Pflanzenökologie, Pflanzengeografie",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#24.2",
+   "level": 1,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#24.3",
+   "notation": "24.3",
+   "label": "Spezielle Botanik",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#24.3p",
+   "notation": "24.3p",
+   "label": "Personen zu Botanik",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#24.3",
+   "level": 1,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#25*",
+   "notation": "25*",
+   "label": "Zoologie",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#25.1",
+   "notation": "25.1",
+   "label": "Zoologie (Allgemeines)",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#25.2",
+   "notation": "25.2",
+   "label": "Allgemeine Zoologie",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#25.2a",
+   "notation": "25.2a",
+   "label": "Anatomie, Tierphysiologie",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#25.2",
+   "level": 1,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#25.2b",
+   "notation": "25.2b",
+   "label": "Tiersoziologie, Tierökologie, Tiergeografie, Verhaltensforschung",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#25.2",
+   "level": 1,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#25.3",
+   "notation": "25.3",
+   "label": "Spezielle Zoologie",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#25.3p",
+   "notation": "25.3p",
+   "label": "Personen zu Zoologie",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#25.3",
+   "level": 1,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#26",
+   "notation": "26",
+   "label": "Anthropologie",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#26p",
+   "notation": "26p",
+   "label": "Personen zu Anthropologie",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#26",
+   "level": 1,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#27*",
+   "notation": "27*",
+   "label": "Medizin",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#27.1*",
+   "notation": "27.1*",
+   "label": "Medizin (Allgemeines), Medizingeschichte",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#27.10",
+   "notation": "27.10",
+   "label": "Chirurgie, Orthopädie",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#27.11",
+   "notation": "27.11",
+   "label": "Gynäkologie, Geburtshilfe",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#27.12",
+   "notation": "27.12",
+   "label": "Kinderheilkunde",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#27.13",
+   "notation": "27.13",
+   "label": "Neurologie, Psychiatrie",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#27.14",
+   "notation": "27.14",
+   "label": "Dermatologie, Venerologie",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#27.15",
+   "notation": "27.15",
+   "label": "Hals-Nasen-Ohren-Heilkunde",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#27.16",
+   "notation": "27.16",
+   "label": "Augenheilkunde",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#27.17",
+   "notation": "27.17",
+   "label": "Zahnmedizin",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#27.18",
+   "notation": "27.18",
+   "label": "Sexualmedizin",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#27.19",
+   "notation": "27.19",
+   "label": "Sondergebiete der Medizin",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#27.1a",
+   "notation": "27.1a",
+   "label": "Medizin (Allgemeines)",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#27.1b",
+   "notation": "27.1b",
+   "label": "Medizingeschichte",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#27.2",
+   "notation": "27.2",
+   "label": "Anatomie",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#27.20",
+   "notation": "27.20",
+   "label": "Hygiene, Gesundheitswesen",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#27.20p",
+   "notation": "27.20p",
+   "label": "Personen zu Medizin, Tiermedizin",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#27.20",
+   "level": 1,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#27.21",
+   "notation": "27.21",
+   "label": "Tiermedizin",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#27.3*",
+   "notation": "27.3*",
+   "label": "Physiologie",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#27.3a",
+   "notation": "27.3a",
+   "label": "Physiologie (Allgemeines), Physiologische Chemie",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#27.3b",
+   "notation": "27.3b",
+   "label": "Blut, Kardiovaskuläres System, Atmungsorgan",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#27.3c",
+   "notation": "27.3c",
+   "label": "Ernährung, Stoffwechsel, Inkretion",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#27.3d",
+   "notation": "27.3d",
+   "label": "Haut, Knochen, Nerven, Muskeln, Sinnesorgane",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#27.3e",
+   "notation": "27.3e",
+   "label": "Harn- und Geschlechtsorgane",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#27.4",
+   "notation": "27.4",
+   "label": "Allgemeine Pathologie, Onkologie, Experimentelle Medizin",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#27.5",
+   "notation": "27.5",
+   "label": "Allgemeine Diagnostik",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#27.6",
+   "notation": "27.6",
+   "label": "Medizinische Radiologie, Nuklearmedizin",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#27.7",
+   "notation": "27.7",
+   "label": "Allgemeine Therapie",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#27.8*",
+   "notation": "27.8*",
+   "label": "Pharmazie, Pharmakologie, Toxikologie, Immunologie",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#27.8a",
+   "notation": "27.8a",
+   "label": "Pharmazie, Pharmakologie, Toxikologie",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#27.8b",
+   "notation": "27.8b",
+   "label": "Immunologie",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#27.9",
+   "notation": "27.9",
+   "label": "Innere Medizin",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#27.9a",
+   "notation": "27.9a",
+   "label": "Hämatologie, Kardiologie",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#27.9",
+   "level": 1,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#27.9b",
+   "notation": "27.9b",
+   "label": "Pulmonologie",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#27.9",
+   "level": 1,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#27.9c",
+   "notation": "27.9c",
+   "label": "Gastroenterologie, Endokrinopathie",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#27.9",
+   "level": 1,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#27.9d",
+   "notation": "27.9d",
+   "label": "Urologie, Nephrologie, Andrologie",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#27.9",
+   "level": 1,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#27.9e",
+   "notation": "27.9e",
+   "label": "Knochen, Gelenke, Muskeln",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#27.9",
+   "level": 1,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#27.9f",
+   "notation": "27.9f",
+   "label": "Infektionen",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#27.9",
+   "level": 1,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#28",
+   "notation": "28",
+   "label": "Mathematik",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#28p",
+   "notation": "28p",
+   "label": "Personen zu Mathematik",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#28",
+   "level": 1,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#29",
+   "notation": "29",
+   "label": "Stochastik, Operations Research",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#29p",
+   "notation": "29p",
+   "label": "Personen zu Stochastik, Operations Research",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#29",
+   "level": 1,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#3*",
+   "notation": "3*",
+   "label": "Religion",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#3.1",
+   "notation": "3.1",
+   "label": "Allgemeine und vergleichende Religionswissenschaft, Nichtchristliche Religionen",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#3.1p",
+   "notation": "3.1p",
+   "label": "Personen zu allgemeiner und vergleichender Religionswissenschaft, Personen zu nichtchristlichen Religionen",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#3.1",
+   "level": 1,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#3.2",
+   "notation": "3.2",
+   "label": "Bibel",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#3.2-3.6*",
+   "notation": "3.2-3.6*",
+   "label": "Christentum",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#3.2a",
+   "notation": "3.2a",
+   "label": "Altes Testament",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#3.2",
+   "level": 1,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#3.2aa",
+   "notation": "3.2aa",
+   "label": "Teile des Alten Testamentes",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#3.2a",
+   "level": 2,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#3.2b",
+   "notation": "3.2b",
+   "label": "Neues Testament",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#3.2",
+   "level": 1,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#3.2ba",
+   "notation": "3.2ba",
+   "label": "Teile des Neuen Testamentes",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#3.2b",
+   "level": 2,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#3.2p",
+   "notation": "3.2p",
+   "label": "Personen der Bibel",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#3.2",
+   "level": 1,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#3.3",
+   "notation": "3.3",
+   "label": "Kirchengeschichte",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#3.3a",
+   "notation": "3.3a",
+   "label": "Kirchengeschichte: Antike",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#3.3",
+   "level": 1,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#3.3b",
+   "notation": "3.3b",
+   "label": "Kirchengeschichte: Mittelalter",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#3.3",
+   "level": 1,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#3.3c",
+   "notation": "3.3c",
+   "label": "Kirchengeschichte: Neuzeit",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#3.3",
+   "level": 1,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#3.4*",
+   "notation": "3.4*",
+   "label": "Systematische Theologie",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#3.4a",
+   "notation": "3.4a",
+   "label": "Systematische Theologie (Allgemeines), Fundamentaltheologie",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#3.4b",
+   "notation": "3.4b",
+   "label": "Dogmatik",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#3.4c",
+   "notation": "3.4c",
+   "label": "Theologische Anthropologie, Christliche Ethik",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#3.5",
+   "notation": "3.5",
+   "label": "Praktische Theologie",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#3.5a",
+   "notation": "3.5a",
+   "label": "Liturgik, Frömmigkeit",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#3.5",
+   "level": 1,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#3.5b*",
+   "notation": "3.5b*",
+   "label": "Homiletik, Katechetik",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#3.5ba",
+   "notation": "3.5ba",
+   "label": "Homiletik",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#3.5",
+   "level": 1,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#3.5bb",
+   "notation": "3.5bb",
+   "label": "Katechetik, Christliche Erziehung, Kirchliche Bildungsarbeit",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#3.5",
+   "level": 1,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#3.5c*",
+   "notation": "3.5c*",
+   "label": "Seelsorge, Mission",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#3.5ca",
+   "notation": "3.5ca",
+   "label": "Seelsorge",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#3.5",
+   "level": 1,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#3.5cb",
+   "notation": "3.5cb",
+   "label": "Mission, Kirchliche Sozialarbeit",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#3.5",
+   "level": 1,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#3.6",
+   "notation": "3.6",
+   "label": "Kirche und Konfession",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#3.6a",
+   "notation": "3.6a",
+   "label": "Katholische Kirche",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#3.6",
+   "level": 1,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#3.6b",
+   "notation": "3.6b",
+   "label": "Evangelische Kirchen",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#3.6",
+   "level": 1,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#3.6c",
+   "notation": "3.6c",
+   "label": "Ostkirchen und andere christliche Religionsgemeinschaften und Sekten",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#3.6",
+   "level": 1,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#3.6p",
+   "notation": "3.6p",
+   "label": "Personen zu Kirchengeschichte, Systematischer und Praktischer Theologie, Kirche und Konfession",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#3.6",
+   "level": 1,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#30",
+   "notation": "30",
+   "label": "Informatik, Datenverarbeitung",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#30m",
+   "notation": "30m",
+   "label": "Informatikprodukte (Hardware- und Softwareprodukte)",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#30",
+   "level": 1,
+   "art": "produkte"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#30p",
+   "notation": "30p",
+   "label": "Personen zur Informatik, Datenverarbeitung",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#30",
+   "level": 1,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#31*",
+   "notation": "31*",
+   "label": "Technik",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#31.1*",
+   "notation": "31.1*",
+   "label": "Technik (Allgemeines), Technikgeschichte",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#31.10",
+   "notation": "31.10",
+   "label": "Verfahrenstechnik, Technische Chemie",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#31.11",
+   "notation": "31.11",
+   "label": "Lebensmitteltechnologie",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#31.12",
+   "notation": "31.12",
+   "label": "Textiltechnik, Gummi- und Lederverarbeitung",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#31.13",
+   "notation": "31.13",
+   "label": "Holzbearbeitung",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#31.14",
+   "notation": "31.14",
+   "label": "Papierherstellung, Grafische Technik",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#31.15",
+   "notation": "31.15",
+   "label": "Glas, Keramik, Steine und Erden",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#31.16",
+   "notation": "31.16",
+   "label": "Militärtechnik",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#31.16p",
+   "notation": "31.16p",
+   "label": "Personen zu Technik (ohne Architektur, Bautechnik)",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#31.16",
+   "level": 1,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#31.1a",
+   "notation": "31.1a",
+   "label": "Technik (Allgemeines)",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#31.1b",
+   "notation": "31.1b",
+   "label": "Technische Physik, Technische Mathematik",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#31.1c",
+   "notation": "31.1c",
+   "label": "Mess-, Steuerungs- und Regelungstechnik",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#31.1d",
+   "notation": "31.1d",
+   "label": "Werkstoffkunde, Werkstoffprüfung",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#31.1e",
+   "notation": "31.1e",
+   "label": "Technikgeschichte",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#31.2",
+   "notation": "31.2",
+   "label": "Sanitärtechnik, Umwelttechnik",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#31.3*",
+   "notation": "31.3*",
+   "label": "Architektur, Bautechnik",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#31.3a",
+   "notation": "31.3a",
+   "label": "Architektur",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#31.3ab",
+   "notation": "31.3ab",
+   "label": "Ortsgebundene Bauwerke",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#31.3a",
+   "level": 1,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#31.3b",
+   "notation": "31.3b",
+   "label": "Bautechnik",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#31.3p",
+   "notation": "31.3p",
+   "label": "Personen zu Architektur, Bautechnik",
+   "broader": null,
+   "level": 0,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#31.4",
+   "notation": "31.4",
+   "label": "Bergbau, Hüttentechnik",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#31.5",
+   "notation": "31.5",
+   "label": "Energietechnik, Kerntechnik",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#31.6",
+   "notation": "31.6",
+   "label": "Maschinenbau",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#31.7",
+   "notation": "31.7",
+   "label": "Fahrzeugbau, Fördertechnik, Raumfahrttechnik",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#31.8*",
+   "notation": "31.8*",
+   "label": "Fertigungstechnik, Feinwerktechnik",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#31.8a",
+   "notation": "31.8a",
+   "label": "Fertigungstechnik",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#31.8b",
+   "notation": "31.8b",
+   "label": "Feinwerktechnik",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#31.9*",
+   "notation": "31.9*",
+   "label": "Elektrotechnik, Elektronik",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#31.9a",
+   "notation": "31.9a",
+   "label": "Elektrotechnik, Elektrische Energietechnik",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#31.9b",
+   "notation": "31.9b",
+   "label": "Elektronik, Kommunikationstechnik",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#32*",
+   "notation": "32*",
+   "label": "Landwirtschaft, Garten",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#32.1*",
+   "notation": "32.1*",
+   "label": "Landwirtschaft (Allgemeines), Landwirtschaftsgeschichte",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#32.10",
+   "notation": "32.10",
+   "label": "Fischerei, Fischzucht",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#32.10p",
+   "notation": "32.10p",
+   "label": "Personen zu Landwirtschaft, Garten",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#32.10",
+   "level": 1,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#32.1a",
+   "notation": "32.1a",
+   "label": "Landwirtschaft (Allgemeines)",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#32.1b",
+   "notation": "32.1b",
+   "label": "Landwirtschaftsgeschichte",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#32.2",
+   "notation": "32.2",
+   "label": "Agrarpolitik, Agrarmarkt, Landwirtschaftliche Betriebslehre",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#32.3",
+   "notation": "32.3",
+   "label": "Ackerbau",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#32.4",
+   "notation": "32.4",
+   "label": "Gartenbau, Obstbau",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#32.5",
+   "notation": "32.5",
+   "label": "Phytomedizin",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#32.6",
+   "notation": "32.6",
+   "label": "Tierzucht, Tierhaltung",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#32.7",
+   "notation": "32.7",
+   "label": "Milchwirtschaft",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#32.8",
+   "notation": "32.8",
+   "label": "Forstwirtschaft",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#32.9",
+   "notation": "32.9",
+   "label": "Jagd",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#33*",
+   "notation": "33*",
+   "label": "Hauswirtschaft, Körperpflege, Mode, Kleidung",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#33.1",
+   "notation": "33.1",
+   "label": "Hauswirtschaft, Körperpflege",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#33.2",
+   "notation": "33.2",
+   "label": "Kochen, Backen, Lebens- und Genussmittel, Küchengerät",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#33.3",
+   "notation": "33.3",
+   "label": "Mode, Kleidung",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#33.3p",
+   "notation": "33.3p",
+   "label": "Personen zu Hauswirtschaft, Körperpflege, Mode, Kleidung",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#33.3",
+   "level": 1,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#34*",
+   "notation": "34*",
+   "label": "Sport",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#34.1",
+   "notation": "34.1",
+   "label": "Sport (Allgemeines)",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#34.2",
+   "notation": "34.2",
+   "label": "Geschichte des Sports",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#34.3",
+   "notation": "34.3",
+   "label": "Einzelne Sportarten",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#34.3p",
+   "notation": "34.3p",
+   "label": "Personen zu Sport",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#34.3",
+   "level": 1,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#35",
+   "notation": "35",
+   "label": "Spiel, Unterhaltung",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#35p",
+   "notation": "35p",
+   "label": "Personen zu Spiel, Unterhaltung",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#35",
+   "level": 1,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#36",
+   "notation": "36",
+   "label": "Basteln, Handarbeiten, Heimwerken",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#36p",
+   "notation": "36p",
+   "label": "Personen zu Basteln, Handarbeiten, Heimwerken",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#36",
+   "level": 1,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#4*",
+   "notation": "4*",
+   "label": "Philosophie",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#4.1",
+   "notation": "4.1",
+   "label": "Philosophie (Allgemeines)",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#4.2",
+   "notation": "4.2",
+   "label": "Philosophiegeschichte",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#4.3",
+   "notation": "4.3",
+   "label": "Erkenntnistheorie, Logik",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#4.4",
+   "notation": "4.4",
+   "label": "Metaphysik",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#4.5",
+   "notation": "4.5",
+   "label": "Ethik, Philosophische Anthropologie, Sozialphilosophie",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#4.6",
+   "notation": "4.6",
+   "label": "Ästhetik",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#4.7",
+   "notation": "4.7",
+   "label": "Kulturphilosophie",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#4.7p",
+   "notation": "4.7p",
+   "label": "Personen zur Philosophie",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#4.7",
+   "level": 1,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#5*",
+   "notation": "5*",
+   "label": "Psychologie, Esoterik",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#5.1*",
+   "notation": "5.1*",
+   "label": "Psychologie (Allgemeines), Tests",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#5.1a",
+   "notation": "5.1a",
+   "label": "Psychologie (Allgemeines), Experimentelle Psychologie",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#5.1b",
+   "notation": "5.1b",
+   "label": "Psychologische Diagnostik, Tests",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#5.2",
+   "notation": "5.2",
+   "label": "Entwicklungspsychologie, Vergleichende Psychologie",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#5.3",
+   "notation": "5.3",
+   "label": "Sozial-, Kultur- und Ethnopsychologie",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#5.4",
+   "notation": "5.4",
+   "label": "Tiefenpsychologie",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#5.5",
+   "notation": "5.5",
+   "label": "Angewandte Psychologie, Psychohygiene",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#5.5p",
+   "notation": "5.5p",
+   "label": "Personen zu Psychologie",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#5.5",
+   "level": 1,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#5.6",
+   "notation": "5.6",
+   "label": "Parapsychologie",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#5.7",
+   "notation": "5.7",
+   "label": "Esoterik",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#5.7p",
+   "notation": "5.7p",
+   "label": "Personen zu Parapsychologie, Esoterik",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#5.7",
+   "level": 1,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#6*",
+   "notation": "6*",
+   "label": "Kultur, Erziehung, Bildung, Wissenschaft",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#6.1*",
+   "notation": "6.1*",
+   "label": "Kultur und Künste, Geistes- und Kulturgeschichte",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#6.1a",
+   "notation": "6.1a",
+   "label": "Kultur, Künste allgemein",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#6.1b",
+   "notation": "6.1b",
+   "label": "Geistes- und Kulturgeschichte",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#6.1p",
+   "notation": "6.1p",
+   "label": "Personen zu Kultur und Künsten, Geistes- und Kulturgeschichte",
+   "broader": null,
+   "level": 0,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#6.2*",
+   "notation": "6.2*",
+   "label": "Bildungswesen (Allgemeines), Geschichte  des Bildungswesens",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#6.2a",
+   "notation": "6.2a",
+   "label": "Bildungswesen (Allgemeines)",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#6.2b",
+   "notation": "6.2b",
+   "label": "Geschichte des Bildungswesens",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#6.3*",
+   "notation": "6.3*",
+   "label": "Schule, Berufsausbildung",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#6.3a",
+   "notation": "6.3a",
+   "label": "Schule",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#6.3b",
+   "notation": "6.3b",
+   "label": "Berufsausbildung",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#6.4",
+   "notation": "6.4",
+   "label": "Unterricht",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#6.4p",
+   "notation": "6.4p",
+   "label": "Personen zu Bildungswesen",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#6.4",
+   "level": 1,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#6.5",
+   "notation": "6.5",
+   "label": "Wissenschaft",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#6.6",
+   "notation": "6.6",
+   "label": "Hochschule",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#6.7",
+   "notation": "6.7",
+   "label": "Bibliothek, Information und Dokumentation",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#6.7p",
+   "notation": "6.7p",
+   "label": "Personen zu Bibliothek, Information und Dokumentation",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#6.7",
+   "level": 1,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#6.8",
+   "notation": "6.8",
+   "label": "Archiv, Museum",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#6.8p",
+   "notation": "6.8p",
+   "label": "Personen zu Archiv, Museum",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#6.8",
+   "level": 1,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#7*",
+   "notation": "7*",
+   "label": "Recht, Allgemeine Verwaltung",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#7.1*",
+   "notation": "7.1*",
+   "label": "Recht (Allgemeines), Öffentliches Recht (Allgemeines), Privatrecht (Allgemeine)s, Rechtsvergleich",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#7.10*",
+   "notation": "7.10*",
+   "label": "Wirtschaftsrecht, Gewerblicher Rechtsschutz",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#7.10a",
+   "notation": "7.10a",
+   "label": "Wirtschaftsrecht, Wirtschaftsaufsicht",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#7.10b",
+   "notation": "7.10b",
+   "label": "Gewerblicher Rechtsschutz, Urheberrecht",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#7.11*",
+   "notation": "7.11*",
+   "label": "Arbeitsrecht, Sozialrecht, Gebührenrecht",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#7.11a",
+   "notation": "7.11a",
+   "label": "Arbeitsrecht, Sozialrecht, Recht der Tarifverträge",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#7.11b",
+   "notation": "7.11b",
+   "label": "Berufsrecht (Rechtsvorschriften für einzelne Berufe)",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#7.11c",
+   "notation": "7.11c",
+   "label": "Gebührenrecht",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#7.12",
+   "notation": "7.12",
+   "label": "Bürgerliches Recht",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#7.12a",
+   "notation": "7.12a",
+   "label": "Bürgerliches Recht: Allgemeiner Teil",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#7.12",
+   "level": 1,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#7.12b",
+   "notation": "7.12b",
+   "label": "Bürgerliches Recht: Schuldrecht",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#7.12",
+   "level": 1,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#7.12c",
+   "notation": "7.12c",
+   "label": "Bürgerliches Recht: Sachenrecht",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#7.12",
+   "level": 1,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#7.12d",
+   "notation": "7.12d",
+   "label": "Bürgerliches Recht: Familienrecht",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#7.12",
+   "level": 1,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#7.12e",
+   "notation": "7.12e",
+   "label": "Bürgerliches Recht: Erbrecht",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#7.12",
+   "level": 1,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#7.13",
+   "notation": "7.13",
+   "label": "Religionsrecht, Kirchenrecht, Staatskirchenrecht",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#7.14",
+   "notation": "7.14",
+   "label": "Internationales Recht (einschließlich Völkerrecht und Recht der Europäischen Gemeinschaften, Europäischen Union), Kollisionsrecht",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#7.14p",
+   "notation": "7.14p",
+   "label": "Personen zum Recht",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#7.14",
+   "level": 1,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#7.15*",
+   "notation": "7.15*",
+   "label": "Öffentliche Verwaltung, Geschichte der Öffentlichen Verwaltung",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#7.15a",
+   "notation": "7.15a",
+   "label": "Öffentliche Verwaltung, Öffentlicher Dienst",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#7.15b",
+   "notation": "7.15b",
+   "label": "Geschichte der öffentlichen Verwaltung",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#7.15p",
+   "notation": "7.15p",
+   "label": "Personen zu öffentlicher Verwaltung",
+   "broader": null,
+   "level": 0,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#7.1a",
+   "notation": "7.1a",
+   "label": "Recht (Allgemeines), Rechtsphilosophie",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#7.1b",
+   "notation": "7.1b",
+   "label": "Rechtsvergleich",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#7.2",
+   "notation": "7.2",
+   "label": "Rechtsgeschichte, Verfassungsgeschichte",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#7.2a",
+   "notation": "7.2a",
+   "label": "Rechtsgeschichte, Verfassungsgeschichte: Altertum",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#7.2",
+   "level": 1,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#7.2b",
+   "notation": "7.2b",
+   "label": "Rechtsgeschichte, Verfassungsgeschichte: Mittelalter",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#7.2",
+   "level": 1,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#7.2c",
+   "notation": "7.2c",
+   "label": "Rechtsgeschichte, Verfassungsgeschichte: Neuzeit",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#7.2",
+   "level": 1,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#7.3",
+   "notation": "7.3",
+   "label": "Staatsrecht, Verfassungsrecht",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#7.4",
+   "notation": "7.4",
+   "label": "Allgemeines Verwaltungsrecht",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#7.5*",
+   "notation": "7.5*",
+   "label": "Besonderes Verwaltungsrecht",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#7.5a",
+   "notation": "7.5a",
+   "label": "Dienstrecht (auch Richter)",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#7.5b",
+   "notation": "7.5b",
+   "label": "Kommunalrecht",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#7.5c",
+   "notation": "7.5c",
+   "label": "Baurecht, Raumordnungsrecht, Bodenrecht, Umweltrecht, Denkmalschutz",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#7.5d",
+   "notation": "7.5d",
+   "label": "Kulturrecht, Presserecht, Rundfunkrecht, Bildungswesen und Forschungsrecht",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#7.5e",
+   "notation": "7.5e",
+   "label": "Straßen- und Wegerecht, Verkehrsrecht, Telekommunikationsrecht",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#7.5f",
+   "notation": "7.5f",
+   "label": "Wehrrecht",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#7.6*",
+   "notation": "7.6*",
+   "label": "Polizeirecht, Gesundheitsrecht, Kriminologie",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#7.6a",
+   "notation": "7.6a",
+   "label": "Polizeirecht, Ordnungsrecht",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#7.6b",
+   "notation": "7.6b",
+   "label": "Gesundheitsrecht",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#7.6c",
+   "notation": "7.6c",
+   "label": "Kriminologie",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#7.7*",
+   "notation": "7.7*",
+   "label": "Strafrecht, Strafvollzug",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#7.7a",
+   "notation": "7.7a",
+   "label": "Strafrecht",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#7.7b",
+   "notation": "7.7b",
+   "label": "Strafvollzug",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#7.8*",
+   "notation": "7.8*",
+   "label": "Rechtspflege, Prozessrecht, Rechtsmedizin",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#7.8a",
+   "notation": "7.8a",
+   "label": "Rechtspflege, Prozessrecht",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#7.8b",
+   "notation": "7.8b",
+   "label": "Rechtsmedizin",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#7.9*",
+   "notation": "7.9*",
+   "label": "Finanzrecht, Steuerrecht, Zollrecht",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#7.9a",
+   "notation": "7.9a",
+   "label": "Finanzrecht",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#7.9b",
+   "notation": "7.9b",
+   "label": "Steuerrecht, Zollrecht",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#8*",
+   "notation": "8*",
+   "label": "Politik, Militär",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#8.1",
+   "notation": "8.1",
+   "label": "Politik (Allgemeines), Politische Theorie",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#8.1p",
+   "notation": "8.1p",
+   "label": "Personen (Politologen, Staatstheoretiker)",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#8.1",
+   "level": 1,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#8.2*",
+   "notation": "8.2*",
+   "label": "Innenpolitik, Parteien",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#8.2a",
+   "notation": "8.2a",
+   "label": "Innenpolitik",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#8.2b",
+   "notation": "8.2b",
+   "label": "Parteien, Politische Organisationen",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#8.3",
+   "notation": "8.3",
+   "label": "Außenpolitik",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#8.4",
+   "notation": "8.4",
+   "label": "Militär",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#8.4p",
+   "notation": "8.4p",
+   "label": "Personen zu politischer Theorie, Militär",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#8.4",
+   "level": 1,
+   "art": "personen"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#9*",
+   "notation": "9*",
+   "label": "Soziologie, Gesellschaft, Arbeit, Sozialgeschichte",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#9.1",
+   "notation": "9.1",
+   "label": "Sozialgeschichte",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#9.1a",
+   "notation": "9.1a",
+   "label": "Sozialgeschichte: Altertum",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#9.1",
+   "level": 1,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#9.1b",
+   "notation": "9.1b",
+   "label": "Sozialgeschichte: Mittelalter",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#9.1",
+   "level": 1,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#9.1c",
+   "notation": "9.1c",
+   "label": "Sozialgeschichte: Neuzeit",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#9.1",
+   "level": 1,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#9.2",
+   "notation": "9.2",
+   "label": "Sozialwissenschaften (Allgemeines), Soziologische Theorien, Statistik in den Sozialwissenschaften",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#9.2a",
+   "notation": "9.2a",
+   "label": "Sozialwissenschaften (Allgemeines), Soziologische Theorien",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#9.2",
+   "level": 1,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#9.2b",
+   "notation": "9.2b",
+   "label": "Methoden und Techniken der empirischen Sozialforschung, Statistik in den Sozialwissenschaften",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#9.2",
+   "level": 1,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#9.3*",
+   "notation": "9.3*",
+   "label": "Sozialstruktur, Soziales Leben, Bevölkerung",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#9.3a",
+   "notation": "9.3a",
+   "label": "Soziales Leben, Bevölkerung (Allgemeines), Gesellschaft allgemein",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#9.3b",
+   "notation": "9.3b",
+   "label": "Bevölkerung, Sozialstruktur, Soziale Situation, Soziale Bewegungen",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#9.3c",
+   "notation": "9.3c",
+   "label": "Gruppe, Organisationssoziologie, Interaktion",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#9.3d",
+   "notation": "9.3d",
+   "label": "Sozialisation, Sozialverhalten",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#9.3e",
+   "notation": "9.3e",
+   "label": "Kommunikation, Meinungsbildung",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#9.4*",
+   "notation": "9.4*",
+   "label": "Arbeit, Arbeitswelt, Gewerkschaften",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#9.4a",
+   "notation": "9.4a",
+   "label": "Arbeit",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#9.4ab",
+   "notation": "9.4ab",
+   "label": "Einzelne Berufe, Tätigkeiten, Funktionen; Religionszugehörigkeit, Weltanschauung",
+   "broader": "https://d-nb.info/standards/vocab/gnd/gnd-sc#9.4a",
+   "level": 1,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#9.4b",
+   "notation": "9.4b",
+   "label": "Mitbestimmung, Gewerkschaften",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#9.5*",
+   "notation": "9.5*",
+   "label": "Sozialpolitik, Sozialarbeit",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#9.5a",
+   "notation": "9.5a",
+   "label": "Sozialpolitik, Entwicklungshilfe",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#9.5b",
+   "notation": "9.5b",
+   "label": "Sozialversicherung und Gesetzliche Krankenversicherung",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#9.5c",
+   "notation": "9.5c",
+   "label": "Sozialarbeit, Sozialhilfe",
+   "broader": null,
+   "level": 0,
+   "art": "sache"
+  },
+  {
+   "uri": "https://d-nb.info/standards/vocab/gnd/gnd-sc#9.5p",
+   "notation": "9.5p",
+   "label": "Personen zu Soziologie, Gesellschaft, Arbeit, Sozialgeschichte",
+   "broader": null,
+   "level": 0,
+   "art": "personen"
+  }
+ ]
+}

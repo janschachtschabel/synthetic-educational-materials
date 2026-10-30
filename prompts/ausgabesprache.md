@@ -1,0 +1,2 @@
+# Ausgabesprache
+Schreibe alle Ausgaben (Materialtext, Titel, Beschreibung, Schlagworte, Fragen und Antworten) auf {{ausgabesprache}}, auch wenn Vorgaben, Thema und Metadaten auf Deutsch sind. Der Bildungskontext bleibt Deutschland (Bildungssystem, Lehrpläne, Beispiele). Verwende die in {{ausgabesprache}} übliche Fachterminologie; deutsche Fachbegriffe bei Bedarf in Klammern. Antworten mit festen Kennungen (z. B. Kategorie-IDs) bleiben unverändert.

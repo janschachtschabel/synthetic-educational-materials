@@ -1,0 +1,32 @@
+{
+ "beschreibung": "Optionale Steuerfelder der Schule. anteil: Wahrscheinlichkeit, dass das Feld in einem Seed gesetzt ist. anforderungsbereich: KMK-Anforderungsbereiche I–III (in der Primarstufe nur I und II). zielgruppe: Gewichte je Themenart.",
+ "didaktische_funktion": {
+  "anteil": 0.6,
+  "werte": ["Einstieg", "Erarbeitung", "Sicherung", "Übung", "Vertiefung und Transfer", "Wiederholung und Prüfungsvorbereitung"]
+ },
+ "bearbeitungsdauer_minuten": {"anteil": 0.5, "werte": [15, 30, 45, 90]},
+ "anforderungsbereich": {
+  "anteil": 0.4,
+  "quelle": "Anforderungsbereiche der KMK (Bildungsstandards, Einheitliche Prüfungsanforderungen)",
+  "werte": {
+   "afb1": "Anforderungsbereich I: Wiedergeben und Beschreiben",
+   "afb2": "Anforderungsbereich II: Anwenden, Erklären und Zusammenhänge herstellen",
+   "afb3": "Anforderungsbereich III: Beurteilen, Reflektieren und Probleme lösen"
+  },
+  "primar": ["afb1", "afb2"]
+ },
+ "sozialform": {"anteil": 0.3, "werte": ["Einzelarbeit", "Partnerarbeit", "Gruppenarbeit", "Plenum"]},
+ "zielgruppe": {
+  "anteil": 1.0,
+  "werte": {
+   "unterrichtsthema": [
+    {"uri": "http://w3id.org/openeduhub/vocabs/intendedEndUserRole/learner", "gewicht": 0.75},
+    {"uri": "http://w3id.org/openeduhub/vocabs/intendedEndUserRole/teacher", "gewicht": 0.25}
+   ],
+   "lehrkraftthema": [
+    {"uri": "http://w3id.org/openeduhub/vocabs/intendedEndUserRole/teacher", "gewicht": 1.0}
+   ]
+  }
+ },
+ "sprache": {"anteil": 1.0, "werte": ["de"]}
+}

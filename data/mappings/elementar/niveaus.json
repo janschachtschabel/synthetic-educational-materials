@@ -1,0 +1,15 @@
+{
+ "beschreibung": "Altersstufen im Elementarbereich. altersgruppen: für welche Altersgruppe des Themas (Abstimmung: u3, ue3, beide) das Niveau gezogen werden darf. exactMatch: KIM-Bildungsstufe (ISCED 2011, Stufe 0).",
+ "quelle": {
+  "name": "Projekt, angelehnt an die Altersstufen der Kindertagesbetreuung (Krippe, Kindergarten, Übergang Schule)",
+  "lizenz": "CC0-1.0"
+ },
+ "niveaus": [
+  {"id": "krippe", "label": "Krippe (unter 3 Jahre)", "alter": "0–3", "exactMatch": "http://w3id.org/kim/educationalLevel/level_0",
+   "altersgruppen": ["u3", "beide"]},
+  {"id": "kindergarten", "label": "Kindergarten (3 bis 6 Jahre)", "alter": "3–6", "exactMatch": "http://w3id.org/kim/educationalLevel/level_0",
+   "altersgruppen": ["ue3", "beide"]},
+  {"id": "vorschule", "label": "Vorschuljahr und Übergang in die Grundschule (5 bis 6 Jahre)", "alter": "5–6", "exactMatch": "http://w3id.org/kim/educationalLevel/level_0",
+   "altersgruppen": ["ue3"]}
+ ]
+}

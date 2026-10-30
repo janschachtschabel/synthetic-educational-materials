@@ -1,0 +1,78 @@
+{
+ "scheme": {
+  "name": "dqrCompetenceLevels",
+  "uri": "http://w3id.org/openeduhub/vocabs/dqrCompetenceLevels/",
+  "title": "Kompetenzniveaus nach DQR",
+  "source": "https://raw.githubusercontent.com/openeduhub/oeh-metadata-vocabs/master/dqrCompetenceLevels.ttl",
+  "public_url": "https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/dqrCompetenceLevels/",
+  "license": "CC0-1.0",
+  "retrieved": "2026-10-30",
+  "quellenangabe": "Quelle: Deutscher Qualifikationsrahmen (DQR), Niveaubeschreibungen; ausgelesen aus dem OpenEduHub-Vokabular dqrCompetenceLevels (github.com/openeduhub/oeh-metadata-vocabs)"
+ },
+ "concepts": [
+  {
+   "uri": "http://w3id.org/openeduhub/vocabs/dqrCompetenceLevels/1",
+   "notation": "1",
+   "label": "Niveau 1",
+   "broader": null,
+   "definition": "Kompetenzen zur Erfüllung einfacher Anforderungen in einem überschaubar und stabil strukturierten Lern- oder Arbeitsbereich. Die Erfüllung der Aufgaben erfolgt unter Anleitung.",
+   "level": 0
+  },
+  {
+   "uri": "http://w3id.org/openeduhub/vocabs/dqrCompetenceLevels/2",
+   "notation": "2",
+   "label": "Niveau 2",
+   "broader": null,
+   "definition": "Kompetenzen zur fachgerechten Erfüllung grundlegender Anforderungen in einem überschaubar und stabil strukturierten Lern- oder Arbeitsbereich. Die Erfüllung der Aufgaben erfolgt weitgehend unter Anleitung.",
+   "level": 0
+  },
+  {
+   "uri": "http://w3id.org/openeduhub/vocabs/dqrCompetenceLevels/3",
+   "notation": "3",
+   "label": "Niveau 3",
+   "broader": null,
+   "definition": "Kompetenzen zur selbständigen Erfüllung fachlicher Anforderungen in einem noch überschaubaren und zum Teil offen strukturierten Lernbereich oder beruflichen Tätigkeitsfeld.",
+   "level": 0
+  },
+  {
+   "uri": "http://w3id.org/openeduhub/vocabs/dqrCompetenceLevels/4",
+   "notation": "4",
+   "label": "Niveau 4",
+   "broader": null,
+   "definition": "Kompetenzen zur selbständigen Planung und Bearbeitung fachlicher Aufgabenstellungen in einem umfassenden, sich verändernden Lernbereich oder beruflichen Tätigkeitsfeld.",
+   "level": 0
+  },
+  {
+   "uri": "http://w3id.org/openeduhub/vocabs/dqrCompetenceLevels/5",
+   "notation": "5",
+   "label": "Niveau 5",
+   "broader": null,
+   "definition": "Kompetenzen zur selbständigen Planung und Bearbeitung umfassender fachlicher Aufgabenstellungen in einem komplexen, spezialisierten, sich verändernden Lernbereich oder beruflichen Tätigkeitsfeld.",
+   "level": 0
+  },
+  {
+   "uri": "http://w3id.org/openeduhub/vocabs/dqrCompetenceLevels/6",
+   "notation": "6",
+   "label": "Niveau 6",
+   "broader": null,
+   "definition": "Kompetenzen zur Planung, Bearbeitung und Auswertung von umfassenden fachlichen Aufgaben- und Problemstellungen sowie zur eigenverantwortlichen Steuerung von Prozessen in Teilbereichen eines wissenschaftlichen Faches oder in einem beruflichen Tätigkeitsfeld. Die Anforderungsstruktur ist durch Komplexität und häufige Veränderungen gekennzeichnet.",
+   "level": 0
+  },
+  {
+   "uri": "http://w3id.org/openeduhub/vocabs/dqrCompetenceLevels/7",
+   "notation": "7",
+   "label": "Niveau 7",
+   "broader": null,
+   "definition": "Kompetenzen zur Bearbeitung von neuen komplexen Aufgaben- und Problemstellungen sowie zur eigenverantwortlichen Steuerung von Prozessen in einem wissenschaftlichen Fach oder in einem strategieorientierten beruflichen Tätigkeitsfeld. Die Anforderungsstruktur ist durch häufige und unvorhersehbare Veränderungen gekennzeichnet.",
+   "level": 0
+  },
+  {
+   "uri": "http://w3id.org/openeduhub/vocabs/dqrCompetenceLevels/8",
+   "notation": "8",
+   "label": "Niveau 8",
+   "broader": null,
+   "definition": "Kompetenzen zur Gewinnung von Forschungserkenntnissen in einem wissenschaftlichen Fach oder zur Entwicklung innovativer Lösungen und Verfahren in einem beruflichen Tätigkeitsfeld. Die Anforderungsstruktur ist durch neuartige und unklare Problemlagen gekennzeichnet.",
+   "level": 0
+  }
+ ]
+}

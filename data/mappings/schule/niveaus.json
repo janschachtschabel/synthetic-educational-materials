@@ -1,0 +1,13 @@
+{
+ "beschreibung": "Klassenstufen je Schulstufe. stufe: primar, sek1, sek2; kontext: OEH educationalContext; exactMatch: KIM-Bildungsstufe (ISCED 2011).",
+ "quelle": {"name": "Projekt, angelehnt an die Schulstufen und Jahrgangsstufen in Deutschland", "lizenz": "CC0-1.0"},
+ "niveaus": [
+  {"id": "klasse_1_2", "label": "Klasse 1–2", "stufe": "primar", "kontext": "grundschule", "exactMatch": "http://w3id.org/kim/educationalLevel/level_1"},
+  {"id": "klasse_3_4", "label": "Klasse 3–4", "stufe": "primar", "kontext": "grundschule", "exactMatch": "http://w3id.org/kim/educationalLevel/level_1"},
+  {"id": "klasse_5_6", "label": "Klasse 5–6", "stufe": "sek1", "kontext": "sekundarstufe_1", "exactMatch": "http://w3id.org/kim/educationalLevel/level_2"},
+  {"id": "klasse_7_8", "label": "Klasse 7–8", "stufe": "sek1", "kontext": "sekundarstufe_1", "exactMatch": "http://w3id.org/kim/educationalLevel/level_2"},
+  {"id": "klasse_9_10", "label": "Klasse 9–10", "stufe": "sek1", "kontext": "sekundarstufe_1", "exactMatch": "http://w3id.org/kim/educationalLevel/level_2"},
+  {"id": "einfuehrungsphase", "label": "Oberstufe, Einführungsphase", "stufe": "sek2", "kontext": "sekundarstufe_2", "exactMatch": "http://w3id.org/kim/educationalLevel/level_3"},
+  {"id": "qualifikationsphase", "label": "Oberstufe, Qualifikationsphase", "stufe": "sek2", "kontext": "sekundarstufe_2", "exactMatch": "http://w3id.org/kim/educationalLevel/level_3"}
+ ]
+}

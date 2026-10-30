@@ -1,0 +1,57 @@
+{
+ "beschreibung": "Niveaustufen der beruflichen Bildung. qualifizierung: für welche Qualifizierungswege des Berufs (Abstimmung) das Niveau gezogen werden darf. kontext: OEH educationalContext des Seeds. exactMatch verweist auf das OEH-Vokabular der DQR-Niveaus.",
+ "quelle": {
+  "name": "Projekt, angelehnt an den Deutschen Qualifikationsrahmen (DQR) und das Berufsbildungsgesetz (Fortbildungsstufen)",
+  "lizenz": "CC0-1.0"
+ },
+ "niveaus": [
+  {
+   "id": "anlernen",
+   "label": "Einarbeitung und Anlernen",
+   "dqr": 2,
+   "exactMatch": "http://w3id.org/openeduhub/vocabs/dqrCompetenceLevels/2",
+   "kontext": "berufliche_bildung",
+   "qualifizierung": ["anlernen"]
+  },
+  {
+   "id": "ausbildung_grundstufe",
+   "label": "Ausbildung, 1. Ausbildungsjahr",
+   "dqr": 3,
+   "exactMatch": "http://w3id.org/openeduhub/vocabs/dqrCompetenceLevels/3",
+   "kontext": "berufliche_bildung",
+   "qualifizierung": ["anlernen", "ausbildung"]
+  },
+  {
+   "id": "ausbildung_fachstufe",
+   "label": "Ausbildung, 2. und 3. Ausbildungsjahr",
+   "dqr": 4,
+   "exactMatch": "http://w3id.org/openeduhub/vocabs/dqrCompetenceLevels/4",
+   "kontext": "berufliche_bildung",
+   "qualifizierung": ["ausbildung"]
+  },
+  {
+   "id": "fortbildung_berufsspezialist",
+   "label": "Fortbildung, Geprüfte Berufsspezialistin / Geprüfter Berufsspezialist",
+   "dqr": 5,
+   "exactMatch": "http://w3id.org/openeduhub/vocabs/dqrCompetenceLevels/5",
+   "kontext": "fortbildung",
+   "qualifizierung": ["fortbildung"]
+  },
+  {
+   "id": "fortbildung_bachelor_professional",
+   "label": "Fortbildung, Bachelor Professional (Meister, Techniker, Fachwirt)",
+   "dqr": 6,
+   "exactMatch": "http://w3id.org/openeduhub/vocabs/dqrCompetenceLevels/6",
+   "kontext": "fortbildung",
+   "qualifizierung": ["fortbildung", "studium"]
+  },
+  {
+   "id": "fortbildung_master_professional",
+   "label": "Fortbildung, Master Professional (z. B. Betriebswirt nach BBiG)",
+   "dqr": 7,
+   "exactMatch": "http://w3id.org/openeduhub/vocabs/dqrCompetenceLevels/7",
+   "kontext": "fortbildung",
+   "qualifizierung": ["fortbildung", "studium"]
+  }
+ ]
+}

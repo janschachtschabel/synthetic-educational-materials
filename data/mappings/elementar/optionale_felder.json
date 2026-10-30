@@ -1,0 +1,33 @@
+{
+ "beschreibung": "Optionale Steuerfelder des Elementarbereichs. anteil: Wahrscheinlichkeit, dass das Feld in einem Seed gesetzt ist. zielgruppe: Gewichte je Themenart (kinderthema, fachthema).",
+ "didaktische_funktion": {
+  "anteil": 0.4,
+  "werte": ["Einstieg in ein Thema", "Freispiel begleiten", "Angebot in der Kleingruppe", "Projektarbeit", "Alltagssituation nutzen", "Übergang zur Grundschule"]
+ },
+ "bearbeitungsdauer_minuten": {
+  "anteil": 0.4,
+  "werte": [10, 20, 30, 45]
+ },
+ "sozialform": {
+  "anteil": 0.4,
+  "werte": ["Einzelbegleitung", "Kleingruppe", "Stuhlkreis", "ganze Gruppe", "mit Eltern"]
+ },
+ "zielgruppe": {
+  "anteil": 1.0,
+  "werte": {
+   "kinderthema": [
+    {"uri": "http://w3id.org/openeduhub/vocabs/intendedEndUserRole/teacher", "gewicht": 0.65},
+    {"uri": "http://w3id.org/openeduhub/vocabs/intendedEndUserRole/parent", "gewicht": 0.2},
+    {"uri": "http://w3id.org/openeduhub/vocabs/intendedEndUserRole/learner", "gewicht": 0.15}
+   ],
+   "fachthema": [
+    {"uri": "http://w3id.org/openeduhub/vocabs/intendedEndUserRole/teacher", "gewicht": 0.75},
+    {"uri": "http://w3id.org/openeduhub/vocabs/intendedEndUserRole/parent", "gewicht": 0.25}
+   ]
+  }
+ },
+ "sprache": {
+  "anteil": 1.0,
+  "werte": ["de"]
+ }
+}
