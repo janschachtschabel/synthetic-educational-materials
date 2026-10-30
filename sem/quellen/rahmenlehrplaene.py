@@ -16,7 +16,6 @@ import re
 import urllib.parse
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
-from pathlib import Path
 
 from ..paths import DATA_DIR
 
@@ -69,8 +68,13 @@ def _zellen(zeile: str) -> list[str]:
     return [re.sub(r"\s+", " ", c).strip() for c in zeile.strip().strip("|").split("|")]
 
 
+# Ergänzungsstrich vor Konjunktionen bleibt stehen („Roh- und Hilfsstoffe“), sonst Trennstrich auflösen
+_ERGAENZUNG = r"(?!(?:und|oder|bis|sowie|bzw)\b)"
+
+
 def _titel(t: str) -> str:
-    t = re.sub(r"(\w)- (\w)", lambda m: m.group(1) + ("-" if m.group(2).isupper() else "") + m.group(2), t)
+    t = re.sub(r"(\w)- " + _ERGAENZUNG + r"(\w)",
+               lambda m: m.group(1) + ("-" if m.group(2).isupper() else "") + m.group(2), t)
     return re.sub(r"\s+", " ", t).strip(" *")
 
 
