@@ -22,7 +22,8 @@ QUELLE = {"name": "WirLernenOnline", "uri": "https://wirlernenonline.de",
                      "und, wo der Export sie enthält, Node-IDs"}
 NODE_URI = "https://redaktion.openeduhub.net/edu-sharing/components/render/{}"
 FELDER = {"node": "sys:node-uuid", "kontext": "ccm:educationalcontext_DISPLAYNAME", "fach": "ccm:taxonid",
-          "fach_uni": "ccm:oeh_taxonid_university", "keywords": "cclom:general_keyword"}
+          "fach_uni": "ccm:oeh_taxonid_university", "keywords": "cclom:general_keyword",
+          "curriculum": "ccm:curriculum", "berufsgruppe": "ccm:oeh_profession_group"}
 # ccm:taxonid mischt Schul- und Hochschulfächer; Hochschulfächer erkennt man an der URI
 HOCHSCHULFACH = "hochschulfaechersystematik"
 CACHE = DATA_DIR / "cache"
@@ -43,6 +44,24 @@ def _spalte(fieldnames: list[str], key: str) -> str | None:
 
 def _liste(row: dict, col: str | None) -> list[str]:
     return [x.strip() for x in (row.get(col) or "").split(",") if x.strip()] if col else []
+
+
+def datensaetze(paths: list, felder: list[str], pflicht: tuple[str, ...] = (), delimiter: str = ";"):
+    """Je Datensatz der Exporte (node, {feld: [werte]}) für Schlüssel aus FELDER; gelesen werden nur diese Spalten.
+    node ist die Node-ID oder, ohne die Spalte, ein interner Zeilenschlüssel „#datei:zeile“ (wird nicht ausgegeben).
+    Fehlt eine Spalte aus pflicht, KeyError; andere fehlende Spalten ergeben leere Listen."""
+    csv.field_size_limit(10 ** 9)
+    for path in paths:
+        with Path(path).open(encoding="utf-8-sig", newline="") as f:
+            r = csv.DictReader(f, delimiter=delimiter)
+            col = {k: next((c for c in r.fieldnames if c == FELDER[k] or c.endswith("." + FELDER[k])), None)
+                   for k in ("node", *felder)}
+            fehlt = [FELDER[k] for k in pflicht if not col[k]]
+            if fehlt:
+                raise KeyError(f"Spalten fehlen im Export: {', '.join(fehlt)}")
+            for i, row in enumerate(r):
+                node = row[col["node"]].strip() if col["node"] else f"#{Path(path).name}:{i}"
+                yield node, {k: _liste(row, col[k]) for k in felder}
 
 
 def _norm(s: str) -> str:

@@ -13,7 +13,6 @@ Schritte (einzeln oder als Folge aufrufbar, siehe METHODIK.md):
 
 from __future__ import annotations
 
-import csv
 import hashlib
 import json
 import re
@@ -184,27 +183,16 @@ WLO_QUELLE = {"name": "WirLernenOnline", "uri": "https://wirlernenonline.de",
 
 
 def build_wlo(cfg: LLMConfig | None = None, wlo_dateien: list[str] | None = None, **_):
-    from ...quellen.wlo import _liste
+    from ...quellen.wlo import datensaetze
 
     if not wlo_dateien:
         return fertig("übersprungen – keine WLO-Exporte angegeben (--wlo)")
-    csv.field_size_limit(10 ** 9)
     data: dict = defaultdict(set)
-    for path in wlo_dateien:
-        with Path(path).open(encoding="utf-8-sig", newline="") as f:
-            r = csv.DictReader(f, delimiter=";")
-
-            def spalte(name):
-                return next((c for c in r.fieldnames if c == name or c.endswith("." + name)), None)
-
-            c_node, c_ctx, c_kw = spalte("sys:node-uuid"), spalte("ccm:educationalcontext_DISPLAYNAME"), \
-                spalte("cclom:general_keyword")
-            for i, row in enumerate(r):
-                if "Erwachsenenbildung" not in _liste(row, c_ctx):
-                    continue
-                node = row[c_node].strip() if c_node else f"#{Path(path).name}:{i}"
-                for kw in {k.strip() for k in (row.get(c_kw) or "").split(",") if k.strip()}:
-                    data[_norm(kw)].add(node)
+    for node, w in datensaetze(wlo_dateien, ["kontext", "keywords"]):
+        if "Erwachsenenbildung" not in w["kontext"]:
+            continue
+        for kw in set(w["keywords"]):
+            data[_norm(kw)].add(node)
     rows = {k: {"anzahl": len(v), "nodes": sorted(n for n in v if not n.startswith("#"))[:10]}
             for k, v in data.items() if len(v) >= WLO_MIN_NODES}
     WLO_PATH.parent.mkdir(parents=True, exist_ok=True)

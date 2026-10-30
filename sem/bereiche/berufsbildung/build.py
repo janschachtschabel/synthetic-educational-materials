@@ -13,7 +13,6 @@ Schritte (einzeln oder als Folge aufrufbar, siehe METHODIK.md):
 
 from __future__ import annotations
 
-import csv
 import hashlib
 import json
 import re
@@ -293,30 +292,18 @@ def _norm(s: str) -> str:
 def lese_wlo(paths: list[Path], delimiter: str = ";") -> dict:
     """keyword (normalisiert) -> {"nodes": set, "kldb": Counter(Kennziffer)}. Gelesen werden nur Node-ID,
     Bildungsstufe, Berufsgruppe und Keywords."""
-    from ...quellen.wlo import _liste
+    from ...quellen.wlo import datensaetze
 
-    csv.field_size_limit(10 ** 9)
     out: dict = defaultdict(lambda: {"nodes": set(), "kldb": Counter()})
-    for path in paths:
-        with Path(path).open(encoding="utf-8-sig", newline="") as f:
-            r = csv.DictReader(f, delimiter=delimiter)
-
-            def spalte(name):
-                return next((c for c in r.fieldnames if c == name or c.endswith("." + name)), None)
-
-            c_node, c_ctx = spalte("sys:node-uuid"), spalte("ccm:educationalcontext_DISPLAYNAME")
-            c_kw, c_pg = spalte("cclom:general_keyword"), spalte("ccm:oeh_profession_group")
-            if not c_kw or not c_ctx:
-                raise KeyError("Spalten für Keywords oder Bildungsstufe fehlen im Export")
-            for i, row in enumerate(r):
-                if not WLO_KONTEXTE & set(_liste(row, c_ctx)):
-                    continue
-                node = row[c_node].strip() if c_node else f"#{Path(path).name}:{i}"
-                kldb = [_uuid(u) for u in _liste(row, c_pg) if "/kldb/" in u]
-                for kw in {k.strip() for k in (row.get(c_kw) or "").split(",") if k.strip()}:
-                    e = out[_norm(kw)]
-                    e["nodes"].add(node)
-                    e["kldb"].update(kldb)
+    for node, w in datensaetze(paths, ["kontext", "keywords", "berufsgruppe"], pflicht=("kontext", "keywords"),
+                               delimiter=delimiter):
+        if not WLO_KONTEXTE & set(w["kontext"]):
+            continue
+        kldb = [_uuid(u) for u in w["berufsgruppe"] if "/kldb/" in u]
+        for kw in set(w["keywords"]):
+            e = out[_norm(kw)]
+            e["nodes"].add(node)
+            e["kldb"].update(kldb)
     return out
 
 

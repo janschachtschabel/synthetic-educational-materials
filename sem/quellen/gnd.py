@@ -22,6 +22,7 @@ from datetime import date
 from pathlib import Path
 
 from ..paths import DATA_DIR, VOCAB_DIR
+from . import wiederholen
 
 GND_SEARCH = "https://lobid.org/gnd/search"
 RES_SEARCH = "https://lobid.org/resources/search"
@@ -54,8 +55,8 @@ def _get(base: str, params: dict, pause: float = 0.05, versuche: int = 5) -> dic
             with urllib.request.urlopen(req, timeout=60) as r:
                 data = json.load(r)
             break
-        except Exception:  # noqa: BLE001
-            if i == versuche - 1:
+        except Exception as e:  # noqa: BLE001 - Netz- und Serverfehler wiederholen, 4xx außer 429 nicht
+            if i == versuche - 1 or not wiederholen(e):
                 raise
             time.sleep(2 ** i)
     time.sleep(pause)

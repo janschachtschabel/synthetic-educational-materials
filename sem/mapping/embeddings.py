@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import hashlib
 import re
+import time
 from pathlib import Path
 from typing import Callable
 
@@ -18,6 +19,9 @@ import numpy as np
 from ..paths import DATA_DIR
 
 DEFAULT_EMBEDDING_MODEL = "intfloat/multilingual-e5-small"
+# Der Cache wird höchstens so oft (Sekunden) zwischendurch gespeichert und immer am Ende; jedes Speichern
+# schreibt die ganze Datei, nach jedem Teilstück wäre das bei großen Läufen quadratisch viel
+SPEICHERN_ALLE = 60.0
 CACHE_DIR = DATA_DIR / "cache" / "embeddings"
 
 
@@ -62,14 +66,21 @@ class Embedder:
         cache = self._load()
         keys = [_h(t) for t in texts]
         todo = [i for i, k in enumerate(keys) if k not in cache]
-        for start in range(0, len(todo), self.batch * 8):
-            part = todo[start:start + self.batch * 8]
-            vecs = self._encode_raw([texts[i] for i in part])
-            for i, v in zip(part, vecs):
-                cache[keys[i]] = v / (np.linalg.norm(v) or 1.0)
-            self._save()
-            if on_progress:
-                on_progress(min(start + len(part), len(todo)), len(todo))
+        gespeichert = time.monotonic()
+        try:
+            for start in range(0, len(todo), self.batch * 8):
+                part = todo[start:start + self.batch * 8]
+                vecs = self._encode_raw([texts[i] for i in part])
+                for i, v in zip(part, vecs):
+                    cache[keys[i]] = v / (np.linalg.norm(v) or 1.0)
+                if time.monotonic() - gespeichert > SPEICHERN_ALLE:
+                    self._save()
+                    gespeichert = time.monotonic()
+                if on_progress:
+                    on_progress(min(start + len(part), len(todo)), len(todo))
+        finally:
+            if todo:
+                self._save()  # auch bei Abbruch: Gerechnetes bleibt erhalten
         return np.stack([cache[k] for k in keys]) if keys else np.zeros((0, 1), dtype=np.float32)
 
     def _save(self):

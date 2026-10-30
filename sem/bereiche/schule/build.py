@@ -20,7 +20,6 @@ Schritte (einzeln oder als Folge aufrufbar, siehe METHODIK.md):
 
 from __future__ import annotations
 
-import csv
 import hashlib
 import json
 import re
@@ -134,30 +133,19 @@ WLO_QUELLE = {"name": "WirLernenOnline", "uri": "https://wirlernenonline.de",
 
 
 def build_wlo(cfg: LLMConfig | None = None, wlo_dateien: list[str] | None = None, **_):
-    from ...quellen.wlo import _liste
+    from ...quellen.wlo import datensaetze
 
     if not wlo_dateien:
         return fertig("übersprungen – keine WLO-Exporte angegeben (--wlo)")
-    csv.field_size_limit(10 ** 9)
     data: dict = defaultdict(lambda: {"stufen": Counter(), "nodes": set()})
-    for path in wlo_dateien:
-        with Path(path).open(encoding="utf-8-sig", newline="") as f:
-            r = csv.DictReader(f, delimiter=";")
-
-            def spalte(name):
-                return next((c for c in r.fieldnames if c == name or c.endswith("." + name)), None)
-
-            c_node, c_ctx, c_cur = spalte("sys:node-uuid"), spalte("ccm:educationalcontext_DISPLAYNAME"), \
-                spalte("ccm:curriculum")
-            for i, row in enumerate(r):
-                themen = [u for u in _liste(row, c_cur) if "/oeh-topics/" in u]
-                if not themen:
-                    continue
-                stufen = {WLO_STUFEN[c] for c in _liste(row, c_ctx) if c in WLO_STUFEN}
-                node = row[c_node].strip() if c_node else f"#{Path(path).name}:{i}"
-                for t in themen:
-                    data[t]["nodes"].add(node)
-                    data[t]["stufen"].update(stufen)
+    for node, w in datensaetze(wlo_dateien, ["kontext", "curriculum"]):
+        themen = [u for u in w["curriculum"] if "/oeh-topics/" in u]
+        if not themen:
+            continue
+        stufen = {WLO_STUFEN[c] for c in w["kontext"] if c in WLO_STUFEN}
+        for t in themen:
+            data[t]["nodes"].add(node)
+            data[t]["stufen"].update(stufen)
     rows = {t: {"datensaetze": len(v["nodes"]), "stufen": dict(v["stufen"]),
                 "nodes": sorted(n for n in v["nodes"] if not n.startswith("#"))[:10]} for t, v in data.items()}
     WLO_PATH.parent.mkdir(parents=True, exist_ok=True)
@@ -285,37 +273,25 @@ def _norm(s: str) -> str:
 
 
 def build_keywords(cfg: LLMConfig | None = None, wlo_dateien: list[str] | None = None, **_):
-    from ...quellen.wlo import _liste
+    from ...quellen.wlo import datensaetze
 
     if not wlo_dateien:
         return fertig("übersprungen – keine WLO-Exporte angegeben (--wlo)")
-    csv.field_size_limit(10 ** 9)
     data: dict = defaultdict(lambda: {"schreibweisen": Counter(), "nodes": set(), "faecher": Counter(),
                                       "stufen": Counter(), "themen": Counter()})
-    for path in wlo_dateien:
-        with Path(path).open(encoding="utf-8-sig", newline="") as f:
-            r = csv.DictReader(f, delimiter=";")
-
-            def spalte(name):
-                return next((c for c in r.fieldnames if c == name or c.endswith("." + name)), None)
-
-            c_node, c_ctx, c_cur, c_fach, c_kw = (spalte(x) for x in (
-                "sys:node-uuid", "ccm:educationalcontext_DISPLAYNAME", "ccm:curriculum", "ccm:taxonid",
-                "cclom:general_keyword"))
-            for i, row in enumerate(r):
-                stufen = {WLO_STUFEN[c] for c in _liste(row, c_ctx) if c in WLO_STUFEN}
-                faecher = [u for u in _liste(row, c_fach) if "/discipline/" in u]
-                if not stufen or not faecher:
-                    continue
-                themen = [u for u in _liste(row, c_cur) if "/oeh-topics/" in u]
-                node = row[c_node].strip() if c_node else f"#{Path(path).name}:{i}"
-                for kw in {k.strip() for k in _liste(row, c_kw)}:
-                    e = data[_norm(kw)]
-                    e["schreibweisen"][kw] += 1
-                    e["nodes"].add(node)
-                    e["faecher"].update(faecher)
-                    e["stufen"].update(stufen)
-                    e["themen"].update(themen)
+    for node, w in datensaetze(wlo_dateien, ["kontext", "curriculum", "fach", "keywords"]):
+        stufen = {WLO_STUFEN[c] for c in w["kontext"] if c in WLO_STUFEN}
+        faecher = [u for u in w["fach"] if "/discipline/" in u]
+        if not stufen or not faecher:
+            continue
+        themen = [u for u in w["curriculum"] if "/oeh-topics/" in u]
+        for kw in set(w["keywords"]):
+            e = data[_norm(kw)]
+            e["schreibweisen"][kw] += 1
+            e["nodes"].add(node)
+            e["faecher"].update(faecher)
+            e["stufen"].update(stufen)
+            e["themen"].update(themen)
     rows = {}
     for k, v in data.items():
         if len(v["nodes"]) >= KW_MIN_NODES:
