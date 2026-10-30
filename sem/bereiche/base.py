@@ -115,6 +115,15 @@ class Bildungsbereich(ABC):
     def standard_auswahl(self) -> dict[str, list[str]]:
         return {k: list(o["standard"]) for k, o in self.auswahl_optionen().items()}
 
+    def mit_konfidenz(self, auswahl: dict[str, list[str]] | None, konfidenz: list[str] | None) -> dict[str, list[str]]:
+        """Setzt alle Status-Filter (Konfidenz) auf dieselben Werte, soweit auswahl sie nicht ausdrücklich setzt."""
+        out = dict(auswahl or {})
+        if konfidenz is not None:
+            for k, o in self.auswahl_optionen().items():
+                if filtergruppe(k, o) == "konfidenz" and k not in out:
+                    out[k] = list(konfidenz)
+        return out
+
     def passt(self, topic: dict, auswahl: dict[str, list[str]]) -> bool:
         """Ob ein Thema zur Auswahl passt. Standard: immer."""
         return True
@@ -141,6 +150,20 @@ class Bildungsbereich(ABC):
                 "default_balance": self.default_balance, "themen": len(self.topics()),
                 "themen_standardauswahl": len(self.themen_auswahl()), "auswahl_optionen": self.auswahl_optionen(),
                 "mapping_schritte": [s.key for s in self.mapping_schritte()]}
+
+
+STATUS_WERTE = ["gesichert", "wahrscheinlich", "unsicher", "redaktionell"]
+STANDARD_KONFIDENZ = ["gesichert", "wahrscheinlich", "redaktionell"]
+
+
+def filtergruppe(name: str, option: dict) -> str:
+    """Gruppe eines Filters für Oberfläche und CLI: „quellen“ (Quellen, Herkunft, Belege), „konfidenz“
+    (Status einer Zuordnung aus der Abstimmung) oder „inhalt“ (alles andere, z. B. Stufen, Themenart)."""
+    if name in ("quellen", "herkunft", "belege"):
+        return "quellen"
+    if set(option["werte"]) == set(STATUS_WERTE):
+        return "konfidenz"
+    return "inhalt"
 
 
 class SeedState:

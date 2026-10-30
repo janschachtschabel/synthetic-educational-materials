@@ -251,7 +251,8 @@ class Schule(Bildungsbereich):
         seed[S.F_PROVENANCE][S.F_THEMA] = S.provenance(q["name"], uri=q["uri"], license=q["lizenz"],
                                                        method=m.get("methode", "Thema aus der Quelle"))
         seed[S.F_PROVENANCE][S.F_THEMA].update(
-            status={"stufen": m.get("status"), "art": (m.get("art") or {}).get("status")},
+            status={"stufen": m.get("status"), "art": (m.get("art") or {}).get("status"),
+                    **({"fach": m["fach"]["status"]} if m.get("fach") else {})},
             belege={"erfuellt": sorted(self.belege_des_themas(topic))})
 
         seed[S.F_NIVEAU] = {"id": niveau["id"], "label": niveau["label"], "stufe": STUFEN_LABEL[stufe],

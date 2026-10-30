@@ -14,6 +14,7 @@ from sem import schema as S
 from sem import seeds as seedlib
 from sem import vorschau
 from sem.bereiche import BEREICHE
+from sem.bereiche.base import STANDARD_KONFIDENZ, STATUS_WERTE, filtergruppe
 from sem.generate import generate
 from sem.i18n import UI_SPRACHEN, t
 from sem.llm import DEFAULT_MODEL, DEFAULT_WORKERS, LLMConfig, Progress
@@ -162,7 +163,8 @@ def dateiname_feld(label: str, art: str, vorschlag: str, key: str, hilfe: str):
     c1.text_input(label, PRAEFIX[art], disabled=True, key=f"{key}-praefix",
                   help=T("Feste Namensanfänge: seeds_ für Seed-Dateien, materialien_ für erzeugte Materialien. "
                          "Daran erkennt die App, welche Dateien in welche Auswahl gehören."))
-    frei = c2.text_input("Name", vorschlag, key=key, help=hilfe)
+    # Vorschlag im Schlüssel: ändern sich die Einstellungen, folgt der Name (sonst bliebe der erste Vorschlag stehen)
+    frei = c2.text_input("Name", vorschlag, key=f"{key}:{vorschlag}", help=hilfe)
     c3.text_input(T("Endung"), ".jsonl", disabled=True, key=f"{key}-endung")
     return ausgabe_pfad(art, frei)
 
@@ -225,29 +227,59 @@ tab_seeds, tab_mat, tab_vorschau, tab_prompts, tab_map, tab_meth = st.tabs(
 with tab_seeds:
     st.subheader(T("Seeds erzeugen"))
     st.caption(T("Ohne LLM. Gleicher Startwert für den Zufall und gleiche Einstellungen ergeben dieselben Seeds."))
-    counts, balance, auswahl = {}, {}, {}
-    for i, key in enumerate(BEREICHE):
+    STATUS_TEXT = {"gesichert": "alle Stimmen einig", "wahrscheinlich": "Mehrheit der Stimmen",
+                   "unsicher": "keine Mehrheit oder Ersatzzuordnung, steht auf der Prüfliste",
+                   "redaktionell": "von Hand korrigiert (korrekturen.csv)"}
+    g1, g2 = st.columns(2)
+    gewaehlt = g1.multiselect(T("Bildungsbereiche"), list(BEREICHE), default=[next(iter(BEREICHE))],
+                              format_func=lambda k: T(bereich(k).label), key=uk("s-bereiche"),
+                              help=T("Für jeden gewählten Bereich lassen sich Anzahl, Gleichverteilung, Quellen und "
+                                     "Konfidenz einzeln einstellen."))
+    konfidenz = g2.multiselect(T("Konfidenz der Zuordnungen (alle Bereiche)"), STATUS_WERTE, default=STANDARD_KONFIDENZ,
+                               key=uk("s-konfidenz"),
+                               help=T("Setzt alle Status-Filter der gewählten Bereiche auf diese Werte; je Bereich "
+                                      "weiter einzeln änderbar. Standard: gesichert, wahrscheinlich und redaktionell; "
+                                      "unsicher erst nach Prüfung.") + "\n\n" +
+                               "\n".join(f"- **{w}**: {T(STATUS_TEXT[w])}" for w in STATUS_WERTE))
+    konf_key = "-".join(konfidenz) or "keine"
+    counts, balance, auswahl, leer = {}, {}, {}, []
+    GRUPPEN = [("quellen", "Quellen und Belege"), ("konfidenz", "Konfidenz (Status der Zuordnungen)"),
+               ("inhalt", "Weitere Merkmale")]
+    for key in gewaehlt:
         b = bereich(key)
+        st.markdown(f"#### {T(b.label)}")
         c1, c2 = st.columns([1, 2])
-        counts[key] = c1.number_input(T("{bereich}: Anzahl", bereich=T(b.label)), 0, 1_000_000,
-                                      1000 if i == 0 else 0, step=500, key=f"n-{key}")
+        counts[key] = c1.number_input(T("{bereich}: Anzahl", bereich=T(b.label)), 0, 1_000_000, 1000, step=500,
+                                      key=f"n-{key}")
         opts = list(b.balance_options)
         balance[key] = c2.selectbox(T("{bereich}: gleich verteilen nach", bereich=T(b.label)), opts,
                                     index=opts.index(b.default_balance),
                                     format_func=lambda o, b=b: f"{o} – {T(b.balance_options[o])}", key=uk(f"bal-{key}"))
         filt = b.auswahl_optionen()
         if filt:
-            with st.expander(T("{bereich}: welche Themen einbezogen werden (Status, Quellen, Belege)",
+            with st.expander(T("{bereich}: welche Themen einbezogen werden (Quellen, Konfidenz, weitere Merkmale)",
                                bereich=T(b.label))):
                 wahl = {}
-                for name, o in filt.items():
-                    wahl[name] = st.multiselect(T(o["label"]), list(o["werte"]), default=o["standard"],
-                                                key=uk(f"f-{key}-{name}"), help=T(o["beschreibung"]),
-                                                format_func=lambda w, o=o: f"{w} – {T(o['werte'][w])}")
+                for gruppe, titel in GRUPPEN:
+                    namen = [n for n, o in filt.items() if filtergruppe(n, o) == gruppe]
+                    if not namen:
+                        continue
+                    st.markdown(f"**{T(titel)}**")
+                    for name in namen:
+                        o = filt[name]
+                        std = konfidenz if gruppe == "konfidenz" else o["standard"]
+                        # Schlüssel mit der globalen Konfidenz: ändert man sie, übernehmen alle Status-Filter den Wert
+                        k = uk(f"f-{key}-{name}" + (f"-{konf_key}" if gruppe == "konfidenz" else ""))
+                        wahl[name] = st.multiselect(T(o["label"]), list(o["werte"]), default=std, key=k,
+                                                    help=T(o["beschreibung"]),
+                                                    format_func=lambda w, o=o: f"{w} – {T(o['werte'][w])}")
                 auswahl[key] = wahl
-                st.caption(T("{n} von {gesamt} Themen ausgewählt. Voreinstellung: gesichert, wahrscheinlich und "
-                             "redaktionell; unsicher erst nach Prüfung.",
-                             n=len(b.themen_auswahl(wahl)), gesamt=len(b.topics())))
+        n_themen = len(b.themen_auswahl(auswahl.get(key)))
+        st.caption(T("{n} von {gesamt} Themen ausgewählt.", n=n_themen, gesamt=len(b.topics())))
+        if not n_themen:
+            leer.append(T(b.label))
+    if leer:
+        st.warning(T("Keine Themen ausgewählt für: {bereiche}. Filter erweitern.", bereiche=", ".join(leer)))
     rnd = st.number_input(T("Startwert für den Zufall"), 0, 2**31 - 1, 42,
                           help=T("Gleicher Startwert und gleiche Einstellungen ergeben dieselben Seeds."))
     ziel = dateiname_feld(T("Dateiname"), "seeds", "_".join(f"{k}{v}" for k, v in counts.items() if v) + f"_s{rnd}",
@@ -258,12 +290,14 @@ with tab_seeds:
     if vorhanden:
         st.warning(T("{datei} gibt es schon ({anzahl}) und wird beim Erzeugen überschrieben.",
                      datei=ziel.name, anzahl=anzahl(zeilen(ziel), "Seed", "Seeds")))
-    if st.button(T("Seeds erzeugen"), type="primary", disabled=sum(counts.values()) == 0):
+    if st.button(T("Seeds erzeugen"), type="primary", disabled=sum(counts.values()) == 0 or bool(leer)):
         try:
             with st.spinner(T("erzeuge …")):
                 data = seedlib.build(counts, balance, int(rnd), auswahl)
                 stats = seedlib.write(data, ziel, {"anzahl": counts, "gleichverteilung": balance,
-                                                   "zufalls_seed": int(rnd), "auswahl": auswahl})
+                                                   "zufalls_seed": int(rnd),
+                                                   "auswahl": {k: bereich(k).auswahl_pruefen(v)
+                                                               for k, v in auswahl.items()}})
         except ValueError as e:  # z. B. Filter ohne verbleibende Themen
             st.error(str(e))
             st.stop()
