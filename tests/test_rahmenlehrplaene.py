@@ -47,3 +47,10 @@ def test_lernfeld_text():
     from sem.bereiche.berufsbildung.lernfelder import lernfeld_text
     assert lernfeld_text({"nr": "9eg", "titel": "Titel", "jahr": 3, "stunden": 80}) == \
         "Lernfeld 9 eg: Titel (3. Ausbildungsjahr, 80 Stunden)"
+
+
+def test_ergaenzungsstrich():
+    assert R._titel("Roh- und Hilfsstoffe") == "Roh- und Hilfsstoffe"
+    assert R._titel("Wohnund Zweckbauten planen") == "Wohn- und Zweckbauten planen"
+    assert R._titel("Den Grund Prüfen") == "Den Grund Prüfen"
+    assert R._titel("Funkti- onen prüfen") == "Funktionen prüfen"

@@ -117,7 +117,7 @@ Everything under `data/` can be used without the code (JSON, JSONL, CSV, UTF-8):
 - `data/mappings/berufsbildung/berufe.jsonl`: 2,930 ESCO occupations with KldB occupational unit group (and higher-level groups),
   qualification pathway, status, confidence, manual mapping confirmation, and the URIs of their essential and
   optional skills
-- `data/mappings/berufsbildung/rahmenlehrplaene.jsonl`: 265 KMK framework curricula with 3,697 learning
+- `data/mappings/berufsbildung/rahmenlehrplaene.jsonl`: 260 KMK framework curricula with 3,612 learning
   fields (number, title, training year, time allocation; no goal texts) and their mapped ESCO occupations
 - `data/mappings/berufsbildung/kompetenzen.jsonl`: 12,539 ESCO skills (label, description, type,
   scope, ISCED-F field, `oeh_uri` in the OEH vocabulary escoSkills, WLO evidence)

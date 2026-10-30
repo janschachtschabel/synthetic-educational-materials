@@ -51,6 +51,12 @@ def _code(uri: str) -> str:
 
 # --- 1. Lernfelder einlesen ------------------------------------------------------------------------
 
+def titel_ok(titel: str) -> bool:
+    """Kein Umwandlungsrest wie „(SM)“ (Kürzel der Fachrichtung) oder „Zielformulierung :“ (Abschnittskopf)."""
+    t = titel.strip()
+    return len(t) > 4 and not re.fullmatch(r"\(?[A-Za-z]{1,4}\)?", t) and not t.lower().startswith("zielformulierung")
+
+
 def build_lernfelder(cfg: LLMConfig | None = None, rlp_ordner: str | None = None, **_):
     ordner = Path(rlp_ordner or os.environ.get("RLP_MARKDOWN_DIR") or "")
     if not rlp_ordner and not os.environ.get("RLP_MARKDOWN_DIR"):
@@ -64,7 +70,7 @@ def build_lernfelder(cfg: LLMConfig | None = None, rlp_ordner: str | None = None
             fehlt.append(e["titel"])
             continue
         lf = rlp.lernfelder(p.read_text(encoding="utf-8"))
-        felder = [{k: f[k] for k in ("nr", "titel", "jahr", "stunden")} for f in lf["lernfelder"] if f["titel"]]
+        felder = [{k: f[k] for k in ("nr", "titel", "jahr", "stunden")} for f in lf["lernfelder"] if titel_ok(f["titel"])]
         rows.append({"id": f"kmk:{e['id']}", "titel": e["titel"], "datum": e["datum"], "url": e["url"],
                      "datei": e["datei"], "lernfelder": felder, "befund": lf["befund"]})
     _write_jsonl(ROH_PATH, rows)

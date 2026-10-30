@@ -248,9 +248,22 @@ und Zeitrichtwert je Lernfeld, keine Ziel- und Inhaltstexte.
    und `pruefliste_rahmenlehrplaene.csv`; `korrekturen_rahmenlehrplaene.csv` hat Vorrang
    (`korrektur_codes` = ESCO-Kürzel, erste acht Zeichen der UUID, `-` = Plan ausschließen).
 
-**Ergebnis:** 222 der 265 Pläne haben einen ESCO-Beruf (171 gesichert, 29 wahrscheinlich, Rest unsicher);
-69 Pläne stehen auf der Prüfliste (keine Mehrheit oder lückenhafte Lernfeldliste). Mit der Voreinstellung
-gehen 3.279 Lernfeld-Themen (ESCO-Beruf × Lernfeld) in die Seeds ein.
+Lernfeldtitel, die nur Umwandlungsreste sind (Fachrichtungskürzel wie „(SM)“, Abschnittsköpfe wie
+„Zielformulierung“), werden verworfen.
+
+**Redaktionelle Durchsicht.** Alle 69 Pläne der Prüfliste (65 ohne Mehrheit, 4 nur mit lückenhafter
+Lernfeldliste) sind durchgesehen; die Stimmen hatten oft gar keinen Kandidaten gewählt, weil die Embedding-
+Kandidaten danebenlagen. Ergebnis in `korrekturen_rahmenlehrplaene.csv` mit Kommentar: 64 Pläne mit
+ESCO-Beruf, auch außerhalb der Kandidaten gesucht (z. B. Berufskraftfahrer → Lastkraftwagen- und
+Omnibusfahrer, Chemikant → Steuerer Chemiewerksleitstand, Fachangestellte für Arbeitsmarktdienstleistungen →
+Arbeitsvermittler); wo ESCO keinen eigenen Beruf hat, der nächste (Estrichleger → Terrazzomacher, Brauer und
+Mälzer → Braumeister, Mälzermeister). 5 ausgeschlossen: Holz- und Bautenschutz (zwei Pläne), Rollladen- und
+Sonnenschutzmechatroniker und Vergolder ohne ESCO-Entsprechung, Fachangestellte für Medien- und
+Informationsdienste wegen unlesbarer Lernfeldtitel.
+
+**Ergebnis:** 260 Pläne mit 3.612 Lernfeldern und ESCO-Beruf (gesichert 168, wahrscheinlich 28,
+redaktionell 64); die Prüfliste ist leer. Mit der Voreinstellung gehen 4.416 Lernfeld-Themen (ESCO-Beruf ×
+Lernfeld) in die Seeds ein.
 
 ## Mappings Elementarbereich
 
@@ -366,9 +379,13 @@ Fremdsprache für ESA/MSA und AHR; Biologie, Chemie, Physik für MSA und AHR): 3
 (Kompetenzbereiche, Teilbereiche, Leitideen, Basiskonzepte, prozessbezogene Kompetenzen) mit Code und Pfad,
 keine Standardformulierungen. Je Unterrichtsthema und Schulstufe gilt das passende Dokument (Primarstufe →
 Primarbereich, Sek I → ESA/MSA, Sek II → AHR); drei Stimmen wählen ein bis zwei inhaltliche Einträge
-(Teilbereich vor Kompetenzbereich, leere Auswahl erlaubt). Prozessbezogene Kompetenzen gelten für alle Themen
-eines Fachs und werden nicht zugeordnet. **Ergebnis:** 4.316 von 5.052 Paaren aus Thema und Dokument haben
-einen Eintrag (gesichert 3.275, wahrscheinlich 1.027, unsicher 14), `bildungsstandards.jsonl`.
+(Teilbereich vor Kompetenzbereich, leere Auswahl erlaubt); sind sie uneinig, entscheiden zwei weitere Stimmen
+(Mehrheit drei von fünf). Prozessbezogene Kompetenzen gelten für alle Themen
+eines Fachs und werden nicht zugeordnet. **Ergebnis:** 4.395 von 5.052 Paaren aus Thema und Dokument haben
+einen Eintrag (gesichert 3.289, wahrscheinlich 1.106, davon 73 per Stichwahl), `bildungsstandards.jsonl`. Ohne
+Eintrag bleiben 320 Paare, bei denen keine Stimme einen Eintrag gewählt hat (oft allgemeiner Wortschatz oder
+Sachthemen in den Fremdsprachen), und rund 340 weiter uneinige; sie bekommen kein Feld statt einer geratenen
+Zuordnung.
 
 ## Mappings Erwachsenenbildung
 

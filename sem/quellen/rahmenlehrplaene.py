@@ -72,9 +72,21 @@ def _zellen(zeile: str) -> list[str]:
 _ERGAENZUNG = r"(?!(?:und|oder|bis|sowie|bzw)\b)"
 
 
+# Ergänzungsstrich, den die Umwandlung ganz verschluckt hat („Wohnund Zweckbauten“); Wörter, die auf „und“
+# enden, bleiben (Grund, Befund, Verbund …)
+_VERSCHLUCKT = re.compile(r"\b([A-ZÄÖÜ][a-zäöüß]{1,})(und|oder) (?=[A-ZÄÖÜ])")
+_ECHTES_UND = ("grund", "befund", "verbund", "schlund")  # auch als Wortende (Hintergrund, Staatenverbund)
+_ECHTES_UND_WORT = {"bund", "hund", "mund", "fund", "stund", "rund"}
+
+
 def _titel(t: str) -> str:
     t = re.sub(r"(\w)- " + _ERGAENZUNG + r"(\w)",
                lambda m: m.group(1) + ("-" if m.group(2).isupper() else "") + m.group(2), t)
+    def ergaenzen(m):
+        wort = (m.group(1) + m.group(2)).lower()
+        return m.group(0) if wort.endswith(_ECHTES_UND) or wort in _ECHTES_UND_WORT else f"{m.group(1)}- {m.group(2)} "
+
+    t = _VERSCHLUCKT.sub(ergaenzen, t)
     return re.sub(r"\s+", " ", t).strip(" *")
 
 

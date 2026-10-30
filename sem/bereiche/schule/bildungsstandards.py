@@ -28,6 +28,7 @@ GLIEDERUNG_PATH = DIR / "bildungsstandards_gliederung.json"
 ZUORDNUNG_PATH = DIR / "bildungsstandards.jsonl"
 STIMMEN_PATH = DATA_DIR / "cache" / "schule_stimmen_bista.jsonl"
 N_STIMMEN = 3
+STICHWAHL = 2  # weitere Stimmen, wenn die ersten drei uneinig sind
 INHALTLICH = {"kompetenzbereich", "leitidee", "basiskonzept", "teilbereich"}
 # Fachportale mit Bildungsstandards (Englisch und Französisch: erste Fremdsprache); Schulstufe → Abschluss
 PORTALE = {"Deutsch", "Mathematik", "Englisch", "Französisch", "Biologie", "Chemie", "Physik"}
@@ -87,9 +88,23 @@ def build_bista(cfg: LLMConfig, on_progress=None, stop_event=None, stimmen: int 
     ziele = {e["code"]: Ziel(e["code"], e["code"], e["label"], " > ".join(e["pfad"][-1:]))
              for e in gliederung()["eintraege"] if e["typ"] in INHALTLICH}
     kand = {o["id"]: [e["code"] for e in eintraege(o["dokument"])] for o in objekte}
-    systeme = [PERSPEKTIVEN[i % len(PERSPEKTIVEN)] + "\n\n" + REGELN for i in range(stimmen)]
-    return abstimmung.abstimmen(objekte, kand, ziele, systeme, STIMMEN_PATH, cfg, max_auswahl=2, batch=12,
+    systeme = [PERSPEKTIVEN[i % len(PERSPEKTIVEN)] + "\n\n" + REGELN for i in range(stimmen + STICHWAHL)]
+    prog = abstimmung.abstimmen(objekte, kand, ziele, systeme[:stimmen], STIMMEN_PATH, cfg, max_auswahl=2,
+                                batch=12, on_progress=on_progress, stop_event=stop_event)
+    if prog.failed or (stop_event is not None and stop_event.is_set()):
+        return prog
+    # Stichwahl: Stimmen uneinig (kein Eintrag mit Mehrheit, aber nicht alle leer) → zwei weitere Stimmen
+    st = abstimmung.lade_stimmen(STIMMEN_PATH)
+    offen = [o for o in objekte if _strittig(st.get(o["id"], {}), stimmen)]
+    return abstimmung.abstimmen(offen, kand, ziele, systeme, STIMMEN_PATH, cfg, max_auswahl=2, batch=12,
                                 on_progress=on_progress, stop_event=stop_event)
+
+
+def _strittig(stimmen_obj: dict, stimmen: int) -> bool:
+    if len(stimmen_obj) > stimmen or not any(stimmen_obj.values()):
+        return False
+    a = abstimmung.auswerten(stimmen_obj, stimmen, max_auswahl=2)
+    return not a["details"] or a["details"][0]["stimmen"] < 2
 
 
 METHODE = "LLM-Mehrfachabstimmung über die inhaltliche Gliederung der passenden KMK-Bildungsstandards"
@@ -102,14 +117,15 @@ def zusammenfuehren(cfg: LLMConfig | None = None, stimmen: int = N_STIMMEN, mode
     for o in _objekte():
         if o["id"] not in st:
             continue
-        a = abstimmung.auswerten(st[o["id"]], stimmen, o["text"], max_auswahl=2)
-        if not a["details"] or a["details"][0]["stimmen"] < 2:  # keine Mehrheit für einen Eintrag
+        n = max(stimmen, len(st[o["id"]]))  # nach einer Stichwahl fünf Stimmen
+        a = abstimmung.auswerten(st[o["id"]], n, o["text"], max_auswahl=2, min_stimmen=n // 2 + 1)
+        if not a["details"] or a["details"][0]["stimmen"] < n // 2 + 1:  # keine Mehrheit für einen Eintrag
             continue
         rows.append({"id": o["id"], "thema": o["thema"], "dokument": o["dokument"],
                      "eintraege": [{"code": d["code"], "label": by_code[d["code"]]["label"],
                                     "typ": by_code[d["code"]]["typ"], "pfad": by_code[d["code"]]["pfad"],
                                     "stimmen": d["stimmen"]} for d in a["details"] if d["code"] in by_code],
-                     "status": a["status"]})
+                     "status": a["status"], **({"stichwahl": True} if n > stimmen else {})})
     meta = {"methode": METHODE, "modell": modell or (cfg.model if cfg else None), "stimmen": stimmen,
             "datum": date.today().isoformat()}
     ZUORDNUNG_PATH.write_text("".join(json.dumps({**r, "mapping": meta}, ensure_ascii=False) + "\n" for r in rows),

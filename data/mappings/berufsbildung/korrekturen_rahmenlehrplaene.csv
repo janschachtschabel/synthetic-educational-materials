@@ -1,0 +1,70 @@
+id,titel,grund,korrektur_codes,kommentar
+kmk:41165,Anlagenmechaniker/Anlagenmechanikerin,keine Mehrheit für einen ESCO-Beruf,5ed024ab|2ff73126,"Anlagenmechaniker (Industrie) baut Apparate, Behälter und Rohrleitungen"
+kmk:12607,Baugeräteführer/Baugeräteführerin,keine Mehrheit für einen ESCO-Beruf; Lernfeldliste lückenhaft (unvollstaendig),5f68c4c3|1f2b8092|cae71f3f,"Baugeräteführer: Straßenbau-, Kran- und Erdbaumaschinen"
+kmk:40505,Berufskraftfahrer/Berufskraftfahrerin,keine Mehrheit für einen ESCO-Beruf,45037d43|00cee175,Berufskraftfahrer: Güter- und Personenverkehr
+kmk:12617,Bestattungsfachkraft,keine Mehrheit für einen ESCO-Beruf,857ed740|d7607255,Bestattungsfachkraft
+kmk:26309,Werksteinhersteller und Werksteinherstellerin,keine Mehrheit für einen ESCO-Beruf,990738f4|a9068f84,"Werksteinhersteller: Betonwerkstein, nächster ESCO-Beruf Betonbau"
+kmk:26310,Bogenmacher und Bogenmacherin,keine Mehrheit für einen ESCO-Beruf,0a94df75|d0c923f1,"Bogenmacher: kein eigener ESCO-Beruf, Streichinstrumentenbau"
+kmk:46950,Brauer und Mälzer,keine Mehrheit für einen ESCO-Beruf,95cd3d64|dc3cc282,ESCO kennt Brauer und Mälzer nur als Meister; nächste Entsprechung
+kmk:12642,Medientechnologe Druckverarbeitung/Medientechnologin Druckverarbeitung,keine Mehrheit für einen ESCO-Beruf,49b21ca8,Druckverarbeitung: Bindemaschinen
+kmk:41228,Chemikant/Chemikantin,keine Mehrheit für einen ESCO-Beruf,b21aac17|5b3ef95b,Chemikant: Chemieanlagen steuern
+kmk:48165,Eisenbahner in der Zugverkehrssteuerung und Eisenbahnerin in der Zugverkehrssteuerung,keine Mehrheit für einen ESCO-Beruf,f643bff3|9cee6106|81f6a814,Zugverkehrssteuerung: Fahrdienstleitung und Zugfahrt
+kmk:12663,Elektroanlagenmonteur/Elektroanlagenmonteurin,Lernfeldliste lückenhaft (ohne_tabelle),d44c5eb0,bestätigt (einstimmig); Lernfeldliste der Umwandlung lückenhaft
+kmk:46658,Elektroniker und Elektronikerin,keine Mehrheit für einen ESCO-Beruf,35efc04c|5dbb9cf0|2bb8adee,Elektroniker (Handwerk) mit Fachrichtungen Energie-/Gebäudetechnik und Automatisierung
+kmk:12667,Fachangestellter für Arbeitsmarktdienstleistungen/Fachangestellte für Arbeitsmarktdienstleistungen,keine Mehrheit für einen ESCO-Beruf,42a96d07,Arbeitsmarktdienstleistungen: Arbeitsvermittlung
+kmk:12671,Fachlagerist/ Fachlageristin,keine Mehrheit für einen ESCO-Beruf,d7a9f9e0|30870ea4,Fachlagerist
+kmk:12676,Fachangestellter für Medien- und Informationsdienste/ Fachangestellte für Medien- und Informationsdienste,keine Mehrheit für einen ESCO-Beruf,-,Lernfeldtitel in der Markdown-Fassung nicht erkennbar (nur „Zielformulierung“)
+kmk:12677,Fassadenmonteur/ Fassadenmonteurin,keine Mehrheit für einen ESCO-Beruf,691ec040,Fassadenmonteur: Metall- und Fassadenbau
+kmk:12680,Fertigungsmechaniker und Fertigungsmechanikerin,keine Mehrheit für einen ESCO-Beruf,be0e6189,Fertigungsmechaniker: Montage
+kmk:12682,Kaufmann im Gesundheitswesen/ Kauffrau im Gesundheitswesen,keine Mehrheit für einen ESCO-Beruf,8c8b5cba|045f05f2,Kaufleute im Gesundheitswesen: Verwaltung in Praxen und Kliniken
+kmk:12772,Kaufmann im Gesundheitswesen/Kauffrau im Gesundheitswesen,keine Mehrheit für einen ESCO-Beruf,8c8b5cba|045f05f2,Kaufleute im Gesundheitswesen: Verwaltung in Praxen und Kliniken
+kmk:12685,Fachkraft Agrarservice,keine Mehrheit für einen ESCO-Beruf,1b8c75a9|1765f9b2,Agrarservice: Maschineneinsatz in der Landwirtschaft
+kmk:12692,Fachkraft für Hafenlogistik,keine Mehrheit für einen ESCO-Beruf,b567a979|dc90cee4,Hafenlogistik: Umschlag
+kmk:12693,Fachkraft für Holz- und Bautenschutzarbeiten,keine Mehrheit für einen ESCO-Beruf,-,Holz- und Bautenschutz hat keine ESCO-Entsprechung (Schädlingsbekämpfung oder Abdichtung allein passen nicht)
+kmk:12742,Holz- und Bautenschützer/ Holz- und Bautenschützerin,keine Mehrheit für einen ESCO-Beruf,-,Holz- und Bautenschutz hat keine ESCO-Entsprechung
+kmk:12694,"Fachkraft für Kurier-, Express- und Postdienstleistungen",keine Mehrheit für einen ESCO-Beruf,7ed2e153|0c408028,KEP-Fachkraft: Zustellung
+kmk:12699,Fachkraft für Straßen- und Verkehrstechnik,keine Mehrheit für einen ESCO-Beruf,c9a5f7c5,Straßen- und Verkehrstechnik: Straßeninstandhaltung
+kmk:12702,Fachkraft für Wasserwirtschaft,keine Mehrheit für einen ESCO-Beruf,13331bd9|21fe7141,Wasserwirtschaft: Gewässer- und Wasserbau
+kmk:12902,Wasserbauer/ Wasserbauerin,keine Mehrheit für einen ESCO-Beruf,13331bd9|21fe7141,Wasserbauer
+kmk:41162,Flachglastechnologe und Flachglastechnologin,keine Mehrheit für einen ESCO-Beruf,447cfc9c|c9f6c245,Flachglastechnologe: Flachglasbearbeitung
+kmk:12730,Glasbläser/ Glasbläserin,Lernfeldliste lückenhaft (unvollstaendig),64a68a43,bestätigt (einstimmig); Lernfeldliste lückenhaft
+kmk:12737,Hafenschiffer/ Hafenschifferin,keine Mehrheit für einen ESCO-Beruf,837502a6|6474e4d4,Hafenschiffer: Binnenschifffahrt
+kmk:12750,Industriekeramiker Modelltechnik/ Industriekeramikerin Modelltechnik,keine Mehrheit für einen ESCO-Beruf,3cbbdb83|ec0e64c9,Industriekeramiker Modelltechnik
+kmk:12751,Industriekeramiker Verfahrenstechnik/ Industriekeramikerin Verfahrenstechnik,keine Mehrheit für einen ESCO-Beruf,5f617498|d4fdb8cb|2ecbed9c,"Industriekeramiker Verfahrenstechnik: Gießen, Pressen, Brennen"
+kmk:12755,Industriekeramiker Anlagentechnik/ Industriekeramikerin Anlagentechnik,keine Mehrheit für einen ESCO-Beruf,2ecbed9c|d4fdb8cb,Industriekeramiker Anlagentechnik
+kmk:45010,Kaufmann für Digitalisierungsmanagement und Kauffrau für Digitalisierungsmanagement,keine Mehrheit für einen ESCO-Beruf,89b85c45|bb95ef58,IT-System- und Digitalisierungsmanagement: IT-Kundenbetreuung und -Beschaffung
+kmk:40507,Kaufmann im E-Commerce und Kauffrau im E-Commerce,keine Mehrheit für einen ESCO-Beruf,356227b9|fde97584,E-Commerce: Online-Marketing und -Kundenberatung
+kmk:12768,Kaufmann für audiovisuelle Medien/ Kauffrau für audiovisuelle Medien,keine Mehrheit für einen ESCO-Beruf,71898b81,audiovisuelle Medien: Filmproduktion
+kmk:12769,Kaufmann für Dialogmarketing/Kauffrau für Dialogmarketing und Servicefachkraft für Dialogmarketing,keine Mehrheit für einen ESCO-Beruf,0ededdc2|d96de969,Dialogmarketing: Callcenter und Kundenbeziehung
+kmk:12773,"Kaufmann für Kurier-, Express- und Postdienstleistungen/ Kauffrau für Kurier,- Express- und Postdienstleistungen",keine Mehrheit für einen ESCO-Beruf,39803100,Kaufleute für KEP: Spedition
+kmk:12774,Kaufmann für Marketingkommunikation/ Kauffrau für Marketingkommunikation,keine Mehrheit für einen ESCO-Beruf,4ebf2dae|47e81c7f,Marketingkommunikation: Werbung
+kmk:40225,Luftverkehrskaufmann und Luftverkehrskauffrau,keine Mehrheit für einen ESCO-Beruf,6e785f05|7153a12d,Luftverkehrskaufleute
+kmk:40224,Servicekaufmann im Luftverkehr und Servicekauffrau im Luftverkehr,keine Mehrheit für einen ESCO-Beruf,7153a12d|f20d3ae6,Servicekaufleute im Luftverkehr: Passagierservice
+kmk:41210,Mechatroniker/Mechatronikerin,Lernfeldliste lückenhaft (unvollstaendig),1a6d1acf|51c7015c,Mechatroniker; Lernfeldliste lückenhaft
+kmk:12803,Medienkaufmann Digital und Print/ Medienkauffrau Digital und Print,keine Mehrheit für einen ESCO-Beruf,1da55a33|f5332f2d,Medienkaufleute: Verlag und Anzeigen
+kmk:12811,Mikrotechnologe/Mikrotechnologin,keine Mehrheit für einen ESCO-Beruf; Lernfeldliste lückenhaft (ohne_tabelle),26e1add0|140613c4,Mikrotechnologe: Mikrosystem- und Halbleiterfertigung; Lernfeldliste lückenhaft
+kmk:12813,Milchwirtschaftlicher Laborant und Milchwirtschaftliche Laborantin,keine Mehrheit für einen ESCO-Beruf,abc849b6,Milchwirtschaftlicher Laborant: Milchkontrolle
+kmk:12819,Ofen- und Luftheizungsbauer/ Ofen und Luftheizungsbauerin,keine Mehrheit für einen ESCO-Beruf,79f435d0,Ofen- und Luftheizungsbau: Heizungsbau
+kmk:12823,Packmitteltechnologe/Packmitteltechnologin,keine Mehrheit für einen ESCO-Beruf,eb5df714|fc9a86ec,Packmitteltechnologe: Wellpappe und Kartonagen
+kmk:12833,Polster- und Dekorationsnäher/ Polster- und Dekorationsnäherin,keine Mehrheit für einen ESCO-Beruf,95a89206|517c01aa,Polster- und Dekorationsnäher
+kmk:41138,Präzisionswerkzeugmechaniker und Präzisionswerkzeugmechanikerin,keine Mehrheit für einen ESCO-Beruf,835d118e|1d8545df,Präzisionswerkzeugmechaniker: Werkzeugschleifen
+kmk:12839,Produktionstechnologe/ Produktionstechnologin,keine Mehrheit für einen ESCO-Beruf,bcc21c63,Produktionstechnologe
+kmk:12841,Produktveredler Textil/ Produktveredlerin Textil,keine Mehrheit für einen ESCO-Beruf,884beda8|5b942a51,Produktveredler Textil: Färben und Drucken
+kmk:49607,Estrichleger und Estrichlegerin,keine Mehrheit für einen ESCO-Beruf,a50d64e7,"Estrichleger: kein eigener ESCO-Beruf, Terrazzo als nächster Bodenbelag"
+kmk:49604,Trockenbaumonteur und Trockenbaumonteurin,keine Mehrheit für einen ESCO-Beruf,41a8e7c8,Trockenbaumonteur: Decken- und Wandverkleidung
+kmk:49605,"Wärme-, Kälte-, Schallschutzisolierer und Wärme-, Kälte-, Schallschutzisoliererin",keine Mehrheit für einen ESCO-Beruf,b2dab4fb,"Wärme-, Kälte-, Schallschutzisolierer"
+kmk:49602,Feuerungs- und Schornsteinbauer und Feuerungs- und Schornsteinbauerin,keine Mehrheit für einen ESCO-Beruf,05f321f8,Feuerungs- und Schornsteinbauer: spezialisierter Maurerberuf
+kmk:49598,Tiefbaufacharbeiter und Tiefbaufacharbeiterin,keine Mehrheit für einen ESCO-Beruf,47300afa|73d77554,Tiefbaufacharbeiter
+kmk:49603,Gleisbauer und Gleisbauerin,keine Mehrheit für einen ESCO-Beruf,755c5c5f|d97fd1e8,Gleisbauer
+kmk:49611,Spezialtiefbauer und Spezialtiefbauerin,keine Mehrheit für einen ESCO-Beruf,364e61ab|46bbecf4,Spezialtiefbauer: Bohr- und Brunnenarbeiten
+kmk:49613,Straßenbauer und Straßenbauerin,keine Mehrheit für einen ESCO-Beruf,5f68c4c3|f272a521,Straßenbauer: kein eigener ESCO-Beruf
+kmk:39687,Rollladen- und Sonnenschutzmechatroniker und Rollladen- und Sonnenschutzmechatronikerin,keine Mehrheit für einen ESCO-Beruf,-,Rollladen- und Sonnenschutzmechatroniker hat keine ESCO-Entsprechung
+kmk:12857,Seiler / Seilerin,keine Mehrheit für einen ESCO-Beruf,ebff4fcf,Seiler: Netzherstellung als Teil des Seilerhandwerks
+kmk:12858,Servicefahrer/ Servicefahrerin,keine Mehrheit für einen ESCO-Beruf,0c408028,Servicefahrer: Auslieferung
+kmk:12864,Spielzeughersteller/Spielzeugherstellerin,Lernfeldliste lückenhaft (ohne_tabelle),5e29c263,bestätigt; Lernfeldliste lückenhaft
+kmk:12877,Technischer Produktdesigner/Technische Produktdesignerin,keine Mehrheit für einen ESCO-Beruf,a4869ae9|38240cc5,Technischer Produktdesigner: technisches Zeichnen und Konstruktion
+kmk:12880,Textillaborant/ Textillaborantin,keine Mehrheit für einen ESCO-Beruf,0663da10|16bc69b8,Textillaborant: Textilprüfung
+kmk:49274,Umwelttechnologe für Kreislauf- und Abfallwirtschaft und Umwelttechnologin für Kreislauf- und Abfallwirtschaft,keine Mehrheit für einen ESCO-Beruf,7a523273|fd6a1c18,Kreislauf- und Abfallwirtschaft
+kmk:40558,Verfahrenstechnologe Metall und Verfahrenstechnologin Metall,keine Mehrheit für einen ESCO-Beruf,6dbca2aa|528e63a7,"Verfahrenstechnologe Metall: Walzen, Schmelzen"
+kmk:12895,Vergolder/Vergolderin,keine Mehrheit für einen ESCO-Beruf; Lernfeldliste lückenhaft (unvollstaendig),-,Vergolder hat keine ESCO-Entsprechung (Maler passt nicht)
+kmk:12900,Verwaltungsfachangestellter/ Verwaltungsfachangestellte,keine Mehrheit für einen ESCO-Beruf; Lernfeldliste lückenhaft (ohne_tabelle),ffade2f4,Verwaltungsfachangestellte
