@@ -4,11 +4,13 @@ from .base import Bildungsbereich
 from .berufsbildung import Berufsbildung
 from .elementar import Elementar
 from .hochschule import Hochschule
+from .schule import Schule
 
 BEREICHE: dict[str, type[Bildungsbereich]] = {
     Hochschule.key: Hochschule,
     Berufsbildung.key: Berufsbildung,
     Elementar.key: Elementar,
+    Schule.key: Schule,
 }
 
 

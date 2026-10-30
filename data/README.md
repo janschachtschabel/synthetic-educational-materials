@@ -53,6 +53,14 @@ Die Themen (Beruf × Kompetenz) entstehen beim Laden aus beiden Dateien und werd
 | `pruefliste_themen.csv`, `korrekturen.csv` | Durchsicht (`korrektur_codes` = Bildungsbereich-IDs, optional `kinderthema`/`fachthema`, `-` = ausschließen; `korrektur_alter`) |
 | `inhaltstypen.json`, `niveaus.json`, `optionale_felder.json` | Inhaltstypen mit Themenart und Zielgruppen, Altersstufen, optionale Felder |
 
+## `mappings/schule/`
+
+| Datei | Inhalt |
+|---|---|
+| `themen_schule.jsonl` | ein Thema je Zeile: `id` (URI im OEH-Vokabular oehTopics), `label_de`, `portal`, `portal_uri`, `pfad`, `ebene`, `definition`, `keywords`, `faecher` (OEH discipline), `art` (`unterrichtsthema`, `lehrkraftthema`), `stufen` (`primar`, `sek1`, `sek2`), `gnd` (exakter GND-Treffer), `quelle`, `belege.wlo` (Datensätze je Stufe, Node-IDs), `mapping` (Status, Konfidenz, Stimmen, `wlo_bestaetigt`) |
+| `pruefliste_themen.csv`, `korrekturen.csv` | Durchsicht (`korrektur_codes` = Stufen mit `|`, `-` = ausschließen; `korrektur_art`) |
+| `inhaltstypen.json`, `niveaus.json`, `optionale_felder.json` | Inhaltstypen mit Themenart, Zielgruppen, Stufen und Fachportalen; Jahrgänge; optionale Felder (u. a. Anforderungsbereich) |
+
 ## `mappings/hochschule/`
 
 | Datei | Inhalt |

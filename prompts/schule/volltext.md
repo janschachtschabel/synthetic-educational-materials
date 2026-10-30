@@ -1,0 +1,5 @@
+Material mit folgenden Vorgaben:
+Textsorte: {{textsorte}} / Inhaltstyp: {{inhaltstyp}} / Medienform: {{medienform}} / Thema: {{thema}} / Einordnung im Themenbaum: {{thema_pfad}} / Fach: {{fach}} / Bildungsstufe: {{bildungsstufe}} / Jahrgang: {{niveau}} / Zielgruppe: {{zielgruppe}}{{#anforderungsbereich}} / {{anforderungsbereich}}{{/anforderungsbereich}}{{#sozialform}} / Sozialform: {{sozialform}}{{/sozialform}}{{#didaktische_funktion}} / Unterrichtsphase: {{didaktische_funktion}}{{/didaktische_funktion}}{{#bearbeitungsdauer}} / Bearbeitungsdauer: etwa {{bearbeitungsdauer}} Minuten{{/bearbeitungsdauer}}
+Worum es fachlich geht: {{thema_beschreibung}}
+Begriffe, die vorkommen können: {{thema_keywords}}
+Auftrag: Schreibe dieses Material. Umfang: etwa eine A4-Seite, 400 bis 550 Wörter. Orientiere dich an den Lehrplänen der Länder für diese Stufe: Fachsprache, Tiefe und Beispiele passend zum Jahrgang, Arbeitsaufträge mit Operatoren (z. B. nenne, erkläre, beurteile).{{#zielsprache}} Fremdsprachenunterricht {{zielsprache}}: Texte und Aufgaben überwiegend in {{zielsprache}}, Arbeitsanweisungen in den unteren Jahrgängen auch auf Deutsch.{{/zielsprache}}

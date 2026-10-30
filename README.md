@@ -9,7 +9,8 @@ OpenAlex-Themen, Lehrthemen aus GND und hbz-Katalog, Keyword-Belege aus WirLerne
 **Berufliche Bildung** (ESCO-Berufe × Kompetenzen, KldB-Berufsfelder, Qualifizierungsweg und DQR-Niveau,
 Handmapping über den BA-Umsteigeschlüssel ISCO → KldB) und **Elementarbereich** (sieben Bildungsbereiche
 des Gemeinsamen Rahmens der Länder, Kita-Themen als GND-Sachbegriffe aus LLM-Themenlisten und WLO-Keywords,
-Eignung und Altersgruppe per Abstimmung). Weitere Bereiche lassen sich ergänzen.
+Eignung und Altersgruppe per Abstimmung) und **Schule** (Themenbäume der WLO-Fachportale, Primarstufe,
+Sekundarstufe I und II als Metadatum und Filter). Weitere Bereiche lassen sich ergänzen.
 
 Wie alles entsteht: [METHODIK.md](METHODIK.md). Die Daten im Einzelnen: [data/README.md](data/README.md).
 
@@ -58,6 +59,8 @@ python -m sem mappings hochschule gnd           # Themen aus GND und hbz-Katalog
 python -m sem auswahl berufsbildung             # Filter Berufsbildung (Qualifizierungsweg, Kompetenzart …)
 python -m sem seeds --anzahl berufsbildung=10000 --gleichverteilung berufsbildung=beruf --seed 42
 python -m sem mappings berufsbildung --wlo export.csv   # ESCO laden, KldB und Qualifizierung abstimmen, WLO-Belege
+python -m sem seeds --anzahl schule=5000 --auswahl schule.stufen=sek1 --seed 42   # nur Sekundarstufe I
+python -m sem seeds --anzahl elementar=1000 schule=3000 berufsbildung=3000 hochschule=3000 --seed 42
 ```
 
 LLM-Optionen für `materialien` und `mappings`: `--base-url`, `--api-key`, `--model`, `--workers`
@@ -87,6 +90,8 @@ Alles unter `data/` ist ohne den Code nutzbar (JSON, JSONL, CSV, UTF-8):
 - `data/mappings/elementar/themen_elementar.jsonl`: 1.033 Kita-Themen (GND-URI, Synonyme, Definition,
   Themenart, Altersgruppe, Bildungsbereich, Herkunft, Status, WLO-Belege); `bildungsbereiche.json`: die
   sieben Bildungsbereiche mit closeMatch auf OEH-Schulfächer
+- `data/mappings/schule/themen_schule.jsonl`: 3.153 Themen der WLO-Themenbäume mit Fachportal, Pfad, Fach,
+  Themenart, Schulstufen, Status, WLO-Stufenbelegen und GND-Abgleich
 
 ## Aufbau
 

@@ -31,6 +31,7 @@ offene Vokabulare und Taxonomien ──► Mappings (Themen mit Fachzuordnung) �
 | [WirLernenOnline](https://wirlernenonline.de) (Export der Redaktion) | nur Keywords in Verbindung mit Hochschulfächern, als Kandidaten und Belege; keine Titel, Beschreibungen oder Inhalte | Keywords nur als Häufigkeiten bzw. Abgleich auf GND/OpenAlex |
 | [KIM-Bildungsstufen](https://w3id.org/kim/educationalLevel/) | `exactMatch` der Niveaustufen | CC0 1.0 |
 | [ESCO](https://esco.ec.europa.eu) über die öffentliche API (2.938 Berufe, 12.564 Kompetenzen, deutsche Labels und Beschreibungen) | Berufe und Kompetenzen Berufsbildung, ESCO-Original-URIs | EU-Weiterverwendung (Beschluss 2011/833/EU), „Quelle: ESCO, Europäische Kommission“ in jeder Herkunftsangabe |
+| OEH-Vokabulare `oehTopics` (Themenbäume der WLO-Fachportale, 3.182 Themen) und `discipline` | Themen und Fächer Schule, Fächer-closeMatch Elementar | CC0 1.0 |
 | OEH-Vokabulare `kldb` (KldB 2010, Fassung 2020, Ebenen 1–4 mit Kurzbeschreibungen), `escoSkills`, `dqrCompetenceLevels` | Berufsfeld (wie WLO-Feld `ccm:oeh_profession_group`), Abgleich der Kompetenzen, DQR-Niveaus | CC0 1.0; KldB: „Quelle: Statistik der Bundesagentur für Arbeit“ |
 | Gemeinsamer Rahmen der Länder für die frühe Bildung in Kindertageseinrichtungen (Fassung 2022, [nach Eurydice](https://eurydice.eacea.ec.europa.eu/de/eurypedia/germany/leitlinien-der-fruehkindlichen-bildung-betreuung-und-erziehung)) | sieben Bildungsbereiche Elementar | amtliches Werk; Liste und Kurzbeschreibungen im Repo CC0 |
 | [Umsteigeschlüssel KldB 2020 → ISCO-08](https://statistik.arbeitsagentur.de/DE/Navigation/Grundlagen/Klassifikationen/Klassifikation-der-Berufe/KldB2010-Fassung2020/Arbeitsmittel/Arbeitsmittel-Nav.html) (BA, Stand 06.08.2021) | Handmapping-Hinweise ESCO-Beruf → KldB und Anforderungsniveaus | „Quelle: Statistik der Bundesagentur für Arbeit“; nur im Zwischenspeicher |
@@ -251,6 +252,44 @@ Rollenspiel, Angebotsplanung, Beobachtungsbogen, Elternbrief, Fachbeitrag, Anlei
 ist auf Themenart und Zielgruppe beschränkt. **Niveaus**: Krippe (unter 3), Kindergarten (3–6),
 Vorschuljahr (5–6), passend zur Altersgruppe; `exactMatch` KIM-Bildungsstufe 0.
 
+## Mappings Schule
+
+Ein Bereich für die allgemeinbildende Schule; die **Schulstufe** (Primarstufe, Sekundarstufe I, II) ist
+Metadatum des Seeds (`ccm:educationalcontext`) und über den Filter `stufen` wählbar
+(z. B. `--auswahl schule.stufen=sek2` für reine Oberstufen-Seeds).
+
+**Themen** sind die Themenbäume der 29 WLO-Fachportale (OEH-Vokabular `oehTopics`, „Taxonomie von
+Lehrplanthemen in WirLernenOnline“, CC0): 3.182 Themen mit Fachportal, Pfad, Definition, Keywords und
+`relatedMatch` auf OEH-Schulfächer. WLO erschließt Materialien mit diesen URIs im Feld `ccm:curriculum`;
+die Seeds tragen sie dort ebenfalls.
+
+Schritte (`python -m sem mappings schule --liste`):
+
+1. `themen`: Themenbäume laden (ohne die Fachportale selbst).
+2. `wlo` (`--wlo export.csv`): je Thema die Bildungsstufen der WLO-Datensätze, die es in `ccm:curriculum`
+   tragen (Zahl der Datensätze je Stufe, Node-IDs). Eine Stufe gilt als belegt, wenn sie in mindestens 20 %
+   von mindestens drei Datensätzen vorkommt (2.646 Themen).
+3. `gnd`: Themenlabel exakt auf GND-Sachbegriffe (954 Treffer), als zusätzliche Normierung (`gnd`).
+4. `art`: drei Stimmen: Unterrichtsthema, Thema für Lehrkräfte (Didaktik, Methoden, Schulentwicklung)
+   oder Sammelknoten ohne eigenen Inhalt (verworfen).
+5. `stufen`: drei Stimmen, in welchen Schulstufen das Thema laut Lehrplänen unterrichtet wird (bis zu drei).
+   Die WLO-Stufen sieht das LLM nicht; sie dienen als unabhängige Gegenprobe (`wlo_bestaetigt`).
+6. `zusammenfuehren`: `themen_schule.jsonl`, Prüfliste (keine Mehrheit, Abweichung von WLO, Ersatz aus
+   WLO); `korrekturen.csv` hat Vorrang (`korrektur_codes` = Stufen, `-` = ausschließen; `korrektur_art`).
+
+**Ergebnis:** 3.153 Themen aus 29 Fachportalen (3.030 Unterrichtsthemen, 123 für Lehrkräfte), 27
+Sammelknoten verworfen. Stufen: Primarstufe 995, Sek I 2.763, Sek II 2.419 Themen; Status gesichert 3.047,
+wahrscheinlich 85, redaktionell 21. In 2.191 Fällen bestätigen die WLO-Datensätze mindestens eine der
+gewählten Stufen. Die 22 Prüffälle sind redaktionell entschieden (OER- und Schulentwicklungsthemen als
+Lehrkräftethemen für alle Stufen, Pädagogik als Oberstufenfach, ein Hochschulthema ausgeschlossen).
+
+**Inhaltstypen** (`inhaltstypen.json`, 19 aus OEH `new_lrt`): u. a. Arbeitsblatt, Übungsmaterial,
+Erklärvideo-Transkript, Schulbuchkapitel, Merkblatt, Tafelbild, Klassenarbeit, Erwartungshorizont, Quiz,
+Lernpfad, Stationenlernen, Versuchsanleitung (nur Naturwissenschaften und Geographie), Stundenentwurf,
+Unterrichtsreihe, Fachbeitrag für Lehrkräfte; je Typ Themenart, Zielgruppe, Stufen und Fachportale.
+**Niveaus**: Klasse 1–2, 3–4, 5–6, 7–8, 9–10, Einführungs- und Qualifikationsphase, `exactMatch`
+KIM-Bildungsstufen 1–3.
+
 ## Seeds
 
 Ein Seed ist ein JSON-Objekt (eine Zeile in JSONL). Feldnamen folgen dem edu-sharing/OEH-Schema:
@@ -332,6 +371,16 @@ Themenart: Kinderthemen 65 % Fachkräfte, 20 % Eltern, 15 % Kinder (Vorlesegesch
 Volltext-Prompt (`prompts/elementar/volltext.md`): altersgerecht, ohne Tests und Noten, mit Hinweisen zu
 Sicherheit und Vielfalt.
 
+**Seeds Schule.** `ccm:educationalcontext` ist die Schulstufe: aus den Stufen des Themas (innerhalb des
+Filters `stufen`) je Thema rotierend gezogen; das Niveau (Jahrgang) passt dazu. `ccm:taxonid` = Schulfach aus
+dem Themenbaum, `ccm:curriculum` = Thema im WLO-Themenbaum. Fremdsprachenportale ergänzen die Zielsprache in
+`cclom:general_language`. Zielgruppe: Unterrichtsthemen 75 % Lernende, 25 % Lehrkräfte; Lehrkräftethemen
+nur Lehrkräfte. Optional: Unterrichtsphase (60 %), Dauer (50 %), Anforderungsbereich I–III der KMK (40 %,
+in der Primarstufe nur I und II), Sozialform (30 %). Gleichverteilung: `thema` (Standard), `portal`
+(kleine Portale wiederholen ihre Themen oft, „Gewaltprävention“ hat nur eines), `fach`, `stufe`. Filter:
+`stufen`, `art`, `stufen_status`, `art_status`, `belege` (`wlo`, `wlo_stufe`, `gnd`). Eigener
+Volltext-Prompt (`prompts/schule/volltext.md`) mit Themenpfad, Jahrgang, Operatoren und Zielsprache.
+
 **Reproduzierbarkeit.** Gleiche Mappings, gleiche Einstellungen und gleicher Zufalls-Seed ergeben
 identische Seeds. Neben jeder Seed-Datei liegt eine `.stats.json` mit Parametern und Verteilungen.
 
@@ -389,6 +438,7 @@ Bedingte Abschnitte `{{#name}}…{{/name}}` erscheinen nur, wenn der Wert gesetz
 | `didaktische_funktion`, `bearbeitungsdauer` | optional |
 | `beruf`, `beruf_beschreibung`, `kompetenzart`, `lernort`, `querschnittsthema` | nur Berufsbildung (`lernort`, `querschnittsthema` optional) |
 | `themenart`, `sozialform` | Elementarbereich (`sozialform` optional, auch Schule) |
+| `thema_pfad`, `zielsprache`, `anforderungsbereich` | nur Schule (`anforderungsbereich` optional, `zielsprache` nur Fremdsprachen) |
 | `rolle`, `sprache` | Autorenrolle im Volltext-Prompt, Sprache als Wort |
 | `titel`, `beschreibung`, `keywords`, `volltext`, `auftrag` | nur in `material.md`: bisher erzeugte Felder („-“ = leer), Volltext, Auftrag aus der Felddatei |
 | `kategorien`, `beispiel_id` | nur in `inhaltstyp.md`: Liste „Name → id“ der Inhaltstypen |
