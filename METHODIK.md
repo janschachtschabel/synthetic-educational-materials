@@ -187,15 +187,23 @@ Schritte (`python -m sem mappings berufsbildung --liste`), alle fortsetzbar:
    `korrektur_codes` = KldB-Kennziffern, `-` = Beruf ausschließen, `korrektur_qualifizierung`).
 
 Die Kompetenzen werden mit dem OEH-Vokabular `escoSkills` abgeglichen (`skos:exactMatch` auf die
-ESCO-URI): 12.332 von 12.548 Kompetenzen sind dort enthalten; deren OEH-URI steht als `exactMatch` im
+ESCO-URI): 12.323 von 12.539 Kompetenzen sind dort enthalten; deren OEH-URI steht als `exactMatch` im
 Seed, maßgeblich bleibt die ESCO-URI. 438 Kompetenzen haben einen WLO-Beleg.
 
-**Ergebnis** (2.935 Berufe nach drei redaktionellen Ausschlüssen: Escort, Wahrsager, Astrologe): KldB
-gesichert 2.114, wahrscheinlich 722, unsicher 99; in 2.017 Fällen bestätigt der Umsteigeschlüssel die
-gewählte Untergruppe. Qualifizierung: Ausbildung 1.192, Fortbildung 434, Studium 797, Anlernen 512
-(gesichert 2.322, unsicher 18). 418 Berufe stehen auf der Prüfliste. Mit der Voreinstellung (Ausbildung
-und Fortbildung, essenzielle Kompetenzen ohne Querschnittskompetenzen, ohne `unsicher`) gehen 32.389 von
-113.598 Beruf-Kompetenz-Themen in die Seeds ein.
+**Redaktionelle Durchsicht.** Alle 418 Berufe der Prüfliste wurden durchgesehen (302 wichen vom
+Umsteigeschlüssel ab, 99 ohne Mehrheit für die KldB, 18 ohne Mehrheit für den Qualifizierungsweg).
+Ergebnis in `korrekturen.csv` mit Kommentar und ursprünglichem Prüflistengrund: 327 bestätigt, 86
+korrigiert (KldB-Untergruppe und/oder Qualifizierungsweg, z. B. Import-/Exportmanager → Kaufleute im
+Groß- und Außenhandel, Fortbildung; Fluglotse → Ausbildung; Lebensmittel-Anlagenberufe aus fachfremden
+Untergruppen), 5 ausgeschlossen (Wahlbeobachter, Polygrafiesachverständiger, Grafologe, Medium,
+Pelztierzüchter), dazu die drei Ausschlüsse von vorher (Escort, Wahrsager, Astrologe).
+
+**Ergebnis** (2.930 Berufe): KldB gesichert 2.104, wahrscheinlich 413, redaktionell 413; in 2.039 Fällen
+bestätigt der Umsteigeschlüssel die gewählte Untergruppe. Qualifizierung: Ausbildung 1.182, Fortbildung
+452, Studium 794, Anlernen 502 (gesichert 2.009, wahrscheinlich 508, redaktionell 413). Die Prüfliste ist
+leer. Mit der Voreinstellung (Ausbildung und Fortbildung, essenzielle Kompetenzen ohne
+Querschnittskompetenzen, ohne `unsicher`) gehen 33.650 von 113.459 Beruf-Kompetenz-Themen in die Seeds
+ein.
 
 **Inhaltstypen** (`inhaltstypen.json`): 18 Typen aus OEH `new_lrt` mit Textsorten für die Berufsbildung,
 z. B. Lernsituation nach der vollständigen Handlung (als „Fallstudie“), Arbeitsanleitung, Checkliste,

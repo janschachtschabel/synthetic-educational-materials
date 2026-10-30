@@ -389,6 +389,7 @@ def bewerte(bid: str, text: str, kand: dict, sk: dict, sq: dict, korr: dict, sti
         if k["codes"]:
             codes = [c for c in k["codes"] if c in by_not][:2] or codes
             mapping["status"], mapping["konfidenz"] = "redaktionell", 1.0
+            mapping["handmapping_bestaetigt"] = bool(set(codes) & hinweis)
         if k["lehrebene"] in QUALIFIZIERUNG:
             quali = k["lehrebene"]
             mapping["qualifizierung"]["status"] = "redaktionell"

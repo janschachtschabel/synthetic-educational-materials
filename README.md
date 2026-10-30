@@ -77,10 +77,10 @@ Alles unter `data/` ist ohne den Code nutzbar (JSON, JSONL, CSV, UTF-8):
 - `data/mappings/hochschule/pruefliste_*.csv`, `korrekturen.csv`: Zuordnungen für die Durchsicht und deren Ergebnis
 - `data/mappings/hochschule/studienfach_gnd_sachgruppe.jsonl`: Studienfach → GND-Sachgruppen
 - `data/mappings/hochschule/openalex_teilgebiet_studienbereich.csv`: Handmapping der OpenAlex-Teilgebiete
-- `data/mappings/berufsbildung/berufe.jsonl`: 2.935 ESCO-Berufe mit KldB-Berufsuntergruppe (und Oberebenen),
+- `data/mappings/berufsbildung/berufe.jsonl`: 2.930 ESCO-Berufe mit KldB-Berufsuntergruppe (und Oberebenen),
   Qualifizierungsweg, Status, Konfidenz, Handmapping-Bestätigung und den URIs ihrer essenziellen und
   optionalen Kompetenzen
-- `data/mappings/berufsbildung/kompetenzen.jsonl`: 12.548 ESCO-Kompetenzen (Label, Beschreibung, Art,
+- `data/mappings/berufsbildung/kompetenzen.jsonl`: 12.539 ESCO-Kompetenzen (Label, Beschreibung, Art,
   Reichweite, ISCED-F-Feld, `oeh_uri` im OEH-Vokabular escoSkills, WLO-Belege)
 
 ## Aufbau
