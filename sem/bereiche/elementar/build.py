@@ -12,7 +12,6 @@ Schritte (einzeln oder als Folge aufrufbar, siehe METHODIK.md):
 
 from __future__ import annotations
 
-import csv
 import hashlib
 import json
 import re
@@ -98,29 +97,18 @@ WLO_QUELLE = {"name": "WirLernenOnline", "uri": "https://wirlernenonline.de",
 
 
 def build_wlo(cfg: LLMConfig | None = None, wlo_dateien: list[str] | None = None, **_):
-    from ...quellen.wlo import _liste
+    from ...quellen.wlo import datensaetze
 
     if not wlo_dateien:
         return fertig("übersprungen – keine WLO-Exporte angegeben (--wlo)")
-    csv.field_size_limit(10 ** 9)
     data: dict = defaultdict(lambda: {"nodes": set(), "schreibweisen": Counter()})
-    for path in wlo_dateien:
-        with Path(path).open(encoding="utf-8-sig", newline="") as f:
-            r = csv.DictReader(f, delimiter=";")
-
-            def spalte(name):
-                return next((c for c in r.fieldnames if c == name or c.endswith("." + name)), None)
-
-            c_node, c_ctx, c_kw = spalte("sys:node-uuid"), spalte("ccm:educationalcontext_DISPLAYNAME"), \
-                spalte("cclom:general_keyword")
-            for i, row in enumerate(r):
-                if "Elementarbereich" not in _liste(row, c_ctx):
-                    continue
-                node = row[c_node].strip() if c_node else f"#{Path(path).name}:{i}"
-                for kw in {k.strip() for k in (row.get(c_kw) or "").split(",") if k.strip()}:
-                    e = data[_norm(kw)]
-                    e["nodes"].add(node)
-                    e["schreibweisen"][kw] += 1
+    for node, w in datensaetze(wlo_dateien, ["kontext", "keywords"]):
+        if "Elementarbereich" not in w["kontext"]:
+            continue
+        for kw in set(w["keywords"]):
+            e = data[_norm(kw)]
+            e["nodes"].add(node)
+            e["schreibweisen"][kw] += 1
     rows = {k: {"schreibweise": v["schreibweisen"].most_common(1)[0][0], "anzahl": len(v["nodes"]),
                 "nodes": sorted(n for n in v["nodes"] if not n.startswith("#"))}
             for k, v in data.items() if len(v["nodes"]) >= WLO_MIN_NODES}

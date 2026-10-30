@@ -18,6 +18,7 @@ from datetime import date
 from pathlib import Path
 
 from ..paths import DATA_DIR
+from . import wiederholen
 
 API = "https://ec.europa.eu/esco/api"
 QUELLE = {"name": "ESCO – Europäische Klassifikation für Fähigkeiten, Kompetenzen, Qualifikationen und Berufe",
@@ -45,8 +46,8 @@ def _get(path: str, versuche: int = 5, **params) -> dict:
         try:
             with urllib.request.urlopen(req, timeout=90) as r:
                 return json.load(r)
-        except Exception:  # noqa: BLE001 - Netz- und Serverfehler: mit Wartezeit wiederholen
-            if i == versuche - 1:
+        except Exception as e:  # noqa: BLE001 - Netz- und Serverfehler: mit Wartezeit wiederholen
+            if i == versuche - 1 or not wiederholen(e):
                 raise
             time.sleep(2 ** i)
     raise RuntimeError("unerreichbar")
