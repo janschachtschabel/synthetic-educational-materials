@@ -19,7 +19,8 @@ open vocabularies and taxonomies ──► Mappings (topics with subject assignm
    content type, level …). No LLM; reproducible using a random seed, provided the same local data
    (`data/lokal/`) is present; its fingerprint is recorded in `synth:seed_parameter.lokale_daten`.
 3. **Materials** are generated from seeds using an LLM: first the full text, then the title, description, keywords,
-   and question-answer pairs from the full text.
+   and question-answer pairs from the full text. Immediately, with Flex, or collected via the Batch API (half
+   price); prompts, checks and results are the same, and `synth:generierung.verarbeitung` records the route.
 
 ## Sources
 

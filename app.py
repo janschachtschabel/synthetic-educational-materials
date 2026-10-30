@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import dataclasses
 import json
 import os
 import threading
@@ -121,6 +122,10 @@ with st.sidebar:
                       help=T("Nur für Reasoning-Modelle. low ist Standard: gemessen ein Drittel schneller als "
                              "der Modellstandard bei gleichen Prüfwerten. „Modellstandard“ sendet den Parameter "
                              "nicht (für Modelle, die ihn nicht kennen)."))
+    flex = st.checkbox(T("Flex-Verarbeitung (halber Preis)"), value=False,
+                       help=T("Nur bei OpenAI: halber Preis, dafür langsamere Antworten und bei Engpässen Ablehnungen, "
+                              "die automatisch wiederholt werden. Gilt für Materialien und Mappings; bei Batch nicht "
+                              "nötig, der ist schon zum halben Preis."))
     retries = st.number_input(T("Versuche pro Aufgabe"), 1, 20, 6)
     outage = st.number_input(T("Wartezeit bei API-Ausfall (Minuten)"), 1, 240, 10,
                              help=T("Danach pausiert der Lauf und lässt sich später fortsetzen."))
@@ -130,7 +135,8 @@ with st.sidebar:
                                      "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"))
     cfg = LLMConfig(base_url=base_url or None, api_key=api_key_fuer(base_url, api_key, env), model=model,
                     workers=int(workers), max_retries=int(retries), outage_minutes=float(outage),
-                    reasoning_effort=None if effort == "Modellstandard" else effort)
+                    reasoning_effort=None if effort == "Modellstandard" else effort,
+                    service_tier="flex" if flex else None)
 
 # --- Helfer für Dateien in output/ ------------------------------------------------------------
 @st.cache_data(max_entries=64)
@@ -318,6 +324,49 @@ with tab_mat:
     st.subheader(T("Materialien erzeugen"))
     st.caption(T("Pro Seed: Volltext, dann je ein Aufruf für Titel, Beschreibung, Keywords, Inhaltstyp-Prüfung und "
                  "Frage-Antwort-Paare. Ein erneuter Start setzt fort und überspringt Fertiges."))
+    # Läufe, die ihr Ziel nicht erreicht haben (z. B. nach Internet-Unterbrechung): fortsetzen oder neu starten
+    from sem.laeufe import freier_name, sperre_aufheben, unfertige_laeufe
+
+    laeuft_mat = bool(jobs().get("mat") and not jobs()["mat"]["done"])
+    unfertig = unfertige_laeufe()
+    if unfertig:
+        with st.expander(T("Unfertige Läufe ({n})", n=len(unfertig)), expanded=not laeuft_mat):
+            st.caption(T("Läufe, die ihr Ziel nicht erreicht haben, z. B. nach einer Internet-Unterbrechung oder mit "
+                         "fehlgeschlagenen Materialien. Fortsetzen nutzt die Einstellungen des Laufs (Seed-Datei, "
+                         "Anzahl, Sprache, Modell, Verarbeitung) und überspringt Fertiges; „Neu starten“ beginnt mit "
+                         "denselben Einstellungen unter neuem Namen, die bisherige Datei bleibt."))
+            for i, L in enumerate(unfertig):
+                c1, c2, c3, c4 = st.columns([5, 2, 2, 2])
+                c1.markdown(f"**{L['name']}** · {L['fertig']} / {L['ziel']} · "
+                            + T("{n} fehlgeschlagen", n=L["fehlgeschlagen"]) + f" · {L['verarbeitung']} · {L['zuletzt']}")
+                lauf_cfg = dataclasses.replace(cfg, model=L["modell"], reasoning_effort=L["reasoning_effort"],
+                                               service_tier="flex" if L["verarbeitung"] == "flex" else None)
+                args = dict(limit=L["limit"], inhaltstyp_pruefen=L["inhaltstyp_pruefen"],
+                            ausgabesprache=L["ausgabesprache"])
+                if not Path(L["seeds"]).exists():
+                    c2.caption(T("Seed-Datei fehlt"))
+                    continue
+                for spalte, label, ziel in ((c2, T("Fortsetzen"), Path(L["ausgabe"])),
+                                            (c3, T("Neu starten"), freier_name(Path(L["ausgabe"])))):
+                    if spalte.button(label, key=f"lauf-{label}-{i}", disabled=laeuft_mat or L["gesperrt"]):
+                        if L["verarbeitung"] == "batch":
+                            from sem.batch import BatchLauf
+
+                            try:
+                                st.session_state["batch-stand"] = BatchLauf(Path(L["seeds"]), ziel, lauf_cfg,
+                                                                            **args).weiter()
+                            except (ValueError, RuntimeError) as e:
+                                st.error(str(e))
+                        else:
+                            start_job("mat", generate, Path(L["seeds"]), ziel, lauf_cfg, **args)
+                        st.rerun()
+                if L["gesperrt"] and not laeuft_mat and c4.button(
+                        T("Sperre aufheben"), key=f"lauf-sperre-{i}",
+                        help=T("Die Sperrdatei bleibt nach einem Absturz liegen. Nur aufheben, wenn sicher kein "
+                               "anderer Lauf (z. B. auf der Kommandozeile) auf dieser Datei arbeitet.")):
+                    sperre_aufheben(Path(L["ausgabe"]))
+                    st.rerun()
+
     seed_dateien = ausgabedateien("seeds")
     if not seed_dateien:
         st.info(T("Noch keine Seed-Dateien (seeds_…) in output/. Erst im Reiter „Seeds“ erzeugen."))
@@ -344,12 +393,37 @@ with tab_mat:
                                       "bleiben deutsch; bei einer anderen Sprache wird der Hinweis aus der Vorlage "
                                       "„ausgabesprache“ (Reiter „Prompts“) angehängt. Steht in cclom:general_language."))
         laeuft = bool(jobs().get("mat") and not jobs()["mat"]["done"])
-        st.caption(T("Einstellungen aus der Seitenleiste: {modell}, {worker} Worker, Reasoning-Aufwand {aufwand}.",
-                     modell=cfg.model, worker=cfg.workers, aufwand=cfg.reasoning_effort or T("Modellstandard")))
-        if st.button(T("Start / Fortsetzen"), type="primary", disabled=laeuft):
-            start_job("mat", generate, src, out, cfg, limit=int(limit) or None, inhaltstyp_pruefen=lrt_check,
-                      ausgabesprache=sprache)
-        job_status("mat")
+        modus = st.radio(T("Verarbeitung"), ["sofort", "batch"], horizontal=True, key=uk("m-modus"),
+                         format_func=lambda m: T("Sofort") if m == "sofort" else T("Batch (halber Preis, Runden bis 24 h)"),
+                         help=T("Sofort: Material für Material mit den Workern aus der Seitenleiste (mit Flex zum "
+                                "halben Preis). Batch: alle Anfragen gesammelt an die Batch-Schnittstelle von OpenAI, "
+                                "eine Runde je Stufe; gleiche Prompts, Prüfungen und Ergebnisse."))
+        if modus == "sofort":
+            st.caption(T("Einstellungen aus der Seitenleiste: {modell}, {worker} Worker, Reasoning-Aufwand {aufwand}.",
+                         modell=cfg.model, worker=cfg.workers, aufwand=cfg.reasoning_effort or T("Modellstandard"))
+                       + (" Flex." if cfg.service_tier == "flex" else ""))
+            if st.button(T("Start / Fortsetzen"), type="primary", disabled=laeuft):
+                start_job("mat", generate, src, out, cfg, limit=int(limit) or None, inhaltstyp_pruefen=lrt_check,
+                          ausgabesprache=sprache)
+            job_status("mat")
+        else:
+            from sem.batch import BatchLauf, status_zeile
+
+            st.caption(T("Je Stufe eine Runde (Volltext, Titel, Beschreibung, Keywords, Abschluss), jede bis zu 24 "
+                         "Stunden, oft schneller. „Batch: abrufen und weiter“ holt Fertiges ab und schickt die nächste Runde; "
+                         "dazwischen kann die Seite geschlossen werden. Automatisch bis zum Ende: python -m sem "
+                         "materialien --batch --warten"))
+            if st.button(T("Batch: abrufen und weiter"), type="primary", disabled=laeuft):
+                try:
+                    with st.spinner(T("frage Batches ab …")):
+                        st.session_state["batch-stand"] = BatchLauf(
+                            src, out, cfg, limit=int(limit) or None, inhaltstyp_pruefen=lrt_check,
+                            ausgabesprache=sprache).weiter()
+                except (ValueError, RuntimeError) as e:
+                    st.error(str(e))
+            stand = st.session_state.get("batch-stand")
+            if stand:
+                (st.success if stand["abgeschlossen"] else st.info)(status_zeile(stand))
         if out.exists() and not laeuft:
             letzte = letzter_datensatz(out)
             if letzte and st.toggle(T("Zuletzt erzeugtes Material zeigen (alle im Reiter „Vorschau“)"), key="mat-letzte"):

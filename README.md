@@ -103,6 +103,10 @@ python -m sem auswahl erwachsenenbildung        # Adult education filters (progr
 python -m sem seeds --anzahl erwachsenenbildung=2000 --auswahl erwachsenenbildung.quellen=gnd,schulthemen --seed 42
 python -m sem seeds --anzahl elementar=1000 schule=3000 berufsbildung=3000 hochschule=3000 erwachsenenbildung=1000 --seed 42
 python -m sem materialien --seeds output/seeds_schule5000_s42.jsonl --sprache en   # materials in English
+python -m sem materialien --seeds output/seeds_schule5000_s42.jsonl --flex         # half price, slower
+python -m sem materialien --seeds output/seeds_schule5000_s42.jsonl --batch --warten   # batch, until everything is done
+python -m sem laeufe                                # runs that did not reach their target
+python -m sem materialien --fortsetzen schule5000_s42   # resume one of them with its settings
 ```
 
 **Selecting topics:** each sector offers its own filters for sources/origin, voting status (confidence:
@@ -114,6 +118,21 @@ filters are in the “Seeds” tab under each sector.
 `pl`, `tr`, `uk`, `ru`, `ar`) or “Output language” in the “Materials” tab writes all fields in that language;
 the education context stays Germany. The note to the model is in `prompts/ausgabesprache.md`; the language is
 stored in `cclom:general_language`. Use a new output file per language, because resuming does not check it.
+
+**Half price: Flex or batch** (OpenAI only). `--flex` or “Flex-Verarbeitung” in the sidebar generates material by
+material as usual, at half price but slower (measured on 30 Oct 2026: 50–90 s instead of about 30 s per material).
+If Flex has no capacity (error 429), a request is retried twice and then sent at the standard price; how often is
+recorded per material under `synth:generierung.tokens.aufrufe_standard`. `--batch` or “Verarbeitung: Batch” in the
+“Materials” tab sends the requests collected to the Batch API: one round per stage (full text, title, description,
+keywords, completion), each up to 24 hours, often faster. Every call collects finished results and sends the next
+round; `--warten` repeats this until done. The state is kept in `output/materialien_<name>.batch/`. Prompts, checks
+and results are the same in all cases; `synth:generierung.verarbeitung` records `flex` or `batch`.
+
+**Interrupted runs:** every run records in `output/materialien_<name>.lauf.json` what it is meant to produce (seed
+file, number, language, model, processing). If it did not reach its target, e.g. after an internet interruption or
+with failed materials, it is listed by `python -m sem laeufe` and in the “Materials” tab under “Unfertige Läufe”
+(unfinished runs): “Resume” (`--fortsetzen NAME`) continues with the same settings and skips finished materials,
+“Start new” begins under a new name. The lock file of a crashed run is taken over when resuming.
 
 LLM options for `materialien` and `mappings`: `--base-url`, `--api-key`, `--model`, `--workers`
 (default 20, `LLM_WORKERS`), `--reasoning-effort` (default `low`, `LLM_REASONING_EFFORT`; `standard`

@@ -142,3 +142,57 @@ def test_env_key_nur_fuer_env_base_url():
     assert api_key_fuer("https://fremd.example/v1", "eigener", env) == "eigener"
     env = LLMConfig(base_url="https://intern.example/v1", api_key="env-key")
     assert api_key_fuer("https://intern.example/v1", "", env) == "env-key"
+
+
+def test_flex_ohne_kapazitaet_faellt_auf_standard_zurueck(monkeypatch):
+    from types import SimpleNamespace
+
+    from sem.llm import LLMClient
+
+    monkeypatch.setattr(llm, "FLEX_WARTEN", 0)
+    client = LLMClient(LLMConfig(api_key="test", service_tier="flex"))
+    gesendet = []
+
+    def create(**params):
+        gesendet.append(params.get("service_tier"))
+        if params.get("service_tier") == "flex":
+            raise _status_fehler(openai.RateLimitError, 429)  # Meldung enthält „Fehler 429“, nicht „flex“
+        return SimpleNamespace(usage=None, choices=[SimpleNamespace(message=SimpleNamespace(content="ok"))])
+
+    monkeypatch.setattr(client.client.chat.completions, "create", create)
+    with pytest.raises(openai.RateLimitError):  # gewöhnliches Rate-Limit: kein Rückfall, run_tasks wiederholt
+        client.chat("s", "u")
+    gesendet.clear()
+
+    def flex_voll(**params):
+        gesendet.append(params.get("service_tier"))
+        if params.get("service_tier") == "flex":
+            req = httpx.Request("POST", "http://test/v1/chat/completions")
+            raise openai.RateLimitError("Flex does not have sufficient resources", response=httpx.Response(429, request=req),
+                                        body=None)
+        return SimpleNamespace(usage=None, choices=[SimpleNamespace(message=SimpleNamespace(content="ok"))])
+
+    monkeypatch.setattr(client.client.chat.completions, "create", flex_voll)
+    assert client.chat("s", "u") == "ok"
+    assert gesendet == ["flex"] * llm.FLEX_VERSUCHE + [None]
+    assert client.zaehler()["aufrufe_standard"] == 1
+
+
+def test_verwaiste_sperre_wird_uebernommen(tmp_path):
+    import os
+    import socket
+    import subprocess
+    import sys
+
+    from sem.llm import sperre_nehmen
+
+    lock = tmp_path / "out.lock"
+    tot = subprocess.run([sys.executable, "-c", "import os; print(os.getpid())"], capture_output=True, text=True)
+    lock.write_text(f"{tot.stdout.strip()} {socket.gethostname()}", encoding="utf-8")  # Prozess ist beendet
+    sperre_nehmen(lock)
+    assert lock.read_text(encoding="utf-8").split()[0] == str(os.getpid())
+    with pytest.raises(RuntimeError, match="existiert"):  # eigener, laufender Prozess: Sperre bleibt
+        sperre_nehmen(lock)
+    lock.write_text("", encoding="utf-8")  # alte Sperrdatei ohne Angaben: nicht anfassen
+    with pytest.raises(RuntimeError):
+        sperre_nehmen(lock)

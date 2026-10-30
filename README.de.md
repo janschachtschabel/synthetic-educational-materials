@@ -100,6 +100,10 @@ python -m sem auswahl erwachsenenbildung        # Filter Erwachsenenbildung (Pro
 python -m sem seeds --anzahl erwachsenenbildung=2000 --auswahl erwachsenenbildung.quellen=gnd,schulthemen --seed 42
 python -m sem seeds --anzahl elementar=1000 schule=3000 berufsbildung=3000 hochschule=3000 erwachsenenbildung=1000 --seed 42
 python -m sem materialien --seeds output/seeds_schule5000_s42.jsonl --sprache en   # Materialien auf Englisch
+python -m sem materialien --seeds output/seeds_schule5000_s42.jsonl --flex         # halber Preis, langsamer
+python -m sem materialien --seeds output/seeds_schule5000_s42.jsonl --batch --warten   # Batch, bis alles fertig ist
+python -m sem laeufe                                # Läufe, die ihr Ziel nicht erreicht haben
+python -m sem materialien --fortsetzen schule5000_s42   # einen davon mit seinen Einstellungen fortsetzen
 ```
 
 **Themen auswählen:** Jeder Bereich hat eigene Filter für Quellen bzw. Herkunft, Abstimmungsstatus (Konfidenz:
@@ -111,6 +115,22 @@ im Reiter „Seeds“ unter jedem Bereich.
 `pl`, `tr`, `uk`, `ru`, `ar`) oder „Ausgabesprache“ im Reiter „Materialien“ schreibt alle Felder in dieser
 Sprache; der Bildungskontext bleibt Deutschland. Der Hinweis an das Modell steht in `prompts/ausgabesprache.md`,
 die Sprache in `cclom:general_language`. Je Sprache eine neue Ausgabedatei wählen, die Fortsetzung prüft sie nicht.
+
+**Halber Preis: Flex oder Batch** (nur OpenAI). `--flex` bzw. „Flex-Verarbeitung“ in der Seitenleiste erzeugt wie
+gewohnt Material für Material, zum halben Preis, aber langsamer (gemessen am 30.10.2026: 50–90 s statt rund 30 s je
+Material). Hat Flex keine Kapazität (Fehler 429), wird eine Anfrage zweimal wiederholt und dann zum Standardpreis
+gestellt; wie oft, steht je Material unter `synth:generierung.tokens.aufrufe_standard`. `--batch` bzw.
+„Verarbeitung: Batch“ im Reiter „Materialien“ schickt die Anfragen gesammelt an die Batch-Schnittstelle: eine Runde je
+Stufe (Volltext, Titel, Beschreibung, Keywords, Abschluss), jede bis zu 24 Stunden, oft schneller. Jeder Aufruf holt
+Fertiges ab und schickt die nächste Runde; `--warten` wiederholt das bis zum Ende. Der Stand liegt in
+`output/materialien_<name>.batch/`. Prompts, Prüfungen und Ergebnis sind in allen Fällen gleich;
+`synth:generierung.verarbeitung` vermerkt `flex` oder `batch`.
+
+**Abgebrochene Läufe:** Jeder Lauf hält in `output/materialien_<name>.lauf.json` fest, was er erzeugen soll (Seed-Datei,
+Anzahl, Sprache, Modell, Verarbeitung). Hat er sein Ziel nicht erreicht, etwa nach einer Internet-Unterbrechung oder
+mit fehlgeschlagenen Materialien, steht er in `python -m sem laeufe` und im Reiter „Materialien“ unter „Unfertige
+Läufe“: „Fortsetzen“ (`--fortsetzen NAME`) macht mit denselben Einstellungen weiter und überspringt Fertiges, „Neu
+starten“ beginnt unter neuem Namen. Die Sperrdatei eines abgestürzten Laufs wird beim Fortsetzen übernommen.
 
 LLM-Optionen für `materialien` und `mappings`: `--base-url`, `--api-key`, `--model`, `--workers`
 (Standard 20, `LLM_WORKERS`), `--reasoning-effort` (Standard `low`, `LLM_REASONING_EFFORT`; `standard`
