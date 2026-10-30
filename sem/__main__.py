@@ -107,6 +107,8 @@ def main(argv=None):
     p.add_argument("--stimmen", type=int, default=3, help="LLM-Stimmen je Zuordnung")
     p.add_argument("--embedding-modell", help="lokales Embedding-Modell (Standard intfloat/multilingual-e5-small)")
     p.add_argument("--wlo", nargs="+", metavar="CSV", help="WLO-Exporte für Keyword-Fach-Belege (bleiben lokal)")
+    p.add_argument("--rlp", metavar="ORDNER", help="Markdown-Fassungen der KMK-Rahmenlehrpläne (Berufsbildung, "
+                                                  "Schritt lernfelder; Standard RLP_MARKDOWN_DIR)")
     _llm_args(p)
 
     a = ap.parse_args(argv)
@@ -177,7 +179,7 @@ def main(argv=None):
             raise SystemExit(f"Unbekannte Schritte {unbekannt}. Möglich: {', '.join(schritte)}, "
                              f"{', '.join(b.mapping_folgen)}, alle")
         prog = b.mapping_ausfuehren(keys, _cfg(a), on_progress=print_progress, limit=a.limit, stimmen=a.stimmen,
-                                    embedding_modell=a.embedding_modell, wlo_dateien=a.wlo)
+                                    embedding_modell=a.embedding_modell, wlo_dateien=a.wlo, rlp_ordner=a.rlp)
         print("\n" + prog.line())
         if "fertig" not in prog.status:
             sys.exit(2)
