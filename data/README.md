@@ -26,6 +26,8 @@ One file `<name>.json` per vocabulary:
 | `inhaltstypen.json` | content types used from OEH `new_lrt`, with text type, media format, skill types, and target groups |
 | `niveaus.json` | DQR levels with qualification pathway and educational level |
 | `optionale_felder.json` | values and proportions of the optional control fields (learning location, cross-cutting topic …) |
+| `rahmenlehrplaene.jsonl` | one KMK framework curriculum per line: `id` (`kmk:<download ID>`), `titel`, `datum`, `url`, `datei`, `lernfelder` (`nr`, `titel`, `jahr`, `stunden`), `vollstaendig`, `berufe` (ESCO `uri`, `label`, `code`, `stimmen`), `quelle`, `mapping` (status, method) |
+| `pruefliste_rahmenlehrplaene.csv`, `korrekturen_rahmenlehrplaene.csv` | curricula without a majority for an ESCO occupation or with gaps in the learning-field list; corrections with `korrektur_codes` = ESCO short codes (first eight characters of the UUID) separated by `|`, `-` = exclude |
 
 Occupation structure:
 
@@ -61,7 +63,9 @@ Topics (occupation × skill) are generated when loading from both files and are 
 |---|---|
 | `themen_schule.jsonl` | one topic per line: `id` (URI in the OEH oehTopics vocabulary, or the GND URI when `herkunft` = `wlo_keyword`), `label_de`, `portal`, `portal_uri`, `pfad`, `ebene`, `definition`, `keywords`, `faecher` (OEH discipline), `art` (`unterrichtsthema`, `lehrkraftthema`), `stufen` (`primar`, `sek1`, `sek2`), `herkunft` (`themenbaum`, `wlo_keyword`), `gnd` (exact GND match), `quelle`, `belege.wlo` (records per level, node IDs), `belege.wlo_keyword` (topic-tree topic also occurs as a keyword in WLO records), `mapping` (status, confidence, votes, `wlo_bestaetigt`; for keyword topics also `fach`, `synonym_bedeutung`, `stufen_entfernt`). Keyword topics only: `label_gnd`, `oberbegriffe` (GND), `eltern` (parent topic in the topic tree, where evidenced) |
 | `pruefliste_themen.csv`, `korrekturen.csv` | review (`korrektur_codes` = levels separated by `|`, `-` = exclude; `korrektur_art`) |
-| `inhaltstypen.json`, `niveaus.json`, `optionale_felder.json` | content types with topic type, target groups, levels, and subject portals; year groups; optional fields (including area of requirement) |
+| `inhaltstypen.json`, `niveaus.json`, `optionale_felder.json` | content types with topic type, target groups, levels, and subject portals; year groups; optional fields (including area of requirement, special-needs focus) |
+| `bildungsstandards_gliederung.json` | outline of the KMK educational standards: `quellen` (document, subject, qualification, resolution, URL, citation), `eintraege` (`code`, `quelle`, `typ`, `pfad`, `label`), headings only |
+| `bildungsstandards.jsonl` | per classroom topic and document: `id` (`<topic ID>|<document>`), `thema`, `dokument`, `eintraege` (code, label, type, path, votes), `status`, `mapping` |
 
 ## `mappings/erwachsenenbildung/`
 

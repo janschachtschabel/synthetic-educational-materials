@@ -61,6 +61,10 @@ def _cfg(a):
 
 
 def main(argv=None):
+    # Windows-Konsole/Umleitung nutzt sonst cp1252 und bricht bei „→“ oder Umlauten in Fremdtexten ab
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(encoding="utf-8", errors="replace")
     ap = argparse.ArgumentParser(prog="python -m sem", description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -73,6 +77,9 @@ def main(argv=None):
     p.add_argument("--seed", type=int, default=42, help="Zufalls-Seed (gleicher Wert = gleiche Seeds)")
     p.add_argument("--auswahl", nargs="*", metavar="BEREICH.FILTER=W1,W2",
                    help="welche Themen einbezogen werden (Status, Quellen, Belege); fehlende Filter = Standard")
+    p.add_argument("--konfidenz", metavar="W1,W2",
+                   help="Status aller Zuordnungen in allen Bereichen, z. B. gesichert oder gesichert,wahrscheinlich "
+                        "(Standard: gesichert,wahrscheinlich,redaktionell); --auswahl hat Vorrang")
     p.add_argument("--out", type=Path, help="Dateiname; das Präfix seeds_ wird ergänzt")
 
     p = sub.add_parser("auswahl", help="Filter eines Bildungsbereichs mit Standardwerten und Themenzahl")
@@ -100,6 +107,8 @@ def main(argv=None):
     p.add_argument("--stimmen", type=int, default=3, help="LLM-Stimmen je Zuordnung")
     p.add_argument("--embedding-modell", help="lokales Embedding-Modell (Standard intfloat/multilingual-e5-small)")
     p.add_argument("--wlo", nargs="+", metavar="CSV", help="WLO-Exporte für Keyword-Fach-Belege (bleiben lokal)")
+    p.add_argument("--rlp", metavar="ORDNER", help="Markdown-Fassungen der KMK-Rahmenlehrpläne (Berufsbildung, "
+                                                  "Schritt lernfelder; Standard RLP_MARKDOWN_DIR)")
     _llm_args(p)
 
     a = ap.parse_args(argv)
@@ -117,8 +126,10 @@ def main(argv=None):
 
         counts = _pairs(a.anzahl, int)
         balance = _pairs(a.gleichverteilung)
-        auswahl = {k: get(k).auswahl_pruefen(v) for k, v in _auswahl(a.auswahl).items()}
-        auswahl = {k: auswahl.get(k) or get(k).standard_auswahl() for k in counts}
+        roh = _auswahl(a.auswahl)
+        konf = [w.strip() for w in a.konfidenz.split(",") if w.strip()] if a.konfidenz else None
+        auswahl = {k: get(k).auswahl_pruefen(get(k).mit_konfidenz(roh.get(k), konf)) for k in set(roh) | set(counts)}
+        auswahl = {k: auswahl[k] for k in counts}
         out = ausgabe_pfad("seeds", a.out or "_".join(f"{k}{v}" for k, v in counts.items()) + f"_s{a.seed}")
         st = seeds.write(seeds.build(counts, balance, a.seed, auswahl), out,
                          {"anzahl": counts, "gleichverteilung": balance, "zufalls_seed": a.seed, "auswahl": auswahl})
@@ -168,7 +179,7 @@ def main(argv=None):
             raise SystemExit(f"Unbekannte Schritte {unbekannt}. Möglich: {', '.join(schritte)}, "
                              f"{', '.join(b.mapping_folgen)}, alle")
         prog = b.mapping_ausfuehren(keys, _cfg(a), on_progress=print_progress, limit=a.limit, stimmen=a.stimmen,
-                                    embedding_modell=a.embedding_modell, wlo_dateien=a.wlo)
+                                    embedding_modell=a.embedding_modell, wlo_dateien=a.wlo, rlp_ordner=a.rlp)
         print("\n" + prog.line())
         if "fertig" not in prog.status:
             sys.exit(2)

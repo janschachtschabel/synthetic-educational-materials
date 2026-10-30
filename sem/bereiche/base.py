@@ -12,11 +12,13 @@ Oberfläche zeigen diese Schritte ohne weitere Anpassung an.
 from __future__ import annotations
 
 import random
+import re
 from abc import ABC, abstractmethod
 from collections import Counter, defaultdict
 from dataclasses import dataclass
 from typing import Callable
 
+from .. import schema as S
 from ..llm import Progress
 
 
@@ -115,6 +117,15 @@ class Bildungsbereich(ABC):
     def standard_auswahl(self) -> dict[str, list[str]]:
         return {k: list(o["standard"]) for k, o in self.auswahl_optionen().items()}
 
+    def mit_konfidenz(self, auswahl: dict[str, list[str]] | None, konfidenz: list[str] | None) -> dict[str, list[str]]:
+        """Setzt alle Status-Filter (Konfidenz) auf dieselben Werte, soweit auswahl sie nicht ausdrücklich setzt."""
+        out = dict(auswahl or {})
+        if konfidenz is not None:
+            for k, o in self.auswahl_optionen().items():
+                if filtergruppe(k, o) == "konfidenz" and k not in out:
+                    out[k] = list(konfidenz)
+        return out
+
     def passt(self, topic: dict, auswahl: dict[str, list[str]]) -> bool:
         """Ob ein Thema zur Auswahl passt. Standard: immer."""
         return True
@@ -141,6 +152,20 @@ class Bildungsbereich(ABC):
                 "default_balance": self.default_balance, "themen": len(self.topics()),
                 "themen_standardauswahl": len(self.themen_auswahl()), "auswahl_optionen": self.auswahl_optionen(),
                 "mapping_schritte": [s.key for s in self.mapping_schritte()]}
+
+
+STATUS_WERTE = ["gesichert", "wahrscheinlich", "unsicher", "redaktionell"]
+STANDARD_KONFIDENZ = ["gesichert", "wahrscheinlich", "redaktionell"]
+
+
+def filtergruppe(name: str, option: dict) -> str:
+    """Gruppe eines Filters für Oberfläche und CLI: „quellen“ (Quellen, Herkunft, Belege), „konfidenz“
+    (Status einer Zuordnung aus der Abstimmung) oder „inhalt“ (alles andere, z. B. Stufen, Themenart)."""
+    if name in ("quellen", "herkunft", "belege"):
+        return "quellen"
+    if set(option["werte"]) == set(STATUS_WERTE):
+        return "konfidenz"
+    return "inhalt"
 
 
 class SeedState:
@@ -181,6 +206,15 @@ def allocate(n: int, groups: dict[str, list[dict]], rng: random.Random) -> list[
     return out
 
 
+_URL = re.compile(r"\s*[(\[]?\s*(?:https?://|www\.)[^\s)\]]*[^\s)\].,;:]\s*[)\]]?")
+
+
+def ohne_urls(text: str) -> str:
+    """Entfernt Web-Adressen (samt umschließender Klammer) aus einer Themenbeschreibung, z. B. Quellenverweise
+    in Definitionen des WLO-Themenbaums; sie gehören nicht in Prompt und Seed."""
+    return re.sub(r"\s+([.,;:])", r"\1", _URL.sub(" ", text)).strip()
+
+
 def build_seeds(bereich: Bildungsbereich, n: int, balance: str | None = None, seed: int = 42,
                 id_prefix: str | None = None, auswahl: dict[str, list[str]] | None = None) -> list[dict]:
     balance = balance or bereich.default_balance
@@ -201,6 +235,9 @@ def build_seeds(bereich: Bildungsbereich, n: int, balance: str | None = None, se
         state.group = group
         s = {"id": f"{prefix}-{seed}-{i:06d}"}
         s.update(bereich.make_seed(topic, rng, state))
+        thema = s.get(S.F_THEMA) or {}
+        if thema.get("beschreibung_de"):
+            thema["beschreibung_de"] = ohne_urls(thema["beschreibung_de"])
         s["synth:seed_parameter"] = {"gleichverteilung": balance, "gruppe": group, "zufalls_seed": seed,
                                      "auswahl": auswahl}
         seeds.append(s)

@@ -1,7 +1,7 @@
 """Bildungsbereich Berufliche Bildung.
 
 Themen: Kombinationen aus ESCO-Beruf und einer Kompetenz, die an diesem Beruf hängt (essenziell, optional
-wählbar). Berufe und Kompetenzen tragen die ESCO-Original-URIs; Kompetenzen zusätzlich den Abgleich mit dem
+wählbar), und Lernfelder der KMK-Rahmenlehrpläne im zugeordneten ESCO-Beruf (Themenquelle „lernfeld“). Berufe und Kompetenzen tragen die ESCO-Original-URIs; Kompetenzen zusätzlich den Abgleich mit dem
 OEH-Vokabular escoSkills. Berufsfeld: KldB 2010 (Fassung 2020) aus dem OEH-Vokabular kldb, wie es WLO im
 Feld ccm:oeh_profession_group nutzt. Qualifizierungsweg (Ausbildung, Fortbildung, Studium, Anlernen) und
 KldB-Zuordnung je Beruf per Mehrfachabstimmung, filterbar über auswahl_optionen.
@@ -41,11 +41,13 @@ class Berufsbildung(Bildungsbereich):
     mapping_folgen = {
         "esco": ["esco", "hinweise", "kandidaten", "kldb", "qualifizierung"],
         "wlo": ["wlo"],
+        "lernfeld": ["lernfelder", "rlp_kandidaten", "rlp_berufe", "rlp_zusammenfuehren"],
     }
     mapping_abschluss = ["zusammenfuehren"]
 
     def mapping_schritte(self) -> list[MappingSchritt]:
         from . import build as b
+        from . import lernfelder as lf
 
         S_ = MappingSchritt
         return [
@@ -60,14 +62,23 @@ class Berufsbildung(Bildungsbereich):
                "(drei Stimmen)", b.build_qualifizierung),
             S_("wlo", "WLO-Keywords", "Keywords und Berufsgruppen aus WLO-Exporten (--wlo), nur berufliche Kontexte",
                b.build_wlo, llm=False),
+            S_("lernfelder", "Lernfelder einlesen", "KMK-Rahmenlehrpläne (Markdown, --rlp ORDNER): Nummer, Titel, "
+               "Jahr und Zeitrichtwert je Lernfeld", lf.build_lernfelder, llm=False),
+            S_("rlp_kandidaten", "Kandidaten Rahmenlehrplan", "ähnlichste ESCO-Berufe je Rahmenlehrplan "
+               "(lokale Embeddings)", lf.build_rlp_kandidaten, llm=False),
+            S_("rlp_berufe", "ESCO-Berufe abstimmen", "welche ESCO-Berufe dem Ausbildungsberuf entsprechen "
+               "(drei Stimmen)", lf.build_rlp_berufe),
+            S_("rlp_zusammenfuehren", "Rahmenlehrpläne zusammenführen", "rahmenlehrplaene.jsonl, Prüfliste, "
+               "Korrekturen", lf.zusammenfuehren, llm=False),
             S_("zusammenfuehren", "Zusammenführen", "berufe.jsonl, kompetenzen.jsonl, Prüfliste, Korrekturen "
                "(läuft zuletzt)", b.zusammenfuehren, llm=False),
         ]
 
     def mapping_statistik(self) -> dict:
-        from . import build
+        from . import build, lernfelder
 
-        return build.statistik() if (DIR / "berufe.jsonl").exists() else {}
+        out = build.statistik() if (DIR / "berufe.jsonl").exists() else {}
+        return {**out, "lernfelder": lernfelder.statistik()} if lernfelder.PLAENE_PATH.exists() else out
 
     # --- Auswahl der Themen ------------------------------------------------------------------
 
@@ -76,6 +87,11 @@ class Berufsbildung(Bildungsbereich):
                   "unsicher": "keine Mehrheit oder Ersatzzuordnung, steht auf der Prüfliste",
                   "redaktionell": "von Hand korrigiert (korrekturen.csv)"}
         return {
+            "quellen": {"label": "Themenquellen",
+                        "beschreibung": "woraus die Themen stammen",
+                        "werte": {"esco": "ESCO-Beruf × Kompetenz des Berufs",
+                                  "lernfeld": "ESCO-Beruf × Lernfeld des KMK-Rahmenlehrplans"},
+                        "standard": ["esco", "lernfeld"]},
             "qualifizierung": {"label": "Qualifizierungsweg des Berufs",
                                "beschreibung": "wie der Beruf in Deutschland üblicherweise erlernt wird (Abstimmung)",
                                "werte": {"ausbildung": "Berufsausbildung (dual oder schulisch)",
@@ -100,6 +116,9 @@ class Berufsbildung(Bildungsbereich):
                             "werte": status, "standard": ["gesichert", "wahrscheinlich", "redaktionell"]},
             "qualifizierung_status": {"label": "Status des Qualifizierungswegs", "beschreibung": "Abstimmung",
                                       "werte": status, "standard": ["gesichert", "wahrscheinlich", "redaktionell"]},
+            "lernfeld_status": {"label": "Status der Zuordnung Rahmenlehrplan → ESCO-Beruf",
+                                "beschreibung": "Abstimmung (nur Lernfeld-Themen)", "werte": status,
+                                "standard": ["gesichert", "wahrscheinlich", "redaktionell"]},
             "belege": {"label": "Belege (mindestens einer)",
                        "beschreibung": "leer = keine Anforderung; sonst muss das Thema mindestens einen der "
                                        "gewählten Belege haben",
@@ -120,8 +139,8 @@ class Berufsbildung(Bildungsbereich):
 
     def belege_des_themas(self, topic: dict) -> set[str]:
         out = set()
-        b, k = topic["beruf"], topic["kompetenz"]
-        if self.wlo_fach_passt(k, b):
+        b, k = topic["beruf"], topic.get("kompetenz")
+        if k and self.wlo_fach_passt(k, b):
             out.add("wlo")
         if (b.get("belege") or {}).get("wlo"):
             out.add("wlo_beruf")
@@ -130,11 +149,15 @@ class Berufsbildung(Bildungsbereich):
         return out
 
     def passt(self, topic: dict, auswahl: dict[str, list[str]]) -> bool:
-        b, k = topic["beruf"], topic["kompetenz"]
+        b, k = topic["beruf"], topic.get("kompetenz")
         m = b.get("mapping") or {}
-        if b.get("qualifizierung") not in auswahl["qualifizierung"] or topic["relation"] not in auswahl["relation"]:
+        if topic.get("quelle", "esco") not in auswahl["quellen"] or b.get("qualifizierung") not in auswahl["qualifizierung"]:
             return False
-        if k.get("art") not in auswahl["kompetenzart"] or k.get("reichweite") not in auswahl["reichweite"]:
+        if k is None:  # Lernfeld-Thema: die Kompetenzfilter gelten nicht
+            if topic["plan"]["mapping"]["status"] not in auswahl["lernfeld_status"]:
+                return False
+        elif topic["relation"] not in auswahl["relation"] or k.get("art") not in auswahl["kompetenzart"] \
+                or k.get("reichweite") not in auswahl["reichweite"]:
             return False
         if m.get("status", "gesichert") not in auswahl["kldb_status"]:
             return False
@@ -196,6 +219,19 @@ class Berufsbildung(Bildungsbereich):
                     if k:
                         out.append({"id": f"{b['uri']}|{uri.rsplit('/', 1)[-1]}", "beruf": b, "kompetenz": k,
                                     "relation": relation})
+        return out + self._lernfeld_topics()
+
+    def _lernfeld_topics(self) -> list[dict]:
+        from .lernfelder import lade_plaene
+
+        by_uri = {b["uri"]: b for b in self.berufe}
+        out = []
+        for p in lade_plaene():
+            for eb in p["berufe"]:
+                b = by_uri.get(eb["uri"])
+                for lf in p["lernfelder"] if b else []:
+                    out.append({"id": f"{b['uri']}|{p['id']}:{lf['nr']}", "beruf": b, "lernfeld": lf, "plan": p,
+                                "quelle": "lernfeld"})
         return out
 
     def balance_key(self, topic: dict, balance: str) -> str:
@@ -204,7 +240,7 @@ class Berufsbildung(Bildungsbereich):
         if balance == "beruf":
             return topic["beruf"]["uri"]
         if balance == "kompetenz":
-            return topic["kompetenz"]["uri"]
+            return topic["kompetenz"]["uri"] if "kompetenz" in topic else topic["id"]
         return topic["beruf"][balance][0]["uri"]
 
     # --- Seed ---------------------------------------------------------------------------
@@ -215,7 +251,8 @@ class Berufsbildung(Bildungsbereich):
         return "fortbildung" if quali in ("fortbildung", "studium") else "ausbildung"
 
     def make_seed(self, topic: dict, rng: random.Random, state: SeedState) -> dict:
-        b, k = topic["beruf"], topic["kompetenz"]
+        b, k = topic["beruf"], topic.get("kompetenz") or {}
+        lf = topic.get("lernfeld")
         opt = self.optionen
         quali = b.get("qualifizierung") or "ausbildung"
 
@@ -228,6 +265,9 @@ class Berufsbildung(Bildungsbereich):
         typ_by_uri = {t["uri"]: t for t in types}
         typ = typ_by_uri[state.pick_least_used(f"typ:{state.group}:{rolle_kurz}", list(typ_by_uri), rng)]
         niveaus = [n for n in self.niveaus["niveaus"] if quali in n["qualifizierung"]] or self.niveaus["niveaus"]
+        if lf:  # Lernfelder gehören zur Ausbildung; das Ausbildungsjahr bestimmt die Stufe
+            niveaus = [n for n in self.niveaus["niveaus"]
+                       if n["id"] == ("ausbildung_grundstufe" if lf.get("jahr") == 1 else "ausbildung_fachstufe")]
         niveau = rng.choice(niveaus)
 
         seed: dict = {S.F_BEREICH: self.key}
@@ -255,31 +295,50 @@ class Berufsbildung(Bildungsbereich):
         seed[S.F_BERUF] = {"uri": b["uri"], "label": b["label"], "isco_08": b["isco"],
                            "beschreibung": b["beschreibung"], "qualifizierung": quali,
                            **{e: b[e] for e in KLDB_EBENEN[1:]}}
-        seed[S.F_KOMPETENZ] = {x: k[x] for x in ("uri", "label", "beschreibung", "art", "reichweite") if k.get(x)}
-        seed[S.F_KOMPETENZ]["relation"] = topic["relation"]
-        if k.get("oeh_uri"):
-            seed[S.F_KOMPETENZ]["exactMatch"] = k["oeh_uri"]
         seed[S.F_PROVENANCE][S.F_BERUF] = S.provenance("ESCO-Berufe", uri=b["uri"], license=esco_lizenz,
                                                        method="Thema aus der Quelle")
         seed[S.F_PROVENANCE][S.F_BERUF]["qualifizierung"] = {
             "status": (m.get("qualifizierung") or {}).get("status"), "methode": "LLM-Mehrfachabstimmung"}
-        seed[S.F_PROVENANCE][S.F_KOMPETENZ] = S.provenance(
-            "ESCO-Kompetenzen", uri=k["uri"], license=esco_lizenz,
-            method=f"{topic['relation']}e Kompetenz des Berufs laut ESCO")
-
-        # Thema für Vorschau, Suche und Prompts: Kompetenz im Kontext des Berufs
-        seed[S.F_THEMA] = {"id": topic["id"], "label_de": k["label"], "beschreibung_de": k.get("beschreibung", ""),
-                           "keywords_de": list(dict.fromkeys([k["label"], *k.get("alt_labels", [])[:4]]))}
-        seed[S.F_PROVENANCE][S.F_THEMA] = S.provenance("ESCO", uri="https://esco.ec.europa.eu", license=esco_lizenz,
-                                                       method="Kombination aus ESCO-Beruf und verknüpfter Kompetenz")
-        seed[S.F_PROVENANCE][S.F_THEMA].update(status={"kldb": m.get("status"),
-                                                       "qualifizierung": (m.get("qualifizierung") or {}).get("status")},
+        status = {"kldb": m.get("status"), "qualifizierung": (m.get("qualifizierung") or {}).get("status")}
+        if lf:
+            p, q = topic["plan"], topic["plan"]["quelle"]
+            seed[S.F_LERNFELD] = {"nr": lf["nr"], "titel": lf["titel"], "ausbildungsjahr": lf.get("jahr"),
+                                  "zeitrichtwert_stunden": lf.get("stunden"),
+                                  "rahmenlehrplan": {"titel": p["titel"], "datum": p["datum"], "url": p["url"]}}
+            seed[S.F_PROVENANCE][S.F_LERNFELD] = S.provenance(q["name"], uri=p["url"], license=q["lizenz"],
+                                                              method=p["mapping"]["methode"])
+            seed[S.F_PROVENANCE][S.F_LERNFELD].update(quellenangabe=q["quellenangabe"], status=p["mapping"]["status"])
+            # Thema: Lernfeld im Kontext des Ausbildungsberufs
+            seed[S.F_THEMA] = {"id": topic["id"], "label_de": lf["titel"], "keywords_de": [lf["titel"]],
+                               "beschreibung_de": f"Lernfeld {lf['nr']} des KMK-Rahmenlehrplans für den "
+                                                  f"Ausbildungsberuf {p['titel']}"}
+            seed[S.F_PROVENANCE][S.F_THEMA] = S.provenance(
+                q["name"], uri=p["url"], license=q["lizenz"],
+                method="Lernfeld des Rahmenlehrplans im zugeordneten ESCO-Beruf")
+            status["rahmenlehrplan"] = p["mapping"]["status"]
+        else:
+            seed[S.F_KOMPETENZ] = {x: k[x] for x in ("uri", "label", "beschreibung", "art", "reichweite") if k.get(x)}
+            seed[S.F_KOMPETENZ]["relation"] = topic["relation"]
+            if k.get("oeh_uri"):
+                seed[S.F_KOMPETENZ]["exactMatch"] = k["oeh_uri"]
+            seed[S.F_PROVENANCE][S.F_KOMPETENZ] = S.provenance(
+                "ESCO-Kompetenzen", uri=k["uri"], license=esco_lizenz,
+                method=f"{topic['relation']}e Kompetenz des Berufs laut ESCO")
+            # Thema für Vorschau, Suche und Prompts: Kompetenz im Kontext des Berufs
+            seed[S.F_THEMA] = {"id": topic["id"], "label_de": k["label"], "beschreibung_de": k.get("beschreibung", ""),
+                               "keywords_de": list(dict.fromkeys([k["label"], *k.get("alt_labels", [])[:4]]))}
+            seed[S.F_PROVENANCE][S.F_THEMA] = S.provenance(
+                "ESCO", uri="https://esco.ec.europa.eu", license=esco_lizenz,
+                method="Kombination aus ESCO-Beruf und verknüpfter Kompetenz")
+        seed[S.F_PROVENANCE][S.F_THEMA].update(status=status,
                                                belege={"erfuellt": sorted(self.belege_des_themas(topic))})
 
         seed[S.F_NIVEAU] = {"id": niveau["id"], "label": niveau["label"], "dqr": niveau["dqr"],
                             "exactMatch": niveau["exactMatch"]}
-        seed[S.F_PROVENANCE][S.F_NIVEAU] = S.provenance(self.niveaus["quelle"]["name"],
-                                                        method="passend zum Qualifizierungsweg, gleichverteilt")
+        seed[S.F_PROVENANCE][S.F_NIVEAU] = S.provenance(
+            self.niveaus["quelle"]["name"],
+            method="aus dem Ausbildungsjahr des Lernfelds (1. Jahr → Grundstufe, sonst Fachstufe)" if lf
+            else "passend zum Qualifizierungsweg, gleichverteilt")
         seed[S.F_MEDIENFORM] = typ["medienform"]
         seed["synth:textsorte"] = typ["textsorte"]
 
@@ -287,7 +346,9 @@ class Berufsbildung(Bildungsbereich):
             seed[S.F_DIDAKTIK] = rng.choice(opt["didaktische_funktion"]["werte"])
         if rng.random() < opt["bearbeitungsdauer_minuten"]["anteil"]:
             seed[S.F_LEARNING_TIME] = rng.choice(opt["bearbeitungsdauer_minuten"]["werte"])
-        if rng.random() < opt["lernort"]["anteil"]:
+        if lf:
+            seed[S.F_LERNORT] = "Berufsschule"  # Lernfelder sind der Lehrplan der Berufsschule
+        elif rng.random() < opt["lernort"]["anteil"]:
             seed[S.F_LERNORT] = rng.choice(opt["lernort"]["werte"][self._weg(quali)])
         if rng.random() < opt["querschnittsthema"]["anteil"]:
             seed[S.F_QUERSCHNITT] = rng.choice(opt["querschnittsthema"]["werte"])
@@ -300,7 +361,10 @@ class Berufsbildung(Bildungsbereich):
                 for t in self.inhaltstypen["inhaltstypen"]]
 
     def prompt_values(self, seed: dict) -> dict:
-        t, b, k = seed[S.F_THEMA], seed[S.F_BERUF], seed[S.F_KOMPETENZ]
+        from .lernfelder import lernfeld_text
+
+        t, b, k = seed[S.F_THEMA], seed[S.F_BERUF], seed.get(S.F_KOMPETENZ) or {}
+        lf = seed.get(S.F_LERNFELD)
         fortbildung = self._weg(b.get("qualifizierung", "ausbildung")) == "fortbildung"
         lernende = "Teilnehmende einer beruflichen Fortbildung" if fortbildung else "Auszubildende"
         lehrende = "Lehrkräfte und Dozierende in der Fortbildung" if fortbildung else \
@@ -327,4 +391,7 @@ class Berufsbildung(Bildungsbereich):
             "bearbeitungsdauer": seed.get(S.F_LEARNING_TIME, ""),
             "lernort": seed.get(S.F_LERNORT, ""),
             "querschnittsthema": seed.get(S.F_QUERSCHNITT, ""),
+            "lernfeld": lernfeld_text({**lf, "jahr": lf.get("ausbildungsjahr"), "stunden": lf.get("zeitrichtwert_stunden")})
+            if lf else "",
+            "rahmenlehrplan": lf["rahmenlehrplan"]["titel"] if lf else "",
         }

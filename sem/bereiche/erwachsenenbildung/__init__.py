@@ -94,8 +94,10 @@ class Erwachsenenbildung(Bildungsbereich):
                                   "rahmencurriculum": "Handlungsfelder des Rahmencurriculums für Integrationskurse "
                                                       "(Sprachen)",
                                   "schulthemen": "Unterrichtsthemen der Schule in Deutsch, Mathematik, Englisch "
-                                                 "(Schulabschlüsse)"},
-                        "standard": ["gnd", "rahmencurriculum", "schulthemen"]},
+                                                 "(Schulabschlüsse)",
+                                  "grundbildung": "Gliederung der lea.-Alpha-Levels und DVV-Rahmencurricula Lesen, "
+                                                  "Schreiben, Rechnen (Grundbildung)"},
+                        "standard": ["gnd", "rahmencurriculum", "schulthemen", "grundbildung"]},
             "art": {"label": "Themenart", "beschreibung": "Abstimmung",
                     "werte": {"kursthema": "Kursthema für Teilnehmende",
                               "kursleitungsthema": "Thema für Kursleitende"},

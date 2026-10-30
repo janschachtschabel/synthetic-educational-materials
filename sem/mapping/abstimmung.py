@@ -44,21 +44,19 @@ def abstimmen(objekte: list[dict], kandidaten: dict[str, list[str]], ziele: dict
               stop_event=None):
     """objekte: [{"id", "prompt": {...}}]; kandidaten: id -> Codes; systeme: ein Systemprompt je Stimme.
 
-    Schreibt je Batch und Stimme eine Zeile nach out_path (fortsetzbar über run_tasks).
+    Schreibt je Batch und Stimme eine Zeile nach out_path (fortsetzbar über run_tasks). Gefragt werden nur
+    Objekte, für die diese Stimme noch keine Antwort hat: Kommen neue Objekte hinzu, bleiben die vorhandenen
+    Stimmen unverändert.
     """
     vorhanden = lade_stimmen(out_path)
     tasks = []
     for v, system in enumerate(systeme):
-        order = sorted(objekte, key=lambda o: o["id"])
+        order = sorted((o for o in objekte if v not in vorhanden.get(o["id"], {})), key=lambda o: o["id"])
         random.Random(v).shuffle(order)
         for i in range(0, len(order), batch):
             chunk = order[i:i + batch]
             tid = f"v{v}:" + hashlib.sha256("|".join(o["id"] for o in chunk).encode()).hexdigest()[:16]
             tasks.append({"id": tid, "stimme": v, "objekte": chunk})
-            # Batch schon erledigt, aber einzelne Objekte ohne Antwort: einzeln nachfragen
-            for o in chunk:
-                if v not in vorhanden.get(o["id"], {}) and any(v in vorhanden.get(x["id"], {}) for x in chunk):
-                    tasks.append({"id": f"v{v}:einzeln:{o['id']}", "stimme": v, "objekte": [o]})
 
     def worker(client: LLMClient, task: dict) -> dict:
         v = task["stimme"]

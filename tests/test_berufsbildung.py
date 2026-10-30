@@ -54,12 +54,16 @@ def test_seeds_haben_beruf_kompetenz_und_herkunft():
         assert s[S.F_BEREICH] == "berufsbildung"
         assert s[S.F_CONTEXT][0].rsplit("/", 1)[-1] in ("berufliche_bildung", "fortbildung")
         assert s[S.F_BERUF]["uri"].startswith("http://data.europa.eu/esco/occupation/")
-        assert s[S.F_KOMPETENZ]["uri"].startswith("http://data.europa.eu/esco/skill/")
         assert all("/vocabs/kldb/" in u for u in s[S.F_PROFESSION])
-        for f in (S.F_CONTEXT, S.F_PROFESSION, S.F_LRT, S.F_ROLE, S.F_THEMA, S.F_NIVEAU, S.F_BERUF, S.F_KOMPETENZ):
+        art = S.F_LERNFELD if S.F_LERNFELD in s else S.F_KOMPETENZ  # Lernfeld- oder ESCO-Thema
+        for f in (S.F_CONTEXT, S.F_PROFESSION, S.F_LRT, S.F_ROLE, S.F_THEMA, S.F_NIVEAU, S.F_BERUF, art):
             assert f in s[S.F_PROVENANCE]
         # Standardauswahl: Ausbildungs- und Fortbildungsberufe, essenzielle Kompetenzen, keine Querschnittskompetenzen
         assert s[S.F_BERUF]["qualifizierung"] in ("ausbildung", "fortbildung")
+        if art == S.F_LERNFELD:
+            assert s[S.F_LERNORT] == "Berufsschule" and s[S.F_NIVEAU]["dqr"] in (3, 4)
+            continue
+        assert s[S.F_KOMPETENZ]["uri"].startswith("http://data.europa.eu/esco/skill/")
         assert s[S.F_KOMPETENZ]["relation"] == "essenziell"
         assert s[S.F_KOMPETENZ].get("reichweite") != "querschnitt"
         if s[S.F_BERUF]["qualifizierung"] == "ausbildung":
@@ -74,3 +78,13 @@ def test_prompt_enthaelt_beruf_und_kompetenz():
     text = render(load_prompts("berufsbildung")["volltext"], values)
     assert s[S.F_BERUF]["label"] in text and s[S.F_KOMPETENZ]["label"] in text
     assert "{{" not in text
+
+
+def test_lernfeld_themen_als_eigene_quelle():
+    b = _bereich()
+    wahl = {**b.standard_auswahl(), "quellen": ["lernfeld"]}
+    seeds = build_seeds(b, 50, "beruf", seed=3, auswahl=wahl)
+    assert seeds and all(S.F_LERNFELD in s and S.F_KOMPETENZ not in s for s in seeds)
+    lf = seeds[0][S.F_LERNFELD]
+    assert lf["titel"] and lf["rahmenlehrplan"]["url"].startswith("https://www.kmk.org/")
+    assert "Lernfeld" in b.prompt_values(seeds[0])["lernfeld"]

@@ -1,5 +1,5 @@
 {
- "beschreibung": "Optionale Steuerfelder der Schule. anteil: Wahrscheinlichkeit, dass das Feld in einem Seed gesetzt ist. anforderungsbereich: KMK-Anforderungsbereiche I–III (in der Primarstufe nur I und II). zielgruppe: Gewichte je Themenart.",
+ "beschreibung": "Optionale Steuerfelder der Schule. anteil: Wahrscheinlichkeit, dass das Feld in einem Seed gesetzt ist. anforderungsbereich: KMK-Anforderungsbereiche I–III (in der Primarstufe nur I und II). zielgruppe: Gewichte je Themenart. foerderschwerpunkt: Anteil der Unterrichtsthemen in den genannten Stufen, die für eine Förderschule bzw. Schülerinnen und Schüler mit sonderpädagogischem Förderbedarf in diesem Förderschwerpunkt geschrieben werden; ergänzt die Bildungsstufe Förderschule.",
  "didaktische_funktion": {
   "anteil": 0.6,
   "werte": ["Einstieg", "Erarbeitung", "Sicherung", "Übung", "Vertiefung und Transfer", "Wiederholung und Prüfungsvorbereitung"]
@@ -16,6 +16,12 @@
   "primar": ["afb1", "afb2"]
  },
  "sozialform": {"anteil": 0.3, "werte": ["Einzelarbeit", "Partnerarbeit", "Gruppenarbeit", "Plenum"]},
+ "foerderschwerpunkt": {
+  "anteil": 0.08,
+  "stufen": ["primar", "sek1"],
+  "quelle": {"name": "Förderschwerpunkte der sonderpädagogischen Förderung (Kultusministerkonferenz, Statistik Sonderpädagogische Förderung in Schulen)", "uri": "https://www.kmk.org/dokumentation-statistik/statistik/schulstatistik/sonderpaedagogische-foerderung-an-schulen.html"},
+  "werte": ["Lernen", "Sprache", "emotionale und soziale Entwicklung", "geistige Entwicklung", "körperliche und motorische Entwicklung", "Hören", "Sehen", "Kranke"]
+ },
  "zielgruppe": {
   "anteil": 1.0,
   "werte": {
