@@ -38,6 +38,11 @@ offene Vokabulare und Taxonomien ──► Mappings (Themen mit Fachzuordnung) �
 | Gemeinsamer Rahmen der Länder für die frühe Bildung in Kindertageseinrichtungen (Fassung 2022, [nach Eurydice](https://eurydice.eacea.ec.europa.eu/de/eurypedia/germany/leitlinien-der-fruehkindlichen-bildung-betreuung-und-erziehung)) | sieben Bildungsbereiche Elementar | amtliches Werk; Liste und Kurzbeschreibungen im Repo CC0 |
 | Volkshochschul-Statistik des DIE, Fachgebietsgliederung seit 2018 (7 Programmbereiche, 85 Fachgebiete): Echarti, Nicolas; Huntemann, Hella; Lux, Thomas; Reichart, Elisabeth (2022): *Volkshochschul-Statistik. 59. Folge, Berichtsjahr 2020.* DIE Survey. Bielefeld: wbv. [DOI 10.3278/70681](https://doi.org/10.3278/70681) | Fach Erwachsenenbildung (Codes und Bezeichnungen aus den Tabellen, Zeilenumbrüche zusammengeführt) | [CC BY 4.0 DE](https://creativecommons.org/licenses/by/4.0/deed.de); vollständige Quellenangabe in `programmbereiche.json` und in der Herkunft jedes Seeds |
 | Buhlmann, Rosemarie; Ende, Karin; Kaufmann, Susan; Kilimann, Angela; Schmitz, Helen: *[Rahmencurriculum für Integrationskurse – Deutsch als Zweitsprache](https://www.goethe.de/resources/files/pdf209/rahmencurriculum-integrationskurs_20171.pdf).* Goethe-Institut im Auftrag des BMI (2007), überarbeitete Neuauflage im Auftrag des BAMF (2017) | Sprachkursthemen Erwachsenenbildung (Gliederung) | urheberrechtlich geschützt; nur Kapitelcodes und -titel übernommen (Schreibung aus Versalien angepasst); vollständige Quellenangabe in `sprachkurs_themen.json` und in der Herkunft jedes Seeds |
+| KMK-Rahmenlehrpläne für den berufsbezogenen Unterricht der Berufsschule ([Downloadbereich](https://www.kmk.org/themen/berufliche-schulen/duale-berufsausbildung/downloadbereich-rahmenlehrplaene.html), 307 Pläne, Stand 30.10.2026) | Lernfelder Berufsbildung (Nummer, Titel, Ausbildungsjahr, Zeitrichtwert) | keine offene Lizenz angegeben; nur Lernfeldnummer, -titel, Jahr und Zeitrichtwert übernommen, keine Ziel- oder Inhaltstexte; Download-URL je Plan in `rahmenlehrplaene.jsonl` und in der Herkunft jedes Seeds |
+| Sekretariat der KMK (Hrsg.): [Bildungsstandards](https://www.kmk.org/themen/qualitaetssicherung-in-schulen/bildungsstandards.html) Deutsch, Mathematik (Primarbereich, ESA/MSA i. d. F. 2022; AHR 2012), erste Fremdsprache (ESA/MSA i. d. F. 2023; AHR 2012), Biologie, Chemie, Physik (MSA i. d. F. 2024; AHR 2020) | Kompetenzbereiche, Leitideen und Basiskonzepte als Metadaten der Schulthemen | urheberrechtlich geschützt (AHR-Ausgaben © Wolters Kluwer und KMK); nur Gliederung und Überschriften übernommen; vollständige Quellenangabe je Dokument in `bildungsstandards_gliederung.json` und im Seed |
+| Förderschwerpunkte der sonderpädagogischen Förderung ([KMK-Statistik](https://www.kmk.org/dokumentation-statistik/statistik/schulstatistik/sonderpaedagogische-foerderung-an-schulen.html)) | optionales Feld Förderschwerpunkt Schule | Liste der Bezeichnungen |
+| lea. – Literalitätsentwicklung von Arbeitskräften, Universität Hamburg: Kompetenzmodelle/Alpha-Levels [Lesen](https://www.ew.uni-hamburg.de/einrichtungen/ew3/erwachsenenbildung-und-lebenslanges-lernen/files/kompetenzmodell-lesen.pdf) (Kretschmann, Wieken 2010), [Schreiben](https://www.ew.uni-hamburg.de/einrichtungen/ew3/erwachsenenbildung-und-lebenslanges-lernen/files/kompetenzmodell-schreiben.pdf) (Grotlüschen, Dessinger, Heinemann, Schepers 2010), [Sprachempfinden](https://www.ew.uni-hamburg.de/einrichtungen/ew3/erwachsenenbildung-und-lebenslanges-lernen/files/kompetenzmodell-sprachempfinden.pdf) (Kretschmann, Wieken 2010) | Grundbildungsthemen (Alpha-Level, Kompetenzbereich) | urheberrechtlich geschützt, keine Lizenzangabe; nur Gliederung, Kurzbezeichnungen der Kann-Beschreibungen selbst formuliert |
+| Deutscher Volkshochschul-Verband (Hrsg.): [DVV-Rahmencurricula kompakt. Lesen und Schreiben – Grundlagen](https://www.grundbildung.de/downloads/lesen/lesen-schreiben-grundlagen-rc.pdf), 2. Aufl. 2021; Meyerhöfer, Hartmann, Jahnke, Wollring: [DVV-Rahmencurriculum Rechnen](https://www.grundbildung.de/downloads/rechnen/rechnen-dvv-rahmencurriculum.pdf), 2. Aufl. 2017; [Unterrichtskonzepte Rechnen Stufe 1–3](https://www.grundbildung.de/downloads/rechnen/rechnen-unterrichtskonzepte-rc-stufe1.pdf), 2021 | Grundbildungsthemen (Kapitel, Lerneinheiten, Themenfelder) | Lesen/Schreiben und Unterrichtskonzepte CC BY-ND, Rahmencurriculum Rechnen © DVV; nur Gliederung und Titel übernommen; vollständige Quellenangaben in `grundbildung_themen.json` und in der Herkunft jedes Seeds |
 | [Umsteigeschlüssel KldB 2020 → ISCO-08](https://statistik.arbeitsagentur.de/DE/Navigation/Grundlagen/Klassifikationen/Klassifikation-der-Berufe/KldB2010-Fassung2020/Arbeitsmittel/Arbeitsmittel-Nav.html) (BA, Stand 06.08.2021) | Handmapping-Hinweise ESCO-Beruf → KldB und Anforderungsniveaus | „Quelle: Statistik der Bundesagentur für Arbeit“; nur im Zwischenspeicher |
 
 Die Vokabulare liegen aufbereitet unter `data/vocabs/` (Abruf mit `scripts/fetch_vocabs.py`, Datum in
@@ -221,6 +226,32 @@ Anlernen (2), Ausbildung 1. Jahr (3), Ausbildung 2. und 3. Jahr (4), Fortbildung
 Bachelor Professional (6), Master Professional (7). Gezogen wird nur, was zum Qualifizierungsweg passt;
 die Bildungsstufe folgt daraus (Berufliche Bildung bzw. Fortbildung).
 
+**Lernfelder der Rahmenlehrpläne** (Folge `lernfeld`, zweite Themenquelle). Die KMK veröffentlicht die
+Rahmenlehrpläne der Berufsschule nur als PDF; eine maschinenlesbare Fassung (XML, API, Open Data) gibt es
+nicht. Eingelesen werden Markdown-Fassungen der PDFs (Docling), Ordner mit `--rlp ORDNER` oder
+`RLP_MARKDOWN_DIR`; sie bleiben außerhalb des Repos. Übernommen werden nur Nummer, Titel, Ausbildungsjahr
+und Zeitrichtwert je Lernfeld, keine Ziel- und Inhaltstexte.
+
+1. `lernfelder`: Die Downloadliste der KMK (307 Rahmenlehrpläne, Titel, Datum, Download-URL; die
+   Dateinamen stehen nur im Download-Kopf und werden einzeln abgefragt) bestimmt, welche Pläne aktuell
+   sind. Je Plan werden zwei Stellen gelesen und abgeglichen: die Übersichtstabelle in Teil V und die
+   Kopfzeile jedes Lernfelds („Lernfeld 3: … 2. Ausbildungsjahr, Zeitrichtwert 80 Stunden“). Die
+   Kopfzeilen fangen Umwandlungsfehler der Tabelle auf (zusammengezogene Zeilen, fehlende Stunden).
+   Stand 30.10.2026: 295 Pläne liegen als Markdown vor, 12 im Jahr 2025/26 erneuerte fehlen noch; 30 sind
+   ältere Fächerpläne ohne Lernfelder; 265 Pläne mit 3.697 Lernfeldern bleiben, 257 davon ohne Lücken.
+2. `rlp_kandidaten`: lokale Embeddings vergleichen Titel und erste Lernfelder des Plans mit allen
+   ESCO-Berufen (Bezeichnung, Synonyme, Beschreibung); die 12 ähnlichsten sind Kandidaten.
+3. `rlp_berufe`: drei Stimmen (Berufsberatung, ESCO-Codierung, Berufsschullehrkraft) wählen ein bis drei
+   ESCO-Berufe, deren Tätigkeit dem Ausbildungsberuf entspricht (Fachrichtungen dürfen eigene Berufe
+   haben; Helfer-, Meister- und Studienberufe nicht).
+4. `rlp_zusammenfuehren`: `rahmenlehrplaene.jsonl` (Plan, Datum, URL, Lernfelder, ESCO-Berufe, Status)
+   und `pruefliste_rahmenlehrplaene.csv`; `korrekturen_rahmenlehrplaene.csv` hat Vorrang
+   (`korrektur_codes` = ESCO-Kürzel, erste acht Zeichen der UUID, `-` = Plan ausschließen).
+
+**Ergebnis:** 222 der 265 Pläne haben einen ESCO-Beruf (171 gesichert, 29 wahrscheinlich, Rest unsicher);
+69 Pläne stehen auf der Prüfliste (keine Mehrheit oder lückenhafte Lernfeldliste). Mit der Voreinstellung
+gehen 3.279 Lernfeld-Themen (ESCO-Beruf × Lernfeld) in die Seeds ein.
+
 ## Mappings Elementarbereich
 
 **Bildungsbereiche** sind die sieben des Gemeinsamen Rahmens der Länder für die frühe Bildung in
@@ -328,6 +359,17 @@ Unterrichtsreihe, Fachbeitrag für Lehrkräfte; je Typ Themenart, Zielgruppe, St
 **Niveaus**: Klasse 1–2, 3–4, 5–6, 7–8, 9–10, Einführungs- und Qualifikationsphase, `exactMatch`
 KIM-Bildungsstufen 1–3.
 
+**KMK-Bildungsstandards** (Folge `bildungsstandards`, Schritte `bista` und `bista_zusammenfuehren`; nach
+den Themen ausführen). `bildungsstandards_gliederung.json` enthält die Gliederung der 14 aktuellen
+Dokumente (Deutsch und Mathematik für Primarbereich, ESA/MSA und Allgemeine Hochschulreife; erste
+Fremdsprache für ESA/MSA und AHR; Biologie, Chemie, Physik für MSA und AHR): 314 Überschriften
+(Kompetenzbereiche, Teilbereiche, Leitideen, Basiskonzepte, prozessbezogene Kompetenzen) mit Code und Pfad,
+keine Standardformulierungen. Je Unterrichtsthema und Schulstufe gilt das passende Dokument (Primarstufe →
+Primarbereich, Sek I → ESA/MSA, Sek II → AHR); drei Stimmen wählen ein bis zwei inhaltliche Einträge
+(Teilbereich vor Kompetenzbereich, leere Auswahl erlaubt). Prozessbezogene Kompetenzen gelten für alle Themen
+eines Fachs und werden nicht zugeordnet. **Ergebnis:** 4.316 von 5.052 Paaren aus Thema und Dokument haben
+einen Eintrag (gesichert 3.275, wahrscheinlich 1.027, unsicher 14), `bildungsstandards.jsonl`.
+
 ## Mappings Erwachsenenbildung
 
 Allgemeine und berufliche Weiterbildung in Kursform (Volkshochschule u. a.); die berufliche
@@ -340,9 +382,11 @@ Aufstiegsfortbildung (Meister, Fachwirt) gehört zur Berufsbildung.
 Themen ein gemeinsames Ziel „4.fs“, weil Sprachkursthemen für alle Sprachen gelten; die konkrete Sprache wird
 beim Seed gezogen (je Thema rotierend) und als Zielsprache in `cclom:general_language` ergänzt.
 
-**Themen** aus drei Quellen (Filter `quellen`):
+**Themen** aus vier Quellen (Filter `quellen`):
 
-1. `gnd` (955): Schritte `kandidaten_llm` (je Fachgebiet 30–40 typische Kursthemen aus zwei Perspektiven),
+1. `gnd` (981): Schritte `kandidaten_llm` (je Fachgebiet 30–40 typische Kursthemen aus zwei Perspektiven,
+   dazu für die Grundbildung je Alltagsfeld Geld, Behörden, Gesundheit und Arbeit 30–40 Gegenstände und
+   Situationen, an denen gelesen, geschrieben oder gerechnet wird, z. B. Kontoauszug, Mahnung, Lastschrift),
    `gnd` (exakt auf GND-Sachbegriffe, 1.076 Treffer), `kandidaten` (je Begriff die sechs ähnlichsten
    Fachgebiete per Embedding plus die Fachgebiete, die ihn vorgeschlagen haben), `eignung` (drei Stimmen:
    Kursthema, Thema für Kursleitende, ungeeignet; 121 verworfen), `fachgebiete` (drei Stimmen, ein bis zwei
@@ -356,11 +400,20 @@ beim Seed gezogen (je Thema rotierend) und als Zielsprache in `cclom:general_lan
    treffen solche Kommunikationssituationen kaum.
 3. `schulthemen` (485): für die Schulabschlusskurse die Unterrichtsthemen des Bereichs Schule in Deutsch,
    Mathematik und Englisch (Sek I → Haupt- und Realschulabschluss, Sek II → Fachhochschulreife und Abitur).
+4. `grundbildung` (334): Gliederung der lea.-Alpha-Levels (Lesen, Schreiben, Sprachempfinden; Alpha-Level
+   1–6) und der DVV-Rahmencurricula Lesen, Schreiben (Texte, Orthografie) und Rechnen (Stufen 1–3,
+   Geometrie, Themenfelder „Mathematik im Leben“ wie Einkaufen, Bankgeschäfte, Mieten und Wohnen) samt
+   Unterrichtskonzepten (`grundbildung_themen.json`). Übernommen sind Überschriften und Titel; wo die Vorlage
+   nur Kann-Beschreibungen in ganzen Sätzen hat, sind die Labels kurze eigene Bezeichnungen. Lesen und
+   Schreiben → 7.01 Alphabetisierung, Rechnen → 7.02, Alltags-Themenfelder → 7.03. Ein lea.-Modell für
+   Rechnen ist nicht veröffentlicht.
 
-**Ergebnis:** 1.557 Themen in 54 Fachgebieten (Programmbereiche: Politik–Gesellschaft–Umwelt 323,
-Kultur–Gestalten 308, Gesundheit 103, Sprachen 146, Arbeitsleben–IT–Organisation 141, Schulabschlüsse 505,
-Grundbildung 31). Die 19 Prüffälle sind redaktionell entschieden. Grundbildung hat wenige Themen; bei
-Gleichverteilung nach Programmbereich wiederholen sie sich.
+Kommen neue Kandidaten hinzu, werden nur sie abgestimmt; vorhandene Stimmen bleiben unverändert.
+
+**Ergebnis:** 1.917 Themen in 54 Fachgebieten (Programmbereiche: Politik–Gesellschaft–Umwelt 332,
+Kultur–Gestalten 308, Gesundheit 108, Sprachen 146, Arbeitsleben–IT–Organisation 146, Schulabschlüsse 505,
+Grundbildung 372: Alphabetisierung 222, Rechnen 120, Alltagskompetenzen 22, berufliche Orientierung 8).
+Die 19 Prüffälle sind redaktionell entschieden.
 
 **Inhaltstypen** (14 aus OEH `new_lrt`): Kursbeschreibung, Handout, Übungsblatt, Anleitung, Checkliste,
 Selbstlerneinheit, Präsentation, Quiz, Wortliste und Dialog/Rollenspiel (Sprachen, Grundbildung),
@@ -427,18 +480,25 @@ Ausbildende); das Niveau passt zum Qualifizierungsweg. Optional: `synth:lernort`
 Ausbildungsbetrieb, überbetriebliche Ausbildungsstätte bzw. Fortbildungsorte) und
 `synth:querschnittsthema` (25 %; eine der vier Standardberufsbildpositionen). Gleichverteilung: `beruf`
 (Standard), `thema`, `kompetenz`, `berufsgruppe`, `berufshauptgruppe`, `berufsbereich`.
+Lernfeld-Themen tragen statt `synth:kompetenz` das Feld `synth:lernfeld` (Nummer, Titel, Ausbildungsjahr,
+Zeitrichtwert, Rahmenlehrplan mit Datum und Download-URL); `synth:thema` ist das Lernfeld im Beruf, der
+Lernort ist immer Berufsschule, das Niveau folgt dem Ausbildungsjahr (1. Jahr → Grundstufe, sonst
+Fachstufe). Die Kompetenzfilter gelten für sie nicht.
 
 | Filter (Berufsbildung) | Werte | Voreinstellung |
 |---|---|---|
+| `quellen` | `esco` (Beruf × Kompetenz), `lernfeld` (Beruf × Lernfeld des Rahmenlehrplans) | beide |
 | `qualifizierung` | `ausbildung`, `fortbildung`, `studium`, `anlernen` | Ausbildung und Fortbildung |
 | `relation` | `essenziell`, `optional` | essenziell |
 | `kompetenzart` | `wissen`, `faehigkeit` | beide |
 | `reichweite` | `berufsspezifisch`, `branchenspezifisch`, `branchenuebergreifend`, `querschnitt` | ohne `querschnitt` |
 | `kldb_status`, `qualifizierung_status` | wie `fach_status` | ohne `unsicher` |
+| `lernfeld_status` | Zuordnung Rahmenlehrplan → ESCO-Beruf, wie `fach_status` | ohne `unsicher` |
 | `belege` | `wlo` (Kompetenz als WLO-Keyword mit Datensätzen derselben KldB-Berufsgruppe), `wlo_beruf` (Beruf als WLO-Keyword), `handmapping` (KldB durch Umsteigeschlüssel bestätigt) | keine Anforderung |
 
-Der Volltext-Prompt der Berufsbildung (`prompts/berufsbildung/volltext.md`) nennt Beruf, Kompetenz,
-Berufsfeld, Lernort und Querschnittsthema und verlangt Bezug auf typische Arbeitsaufgaben im Beruf.
+Der Volltext-Prompt der Berufsbildung (`prompts/berufsbildung/volltext.md`) nennt Beruf, Kompetenz bzw.
+Lernfeld mit Rahmenlehrplan, Berufsfeld, Lernort und Querschnittsthema und verlangt Bezug auf typische
+Arbeitsaufgaben im Beruf; Lernfeld-Materialien sind als Lernsituation der Berufsschule angelegt.
 
 **Seeds Elementarbereich.** Bildungsstufe fest Elementarbereich; `synth:bildungsbereich_elementar`
 (Bildungsbereich des Gemeinsamen Rahmens) und `ccm:taxonid` (closeMatch auf OEH-Schulfächer). Zielgruppe je
@@ -454,7 +514,11 @@ Filters `stufen`) je Thema rotierend gezogen; das Niveau (Jahrgang) passt dazu. 
 dem Themenbaum, `ccm:curriculum` = Thema im WLO-Themenbaum. Fremdsprachenportale ergänzen die Zielsprache in
 `cclom:general_language`. Zielgruppe: Unterrichtsthemen 75 % Lernende, 25 % Lehrkräfte; Lehrkräftethemen
 nur Lehrkräfte. Optional: Unterrichtsphase (60 %), Dauer (50 %), Anforderungsbereich I–III der KMK (40 %,
-in der Primarstufe nur I und II), Sozialform (30 %). Gleichverteilung: `thema` (Standard), `portal`
+in der Primarstufe nur I und II), Sozialform (30 %), Förderschwerpunkt (8 % der Unterrichtsthemen in
+Primarstufe und Sek I; `synth:foerderschwerpunkt`, z. B. Lernen, Sprache, Hören, dazu die Bildungsstufe
+Förderschule als zweiter Wert in `ccm:educationalcontext`). Unterrichtsthemen in Fächern mit
+Bildungsstandards tragen `synth:bildungsstandards` (Dokument, Beschluss, URL, gewählte Einträge mit Code,
+Typ und Pfad). Gleichverteilung: `thema` (Standard), `portal`
 (kleine Portale wiederholen ihre Themen oft, „Gewaltprävention“ hat nur eines), `fach`, `stufe`. Filter:
 `stufen`, `art`, `stufen_status`, `art_status`, `belege` (`wlo`, `wlo_stufe`, `gnd`). Eigener
 Volltext-Prompt (`prompts/schule/volltext.md`) mit Themenpfad, Jahrgang, Operatoren und Zielsprache.
@@ -528,9 +592,9 @@ Bedingte Abschnitte `{{#name}}…{{/name}}` erscheinen nur, wenn der Wert gesetz
 | `thema`, `thema_beschreibung`, `thema_keywords` | aus dem Thema (deutsch) |
 | `fach`, `bildungsstufe`, `niveau`, `zielgruppe` | aus den Metadaten (bereinigte Labels) |
 | `didaktische_funktion`, `bearbeitungsdauer` | optional |
-| `beruf`, `beruf_beschreibung`, `kompetenzart`, `lernort`, `querschnittsthema` | nur Berufsbildung (`lernort`, `querschnittsthema` optional) |
+| `beruf`, `beruf_beschreibung`, `kompetenzart`, `lernort`, `querschnittsthema`, `lernfeld`, `rahmenlehrplan` | nur Berufsbildung (`lernort`, `querschnittsthema` optional; `kompetenzart` nur ESCO-Themen, `lernfeld` und `rahmenlehrplan` nur Lernfeld-Themen) |
 | `themenart`, `sozialform` | Elementarbereich (`sozialform` optional, auch Schule) |
-| `thema_pfad`, `zielsprache`, `anforderungsbereich` | nur Schule (`anforderungsbereich` optional, `zielsprache` nur Fremdsprachen) |
+| `thema_pfad`, `zielsprache`, `anforderungsbereich`, `foerderschwerpunkt`, `bildungsstandards` | nur Schule (`anforderungsbereich`, `foerderschwerpunkt` optional, `zielsprache` nur Fremdsprachen, `bildungsstandards` nur in Fächern mit Bildungsstandards) |
 | `programmbereich`, `einfache_sprache`, `veranstaltungsform` | nur Erwachsenenbildung (auch `zielsprache`) |
 | `rolle`, `sprache` | Autorenrolle im Volltext-Prompt, Sprache als Wort |
 | `titel`, `beschreibung`, `keywords`, `volltext`, `auftrag` | nur in `material.md`: bisher erzeugte Felder („-“ = leer), Volltext, Auftrag aus der Felddatei |
@@ -550,7 +614,10 @@ Bedingte Abschnitte `{{#name}}…{{/name}}` erscheinen nur, wenn der Wert gesetz
 - ESCO ist europäisch. Viele Berufe entsprechen keinem deutschen Ausbildungsberuf eins zu eins, manche
   deutsche Übersetzungen sind holprig. Der Qualifizierungsweg ist eine Einschätzung per Abstimmung,
   keine amtliche Zuordnung zu den anerkannten Ausbildungsberufen (deren Verzeichnis ist nicht offen
-  lizenziert). Lernfelder der Rahmenlehrpläne gibt es nicht maschinenlesbar; sie fehlen.
+  lizenziert). Lernfelder der Rahmenlehrpläne gibt es nur als PDF; die Lernfeldlisten stammen aus einer
+  automatischen Umwandlung und sind gegen die Kopfzeilen der Lernfelder geprüft, nicht von Hand. 12 im
+  Jahr 2025/26 erneuerte Pläne fehlen, bis ihre Markdown-Fassungen vorliegen; die Zuordnung zum
+  ESCO-Beruf ist eine Abstimmung, keine amtliche Zuordnung.
 - Synthetische Texte können fachliche Fehler enthalten. Für Trainingszwecke ist die Abbildung Text →
   Metadaten wichtiger als die fachliche Tiefe. Für eine Veröffentlichung als Lernmaterial sind sie nicht
   geprüft.

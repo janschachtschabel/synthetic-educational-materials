@@ -9,14 +9,16 @@ the OpenEduHub/edu-sharing metadata schema. Each value has a URI, label, and pro
 Education sectors are modules. Included are **higher education** (Destatis-Fächersystematik,
 OpenAlex topics, teaching topics from GND and the hbz catalog, keyword evidence from WirLernenOnline),
 **vocational education and training** (ESCO occupations × skills, KldB occupational fields, qualification
-pathway and DQR level, manual mapping via the BA conversion key ISCO → KldB), **early childhood education**
+pathway and DQR level, manual mapping via the BA conversion key ISCO → KldB, learning fields of the KMK
+framework curricula), **early childhood education**
 (seven educational areas of the Gemeinsamer Rahmen der Länder, daycare topics as GND subject headings from
 LLM topic lists and WLO keywords, suitability and age group determined by vote), **school** (topic trees
 from WLO subject portals plus finer topics from WLO keywords per subject as GND subject headings, primary,
-lower secondary and upper secondary levels as metadata and filters),
+lower secondary and upper secondary levels as metadata and filters, KMK educational standards and
+special-needs focus as metadata),
 and **adult education** (program areas and subject areas from the Volkshochschul-Statistik, course topics
 from GND, language course topics from the Rahmencurriculum für Integrationskurse, school-leaving
-qualification courses). More sectors can be added.
+qualification courses, basic education from the lea. Alpha-Levels and DVV framework curricula). More sectors can be added.
 
 How everything is created: [METHODOLOGY.md](METHODOLOGY.md). The data in detail: [data/README.md](data/README.md).
 
@@ -47,7 +49,8 @@ content type check, metadata, and provenance), **Prompts** (edit and save),
 default can be set with `SEM_UI_SPRACHE=en`. This affects only the interface; the language of generated
 content is selected separately in the “Materials” tab (output language). The translations are in
 `i18n/en.json` (German text as keys). To find new interface text, run `python scripts/i18n_texte.py`;
-`--uebersetzen` adds missing translations using an LLM.
+`--uebersetzen` adds missing translations using an LLM. Whether the English documentation lags behind the
+German version is shown by `python scripts/doku_paare.py` (exit code 1 if a version is outdated).
 
 Seed files always start with `seeds_`, generated materials with `materialien_` (both under
 `output/`). The user interface and command line add the prefix themselves; the selection lists show only
@@ -71,6 +74,8 @@ python -m sem mappings hochschule gnd           # Topics from GND and the hbz ca
 python -m sem auswahl berufsbildung             # Vocational education and training filters (qualification pathway, skill type …)
 python -m sem seeds --anzahl berufsbildung=10000 --gleichverteilung berufsbildung=beruf --seed 42
 python -m sem mappings berufsbildung --wlo export.csv   # Load ESCO, vote on KldB and qualification, WLO evidence
+python -m sem mappings berufsbildung lernfeld --rlp FOLDER   # Learning fields of the KMK framework curricula (Markdown) → ESCO occupations
+python -m sem seeds --anzahl berufsbildung=2000 --auswahl berufsbildung.quellen=lernfeld --seed 42   # learning-field topics only
 python -m sem seeds --anzahl schule=5000 --auswahl schule.stufen=sek1 --seed 42   # Secondary level I only
 python -m sem seeds --anzahl schule=5000 --auswahl schule.herkunft=themenbaum --seed 42   # topic trees only, without keyword topics
 python -m sem mappings schule keywords --wlo export.csv   # school topics from WLO keywords (then kw_gnd … kw_stufen)
@@ -112,6 +117,8 @@ Everything under `data/` can be used without the code (JSON, JSONL, CSV, UTF-8):
 - `data/mappings/berufsbildung/berufe.jsonl`: 2,930 ESCO occupations with KldB occupational unit group (and higher-level groups),
   qualification pathway, status, confidence, manual mapping confirmation, and the URIs of their essential and
   optional skills
+- `data/mappings/berufsbildung/rahmenlehrplaene.jsonl`: 265 KMK framework curricula with 3,697 learning
+  fields (number, title, training year, time allocation; no goal texts) and their mapped ESCO occupations
 - `data/mappings/berufsbildung/kompetenzen.jsonl`: 12,539 ESCO skills (label, description, type,
   scope, ISCED-F field, `oeh_uri` in the OEH vocabulary escoSkills, WLO evidence)
 - `data/mappings/elementar/themen_elementar.jsonl`: 1,033 daycare topics (GND URI, synonyms, definition,
@@ -120,8 +127,9 @@ Everything under `data/` can be used without the code (JSON, JSONL, CSV, UTF-8):
 - `data/mappings/schule/themen_schule.jsonl`: 7,569 school topics: 3,153 from the WLO topic trees and 4,416
   finer topics from WLO keywords per subject (normalized as GND subject headings), with subject portal, path,
   subject, topic type, school levels, provenance, status, WLO evidence, and GND alignment
-- `data/mappings/erwachsenenbildung/themen_erwachsenenbildung.jsonl`: 1,557 course topics with subject area and
-  program area from the Volkshochschul-Statistik, provenance (`gnd`, `rahmencurriculum`, `schulthemen`), status;
+- `data/mappings/erwachsenenbildung/themen_erwachsenenbildung.jsonl`: 1,917 course topics with subject area and
+  program area from the Volkshochschul-Statistik, provenance (`gnd`, `rahmencurriculum`, `schulthemen`,
+  `grundbildung`), status;
   `programmbereiche.json`: the classification system with 85 subject areas
 
 ## Structure

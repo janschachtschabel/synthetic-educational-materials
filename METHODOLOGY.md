@@ -37,6 +37,11 @@ open vocabularies and taxonomies ──► Mappings (topics with subject assignm
 | Gemeinsamer Rahmen der Länder für die frühe Bildung in Kindertageseinrichtungen (2022 edition, [according to Eurydice](https://eurydice.eacea.ec.europa.eu/de/eurypedia/germany/leitlinien-der-fruehkindlichen-bildung-betreuung-und-erziehung)) | Seven educational areas for early childhood education | Official work; list and short descriptions in the repository under CC0 |
 | Volkshochschul-Statistik des DIE, Fachgebietsgliederung seit 2018 (7 program areas, 85 subject areas): Echarti, Nicolas; Huntemann, Hella; Lux, Thomas; Reichart, Elisabeth (2022): *Volkshochschul-Statistik. 59. Folge, Berichtsjahr 2020.* DIE Survey. Bielefeld: wbv. [DOI 10.3278/70681](https://doi.org/10.3278/70681) | Adult education subjects (codes and labels from the tables, with line breaks joined) | [CC BY 4.0 DE](https://creativecommons.org/licenses/by/4.0/deed.de); full source citation in `programmbereiche.json` and in the provenance of every seed |
 | Buhlmann, Rosemarie; Ende, Karin; Kaufmann, Susan; Kilimann, Angela; Schmitz, Helen: *[Rahmencurriculum für Integrationskurse – Deutsch als Zweitsprache](https://www.goethe.de/resources/files/pdf209/rahmencurriculum-integrationskurs_20171.pdf).* Goethe-Institut im Auftrag des BMI (2007), überarbeitete Neuauflage im Auftrag des BAMF (2017) | Language-course topics for adult education (outline) | Copyright protected; only chapter codes and titles have been adopted (capitalization adjusted); full source citation in `sprachkurs_themen.json` and in the provenance of every seed |
+| KMK framework curricula for vocational schools ([download area](https://www.kmk.org/themen/berufliche-schulen/duale-berufsausbildung/downloadbereich-rahmenlehrplaene.html), 307 curricula, as of 30 Oct 2026) | VET learning fields (number, title, training year, time allocation) | no open licence stated; only learning-field number, title, year and time allocation are taken, no goal or content texts; download URL per curriculum in `rahmenlehrplaene.jsonl` and in the provenance of each seed |
+| Secretariat of the KMK (ed.): [Bildungsstandards](https://www.kmk.org/themen/qualitaetssicherung-in-schulen/bildungsstandards.html) German, mathematics (primary, ESA/MSA as amended 2022; Abitur 2012), first foreign language (ESA/MSA as amended 2023; Abitur 2012), biology, chemistry, physics (MSA as amended 2024; Abitur 2020) | competence areas, key ideas and basic concepts as metadata of school topics | protected by copyright (Abitur editions © Wolters Kluwer and KMK); only outline and headings taken; full citation per document in `bildungsstandards_gliederung.json` and in the seed |
+| Special-needs focus areas (Förderschwerpunkte) of special educational support ([KMK statistics](https://www.kmk.org/dokumentation-statistik/statistik/schulstatistik/sonderpaedagogische-foerderung-an-schulen.html)) | optional school field special-needs focus | list of names |
+| lea. – Literalitätsentwicklung von Arbeitskräften, University of Hamburg: competence models/Alpha-Levels [reading](https://www.ew.uni-hamburg.de/einrichtungen/ew3/erwachsenenbildung-und-lebenslanges-lernen/files/kompetenzmodell-lesen.pdf) (Kretschmann, Wieken 2010), [writing](https://www.ew.uni-hamburg.de/einrichtungen/ew3/erwachsenenbildung-und-lebenslanges-lernen/files/kompetenzmodell-schreiben.pdf) (Grotlüschen, Dessinger, Heinemann, Schepers 2010), [language awareness](https://www.ew.uni-hamburg.de/einrichtungen/ew3/erwachsenenbildung-und-lebenslanges-lernen/files/kompetenzmodell-sprachempfinden.pdf) (Kretschmann, Wieken 2010) | basic-education topics (Alpha-Level, competence area) | protected by copyright, no licence stated; outline only, short labels for the can-do descriptors written by us |
+| Deutscher Volkshochschul-Verband (ed.): [DVV-Rahmencurricula kompakt. Lesen und Schreiben – Grundlagen](https://www.grundbildung.de/downloads/lesen/lesen-schreiben-grundlagen-rc.pdf), 2nd ed. 2021; Meyerhöfer, Hartmann, Jahnke, Wollring: [DVV-Rahmencurriculum Rechnen](https://www.grundbildung.de/downloads/rechnen/rechnen-dvv-rahmencurriculum.pdf), 2nd ed. 2017; [Unterrichtskonzepte Rechnen Stufe 1–3](https://www.grundbildung.de/downloads/rechnen/rechnen-unterrichtskonzepte-rc-stufe1.pdf), 2021 | basic-education topics (chapters, learning units, topic fields) | reading/writing and teaching concepts CC BY-ND, Rahmencurriculum Rechnen © DVV; outline and titles only; full citations in `grundbildung_themen.json` and in the provenance of each seed |
 | [Umsteigeschlüssel KldB 2020 → ISCO-08](https://statistik.arbeitsagentur.de/DE/Navigation/Grundlagen/Klassifikationen/Klassifikation-der-Berufe/KldB2010-Fassung2020/Arbeitsmittel/Arbeitsmittel-Nav.html) (BA, as of 06.08.2021) | Manual mapping notes for ESCO occupation → KldB and requirement levels | “Quelle: Statistik der Bundesagentur für Arbeit”; temporary cache only |
 
 The vocabularies are prepared and stored under `data/vocabs/` (retrieved with `scripts/fetch_vocabs.py`, date in
@@ -150,6 +155,15 @@ The skills are matched against the OEH vocabulary `escoSkills` (`skos:exactMatch
 
 **Levels** (`niveaus.json`) based on the DQR, with `exactMatch` to the OEH vocabulary `dqrCompetenceLevels`: on-the-job training (2), first year of vocational training (3), second and third years of vocational training (4), vocational specialist advanced training (5), Bachelor Professional (6), Master Professional (7). Only what fits the qualification pathway is selected; the educational level follows from it (vocational education and training or advanced vocational training).
 
+**Learning fields of the framework curricula** (sequence `lernfeld`, second topic source). The KMK publishes the vocational-school framework curricula (Rahmenlehrpläne) only as PDFs; there is no machine-readable version (XML, API, open data). The pipeline reads Markdown conversions of the PDFs (Docling), folder given with `--rlp FOLDER` or `RLP_MARKDOWN_DIR`; they stay outside the repository. Only number, title, training year and time allocation (Zeitrichtwert) of each learning field are taken, no goal or content texts.
+
+1. `lernfelder`: The KMK download list (307 framework curricula with title, date and download URL; file names are only in the download header and are requested one by one) defines which curricula are current. Two places in each curriculum are read and compared: the overview table in part V and the header of each learning field ("Lernfeld 3: … 2. Ausbildungsjahr, Zeitrichtwert 80 Stunden"). The headers compensate for conversion errors in the table (merged rows, missing hours). As of 30 Oct 2026: 295 curricula are available as Markdown, 12 renewed in 2025/26 are still missing; 30 are older subject-based curricula without learning fields; 265 curricula with 3,697 learning fields remain, 257 of them without gaps.
+2. `rlp_kandidaten`: Local embeddings compare the title and first learning fields of each curriculum with all ESCO occupations (label, synonyms, description); the 12 most similar are candidates.
+3. `rlp_berufe`: Three votes (career guidance, ESCO coding, vocational-school teacher) select one to three ESCO occupations whose activity corresponds to the training occupation (specialisations may have their own occupation; helper, master-craftsperson and degree occupations may not).
+4. `rlp_zusammenfuehren`: `rahmenlehrplaene.jsonl` (curriculum, date, URL, learning fields, ESCO occupations, status) and `pruefliste_rahmenlehrplaene.csv`; `korrekturen_rahmenlehrplaene.csv` takes precedence (`korrektur_codes` = ESCO short codes, the first eight characters of the UUID, `-` = exclude curriculum).
+
+**Result:** 222 of the 265 curricula have an ESCO occupation (171 `gesichert`, 29 `wahrscheinlich`, the rest `unsicher`); 69 curricula are on the review list (no majority or a learning-field list with gaps). With the default settings, 3,279 learning-field topics (ESCO occupation × learning field) are included in the seeds.
+
 ## Mappings: Early Childhood Education
 
 **Education sectors** are the seven from the Gemeinsamer Rahmen der Länder for early education in daycare centers (2022 edition, based on Eurydice): integrated language development in everyday activities; personal and socio-emotional development, values, religiosity; STEM; media and digital education; aesthetic education; body, movement, health, prevention; environmental education and education for sustainable development (`bildungsbereiche.json` with short descriptions and `closeMatch` to OEH school subjects used by WLO to index daycare materials).
@@ -241,6 +255,8 @@ portals.
 **Levels**: grades 1–2, 3–4, 5–6, 7–8, 9–10, introductory and qualification phases, `exactMatch`
 KIM educational levels 1–3.
 
+**KMK educational standards** (sequence `bildungsstandards`, steps `bista` and `bista_zusammenfuehren`; run after the topics). `bildungsstandards_gliederung.json` holds the outline of the 14 current documents (German and mathematics for primary, ESA/MSA and Abitur; first foreign language for ESA/MSA and Abitur; biology, chemistry and physics for MSA and Abitur): 314 headings (competence areas, sub-areas, key ideas, basic concepts, process-related competences) with code and path, no standard texts. For each classroom topic and school level the matching document applies (primary → primary, lower secondary → ESA/MSA, upper secondary → Abitur); three votes select one or two content entries (sub-area before competence area, empty selection allowed). Process-related competences apply to all topics of a subject and are not assigned. **Result:** 4,316 of 5,052 topic-document pairs have an entry (3,275 `gesichert`, 1,027 `wahrscheinlich`, 14 `unsicher`), `bildungsstandards.jsonl`.
+
 ## Mappings: Adult Education
 
 General and vocational continuing education in course format (adult education centers and others); advanced
@@ -255,9 +271,11 @@ foreign languages are grouped into one shared target, “4.fs”, for topics, be
 to all languages; the specific language is selected when the seed is drawn (rotating by topic) and added as the
 target language in `cclom:general_language`.
 
-**Topics** from three sources (filter `quellen`):
+**Topics** from four sources (filter `quellen`):
 
-1. `gnd` (955): steps `kandidaten_llm` (30–40 typical course topics per subject area, from two perspectives),
+1. `gnd` (981): steps `kandidaten_llm` (30–40 typical course topics per subject area, from two perspectives,
+   plus for basic education 30–40 everyday items and situations per field (money, authorities, health, work)
+   that involve reading, writing or arithmetic, e.g. bank statement, payment reminder, direct debit),
    `gnd` (exact match to GND subject headings, 1,076 matches), `kandidaten` (the six most similar subject areas
    per term using embeddings, plus the subject areas that suggested it), `eignung` (three votes: course topic,
    topic for course instructors, unsuitable; 121 discarded), `fachgebiete` (three votes, one or two subject
@@ -273,11 +291,19 @@ target language in `cclom:general_language`.
 3. `schulthemen` (485): for school-leaving qualification courses, classroom topics from the School section in
    German, mathematics, and English (lower secondary → Hauptschulabschluss and Realschulabschluss, upper
    secondary → Fachhochschulreife and Abitur).
+4. `grundbildung` (334): outline of the lea. Alpha-Levels (reading, writing, language awareness; Alpha-Level
+   1–6) and of the DVV framework curricula for reading, writing (texts, orthography) and arithmetic (levels 1–3,
+   geometry, topic fields "Mathematik im Leben" such as shopping, banking, renting and housing) with their
+   teaching concepts (`grundbildung_themen.json`). Headings and titles are taken; where the source only has
+   can-do descriptors in full sentences, the labels are short names of our own. Reading and writing → 7.01
+   literacy, arithmetic → 7.02, everyday topic fields → 7.03. No lea. model for arithmetic is published.
 
-**Result:** 1,557 topics in 54 subject areas (program areas: Politics–Society–Environment 323,
-Culture–Creative Activities 308, Health 103, Languages 146, Working Life–IT–Organization 141,
-School-Leaving Qualifications 505, Basic Education 31). The 19 review cases were resolved editorially.
-Basic Education has few topics; with even distribution by program area, they recur.
+When new candidates are added, only they are voted on; existing votes stay unchanged.
+
+**Result:** 1,917 topics in 54 subject areas (program areas: Politics–Society–Environment 332,
+Culture–Creative Activities 308, Health 108, Languages 146, Working Life–IT–Organization 146,
+School-Leaving Qualifications 505, Basic Education 372: literacy 222, arithmetic 120, everyday skills 22,
+vocational orientation 8). The 19 review cases were resolved editorially.
 
 **Content types** (14 from OEH `new_lrt`): course description, handout, exercise sheet, instructions, checklist,
 self-study unit, presentation, quiz, vocabulary list and dialogue/role-play (Languages, Basic Education),
@@ -323,22 +349,24 @@ Controlled values are stored as a list of URIs, as in edu-sharing. The label is 
 `unsicher` is excluded by default until the review list has been reviewed; a correction or confirmation makes a topic `redaktionell`, so it is included again. Once the review is complete, all 9.130 topics are included by default.
 Each seed records in `synth:provenance` → `synth:thema` the status of each assignment and its evidence: catalog counts with query URIs (lobid), WLO records with a reference to WirLernenOnline.de and, where included in the export, links to the Node IDs. Only WLO keywords associated with higher-education subjects are used. The `.stats.json` counts topic sources, statuses, and evidence.
 
-**Vocational education and training seeds.** Instead of `ccm:oeh_taxonid_university`, they include `ccm:oeh_profession_group` (KldB occupational subgroups, OEH URIs), as well as `synth:beruf` (ESCO URI, label, ISCO-08, description, qualification pathway, higher-level KldB categories) and `synth:kompetenz` (ESCO URI, label, description, type, scope, essential/optional, `exactMatch` to OEH `escoSkills`). `synth:thema` is the competency in the context of the occupation. The content type matches the competency type and target group (80% learners, 20% teachers and trainers); the level matches the qualification pathway. Optional: `synth:lernort` (40%; vocational school, training company, inter-company training center, or continuing education venue) and `synth:querschnittsthema` (25%; one of the four standard occupational profile positions). Even distribution: `beruf` (default), `thema`, `kompetenz`, `berufsgruppe`, `berufshauptgruppe`, `berufsbereich`.
+**Vocational education and training seeds.** Instead of `ccm:oeh_taxonid_university`, they include `ccm:oeh_profession_group` (KldB occupational subgroups, OEH URIs), as well as `synth:beruf` (ESCO URI, label, ISCO-08, description, qualification pathway, higher-level KldB categories) and `synth:kompetenz` (ESCO URI, label, description, type, scope, essential/optional, `exactMatch` to OEH `escoSkills`). `synth:thema` is the competency in the context of the occupation. The content type matches the competency type and target group (80% learners, 20% teachers and trainers); the level matches the qualification pathway. Optional: `synth:lernort` (40%; vocational school, training company, inter-company training center, or continuing education venue) and `synth:querschnittsthema` (25%; one of the four standard occupational profile positions). Even distribution: `beruf` (default), `thema`, `kompetenz`, `berufsgruppe`, `berufshauptgruppe`, `berufsbereich`. Learning-field topics carry `synth:lernfeld` (number, title, training year, time allocation, framework curriculum with date and download URL) instead of `synth:kompetenz`; `synth:thema` is the learning field within the occupation, the learning venue is always the vocational school, and the level follows the training year (1st year → basic level, otherwise advanced level). The skill filters do not apply to them.
 
 | Filter (vocational education and training) | Values | Default |
 |---|---|---|
+| `quellen` | `esco` (occupation × skill), `lernfeld` (occupation × learning field of the framework curriculum) | both |
 | `qualifizierung` | `ausbildung`, `fortbildung`, `studium`, `anlernen` | Ausbildung and Fortbildung |
 | `relation` | `essenziell`, `optional` | essenziell |
 | `kompetenzart` | `wissen`, `faehigkeit` | both |
 | `reichweite` | `berufsspezifisch`, `branchenspezifisch`, `branchenuebergreifend`, `querschnitt` | excluding `querschnitt` |
 | `kldb_status`, `qualifizierung_status` | same as `fach_status` | excluding `unsicher` |
+| `lernfeld_status` | mapping framework curriculum → ESCO occupation, same as `fach_status` | excluding `unsicher` |
 | `belege` | `wlo` (competency as a WLO keyword with records from the same KldB occupational group), `wlo_beruf` (occupation as a WLO keyword), `handmapping` (KldB confirmed through a crosswalk) | no requirement |
 
-The German full-text prompt for vocational education and training (`prompts/berufsbildung/volltext.md`) names the occupation, competency, occupational field, learning venue, and cross-cutting topic, and requires a connection to typical work tasks in the occupation.
+The German full-text prompt for vocational education and training (`prompts/berufsbildung/volltext.md`) names the occupation, the competency or the learning field with its framework curriculum, occupational field, learning venue, and cross-cutting topic, and requires a connection to typical work tasks in the occupation; learning-field materials are written as a vocational-school learning situation.
 
 **Early childhood education seeds.** Educational level is fixed as early childhood education; `synth:bildungsbereich_elementar` (education sector from the Gemeinsamer Rahmen der Länder (Common Framework of the Länder)) and `ccm:taxonid` (`closeMatch` to OEH school subjects). Target group by topic type: child-focused topics—65% professionals, 20% parents, 15% children (read-aloud story, song); professional topics—75% professionals, 25% parents. Optional: didactic function, duration, social format (40% each). Even distribution: `bildungsbereich` (default), `thema`, `altersgruppe`, `art`. Filters: `art`, `herkunft` (`llm`, `wlo`), `eignung_status`, `bereich_status`, `alter_status`, `belege` (`wlo`, `llm_bestaetigt`). A dedicated German full-text prompt (`prompts/elementar/volltext.md`) is age-appropriate, avoids tests and grades, and includes guidance on safety and diversity.
 
-**School seeds.** `ccm:educationalcontext` is the school level: for each topic, a level is selected in rotation from its levels (within the `stufen` filter); the level (year group) matches it. `ccm:taxonid` = school subject from the topic tree, `ccm:curriculum` = topic in the WLO topic tree. Foreign-language portals add the target language to `cclom:general_language`. Target group: classroom topics—75% learners, 25% teachers; teacher-focused topics—teachers only. Optional: lesson phase (60%), duration (50%), KMK competency level I–III (40%, only I and II in primary education), social format (30%). Even distribution: `thema` (default), `portal` (small portals often repeat their topics; “Gewaltprävention” has only one), `fach`, `stufe`. Filters: `stufen`, `art`, `stufen_status`, `art_status`, `belege` (`wlo`, `wlo_stufe`, `gnd`). A dedicated German full-text prompt (`prompts/schule/volltext.md`) includes the topic path, year group, operators, and target language.
+**School seeds.** `ccm:educationalcontext` is the school level: for each topic, a level is selected in rotation from its levels (within the `stufen` filter); the level (year group) matches it. `ccm:taxonid` = school subject from the topic tree, `ccm:curriculum` = topic in the WLO topic tree. Foreign-language portals add the target language to `cclom:general_language`. Target group: classroom topics—75% learners, 25% teachers; teacher-focused topics—teachers only. Optional: lesson phase (60%), duration (50%), KMK competency level I–III (40%, only I and II in primary education), social format (30%), special-needs focus (8% of classroom topics in primary and lower secondary; `synth:foerderschwerpunkt`, e.g. learning, language, hearing, plus the educational level Förderschule as a second value in `ccm:educationalcontext`). Classroom topics in subjects with educational standards carry `synth:bildungsstandards` (document, resolution, URL, selected entries with code, type and path). Even distribution: `thema` (default), `portal` (small portals often repeat their topics; “Gewaltprävention” has only one), `fach`, `stufe`. Filters: `stufen`, `art`, `stufen_status`, `art_status`, `belege` (`wlo`, `wlo_stufe`, `gnd`). A dedicated German full-text prompt (`prompts/schule/volltext.md`) includes the topic path, year group, operators, and target language.
 
 **Adult education seeds.** Educational level is fixed as adult education; `synth:fachgebiet_vhs` and `synth:programmbereich_vhs` (Volkshochschul-Statistik (adult education center statistics)). Target group: course topics—80% participants, 20% course instructors; topics for course instructors—course instructors only. For basic education always, otherwise in 5% of seeds, `synth:sprachniveau` = simple language. Optional: use (50%), duration (40%), event format (40%; evening course, weekend seminar, educational leave, online course, lecture, self-study offering). Even distribution: `programmbereich` (default), `fachgebiet`, `thema`, `art`. Filters: `programmbereiche`, `quellen`, `art`, `eignung_status`, `fachgebiet_status`, `belege` (`wlo`, `llm_bestaetigt`). A dedicated German full-text prompt (`prompts/erwachsenenbildung/volltext.md`) includes the target language and simple language.
 
@@ -401,9 +429,9 @@ In the prompt templates (`prompts/`, editable in the user interface), placeholde
 | `thema`, `thema_beschreibung`, `thema_keywords` | from the topic (in German) |
 | `fach`, `bildungsstufe`, `niveau`, `zielgruppe` | from the metadata (cleaned labels) |
 | `didaktische_funktion`, `bearbeitungsdauer` | optional |
-| `beruf`, `beruf_beschreibung`, `kompetenzart`, `lernort`, `querschnittsthema` | vocational education and training only (`lernort`, `querschnittsthema` optional) |
+| `beruf`, `beruf_beschreibung`, `kompetenzart`, `lernort`, `querschnittsthema`, `lernfeld`, `rahmenlehrplan` | vocational education and training only (`lernort`, `querschnittsthema` optional; `kompetenzart` only for ESCO topics, `lernfeld` and `rahmenlehrplan` only for learning-field topics) |
 | `themenart`, `sozialform` | early childhood education (`sozialform` optional, also school) |
-| `thema_pfad`, `zielsprache`, `anforderungsbereich` | school only (`anforderungsbereich` optional, `zielsprache` only for foreign languages) |
+| `thema_pfad`, `zielsprache`, `anforderungsbereich`, `foerderschwerpunkt`, `bildungsstandards` | school only (`anforderungsbereich`, `foerderschwerpunkt` optional, `zielsprache` only for foreign languages, `bildungsstandards` only in subjects with educational standards) |
 | `programmbereich`, `einfache_sprache`, `veranstaltungsform` | adult education only (also `zielsprache`) |
 | `rolle`, `sprache` | author role in the full-text prompt, language as a word |
 | `titel`, `beschreibung`, `keywords`, `volltext`, `auftrag` | only in `material.md`: fields generated so far (“-” = empty), full text, instructions from the field file |
@@ -424,8 +452,10 @@ In the prompt templates (`prompts/`, editable in the user interface), placeholde
 - ESCO is European. Many occupations do not correspond one-to-one to a German training occupation,
   and some German translations are awkward. The qualification pathway is an estimate based on
   voting, not an official assignment to recognized training occupations (their directory is not
-  openly licensed). Learning fields from the framework curricula are not available in machine-readable
-  form; they are missing.
+  openly licensed). Learning fields from the framework curricula exist only as PDFs; the learning-field
+  lists come from an automatic conversion and are checked against the learning-field headers, not by
+  hand. 12 curricula renewed in 2025/26 are missing until their Markdown versions are available; the
+  mapping to ESCO occupations is a vote, not an official assignment.
 - Synthetic texts may contain factual errors. For training purposes, mapping text →
   metadata is more important than subject-matter depth. They have not been reviewed for publication
   as learning materials.

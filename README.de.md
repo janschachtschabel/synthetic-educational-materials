@@ -9,12 +9,13 @@ dem OpenEduHub/edu-sharing-Metadatenschema. Jeder Wert trägt URI, Label und Her
 Bildungsbereiche sind Module. Enthalten sind **Hochschule** (Destatis-Fächersystematik,
 OpenAlex-Themen, Lehrthemen aus GND und hbz-Katalog, Keyword-Belege aus WirLernenOnline) und
 **Berufliche Bildung** (ESCO-Berufe × Kompetenzen, KldB-Berufsfelder, Qualifizierungsweg und DQR-Niveau,
-Handmapping über den BA-Umsteigeschlüssel ISCO → KldB) und **Elementarbereich** (sieben Bildungsbereiche
+Handmapping über den BA-Umsteigeschlüssel ISCO → KldB, Lernfelder der KMK-Rahmenlehrpläne) und **Elementarbereich** (sieben Bildungsbereiche
 des Gemeinsamen Rahmens der Länder, Kita-Themen als GND-Sachbegriffe aus LLM-Themenlisten und WLO-Keywords,
 Eignung und Altersgruppe per Abstimmung) und **Schule** (Themenbäume der WLO-Fachportale und feinere Themen aus
-WLO-Keywords je Fach als GND-Sachbegriffe, Primarstufe, Sekundarstufe I und II als Metadatum und Filter) und **Erwachsenenbildung** (Programmbereiche und
+WLO-Keywords je Fach als GND-Sachbegriffe, Primarstufe, Sekundarstufe I und II als Metadatum und Filter, KMK-Bildungsstandards und Förderschwerpunkt als
+Metadaten) und **Erwachsenenbildung** (Programmbereiche und
 Fachgebiete der Volkshochschul-Statistik, Kursthemen aus GND, Sprachkursthemen aus dem Rahmencurriculum für
-Integrationskurse, Schulabschlusskurse). Weitere Bereiche lassen sich ergänzen.
+Integrationskurse, Schulabschlusskurse, Grundbildung aus lea.-Alpha-Levels und DVV-Rahmencurricula). Weitere Bereiche lassen sich ergänzen.
 
 Wie alles entsteht: [METHODIK.md](METHODIK.md). Die Daten im Einzelnen: [data/README.de.md](data/README.de.md).
 
@@ -45,7 +46,8 @@ Inhaltstyp-Prüfung, Metadaten und Herkunft), **Prompts** (bearbeiten und speich
 Voreinstellung über `SEM_UI_SPRACHE=en`. Das betrifft nur die Bedienung; die Sprache der erzeugten Inhalte
 wählt man getrennt davon im Reiter „Materialien“ (Ausgabesprache). Die Übersetzungen stehen in
 `i18n/en.json` (deutscher Text als Schlüssel). Neue Oberflächentexte findet `python scripts/i18n_texte.py`;
-mit `--uebersetzen` ergänzt es fehlende Übersetzungen per LLM.
+mit `--uebersetzen` ergänzt es fehlende Übersetzungen per LLM. Ob die englische Dokumentation hinter der
+deutschen zurückliegt, zeigt `python scripts/doku_paare.py` (Rückgabewert 1, wenn eine Fassung veraltet ist).
 
 Seed-Dateien beginnen immer mit `seeds_`, erzeugte Materialien mit `materialien_` (beides unter
 `output/`). Oberfläche und Kommandozeile ergänzen das Präfix selbst; die Auswahllisten zeigen nur die
@@ -69,6 +71,8 @@ python -m sem mappings hochschule gnd           # Themen aus GND und hbz-Katalog
 python -m sem auswahl berufsbildung             # Filter Berufsbildung (Qualifizierungsweg, Kompetenzart …)
 python -m sem seeds --anzahl berufsbildung=10000 --gleichverteilung berufsbildung=beruf --seed 42
 python -m sem mappings berufsbildung --wlo export.csv   # ESCO laden, KldB und Qualifizierung abstimmen, WLO-Belege
+python -m sem mappings berufsbildung lernfeld --rlp ORDNER   # Lernfelder der KMK-Rahmenlehrpläne (Markdown) → ESCO-Berufe
+python -m sem seeds --anzahl berufsbildung=2000 --auswahl berufsbildung.quellen=lernfeld --seed 42   # nur Lernfeld-Themen
 python -m sem seeds --anzahl schule=5000 --auswahl schule.stufen=sek1 --seed 42   # nur Sekundarstufe I
 python -m sem seeds --anzahl schule=5000 --auswahl schule.herkunft=themenbaum --seed 42   # nur Themenbäume, ohne Keyword-Themen
 python -m sem mappings schule keywords --wlo export.csv   # Schulthemen aus WLO-Keywords (danach kw_gnd … kw_stufen)
@@ -112,14 +116,16 @@ Alles unter `data/` ist ohne den Code nutzbar (JSON, JSONL, CSV, UTF-8):
   optionalen Kompetenzen
 - `data/mappings/berufsbildung/kompetenzen.jsonl`: 12.539 ESCO-Kompetenzen (Label, Beschreibung, Art,
   Reichweite, ISCED-F-Feld, `oeh_uri` im OEH-Vokabular escoSkills, WLO-Belege)
+- `data/mappings/berufsbildung/rahmenlehrplaene.jsonl`: 265 KMK-Rahmenlehrpläne mit 3.697 Lernfeldern
+  (Nummer, Titel, Ausbildungsjahr, Zeitrichtwert; keine Zieltexte) und zugeordneten ESCO-Berufen
 - `data/mappings/elementar/themen_elementar.jsonl`: 1.033 Kita-Themen (GND-URI, Synonyme, Definition,
   Themenart, Altersgruppe, Bildungsbereich, Herkunft, Status, WLO-Belege); `bildungsbereiche.json`: die
   sieben Bildungsbereiche mit closeMatch auf OEH-Schulfächer
 - `data/mappings/schule/themen_schule.jsonl`: 7.569 Schulthemen: 3.153 aus den WLO-Themenbäumen und 4.416
   feinere Themen aus WLO-Keywords je Fach (als GND-Sachbegriffe normiert), mit Fachportal, Pfad, Fach,
   Themenart, Schulstufen, Herkunft, Status, WLO-Belegen und GND-Abgleich
-- `data/mappings/erwachsenenbildung/themen_erwachsenenbildung.jsonl`: 1.557 Kursthemen mit Fachgebiet und
-  Programmbereich der Volkshochschul-Statistik, Herkunft (`gnd`, `rahmencurriculum`, `schulthemen`), Status;
+- `data/mappings/erwachsenenbildung/themen_erwachsenenbildung.jsonl`: 1.917 Kursthemen mit Fachgebiet und
+  Programmbereich der Volkshochschul-Statistik, Herkunft (`gnd`, `rahmencurriculum`, `schulthemen`, `grundbildung`), Status;
   `programmbereiche.json`: die Systematik mit 85 Fachgebieten
 
 ## Aufbau

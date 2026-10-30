@@ -26,6 +26,8 @@ stehen zusätzlich `definition` und `note` (KldB: Kurzbeschreibung und typische 
 | `inhaltstypen.json` | genutzte Inhaltstypen aus OEH `new_lrt` mit Textsorte, Medienform, Kompetenzarten, Zielgruppen |
 | `niveaus.json` | DQR-Niveaus mit Qualifizierungsweg und Bildungsstufe |
 | `optionale_felder.json` | Werte und Anteile der optionalen Steuerfelder (Lernort, Querschnittsthema …) |
+| `rahmenlehrplaene.jsonl` | ein KMK-Rahmenlehrplan je Zeile: `id` (`kmk:<Download-ID>`), `titel`, `datum`, `url`, `datei`, `lernfelder` (`nr`, `titel`, `jahr`, `stunden`), `vollstaendig`, `berufe` (ESCO `uri`, `label`, `code`, `stimmen`), `quelle`, `mapping` (Status, Methode) |
+| `pruefliste_rahmenlehrplaene.csv`, `korrekturen_rahmenlehrplaene.csv` | Pläne ohne Mehrheit für einen ESCO-Beruf oder mit lückenhafter Lernfeldliste; Korrekturen mit `korrektur_codes` = ESCO-Kürzel (erste acht Zeichen der UUID) mit `|`, `-` = ausschließen |
 
 Beruf-Struktur:
 
@@ -61,7 +63,9 @@ Die Themen (Beruf × Kompetenz) entstehen beim Laden aus beiden Dateien und werd
 |---|---|
 | `themen_schule.jsonl` | ein Thema je Zeile: `id` (URI im OEH-Vokabular oehTopics bzw. bei `herkunft` = `wlo_keyword` die GND-URI), `label_de`, `portal`, `portal_uri`, `pfad`, `ebene`, `definition`, `keywords`, `faecher` (OEH discipline), `art` (`unterrichtsthema`, `lehrkraftthema`), `stufen` (`primar`, `sek1`, `sek2`), `herkunft` (`themenbaum`, `wlo_keyword`), `gnd` (exakter GND-Treffer), `quelle`, `belege.wlo` (Datensätze je Stufe, Node-IDs), `belege.wlo_keyword` (Themenbaum-Thema steht auch als Keyword in WLO-Datensätzen), `mapping` (Status, Konfidenz, Stimmen, `wlo_bestaetigt`; bei Keyword-Themen zusätzlich `fach`, `synonym_bedeutung`, `stufen_entfernt`). Nur Keyword-Themen: `label_gnd`, `oberbegriffe` (GND), `eltern` (Oberthema im Themenbaum, falls belegt) |
 | `pruefliste_themen.csv`, `korrekturen.csv` | Durchsicht (`korrektur_codes` = Stufen mit `|`, `-` = ausschließen; `korrektur_art`) |
-| `inhaltstypen.json`, `niveaus.json`, `optionale_felder.json` | Inhaltstypen mit Themenart, Zielgruppen, Stufen und Fachportalen; Jahrgänge; optionale Felder (u. a. Anforderungsbereich) |
+| `inhaltstypen.json`, `niveaus.json`, `optionale_felder.json` | Inhaltstypen mit Themenart, Zielgruppen, Stufen und Fachportalen; Jahrgänge; optionale Felder (u. a. Anforderungsbereich, Förderschwerpunkt) |
+| `bildungsstandards_gliederung.json` | Gliederung der KMK-Bildungsstandards: `quellen` (Dokument, Fach, Abschluss, Beschluss, URL, Quellenangabe), `eintraege` (`code`, `quelle`, `typ`, `pfad`, `label`), nur Überschriften |
+| `bildungsstandards.jsonl` | je Unterrichtsthema und Dokument: `id` (`<Themen-ID>|<Dokument>`), `thema`, `dokument`, `eintraege` (Code, Label, Typ, Pfad, Stimmen), `status`, `mapping` |
 
 ## `mappings/erwachsenenbildung/`
 
