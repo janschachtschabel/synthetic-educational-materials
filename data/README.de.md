@@ -70,8 +70,7 @@ Die Themen (Beruf × Kompetenz) entstehen beim Laden aus beiden Dateien und werd
 | Datei | Inhalt |
 |---|---|
 | `programmbereiche.json` | 7 Programmbereiche und 85 Fachgebiete der Volkshochschul-Statistik (`notation`, `label`, `uri`, `uebergreifend` für die Sammelpositionen x.00) |
-| `sprachkurs_themen.json` | Handlungsfelder und Lernzielbereiche des Rahmencurriculums für Integrationskurse (`code`, `handlungsfeld`, `titel`, `label`, `fachgebiete`) |
-| `themen_erwachsenenbildung.jsonl` | ein Thema je Zeile: `id` (GND-URI, Rahmencurriculum-Code oder oehTopics-URI), `label_de`, `art` (`kursthema`, `kursleitungsthema`), `herkunft` (`gnd`, `rahmencurriculum`, `schulthemen`), `fachgebiet` und `programmbereich` [{`notation`, `uri`, `label`}] (Fremdsprachen als `4.fs`), `quelle`, `belege.wlo`, `mapping` |
+| `themen_erwachsenenbildung.jsonl` | ein Thema je Zeile: `id` (GND-URI oder oehTopics-URI), `label_de`, `art` (`kursthema`, `kursleitungsthema`), `herkunft` (`gnd`, `schulthemen`; `rahmencurriculum` und `grundbildung` nur lokal, siehe `lokal/`), `fachgebiet` und `programmbereich` [{`notation`, `uri`, `label`}] (Fremdsprachen als `4.fs`), `quelle`, `belege.wlo`, `mapping` |
 | `pruefliste_themen.csv`, `korrekturen.csv` | Durchsicht (`korrektur_codes` = Fachgebiete, optional `kursthema`/`kursleitungsthema`, `-` = ausschließen) |
 | `inhaltstypen.json`, `niveaus.json`, `optionale_felder.json` | Inhaltstypen mit Themenart, Zielgruppen und Programmbereichen; Niveaus je Programmbereich (GER, Alpha-Level, Abschlüsse); optionale Felder und Zielsprachen je Fachgebiet |
 
@@ -79,13 +78,22 @@ Die Themen (Beruf × Kompetenz) entstehen beim Laden aus beiden Dateien und werd
 
 Vollständige Gliederungen urheberrechtlich geschützter Vorlagen liegen nur lokal als Build-Eingabe
 (`.gitignore`), damit das Repo keine Kopie der ganzen Gliederung veröffentlicht. In die Daten gelangen nur
-die einzelnen Überschriften, die ein Thema oder Seed braucht, jeweils mit Quellenangabe.
+die einzelnen Überschriften, die ein Seed braucht, jeweils mit Quellenangabe. Themen, die vollständig aus
+einer solchen Gliederung stammen, liegen ebenfalls nur hier.
+
+Fehlt eine Datei, läuft alles weiter, nur ohne die abhängigen Teile (Spalte „ohne die Datei“), und es erscheint
+eine Warnung. Die Kennung der Dateien, von denen Seeds abhängen (sha256, 12 Zeichen; `null` = fehlt), steht in
+jedem Seed unter `synth:seed_parameter.lokale_daten` und in der Statistik (`.stats.json`, `lokale_daten`):
+Gleicher Startwert ergibt nur bei gleicher Kennung dieselben Seeds. Fassungen, die bis Oktober 2026 im Repo
+lagen, sind über die Git-Historie abrufbar.
 
 | Datei | Inhalt | ohne die Datei |
 |---|---|---|
-| `schule/bildungsstandards_gliederung.json` | Gliederung der KMK-Bildungsstandards: `meta`, `quellen` (Dokument, Fach, Abschluss, Beschluss, URL, Quellenangabe), `eintraege` (`code`, `quelle`, `typ`, `pfad`, `label`), nur Überschriften | Seeds ohne `synth:bildungsstandards`; Schritt `bista` nicht ausführbar |
+| `schule/bildungsstandards_gliederung.json` | Gliederung der KMK-Bildungsstandards: `meta`, `quellen` (Dokument, Fach, Abschluss, Beschluss, URL, Quellenangabe), `eintraege` (`code`, `quelle`, `typ`, `pfad`, `label`), nur Überschriften | Seeds ohne `synth:bildungsstandards`; Schritte `bista` und `bista_zusammenfuehren` brechen mit Hinweis ab (`bildungsstandards.jsonl` bleibt unverändert) |
 | `berufsbildung/rahmenlehrplaene.jsonl` | ein KMK-Rahmenlehrplan je Zeile: `id` (`kmk:<Download-ID>`), `titel`, `datum`, `url`, `datei`, `lernfelder` (`nr`, `titel`, `jahr`, `stunden`), `vollstaendig`, `berufe` (ESCO `uri`, `label`, `code`, `stimmen`), `quelle`, `mapping` (Status, Methode) | keine Lernfeld-Themen in den Seeds; neu erzeugen mit der Folge `lernfeld` aus den Markdown-Fassungen der Pläne |
-| `erwachsenenbildung/grundbildung_themen.json` | Grundbildungs-Themen aus lea.-Alpha-Levels und DVV-Rahmencurricula: `quellen`, `themen` (`code`, `quelle`, `bereich`, `pfad`, `label`, `fachgebiet`, `niveau`) | beim Neubau der Themen entfallen die Grundbildungs-Themen (Warnung); die vorhandene `themen_erwachsenenbildung.jsonl` enthält sie |
+| `erwachsenenbildung/grundbildung_themen.json` | Grundbildungs-Themen aus lea.-Alpha-Levels und DVV-Rahmencurricula: `quellen`, `themen` (`code`, `quelle`, `bereich`, `pfad`, `label`, `fachgebiet`, `niveau`) | Schritt `zusammenfuehren` baut keine Grundbildungs-Themen (Warnung) |
+| `erwachsenenbildung/sprachkurs_themen.json` | Gliederung des Rahmencurriculums für Integrationskurse: Handlungsfelder und Lernzielbereiche (`code`, `handlungsfeld`, `titel`, `label`, `fachgebiete`), `quelle` | Schritt `zusammenfuehren` baut keine Sprachkurs-Themen (Warnung) |
+| `erwachsenenbildung/themen_lokal.jsonl` | die Themen der Erwachsenenbildung mit Herkunft `rahmencurriculum` (117) und `grundbildung` (334), gleiche Felder wie `themen_erwachsenenbildung.jsonl`; schreibt der Schritt `zusammenfuehren`, solange eine der beiden Gliederungen vorhanden ist | Erwachsenenbildung nur mit den 1.466 Themen aus dem Repo |
 
 ## `mappings/hochschule/`
 

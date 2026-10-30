@@ -136,6 +136,10 @@ def main(argv=None):
         print(f"{st['anzahl']} Seeds → {out}")
         print(json.dumps({k: st[k] for k in ("themen_abgedeckt", "seeds_je_gruppe", "seeds_je_thema", "niveau",
                                              "status", "belege")}, ensure_ascii=False))
+        fehlt = [k for k, v in st.get("lokale_daten", {}).items() if v is None]
+        if fehlt:
+            print(f"Hinweis: lokale Dateien fehlen ({', '.join(fehlt)}); die Seeds weichen von einem Lauf mit "
+                  "diesen Dateien ab (siehe data/README.md, data/lokal/)", file=sys.stderr)
 
     elif a.cmd == "auswahl":
         from .bereiche import get

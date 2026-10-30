@@ -50,6 +50,7 @@
  "Gleicher Startwert und gleiche Einstellungen ergeben dieselben Seeds.": "The same starting value and settings produce the same seeds.",
  "{datei} gibt es schon ({anzahl}) und wird beim Erzeugen überschrieben.": "{datei} already exists ({anzahl}) and will be overwritten when generated.",
  "{n} Seeds in output/{datei}. Weiter im Reiter „Materialien“.": "{n} seeds in output/{datei}. Continue in the “Materials” tab.",
+ "Lokale Dateien fehlen ({dateien}): Die Seeds weichen von einem Lauf mit diesen Dateien ab (siehe data/README.md, data/lokal/).": "Local files missing ({dateien}): the seeds differ from a run with these files (see data/README.md, data/lokal/).",
  "Seeds herunterladen": "Download seeds",
  "Noch keine Seed-Dateien (seeds_…) in output/. Erst im Reiter „Seeds“ erzeugen.": "No seed files (seeds_…) in output/ yet. Generate them first in the “Seeds” tab.",
  "Seed-Datei (neueste zuerst)": "Seed file (newest first)",
