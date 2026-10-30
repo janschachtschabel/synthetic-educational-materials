@@ -30,6 +30,8 @@ ENDPUNKT = "/v1/chat/completions"
 MAX_ANFRAGEN = 50_000            # je Batch-Datei (Grenze der API)
 MAX_BYTES = 190 * 1024 ** 2      # je Batch-Datei (Grenze der API: 200 MB)
 MAX_API_FEHLER = 3               # so oft wird eine Anfrage neu gestellt, die im Batch selbst scheitert
+MAX_BATCH_FEHLER_IN_FOLGE = 3    # so viele ganze Batches dürfen nacheinander scheitern, dann hält der Lauf an
+DATEI_TIMEOUT = 1800.0           # Sekunden für Hoch- und Herunterladen der Batch-Dateien (bis 190 MB)
 FERTIG = {"completed", "failed", "expired", "cancelled"}
 
 
@@ -71,6 +73,8 @@ class BatchLauf:
         else:
             self.stand = {"gestartet": time.time(), "parameter": parameter, "runde": 0, "materialien": {},
                           "fehlgeschlagen": [], "batches": []}
+        self.stand.setdefault("token_budget", None)  # geschätzte Tokens, die höchstens gleichzeitig unterwegs sind
+        self.stand.setdefault("batch_fehler_in_folge", 0)
         lauf_speichern(self.out_path, seeds_path, cfg, limit, inhaltstyp_pruefen, ausgabesprache, "batch")
 
     # --- Stand ------------------------------------------------------------------------------------
@@ -124,20 +128,32 @@ class BatchLauf:
         if info.status not in FERTIG:
             return
         beantwortet = set()
-        for datei_id in (info.output_file_id, info.error_file_id):
+        for datei_id in (getattr(info, "output_file_id", None), getattr(info, "error_file_id", None)):
             if not datei_id:
                 continue
-            for zeile in self.client.files.content(datei_id).text.splitlines():
+            for zeile in self.client.files.content(datei_id, timeout=DATEI_TIMEOUT).text.splitlines():
                 if zeile.strip():
                     r = json.loads(zeile)
                     beantwortet.add(r["custom_id"])
                     self._ergebnis(r)
-        # abgelaufen, abgebrochen oder ohne Zeile: neu stellen
-        for cid in b["anfragen"]:
-            if cid not in beantwortet:
-                self._api_fehler(cid, f"Batch {info.status}")
+        # Abgelaufen, abgebrochen oder vom Batch als Ganzes abgelehnt (z. B. Warteschlangen-Limit des Kontos):
+        # Die Anfragen ohne Zeile werden in der nächsten Runde neu gestellt, ohne als Fehlversuch zu zählen.
+        if info.status == "failed" and not beantwortet:
+            grund = _batch_fehler(info)
+            if "token_limit" in grund:
+                # Limit der Warteschlange: künftig höchstens halb so viel gleichzeitig unterwegs
+                self.stand["token_budget"] = max(1, int((self.stand["token_budget"] or b.get("tokens", 0)) / 2))
+            else:
+                self.stand["batch_fehler_in_folge"] += 1
+        else:
+            self.stand["batch_fehler_in_folge"] = 0
         b["ausgewertet"] = True
+        b["anzahl"] = len(b["anfragen"])
+        b["anfragen"] = []  # ausgewertet: die Liste wird nicht mehr gebraucht, stand.json bleibt klein
         self._speichern()
+        if self.stand["batch_fehler_in_folge"] >= MAX_BATCH_FEHLER_IN_FOLGE:
+            raise RuntimeError(f"{MAX_BATCH_FEHLER_IN_FOLGE} Batches nacheinander abgelehnt, zuletzt: "
+                               f"{_batch_fehler(info)}. Lauf angehalten; nach Klärung mit „weiter“ fortsetzen.")
 
     def _ergebnis(self, r: dict):
         cid = r["custom_id"]
@@ -184,40 +200,53 @@ class BatchLauf:
 
     def _abschicken(self):
         unterwegs = self._unterwegs()
+        budget = self.stand["token_budget"]
+        tokens = sum(b.get("tokens", 0) for b in self.stand["batches"] if not b["ausgewertet"])
         zeilen = []
         runde = self.stand["runde"] + 1
+        voll = False
         for sid in self._offene_ids():
             for a in self._material(sid).anfragen():
-                if (sid, a.feld) not in unterwegs:
-                    body = self.cfg.parameter(a.system, a.user, a.json_mode, batch=True)
-                    zeilen.append((f"{sid}|{a.feld}|{runde}",
-                                   json.dumps({"custom_id": f"{sid}|{a.feld}|{runde}", "method": "POST",
-                                               "url": ENDPUNKT, "body": body}, ensure_ascii=False)))
+                if (sid, a.feld) in unterwegs:
+                    continue
+                n = _tokens_geschaetzt(a)
+                # mit Budget: höchstens so viel gleichzeitig unterwegs (eine Anfrage immer, wenn nichts unterwegs ist)
+                if budget and tokens + n > budget and (zeilen or tokens):
+                    voll = True  # Rest in einer späteren Runde, wenn Platz in der Warteschlange ist
+                    break
+                body = self.cfg.parameter(a.system, a.user, a.json_mode, batch=True)
+                zeile = json.dumps({"custom_id": f"{sid}|{a.feld}|{runde}", "method": "POST",
+                                    "url": ENDPUNKT, "body": body}, ensure_ascii=False)
+                tokens += n
+                zeilen.append((f"{sid}|{a.feld}|{runde}", zeile, n))
+            if voll:
+                break
         if not zeilen:
             return
         self.stand["runde"] = runde
         self.ordner.mkdir(parents=True, exist_ok=True)
         teil, groesse, nr = [], 0, 0
-        for cid, zeile in zeilen + [(None, None)]:
+        for cid, zeile, t in zeilen + [(None, None, 0)]:
             n = len(zeile.encode("utf-8")) + 1 if zeile else 0
             if teil and (zeile is None or len(teil) >= MAX_ANFRAGEN or groesse + n > MAX_BYTES):
                 nr += 1
                 self._batch_anlegen(runde, nr, teil)
                 teil, groesse = [], 0
             if zeile is not None:
-                teil.append((cid, zeile))
+                teil.append((cid, zeile, t))
                 groesse += n
 
-    def _batch_anlegen(self, runde: int, nr: int, teil: list[tuple[str, str]]):
+    def _batch_anlegen(self, runde: int, nr: int, teil: list[tuple[str, str, int]]):
         datei = self.ordner / f"runde{runde:03d}_{nr:02d}.jsonl"
-        datei.write_text("".join(z + "\n" for _, z in teil), encoding="utf-8")
+        datei.write_text("".join(z + "\n" for _, z, _ in teil), encoding="utf-8")
         with datei.open("rb") as f:
-            hochgeladen = self.client.files.create(file=f, purpose="batch")
+            hochgeladen = self.client.files.create(file=f, purpose="batch", timeout=DATEI_TIMEOUT)
         b = self.client.batches.create(input_file_id=hochgeladen.id, endpoint=ENDPUNKT, completion_window="24h",
                                        metadata={"zweck": "synthetic-educational-materials", "runde": str(runde)})
         self.stand["batches"].append({"id": b.id, "runde": runde, "datei": datei.name, "status": b.status,
                                       "gestartet": datetime.now().isoformat(timespec="seconds"),
-                                      "anfragen": [c for c, _ in teil], "ausgewertet": False})
+                                      "anfragen": [c for c, _, _ in teil], "tokens": sum(t for _, _, t in teil),
+                                      "ausgewertet": False})
         self._speichern()  # sofort: nach einem Absturz wird nichts doppelt geschickt
 
     # --- Übersicht --------------------------------------------------------------------------------
@@ -247,6 +276,23 @@ class BatchLauf:
             if st["abgeschlossen"]:
                 return st
             time.sleep(intervall)
+
+
+def _tokens_geschaetzt(a) -> int:
+    """Grobe Schätzung der Eingabe-Tokens einer Anfrage (etwa 3 Zeichen je Token bei deutschem Text)."""
+    return (len(a.system) + len(a.user)) // 3 + 1
+
+
+def _batch_fehler(info) -> str:
+    """Fehlertext eines als Ganzes abgelehnten Batches (z. B. token_limit_exceeded)."""
+    errors = getattr(info, "errors", None)
+    data = (errors.get("data") if isinstance(errors, dict) else getattr(errors, "data", None)) or []
+    teile = []
+    for e in data:
+        code = e.get("code") if isinstance(e, dict) else getattr(e, "code", None)
+        msg = e.get("message") if isinstance(e, dict) else getattr(e, "message", None)
+        teile.append(": ".join(x for x in (code, msg) if x))
+    return "; ".join(teile) or info.status
 
 
 def status_zeile(st: dict) -> str:

@@ -138,7 +138,10 @@ class LLMClient:
 
     def chat(self, system: str, user: str, json_mode: bool = False) -> str:
         params = self.cfg.parameter(system, user, json_mode)
-        resp = self._flex(params) if params.get("service_tier") == "flex" else             self.client.chat.completions.create(**params)
+        if params.get("service_tier") == "flex":
+            resp = self._flex(params)
+        else:
+            resp = self.client.chat.completions.create(**params)
         u = getattr(resp, "usage", None)
         if u is not None:
             z = self.zaehler()

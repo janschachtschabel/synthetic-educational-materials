@@ -44,20 +44,21 @@ class Antworten:
 class FakeOpenAI:
     """files.create/content und batches.create/retrieve; ein Batch ist beim ersten retrieve fertig."""
 
-    def __init__(self, antworten, fehler_ids=(), ablaufen=0):
+    def __init__(self, antworten, fehler_ids=(), ablaufen=0, abgelehnt=0, ablehnung="token_limit_exceeded"):
         self.antworten, self.dateien, self.batches = antworten, {}, {}
+        self.abgelehnt, self.ablehnung = abgelehnt, ablehnung  # so viele Batches lehnt die API als Ganzes ab
         self.fehler_ids = set(fehler_ids)  # custom_id-Präfixe, die einmal mit Fehler zurückkommen
         self.ablaufen = ablaufen          # so viele Batches laufen ab, ohne Ergebnis
         self.files = SimpleNamespace(create=self._datei_anlegen, content=self._datei_inhalt)
         self.batches = SimpleNamespace(create=self._batch_anlegen, retrieve=self._batch_abrufen)
         self._batches, self.anfragen = {}, []
 
-    def _datei_anlegen(self, file, purpose):
+    def _datei_anlegen(self, file, purpose, timeout=None):
         fid = f"file-{len(self.dateien)}"
         self.dateien[fid] = file.read().decode("utf-8")
         return SimpleNamespace(id=fid)
 
-    def _datei_inhalt(self, fid):
+    def _datei_inhalt(self, fid, timeout=None):
         return SimpleNamespace(text=self.dateien[fid])
 
     def _batch_anlegen(self, input_file_id, endpoint, completion_window, metadata):
@@ -66,6 +67,10 @@ class FakeOpenAI:
         return SimpleNamespace(id=bid, status="validating")
 
     def _batch_abrufen(self, bid):
+        if self.abgelehnt:
+            self.abgelehnt -= 1
+            return SimpleNamespace(status="failed", output_file_id=None, error_file_id=None,
+                                   errors={"data": [{"code": self.ablehnung, "message": "abgelehnt"}]})
         if self.ablaufen:
             self.ablaufen -= 1
             return SimpleNamespace(status="expired", output_file_id=None, error_file_id=None)
@@ -182,3 +187,29 @@ def test_fortsetzen_mit_neuem_objekt_und_aufteilung(seeds_datei, tmp_path, monke
     assert len(read_done(tmp_path / "materialien_t.jsonl")) == 3
     with pytest.raises(ValueError, match="anderen Einstellungen"):
         _lauf(path, tmp_path, client, ausgabesprache="en")
+
+
+def test_warteschlangen_limit_zaehlt_nicht_als_fehlversuch(seeds_datei, tmp_path):
+    path, seeds = seeds_datei
+    client = FakeOpenAI(Antworten(load_prompts("hochschule"), titel_kaputt=0), abgelehnt=2)
+    lauf = _lauf(path, tmp_path, client)
+    for _ in range(40):
+        if lauf.weiter()["abgeschlossen"]:
+            break
+    # zwei abgelehnte Batches, trotzdem alle fertig; danach weniger gleichzeitig unterwegs
+    assert len(read_done(tmp_path / "materialien_t.jsonl")) == 3
+    assert not (tmp_path / "materialien_t.fehler.jsonl").exists()
+    assert lauf.stand["token_budget"]
+    # ausgewertete Batches tragen keine Anfrageliste mehr, nur die Anzahl
+    assert all(b["anfragen"] == [] and b["anzahl"] for b in lauf.stand["batches"])
+
+
+def test_wiederholt_abgelehnte_batches_halten_den_lauf_an(seeds_datei, tmp_path):
+    path, _ = seeds_datei
+    client = FakeOpenAI(Antworten(load_prompts("hochschule"), titel_kaputt=0), abgelehnt=99,
+                        ablehnung="invalid_request")
+    lauf = _lauf(path, tmp_path, client)
+    with pytest.raises(RuntimeError, match="nacheinander abgelehnt"):
+        for _ in range(10):
+            lauf.weiter()
+    assert not (tmp_path / "materialien_t.fehler.jsonl").exists()
