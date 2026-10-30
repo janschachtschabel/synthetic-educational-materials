@@ -10,7 +10,9 @@ OpenAlex-Themen, Lehrthemen aus GND und hbz-Katalog, Keyword-Belege aus WirLerne
 Handmapping über den BA-Umsteigeschlüssel ISCO → KldB) und **Elementarbereich** (sieben Bildungsbereiche
 des Gemeinsamen Rahmens der Länder, Kita-Themen als GND-Sachbegriffe aus LLM-Themenlisten und WLO-Keywords,
 Eignung und Altersgruppe per Abstimmung) und **Schule** (Themenbäume der WLO-Fachportale, Primarstufe,
-Sekundarstufe I und II als Metadatum und Filter). Weitere Bereiche lassen sich ergänzen.
+Sekundarstufe I und II als Metadatum und Filter) und **Erwachsenenbildung** (Programmbereiche und
+Fachgebiete der Volkshochschul-Statistik, Kursthemen aus GND, Sprachkursthemen aus dem Rahmencurriculum für
+Integrationskurse, Schulabschlusskurse). Weitere Bereiche lassen sich ergänzen.
 
 Wie alles entsteht: [METHODIK.md](METHODIK.md). Die Daten im Einzelnen: [data/README.md](data/README.md).
 
@@ -92,6 +94,9 @@ Alles unter `data/` ist ohne den Code nutzbar (JSON, JSONL, CSV, UTF-8):
   sieben Bildungsbereiche mit closeMatch auf OEH-Schulfächer
 - `data/mappings/schule/themen_schule.jsonl`: 3.153 Themen der WLO-Themenbäume mit Fachportal, Pfad, Fach,
   Themenart, Schulstufen, Status, WLO-Stufenbelegen und GND-Abgleich
+- `data/mappings/erwachsenenbildung/themen_erwachsenenbildung.jsonl`: 1.557 Kursthemen mit Fachgebiet und
+  Programmbereich der Volkshochschul-Statistik, Herkunft (`gnd`, `rahmencurriculum`, `schulthemen`), Status;
+  `programmbereiche.json`: die Systematik mit 85 Fachgebieten
 
 ## Aufbau
 

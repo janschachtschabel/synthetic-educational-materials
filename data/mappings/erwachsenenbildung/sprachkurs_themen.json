@@ -1,0 +1,1145 @@
+{
+ "beschreibung": "Sprachkurs-Themen: Handlungsfelder und Lernzielbereiche des Rahmencurriculums für Integrationskurse (Deutsch als Zweitsprache). Übernommen werden nur Kapitelcodes und -titel; fachgebiete: 4.04 Deutsch als Fremdsprache, 4.fs Fremdsprachen (alltagsnahe Handlungsfelder). Groß- und Kleinschreibung der Titel (im Original in Versalien) per LLM wiederhergestellt, nur Schreibung geprüft.",
+ "quelle": {
+  "name": "Rahmencurriculum für Integrationskurse – Deutsch als Zweitsprache, überarbeitete Neuauflage 2017, Goethe-Institut im Auftrag des Bundesministeriums des Innern",
+  "uri": "https://www.goethe.de/resources/files/pdf209/rahmencurriculum-integrationskurs_20171.pdf",
+  "lizenz": "urheberrechtlich geschützt; übernommen sind nur Gliederung und Kapiteltitel"
+ },
+ "themen": [
+  {
+   "code": "A",
+   "handlungsfeld": "Umgang mit der Migrationssituation",
+   "titel": "Umgang mit der Migrationssituation",
+   "label": "Umgang mit der Migrationssituation",
+   "fachgebiete": [
+    "4.04"
+   ]
+  },
+  {
+   "code": "B",
+   "handlungsfeld": "Realisierung von Gefühlen, Haltungen und Meinungen",
+   "titel": "Realisierung von Gefühlen, Haltungen und Meinungen",
+   "label": "Realisierung von Gefühlen, Haltungen und Meinungen",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "C",
+   "handlungsfeld": "Umgang mit Dissens und Konflikten",
+   "titel": "Umgang mit Dissens und Konflikten",
+   "label": "Umgang mit Dissens und Konflikten",
+   "fachgebiete": [
+    "4.04"
+   ]
+  },
+  {
+   "code": "D",
+   "handlungsfeld": "Gestaltung sozialer Kontakte",
+   "titel": "Gestaltung sozialer Kontakte",
+   "label": "Gestaltung sozialer Kontakte",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "E",
+   "handlungsfeld": "Umgang mit dem eigenen Sprachenlernen",
+   "titel": "Umgang mit dem eigenen Sprachenlernen",
+   "label": "Umgang mit dem eigenen Sprachenlernen",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "1.1.1",
+   "handlungsfeld": "Ämter und Behörden",
+   "titel": "Sich informieren",
+   "label": "Ämter und Behörden: Sich informieren",
+   "fachgebiete": [
+    "4.04"
+   ]
+  },
+  {
+   "code": "1.2.1",
+   "handlungsfeld": "Ämter und Behörden",
+   "titel": "Mitteilungen verstehen und darauf reagieren",
+   "label": "Ämter und Behörden: Mitteilungen verstehen und darauf reagieren",
+   "fachgebiete": [
+    "4.04"
+   ]
+  },
+  {
+   "code": "1.2.2",
+   "handlungsfeld": "Ämter und Behörden",
+   "titel": "Formulare ausfüllen und Anträge stellen",
+   "label": "Ämter und Behörden: Formulare ausfüllen und Anträge stellen",
+   "fachgebiete": [
+    "4.04"
+   ]
+  },
+  {
+   "code": "1.3.1",
+   "handlungsfeld": "Ämter und Behörden",
+   "titel": "Sich informieren und Auskünfte geben",
+   "label": "Ämter und Behörden: Sich informieren und Auskünfte geben",
+   "fachgebiete": [
+    "4.04"
+   ]
+  },
+  {
+   "code": "1.3.2",
+   "handlungsfeld": "Ämter und Behörden",
+   "titel": "Um Hilfe bitten",
+   "label": "Ämter und Behörden: Um Hilfe bitten",
+   "fachgebiete": [
+    "4.04"
+   ]
+  },
+  {
+   "code": "1.3.3",
+   "handlungsfeld": "Ämter und Behörden",
+   "titel": "Sich beschweren",
+   "label": "Ämter und Behörden: Sich beschweren",
+   "fachgebiete": [
+    "4.04"
+   ]
+  },
+  {
+   "code": "1.3.4",
+   "handlungsfeld": "Ämter und Behörden",
+   "titel": "An Beratungsgesprächen teilnehmen",
+   "label": "Ämter und Behörden: An Beratungsgesprächen teilnehmen",
+   "fachgebiete": [
+    "4.04"
+   ]
+  },
+  {
+   "code": "2.1.1",
+   "handlungsfeld": "Arbeit",
+   "titel": "Sich informieren und Auskünfte geben",
+   "label": "Arbeit: Sich informieren und Auskünfte geben",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "2.1.2",
+   "handlungsfeld": "Arbeit",
+   "titel": "Aufträge verstehen und darauf reagieren, Aufträge geben",
+   "label": "Arbeit: Aufträge verstehen und darauf reagieren, Aufträge geben",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "2.1.3",
+   "handlungsfeld": "Arbeit",
+   "titel": "Mitteilungen verstehen und darauf reagieren, Mitteilungen machen",
+   "label": "Arbeit: Mitteilungen verstehen und darauf reagieren, Mitteilungen machen",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "2.1.4",
+   "handlungsfeld": "Arbeit",
+   "titel": "Vorschriften und Anleitungen verstehen und darauf reagieren, Anleitungen geben",
+   "label": "Arbeit: Vorschriften und Anleitungen verstehen und darauf reagieren, Anleitungen geben",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "2.1.5",
+   "handlungsfeld": "Arbeit",
+   "titel": "Absprachen treffen",
+   "label": "Arbeit: Absprachen treffen",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "2.1.6",
+   "handlungsfeld": "Arbeit",
+   "titel": "An Besprechungen teilnehmen",
+   "label": "Arbeit: An Besprechungen teilnehmen",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "2.1.7",
+   "handlungsfeld": "Arbeit",
+   "titel": "Zufriedenheit/Unzufriedenheit, Lob ausdrücken",
+   "label": "Arbeit: Zufriedenheit/Unzufriedenheit, Lob ausdrücken",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "2.2.1",
+   "handlungsfeld": "Arbeit",
+   "titel": "Verträge verstehen und abschliessen, Verträge kündigen",
+   "label": "Arbeit: Verträge verstehen und abschliessen, Verträge kündigen",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "2.2.2",
+   "handlungsfeld": "Arbeit",
+   "titel": "Dokumente verstehen, Formulare ausfüllen",
+   "label": "Arbeit: Dokumente verstehen, Formulare ausfüllen",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "2.2.3",
+   "handlungsfeld": "Arbeit",
+   "titel": "Anträge stellen",
+   "label": "Arbeit: Anträge stellen",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "2.3.1",
+   "handlungsfeld": "Arbeit",
+   "titel": "Sich informieren und Auskünfte geben",
+   "label": "Arbeit: Sich informieren und Auskünfte geben",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "2.3.2",
+   "handlungsfeld": "Arbeit",
+   "titel": "Nach Wünschen fragen und Wünsche äussern",
+   "label": "Arbeit: Nach Wünschen fragen und Wünsche äussern",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "2.3.3",
+   "handlungsfeld": "Arbeit",
+   "titel": "Bestellungen aufgeben und Lieferungen entgegennehmen",
+   "label": "Arbeit: Bestellungen aufgeben und Lieferungen entgegennehmen",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "2.3.4",
+   "handlungsfeld": "Arbeit",
+   "titel": "Absprachen treffen",
+   "label": "Arbeit: Absprachen treffen",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "2.3.5",
+   "handlungsfeld": "Arbeit",
+   "titel": "Beschwerden verstehen und darauf reagieren, mit Problemen umgehen",
+   "label": "Arbeit: Beschwerden verstehen und darauf reagieren, mit Problemen umgehen",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "3.1.1",
+   "handlungsfeld": "Arbeitssuche",
+   "titel": "Die eigene Bildungsbiografie darstellen",
+   "label": "Arbeitssuche: Die eigene Bildungsbiografie darstellen",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "3.1.2",
+   "handlungsfeld": "Arbeitssuche",
+   "titel": "Sprachkompetenzen darstellen",
+   "label": "Arbeitssuche: Sprachkompetenzen darstellen",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "3.1.3",
+   "handlungsfeld": "Arbeitssuche",
+   "titel": "Stärken und Fähigkeiten benennen",
+   "label": "Arbeitssuche: Stärken und Fähigkeiten benennen",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "3.1.4",
+   "handlungsfeld": "Arbeitssuche",
+   "titel": "Ziele und Berufswünsche formulieren",
+   "label": "Arbeitssuche: Ziele und Berufswünsche formulieren",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "3.2.1",
+   "handlungsfeld": "Arbeitssuche",
+   "titel": "Sich informieren",
+   "label": "Arbeitssuche: Sich informieren",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "3.3.1",
+   "handlungsfeld": "Arbeitssuche",
+   "titel": "An Beratungsgesprächen teilnehmen",
+   "label": "Arbeitssuche: An Beratungsgesprächen teilnehmen",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "3.3.2",
+   "handlungsfeld": "Arbeitssuche",
+   "titel": "Formulare ausfüllen",
+   "label": "Arbeitssuche: Formulare ausfüllen",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "3.4.1",
+   "handlungsfeld": "Arbeitssuche",
+   "titel": "Stellenangebote verstehen und darauf reagieren, Stellengesuche aufgeben",
+   "label": "Arbeitssuche: Stellenangebote verstehen und darauf reagieren, Stellengesuche aufgeben",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "3.4.2",
+   "handlungsfeld": "Arbeitssuche",
+   "titel": "Sich bewerben",
+   "label": "Arbeitssuche: Sich bewerben",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "3.4.3",
+   "handlungsfeld": "Arbeitssuche",
+   "titel": "Eine Bewerbungsmappe zusammenstellen",
+   "label": "Arbeitssuche: Eine Bewerbungsmappe zusammenstellen",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "3.4.4",
+   "handlungsfeld": "Arbeitssuche",
+   "titel": "An einem Vorstellungsgespräch teilnehmen",
+   "label": "Arbeitssuche: An einem Vorstellungsgespräch teilnehmen",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "3.4.5",
+   "handlungsfeld": "Arbeitssuche",
+   "titel": "Verträge verstehen",
+   "label": "Arbeitssuche: Verträge verstehen",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "4.1.1",
+   "handlungsfeld": "Aus- und Weiterbildung",
+   "titel": "Sich informieren und Auskünfte geben",
+   "label": "Aus- und Weiterbildung: Sich informieren und Auskünfte geben",
+   "fachgebiete": [
+    "4.04"
+   ]
+  },
+  {
+   "code": "4.2.1",
+   "handlungsfeld": "Aus- und Weiterbildung",
+   "titel": "Sich informieren, an Beratungsgesprächen teilnehmen",
+   "label": "Aus- und Weiterbildung: Sich informieren, an Beratungsgesprächen teilnehmen",
+   "fachgebiete": [
+    "4.04"
+   ]
+  },
+  {
+   "code": "4.2.2",
+   "handlungsfeld": "Aus- und Weiterbildung",
+   "titel": "Formulare ausfüllen",
+   "label": "Aus- und Weiterbildung: Formulare ausfüllen",
+   "fachgebiete": [
+    "4.04"
+   ]
+  },
+  {
+   "code": "4.2.3",
+   "handlungsfeld": "Aus- und Weiterbildung",
+   "titel": "Verträge verstehen",
+   "label": "Aus- und Weiterbildung: Verträge verstehen",
+   "fachgebiete": [
+    "4.04"
+   ]
+  },
+  {
+   "code": "4.2.4",
+   "handlungsfeld": "Aus- und Weiterbildung",
+   "titel": "Sich bewerben",
+   "label": "Aus- und Weiterbildung: Sich bewerben",
+   "fachgebiete": [
+    "4.04"
+   ]
+  },
+  {
+   "code": "4.2.5",
+   "handlungsfeld": "Aus- und Weiterbildung",
+   "titel": "Weitere wichtige sprachliche Handlungen während der Aus-/Weiterbildung",
+   "label": "Aus- und Weiterbildung: Weitere wichtige sprachliche Handlungen während der Aus-/Weiterbildung",
+   "fachgebiete": [
+    "4.04"
+   ]
+  },
+  {
+   "code": "5.1.1",
+   "handlungsfeld": "Banken und Versicherungen",
+   "titel": "Sich informieren",
+   "label": "Banken und Versicherungen: Sich informieren",
+   "fachgebiete": [
+    "4.04"
+   ]
+  },
+  {
+   "code": "5.2.1",
+   "handlungsfeld": "Banken und Versicherungen",
+   "titel": "Anleitungen verstehen und darauf reagieren",
+   "label": "Banken und Versicherungen: Anleitungen verstehen und darauf reagieren",
+   "fachgebiete": [
+    "4.04"
+   ]
+  },
+  {
+   "code": "5.2.2",
+   "handlungsfeld": "Banken und Versicherungen",
+   "titel": "Mitteilungen verstehen und Mitteilungen machen",
+   "label": "Banken und Versicherungen: Mitteilungen verstehen und Mitteilungen machen",
+   "fachgebiete": [
+    "4.04"
+   ]
+  },
+  {
+   "code": "5.2.3",
+   "handlungsfeld": "Banken und Versicherungen",
+   "titel": "Formulare ausfüllen",
+   "label": "Banken und Versicherungen: Formulare ausfüllen",
+   "fachgebiete": [
+    "4.04"
+   ]
+  },
+  {
+   "code": "5.3.1",
+   "handlungsfeld": "Banken und Versicherungen",
+   "titel": "Sich informieren",
+   "label": "Banken und Versicherungen: Sich informieren",
+   "fachgebiete": [
+    "4.04"
+   ]
+  },
+  {
+   "code": "5.3.2",
+   "handlungsfeld": "Banken und Versicherungen",
+   "titel": "Mitteilungen verstehen und Mitteilungen machen",
+   "label": "Banken und Versicherungen: Mitteilungen verstehen und Mitteilungen machen",
+   "fachgebiete": [
+    "4.04"
+   ]
+  },
+  {
+   "code": "5.3.3",
+   "handlungsfeld": "Banken und Versicherungen",
+   "titel": "Verträge verstehen und abschliessen",
+   "label": "Banken und Versicherungen: Verträge verstehen und abschliessen",
+   "fachgebiete": [
+    "4.04"
+   ]
+  },
+  {
+   "code": "5.4.1",
+   "handlungsfeld": "Banken und Versicherungen",
+   "titel": "Sich informieren und Auskünfte geben",
+   "label": "Banken und Versicherungen: Sich informieren und Auskünfte geben",
+   "fachgebiete": [
+    "4.04"
+   ]
+  },
+  {
+   "code": "5.4.2",
+   "handlungsfeld": "Banken und Versicherungen",
+   "titel": "Bedürfnisse äussern, Aufträge erteilen",
+   "label": "Banken und Versicherungen: Bedürfnisse äussern, Aufträge erteilen",
+   "fachgebiete": [
+    "4.04"
+   ]
+  },
+  {
+   "code": "6.1.1",
+   "handlungsfeld": "Betreuung und Ausbildung der Kinder",
+   "titel": "Sich informieren und Auskünfte geben",
+   "label": "Betreuung und Ausbildung der Kinder: Sich informieren und Auskünfte geben",
+   "fachgebiete": [
+    "4.04"
+   ]
+  },
+  {
+   "code": "6.2.1",
+   "handlungsfeld": "Betreuung und Ausbildung der Kinder",
+   "titel": "Sich informieren, Informationen geben",
+   "label": "Betreuung und Ausbildung der Kinder: Sich informieren, Informationen geben",
+   "fachgebiete": [
+    "4.04"
+   ]
+  },
+  {
+   "code": "6.2.2",
+   "handlungsfeld": "Betreuung und Ausbildung der Kinder",
+   "titel": "Mitteilungen verstehen und darauf reagieren, Mitteilungen machen",
+   "label": "Betreuung und Ausbildung der Kinder: Mitteilungen verstehen und darauf reagieren, Mitteilungen machen",
+   "fachgebiete": [
+    "4.04"
+   ]
+  },
+  {
+   "code": "6.2.3",
+   "handlungsfeld": "Betreuung und Ausbildung der Kinder",
+   "titel": "Anträge stellen und Formulare ausfüllen",
+   "label": "Betreuung und Ausbildung der Kinder: Anträge stellen und Formulare ausfüllen",
+   "fachgebiete": [
+    "4.04"
+   ]
+  },
+  {
+   "code": "6.3.1",
+   "handlungsfeld": "Betreuung und Ausbildung der Kinder",
+   "titel": "Sich informieren und Auskünfte geben",
+   "label": "Betreuung und Ausbildung der Kinder: Sich informieren und Auskünfte geben",
+   "fachgebiete": [
+    "4.04"
+   ]
+  },
+  {
+   "code": "6.3.2",
+   "handlungsfeld": "Betreuung und Ausbildung der Kinder",
+   "titel": "An Informationsveranstaltungen teilnehmen",
+   "label": "Betreuung und Ausbildung der Kinder: An Informationsveranstaltungen teilnehmen",
+   "fachgebiete": [
+    "4.04"
+   ]
+  },
+  {
+   "code": "6.3.3",
+   "handlungsfeld": "Betreuung und Ausbildung der Kinder",
+   "titel": "Mitteilungen verstehen und Mitteilungen machen",
+   "label": "Betreuung und Ausbildung der Kinder: Mitteilungen verstehen und Mitteilungen machen",
+   "fachgebiete": [
+    "4.04"
+   ]
+  },
+  {
+   "code": "6.3.4",
+   "handlungsfeld": "Betreuung und Ausbildung der Kinder",
+   "titel": "An Beratungsgesprächen teilnehmen",
+   "label": "Betreuung und Ausbildung der Kinder: An Beratungsgesprächen teilnehmen",
+   "fachgebiete": [
+    "4.04"
+   ]
+  },
+  {
+   "code": "6.3.5",
+   "handlungsfeld": "Betreuung und Ausbildung der Kinder",
+   "titel": "Beschwerden verstehen, darauf reagieren, sich beschweren",
+   "label": "Betreuung und Ausbildung der Kinder: Beschwerden verstehen, darauf reagieren, sich beschweren",
+   "fachgebiete": [
+    "4.04"
+   ]
+  },
+  {
+   "code": "6.3.6",
+   "handlungsfeld": "Betreuung und Ausbildung der Kinder",
+   "titel": "Absprachen treffen",
+   "label": "Betreuung und Ausbildung der Kinder: Absprachen treffen",
+   "fachgebiete": [
+    "4.04"
+   ]
+  },
+  {
+   "code": "6.4.1",
+   "handlungsfeld": "Betreuung und Ausbildung der Kinder",
+   "titel": "Absprachen treffen",
+   "label": "Betreuung und Ausbildung der Kinder: Absprachen treffen",
+   "fachgebiete": [
+    "4.04"
+   ]
+  },
+  {
+   "code": "7.1.1",
+   "handlungsfeld": "Einkaufen",
+   "titel": "Sich informieren und Auskünfte geben",
+   "label": "Einkaufen: Sich informieren und Auskünfte geben",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "7.2.1",
+   "handlungsfeld": "Einkaufen",
+   "titel": "Sich informieren und Auskünfte geben",
+   "label": "Einkaufen: Sich informieren und Auskünfte geben",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "7.2.2",
+   "handlungsfeld": "Einkaufen",
+   "titel": "Bestellungen aufgeben und entgegennehmen, Reservierungen tätigen und annehmen",
+   "label": "Einkaufen: Bestellungen aufgeben und entgegennehmen, Reservierungen tätigen und annehmen",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "7.2.4",
+   "handlungsfeld": "Einkaufen",
+   "titel": "Sich beschweren, auf Beschwerden reagieren",
+   "label": "Einkaufen: Sich beschweren, auf Beschwerden reagieren",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "7.2.5",
+   "handlungsfeld": "Einkaufen",
+   "titel": "Wünsche äussern, auf Wünsche reagieren",
+   "label": "Einkaufen: Wünsche äussern, auf Wünsche reagieren",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "8.1.1",
+   "handlungsfeld": "Gesundheit",
+   "titel": "Sich informieren",
+   "label": "Gesundheit: Sich informieren",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "8.2.1",
+   "handlungsfeld": "Gesundheit",
+   "titel": "Termine vereinbaren",
+   "label": "Gesundheit: Termine vereinbaren",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "8.2.2",
+   "handlungsfeld": "Gesundheit",
+   "titel": "Sich informieren und Auskünfte geben",
+   "label": "Gesundheit: Sich informieren und Auskünfte geben",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "8.2.3",
+   "handlungsfeld": "Gesundheit",
+   "titel": "Bedürfnisse und Wünsche äussern, auf Bedürfnisse und Wünsche reagieren",
+   "label": "Gesundheit: Bedürfnisse und Wünsche äussern, auf Bedürfnisse und Wünsche reagieren",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "8.2.4",
+   "handlungsfeld": "Gesundheit",
+   "titel": "Anweisungen verstehen, Anweisungen geben und darauf reagieren",
+   "label": "Gesundheit: Anweisungen verstehen, Anweisungen geben und darauf reagieren",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "8.2.5",
+   "handlungsfeld": "Gesundheit",
+   "titel": "Formulare ausfüllen",
+   "label": "Gesundheit: Formulare ausfüllen",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "8.2.6",
+   "handlungsfeld": "Gesundheit",
+   "titel": "Einen Notruf absetzen",
+   "label": "Gesundheit: Einen Notruf absetzen",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "8.3.1",
+   "handlungsfeld": "Gesundheit",
+   "titel": "Nach dem Befinden fragen und auf die Frage nach dem Befinden reagieren",
+   "label": "Gesundheit: Nach dem Befinden fragen und auf die Frage nach dem Befinden reagieren",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "8.3.2",
+   "handlungsfeld": "Gesundheit",
+   "titel": "Um Rat fragen und jemanden beraten",
+   "label": "Gesundheit: Um Rat fragen und jemanden beraten",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "8.3.3",
+   "handlungsfeld": "Gesundheit",
+   "titel": "Den Behandlungsablauf darstellen",
+   "label": "Gesundheit: Den Behandlungsablauf darstellen",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "8.3.4",
+   "handlungsfeld": "Gesundheit",
+   "titel": "Eine Pflegeübergabe machen",
+   "label": "Gesundheit: Eine Pflegeübergabe machen",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "8.4.1",
+   "handlungsfeld": "Gesundheit",
+   "titel": "Sich informieren",
+   "label": "Gesundheit: Sich informieren",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "8.4.2",
+   "handlungsfeld": "Gesundheit",
+   "titel": "Verträge abschliessen",
+   "label": "Gesundheit: Verträge abschliessen",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "8.4.3",
+   "handlungsfeld": "Gesundheit",
+   "titel": "Mitteilungen verstehen und Mitteilungen machen",
+   "label": "Gesundheit: Mitteilungen verstehen und Mitteilungen machen",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "8.4.4",
+   "handlungsfeld": "Gesundheit",
+   "titel": "Formulare ausfüllen",
+   "label": "Gesundheit: Formulare ausfüllen",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "9.1.1",
+   "handlungsfeld": "Mediennutzung",
+   "titel": "Sich informieren und Auskünfte geben",
+   "label": "Mediennutzung: Sich informieren und Auskünfte geben",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "9.2.1",
+   "handlungsfeld": "Mediennutzung",
+   "titel": "Sich informieren",
+   "label": "Mediennutzung: Sich informieren",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "9.3.1",
+   "handlungsfeld": "Mediennutzung",
+   "titel": "Sich informieren und Auskünfte geben",
+   "label": "Mediennutzung: Sich informieren und Auskünfte geben",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "10.1.1",
+   "handlungsfeld": "Mobilität",
+   "titel": "Sich informieren, Informationen geben",
+   "label": "Mobilität: Sich informieren, Informationen geben",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "10.2.1",
+   "handlungsfeld": "Mobilität",
+   "titel": "Sich informieren, Informationen geben",
+   "label": "Mobilität: Sich informieren, Informationen geben",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "10.2.2",
+   "handlungsfeld": "Mobilität",
+   "titel": "Durchsagen verstehen und machen",
+   "label": "Mobilität: Durchsagen verstehen und machen",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "10.2.3",
+   "handlungsfeld": "Mobilität",
+   "titel": "Mitteilungen verstehen und darauf reagieren, Mitteilungen machen",
+   "label": "Mobilität: Mitteilungen verstehen und darauf reagieren, Mitteilungen machen",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "10.2.4",
+   "handlungsfeld": "Mobilität",
+   "titel": "Anleitungen verstehen und darauf reagieren",
+   "label": "Mobilität: Anleitungen verstehen und darauf reagieren",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "10.2.5",
+   "handlungsfeld": "Mobilität",
+   "titel": "Formulare ausfüllen",
+   "label": "Mobilität: Formulare ausfüllen",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "10.2.6",
+   "handlungsfeld": "Mobilität",
+   "titel": "Eine Buchung tätigen und entgegennehmen",
+   "label": "Mobilität: Eine Buchung tätigen und entgegennehmen",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "10.3.1",
+   "handlungsfeld": "Mobilität",
+   "titel": "Sich informieren und Auskünfte geben",
+   "label": "Mobilität: Sich informieren und Auskünfte geben",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "11.1.1",
+   "handlungsfeld": "Unterricht",
+   "titel": "Sich informieren",
+   "label": "Unterricht: Sich informieren",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "11.1.2",
+   "handlungsfeld": "Unterricht",
+   "titel": "Arbeitsaufträge verstehen",
+   "label": "Unterricht: Arbeitsaufträge verstehen",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "11.1.3",
+   "handlungsfeld": "Unterricht",
+   "titel": "Erklärungen verstehen und um Erklärungen bitten",
+   "label": "Unterricht: Erklärungen verstehen und um Erklärungen bitten",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "11.1.4",
+   "handlungsfeld": "Unterricht",
+   "titel": "Mitteilungen machen",
+   "label": "Unterricht: Mitteilungen machen",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "11.1.5",
+   "handlungsfeld": "Unterricht",
+   "titel": "Über individuelle Lernziele und das eigene Lernen sprechen",
+   "label": "Unterricht: Über individuelle Lernziele und das eigene Lernen sprechen",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "11.1.6",
+   "handlungsfeld": "Unterricht",
+   "titel": "Absprachen treffen",
+   "label": "Unterricht: Absprachen treffen",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "11.2.1",
+   "handlungsfeld": "Unterricht",
+   "titel": "Sich informieren und Auskünfte geben",
+   "label": "Unterricht: Sich informieren und Auskünfte geben",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "11.2.2",
+   "handlungsfeld": "Unterricht",
+   "titel": "Absprachen treffen",
+   "label": "Unterricht: Absprachen treffen",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "11.2.3",
+   "handlungsfeld": "Unterricht",
+   "titel": "Um Rat fragen und jemanden beraten",
+   "label": "Unterricht: Um Rat fragen und jemanden beraten",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "11.3.1",
+   "handlungsfeld": "Unterricht",
+   "titel": "An einem Prüfungsgespräch teilnehmen",
+   "label": "Unterricht: An einem Prüfungsgespräch teilnehmen",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "12.1.1",
+   "handlungsfeld": "Wohnen",
+   "titel": "Sich informieren",
+   "label": "Wohnen: Sich informieren",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "12.2.1",
+   "handlungsfeld": "Wohnen",
+   "titel": "Anzeigen verstehen und darauf reagieren, Anzeigen aufgeben",
+   "label": "Wohnen: Anzeigen verstehen und darauf reagieren, Anzeigen aufgeben",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "12.2.2",
+   "handlungsfeld": "Wohnen",
+   "titel": "Sich informieren und Auskünfte geben",
+   "label": "Wohnen: Sich informieren und Auskünfte geben",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "12.2.3",
+   "handlungsfeld": "Wohnen",
+   "titel": "Absprachen treffen",
+   "label": "Wohnen: Absprachen treffen",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "12.2.4",
+   "handlungsfeld": "Wohnen",
+   "titel": "Mietverträge verstehen und abschliessen, Mietverträge kündigen",
+   "label": "Wohnen: Mietverträge verstehen und abschliessen, Mietverträge kündigen",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "12.3.1",
+   "handlungsfeld": "Wohnen",
+   "titel": "Mitteilungen verstehen und darauf reagieren, Mitteilungen machen",
+   "label": "Wohnen: Mitteilungen verstehen und darauf reagieren, Mitteilungen machen",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "12.3.2",
+   "handlungsfeld": "Wohnen",
+   "titel": "Vorschriften/Regelungen verstehen",
+   "label": "Wohnen: Vorschriften/Regelungen verstehen",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "12.3.3",
+   "handlungsfeld": "Wohnen",
+   "titel": "Formulare ausfüllen",
+   "label": "Wohnen: Formulare ausfüllen",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "12.4.1",
+   "handlungsfeld": "Wohnen",
+   "titel": "Sich informieren und Auskünfte geben",
+   "label": "Wohnen: Sich informieren und Auskünfte geben",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "12.4.2",
+   "handlungsfeld": "Wohnen",
+   "titel": "Mitteilungen verstehen und darauf reagieren, Mitteilungen machen",
+   "label": "Wohnen: Mitteilungen verstehen und darauf reagieren, Mitteilungen machen",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  },
+  {
+   "code": "12.4.3",
+   "handlungsfeld": "Wohnen",
+   "titel": "Um Hilfe bitten und auf Bitten reagieren",
+   "label": "Wohnen: Um Hilfe bitten und auf Bitten reagieren",
+   "fachgebiete": [
+    "4.04",
+    "4.fs"
+   ]
+  }
+ ]
+}

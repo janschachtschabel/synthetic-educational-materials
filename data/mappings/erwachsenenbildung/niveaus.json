@@ -1,0 +1,18 @@
+{
+ "beschreibung": "Niveaus je Programmbereich (Empfehlung im Recherchedokument): Sprachen nach dem Gemeinsamen europäischen Referenzrahmen (GER), Grundbildung nach Alpha-Levels (leo.-Studien, DVV-Rahmencurricula decken 1–4 ab), Schulabschlüsse nach Fachgebiet, sonst Einsteiger und Fortgeschrittene. programmbereiche: Notationen 1–7; fachgebiete: optional auf Fachgebiete beschränkt. exactMatch: KIM-Bildungsstufe, wo sinnvoll.",
+ "quelle": {"name": "Projekt, angelehnt an GER (Europarat), Alpha-Levels (leo.-Studien, Universität Hamburg) und die Schulabschlüsse", "lizenz": "CC0-1.0"},
+ "niveaus": [
+  {"id": "ger_a1", "label": "GER A1", "programmbereiche": ["4"]},
+  {"id": "ger_a2", "label": "GER A2", "programmbereiche": ["4"]},
+  {"id": "ger_b1", "label": "GER B1", "programmbereiche": ["4"]},
+  {"id": "ger_b2", "label": "GER B2", "programmbereiche": ["4"]},
+  {"id": "ger_c1", "label": "GER C1", "programmbereiche": ["4"]},
+  {"id": "alpha_1_2", "label": "Alpha-Level 1–2 (Buchstaben und Wörter)", "programmbereiche": ["7"], "fachgebiete": ["7.01", "7.03", "7.04", "7.00"]},
+  {"id": "alpha_3_4", "label": "Alpha-Level 3–4 (Sätze und kurze Texte)", "programmbereiche": ["7"]},
+  {"id": "hauptschulabschluss", "label": "Vorbereitung Hauptschulabschluss (Erster Schulabschluss)", "programmbereiche": ["6"], "fachgebiete": ["6.01", "6.06", "6.07", "6.00"], "exactMatch": "http://w3id.org/kim/educationalLevel/level_2"},
+  {"id": "realschulabschluss", "label": "Vorbereitung Realschulabschluss (Mittlerer Schulabschluss)", "programmbereiche": ["6"], "fachgebiete": ["6.02", "6.06", "6.07", "6.00"], "exactMatch": "http://w3id.org/kim/educationalLevel/level_2"},
+  {"id": "hochschulreife", "label": "Vorbereitung Fachhochschulreife oder Abitur", "programmbereiche": ["6"], "fachgebiete": ["6.03", "6.04", "6.05", "6.06", "6.07", "6.08", "6.00"], "exactMatch": "http://w3id.org/kim/educationalLevel/level_3"},
+  {"id": "einsteiger", "label": "Einsteiger ohne Vorkenntnisse", "programmbereiche": ["1", "2", "3", "5"]},
+  {"id": "fortgeschrittene", "label": "Fortgeschrittene mit Vorkenntnissen", "programmbereiche": ["1", "2", "3", "5"]}
+ ]
+}

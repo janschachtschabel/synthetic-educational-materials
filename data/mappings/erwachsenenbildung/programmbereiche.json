@@ -1,0 +1,643 @@
+{
+ "beschreibung": "Programmbereiche und Fachgebiete der Volkshochschul-Statistik (Fachgebietsgliederung seit Berichtsjahr 2018). uebergreifend: Sammelposition „fachgebietsübergreifende/sonstige Kurse“, wird nicht als Ziel einer Themenzuordnung genutzt.",
+ "quelle": {
+  "name": "Deutsches Institut für Erwachsenenbildung (DIE), Volkshochschul-Statistik, Fachgebietsgliederung (z. B. 59. Folge, Berichtsjahr 2020, Statistikbericht 2022)",
+  "uri": "https://www.die-bonn.de/weiterbildung/statistik/vhs-statistik/",
+  "lizenz": "CC BY 4.0 DE (Statistikbericht); Codes und Bezeichnungen als Fakten übernommen"
+ },
+ "uri_basis": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#",
+ "programmbereiche": [
+  {
+   "notation": "1",
+   "label": "Politik – Gesellschaft – Umwelt",
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#pb1"
+  },
+  {
+   "notation": "2",
+   "label": "Kultur – Gestalten",
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#pb2"
+  },
+  {
+   "notation": "3",
+   "label": "Gesundheit",
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#pb3"
+  },
+  {
+   "notation": "4",
+   "label": "Sprachen",
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#pb4"
+  },
+  {
+   "notation": "5",
+   "label": "Qualifikationen für das Arbeitsleben – IT – Organisation/Management",
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#pb5"
+  },
+  {
+   "notation": "6",
+   "label": "Schulabschlüsse – Studienzugang und -begleitung",
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#pb6"
+  },
+  {
+   "notation": "7",
+   "label": "Grundbildung",
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#pb7"
+  }
+ ],
+ "fachgebiete": [
+  {
+   "notation": "1.00",
+   "label": "Fachgebietsübergreifende/sonstige Kurse",
+   "programmbereich": "1",
+   "uebergreifend": true,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg1.00"
+  },
+  {
+   "notation": "1.01",
+   "label": "Geschichte/Zeitgeschichte",
+   "programmbereich": "1",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg1.01"
+  },
+  {
+   "notation": "1.02",
+   "label": "Politik/bürgerschaftliches Engagement",
+   "programmbereich": "1",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg1.02"
+  },
+  {
+   "notation": "1.03",
+   "label": "Ökonomie/Recht/Finanzen",
+   "programmbereich": "1",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg1.03"
+  },
+  {
+   "notation": "1.04",
+   "label": "Globales Lernen/Bildung für nachhaltige Entwicklung/Umweltbildung und Verbraucherfragen",
+   "programmbereich": "1",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg1.04"
+  },
+  {
+   "notation": "1.05",
+   "label": "Pädagogik/Erziehung/Familie",
+   "programmbereich": "1",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg1.05"
+  },
+  {
+   "notation": "1.06",
+   "label": "Persönlichkeitsentwicklung/Psychologie",
+   "programmbereich": "1",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg1.06"
+  },
+  {
+   "notation": "1.07",
+   "label": "Diversity/Gender/Interkulturalität",
+   "programmbereich": "1",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg1.07"
+  },
+  {
+   "notation": "1.08",
+   "label": "Philosophie/Religion/Ethik",
+   "programmbereich": "1",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg1.08"
+  },
+  {
+   "notation": "1.09",
+   "label": "Länder- und Heimatkunde/Stadtkultur",
+   "programmbereich": "1",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg1.09"
+  },
+  {
+   "notation": "1.10",
+   "label": "Naturwissenschaften",
+   "programmbereich": "1",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg1.10"
+  },
+  {
+   "notation": "1.11",
+   "label": "Kommunikation/Medien",
+   "programmbereich": "1",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg1.11"
+  },
+  {
+   "notation": "2.00",
+   "label": "Fachgebietsübergreifende/sonstige Kurse",
+   "programmbereich": "2",
+   "uebergreifend": true,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg2.00"
+  },
+  {
+   "notation": "2.01",
+   "label": "Literatur (Theorie)",
+   "programmbereich": "2",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg2.01"
+  },
+  {
+   "notation": "2.02",
+   "label": "Literarische Praxis",
+   "programmbereich": "2",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg2.02"
+  },
+  {
+   "notation": "2.03",
+   "label": "Theater/Tanz (Theorie)",
+   "programmbereich": "2",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg2.03"
+  },
+  {
+   "notation": "2.04",
+   "label": "Theaterpraxis/Kleinkunst",
+   "programmbereich": "2",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg2.04"
+  },
+  {
+   "notation": "2.05",
+   "label": "Tanzpraxis",
+   "programmbereich": "2",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg2.05"
+  },
+  {
+   "notation": "2.06",
+   "label": "Kunst-/Kulturgeschichte",
+   "programmbereich": "2",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg2.06"
+  },
+  {
+   "notation": "2.07",
+   "label": "Malen/Zeichnen/Drucktechnik",
+   "programmbereich": "2",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg2.07"
+  },
+  {
+   "notation": "2.08",
+   "label": "Plastisches Gestalten",
+   "programmbereich": "2",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg2.08"
+  },
+  {
+   "notation": "2.09",
+   "label": "Textiles Gestalten",
+   "programmbereich": "2",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg2.09"
+  },
+  {
+   "notation": "2.10",
+   "label": "Handwerk/Kunsthandwerk",
+   "programmbereich": "2",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg2.10"
+  },
+  {
+   "notation": "2.11",
+   "label": "Foto-, Film-, Audio- und sonstige Medienpraxis",
+   "programmbereich": "2",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg2.11"
+  },
+  {
+   "notation": "2.12",
+   "label": "Musik (Theorie)",
+   "programmbereich": "2",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg2.12"
+  },
+  {
+   "notation": "2.13",
+   "label": "Musikalische Praxis",
+   "programmbereich": "2",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg2.13"
+  },
+  {
+   "notation": "3.00",
+   "label": "Fachgebietsübergreifende/sonstige Kurse",
+   "programmbereich": "3",
+   "uebergreifend": true,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg3.00"
+  },
+  {
+   "notation": "3.01",
+   "label": "Entspannung/Stressbewältigung",
+   "programmbereich": "3",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg3.01"
+  },
+  {
+   "notation": "3.02",
+   "label": "Bewegung/Fitness",
+   "programmbereich": "3",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg3.02"
+  },
+  {
+   "notation": "3.03",
+   "label": "Prävention/Krankheit/Gesundheit",
+   "programmbereich": "3",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg3.03"
+  },
+  {
+   "notation": "3.04",
+   "label": "Gesundheitspflege",
+   "programmbereich": "3",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg3.04"
+  },
+  {
+   "notation": "3.05",
+   "label": "Essen und Trinken/Ernährung",
+   "programmbereich": "3",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg3.05"
+  },
+  {
+   "notation": "3.06",
+   "label": "Gesundheit und Psyche",
+   "programmbereich": "3",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg3.06"
+  },
+  {
+   "notation": "4.00",
+   "label": "Fachgebietsübergreifende/sonstige Kurse",
+   "programmbereich": "4",
+   "uebergreifend": true,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg4.00"
+  },
+  {
+   "notation": "4.01",
+   "label": "Arabisch",
+   "programmbereich": "4",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg4.01"
+  },
+  {
+   "notation": "4.02",
+   "label": "Chinesisch",
+   "programmbereich": "4",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg4.02"
+  },
+  {
+   "notation": "4.03",
+   "label": "Dänisch",
+   "programmbereich": "4",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg4.03"
+  },
+  {
+   "notation": "4.04",
+   "label": "Deutsch als Fremdsprache",
+   "programmbereich": "4",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg4.04"
+  },
+  {
+   "notation": "4.05",
+   "label": "Deutsch als Muttersprache",
+   "programmbereich": "4",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg4.05"
+  },
+  {
+   "notation": "4.06",
+   "label": "Englisch",
+   "programmbereich": "4",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg4.06"
+  },
+  {
+   "notation": "4.07",
+   "label": "Finnisch",
+   "programmbereich": "4",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg4.07"
+  },
+  {
+   "notation": "4.08",
+   "label": "Französisch",
+   "programmbereich": "4",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg4.08"
+  },
+  {
+   "notation": "4.09",
+   "label": "Italienisch",
+   "programmbereich": "4",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg4.09"
+  },
+  {
+   "notation": "4.10",
+   "label": "Japanisch",
+   "programmbereich": "4",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg4.10"
+  },
+  {
+   "notation": "4.11",
+   "label": "Latein",
+   "programmbereich": "4",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg4.11"
+  },
+  {
+   "notation": "4.12",
+   "label": "Neugriechisch",
+   "programmbereich": "4",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg4.12"
+  },
+  {
+   "notation": "4.13",
+   "label": "Neuhebräisch",
+   "programmbereich": "4",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg4.13"
+  },
+  {
+   "notation": "4.14",
+   "label": "Niederländisch",
+   "programmbereich": "4",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg4.14"
+  },
+  {
+   "notation": "4.15",
+   "label": "Norwegisch",
+   "programmbereich": "4",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg4.15"
+  },
+  {
+   "notation": "4.16",
+   "label": "Persisch",
+   "programmbereich": "4",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg4.16"
+  },
+  {
+   "notation": "4.17",
+   "label": "Polnisch",
+   "programmbereich": "4",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg4.17"
+  },
+  {
+   "notation": "4.18",
+   "label": "Portugiesisch",
+   "programmbereich": "4",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg4.18"
+  },
+  {
+   "notation": "4.19",
+   "label": "Russisch",
+   "programmbereich": "4",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg4.19"
+  },
+  {
+   "notation": "4.20",
+   "label": "Schwedisch",
+   "programmbereich": "4",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg4.20"
+  },
+  {
+   "notation": "4.21",
+   "label": "Bosnisch, Kroatisch, Serbisch",
+   "programmbereich": "4",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg4.21"
+  },
+  {
+   "notation": "4.22",
+   "label": "Spanisch",
+   "programmbereich": "4",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg4.22"
+  },
+  {
+   "notation": "4.23",
+   "label": "Tschechisch",
+   "programmbereich": "4",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg4.23"
+  },
+  {
+   "notation": "4.24",
+   "label": "Türkisch",
+   "programmbereich": "4",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg4.24"
+  },
+  {
+   "notation": "4.25",
+   "label": "Ungarisch",
+   "programmbereich": "4",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg4.25"
+  },
+  {
+   "notation": "4.26",
+   "label": "Andere Fremdsprachen",
+   "programmbereich": "4",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg4.26"
+  },
+  {
+   "notation": "4.27",
+   "label": "Deutsche Dialekte",
+   "programmbereich": "4",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg4.27"
+  },
+  {
+   "notation": "4.28",
+   "label": "Gebärdensprache",
+   "programmbereich": "4",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg4.28"
+  },
+  {
+   "notation": "5.00",
+   "label": "Fachgebietsübergreifende/sonstige Kurse",
+   "programmbereich": "5",
+   "uebergreifend": true,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg5.00"
+  },
+  {
+   "notation": "5.01",
+   "label": "IT-/Mediengrundlagen/allgemeine Anwendungen",
+   "programmbereich": "5",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg5.01"
+  },
+  {
+   "notation": "5.02",
+   "label": "Kaufmännische IT-/Medienanwendungen",
+   "programmbereich": "5",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg5.02"
+  },
+  {
+   "notation": "5.03",
+   "label": "Technische IT-/Medienanwendungen",
+   "programmbereich": "5",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg5.03"
+  },
+  {
+   "notation": "5.04",
+   "label": "Kaufmännische Grund- und Fachlehrgänge/Rechnungswesen",
+   "programmbereich": "5",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg5.04"
+  },
+  {
+   "notation": "5.05",
+   "label": "Technische Grund- und Fachlehrgänge",
+   "programmbereich": "5",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg5.05"
+  },
+  {
+   "notation": "5.06",
+   "label": "Softskills/Bewerbungstrainings",
+   "programmbereich": "5",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg5.06"
+  },
+  {
+   "notation": "5.07",
+   "label": "Organisation/Management",
+   "programmbereich": "5",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg5.07"
+  },
+  {
+   "notation": "5.08",
+   "label": "Branchenspezifische Fachlehrgänge",
+   "programmbereich": "5",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg5.08"
+  },
+  {
+   "notation": "6.00",
+   "label": "Fachgebietsübergreifende/sonstige Kurse",
+   "programmbereich": "6",
+   "uebergreifend": true,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg6.00"
+  },
+  {
+   "notation": "6.01",
+   "label": "Hauptschulabschluss",
+   "programmbereich": "6",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg6.01"
+  },
+  {
+   "notation": "6.02",
+   "label": "Realschulabschluss",
+   "programmbereich": "6",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg6.02"
+  },
+  {
+   "notation": "6.03",
+   "label": "Fachhochschulreife/Fachoberschulabschluss",
+   "programmbereich": "6",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg6.03"
+  },
+  {
+   "notation": "6.04",
+   "label": "Abitur/allgemeine Hochschulreife",
+   "programmbereich": "6",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg6.04"
+  },
+  {
+   "notation": "6.05",
+   "label": "Hochschulzugang ohne Abitur",
+   "programmbereich": "6",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg6.05"
+  },
+  {
+   "notation": "6.06",
+   "label": "sonstige Schulabschlüsse",
+   "programmbereich": "6",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg6.06"
+  },
+  {
+   "notation": "6.07",
+   "label": "Schulabschlussbezogene Einzelangebote/Schulabschluss- und Prüfungsvorbereitung",
+   "programmbereich": "6",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg6.07"
+  },
+  {
+   "notation": "6.08",
+   "label": "Studienvorbereitung und -begleitung",
+   "programmbereich": "6",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg6.08"
+  },
+  {
+   "notation": "7.00",
+   "label": "Fachgebietsübergreifende/sonstige Kurse",
+   "programmbereich": "7",
+   "uebergreifend": true,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg7.00"
+  },
+  {
+   "notation": "7.01",
+   "label": "Alphabetisierung",
+   "programmbereich": "7",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg7.01"
+  },
+  {
+   "notation": "7.02",
+   "label": "Rechnen",
+   "programmbereich": "7",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg7.02"
+  },
+  {
+   "notation": "7.03",
+   "label": "Erwerb von Alltagskompetenzen",
+   "programmbereich": "7",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg7.03"
+  },
+  {
+   "notation": "7.04",
+   "label": "Berufliche Orientierung und Vorbereitung",
+   "programmbereich": "7",
+   "uebergreifend": false,
+   "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#fg7.04"
+  }
+ ]
+}

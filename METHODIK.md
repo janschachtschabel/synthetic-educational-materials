@@ -34,6 +34,8 @@ offene Vokabulare und Taxonomien ──► Mappings (Themen mit Fachzuordnung) �
 | OEH-Vokabulare `oehTopics` (Themenbäume der WLO-Fachportale, 3.182 Themen) und `discipline` | Themen und Fächer Schule, Fächer-closeMatch Elementar | CC0 1.0 |
 | OEH-Vokabulare `kldb` (KldB 2010, Fassung 2020, Ebenen 1–4 mit Kurzbeschreibungen), `escoSkills`, `dqrCompetenceLevels` | Berufsfeld (wie WLO-Feld `ccm:oeh_profession_group`), Abgleich der Kompetenzen, DQR-Niveaus | CC0 1.0; KldB: „Quelle: Statistik der Bundesagentur für Arbeit“ |
 | Gemeinsamer Rahmen der Länder für die frühe Bildung in Kindertageseinrichtungen (Fassung 2022, [nach Eurydice](https://eurydice.eacea.ec.europa.eu/de/eurypedia/germany/leitlinien-der-fruehkindlichen-bildung-betreuung-und-erziehung)) | sieben Bildungsbereiche Elementar | amtliches Werk; Liste und Kurzbeschreibungen im Repo CC0 |
+| [Volkshochschul-Statistik des DIE](https://www.die-bonn.de/weiterbildung/statistik/vhs-statistik/) (Fachgebietsgliederung seit 2018, 7 Programmbereiche, 85 Fachgebiete) | Fach Erwachsenenbildung | Statistikbericht CC BY 4.0 DE; Codes und Bezeichnungen als Fakten |
+| [Rahmencurriculum für Integrationskurse](https://www.goethe.de/resources/files/pdf209/rahmencurriculum-integrationskurs_20171.pdf) (Goethe-Institut, 2017) | Sprachkursthemen Erwachsenenbildung (Gliederung) | urheberrechtlich geschützt; nur Kapitelcodes und -titel übernommen |
 | [Umsteigeschlüssel KldB 2020 → ISCO-08](https://statistik.arbeitsagentur.de/DE/Navigation/Grundlagen/Klassifikationen/Klassifikation-der-Berufe/KldB2010-Fassung2020/Arbeitsmittel/Arbeitsmittel-Nav.html) (BA, Stand 06.08.2021) | Handmapping-Hinweise ESCO-Beruf → KldB und Anforderungsniveaus | „Quelle: Statistik der Bundesagentur für Arbeit“; nur im Zwischenspeicher |
 
 Die Vokabulare liegen aufbereitet unter `data/vocabs/` (Abruf mit `scripts/fetch_vocabs.py`, Datum in
@@ -290,6 +292,46 @@ Unterrichtsreihe, Fachbeitrag für Lehrkräfte; je Typ Themenart, Zielgruppe, St
 **Niveaus**: Klasse 1–2, 3–4, 5–6, 7–8, 9–10, Einführungs- und Qualifikationsphase, `exactMatch`
 KIM-Bildungsstufen 1–3.
 
+## Mappings Erwachsenenbildung
+
+Allgemeine und berufliche Weiterbildung in Kursform (Volkshochschule u. a.); die berufliche
+Aufstiegsfortbildung (Meister, Fachwirt) gehört zur Berufsbildung.
+
+**Fach** sind die 7 Programmbereiche und 85 Fachgebiete der Volkshochschul-Statistik des DIE
+(Fachgebietsgliederung seit Berichtsjahr 2018; `programmbereiche.json`), z. B. 1.04 Globales Lernen/BNE,
+3.05 Essen und Trinken, 4.06 Englisch, 5.04 Kaufmännische Lehrgänge, 6.01 Hauptschulabschluss,
+7.01 Alphabetisierung. Die Sammelpositionen x.00 sind kein Zuordnungsziel. Die 24 Fremdsprachen sind für die
+Themen ein gemeinsames Ziel „4.fs“, weil Sprachkursthemen für alle Sprachen gelten; die konkrete Sprache wird
+beim Seed gezogen (je Thema rotierend) und als Zielsprache in `cclom:general_language` ergänzt.
+
+**Themen** aus drei Quellen (Filter `quellen`):
+
+1. `gnd` (955): Schritte `kandidaten_llm` (je Fachgebiet 30–40 typische Kursthemen aus zwei Perspektiven),
+   `gnd` (exakt auf GND-Sachbegriffe, 1.076 Treffer), `kandidaten` (je Begriff die sechs ähnlichsten
+   Fachgebiete per Embedding plus die Fachgebiete, die ihn vorgeschlagen haben), `eignung` (drei Stimmen:
+   Kursthema, Thema für Kursleitende, ungeeignet; 121 verworfen), `fachgebiete` (drei Stimmen, ein bis zwei
+   Fachgebiete). WLO-Keywords der Erwachsenenbildung dienen nur als Beleg (`wlo`, 347 Themen), nicht als
+   Kandidaten, weil sie stark mit anderen Bereichen vermischt sind.
+2. `rahmencurriculum` (117): Sprachkursthemen aus der Gliederung des Rahmencurriculums für Integrationskurse
+   (Goethe-Institut im Auftrag des BMI, 2017): die zwölf Handlungsfelder mit ihren Lernzielbereichen (z. B.
+   „Wohnen: Mietverträge verstehen und abschließen“) und die fünf handlungsfeldübergreifenden Bereiche
+   (`sprachkurs_themen.json`; übernommen sind nur Codes und Titel, Schreibung aus den Versalien per LLM
+   wiederhergestellt). Alle für Deutsch als Fremdsprache, die alltagsnahen auch für Fremdsprachen. GND-Begriffe
+   treffen solche Kommunikationssituationen kaum.
+3. `schulthemen` (485): für die Schulabschlusskurse die Unterrichtsthemen des Bereichs Schule in Deutsch,
+   Mathematik und Englisch (Sek I → Haupt- und Realschulabschluss, Sek II → Fachhochschulreife und Abitur).
+
+**Ergebnis:** 1.557 Themen in 54 Fachgebieten (Programmbereiche: Politik–Gesellschaft–Umwelt 323,
+Kultur–Gestalten 308, Gesundheit 103, Sprachen 146, Arbeitsleben–IT–Organisation 141, Schulabschlüsse 505,
+Grundbildung 31). Die 19 Prüffälle sind redaktionell entschieden. Grundbildung hat wenige Themen; bei
+Gleichverteilung nach Programmbereich wiederholen sie sich.
+
+**Inhaltstypen** (14 aus OEH `new_lrt`): Kursbeschreibung, Handout, Übungsblatt, Anleitung, Checkliste,
+Selbstlerneinheit, Präsentation, Quiz, Wortliste und Dialog/Rollenspiel (Sprachen, Grundbildung),
+Übungsprüfung (Sprachen, Schulabschlüsse), Podcast, Kursablaufplan und Fachbeitrag für Kursleitende.
+**Niveaus** je Programmbereich: GER A1–C1 (Sprachen), Alpha-Level 1–2 und 3–4 (Grundbildung), Vorbereitung
+Haupt-, Realschulabschluss bzw. Hochschulreife (Schulabschlüsse), sonst Einsteiger und Fortgeschrittene.
+
 ## Seeds
 
 Ein Seed ist ein JSON-Objekt (eine Zeile in JSONL). Feldnamen folgen dem edu-sharing/OEH-Schema:
@@ -381,6 +423,15 @@ in der Primarstufe nur I und II), Sozialform (30 %). Gleichverteilung: `thema` (
 `stufen`, `art`, `stufen_status`, `art_status`, `belege` (`wlo`, `wlo_stufe`, `gnd`). Eigener
 Volltext-Prompt (`prompts/schule/volltext.md`) mit Themenpfad, Jahrgang, Operatoren und Zielsprache.
 
+**Seeds Erwachsenenbildung.** Bildungsstufe fest Erwachsenenbildung; `synth:fachgebiet_vhs` und
+`synth:programmbereich_vhs` (Volkshochschul-Statistik). Zielgruppe: Kursthemen 80 % Teilnehmende, 20 %
+Kursleitende; Themen für Kursleitende nur Kursleitende. In der Grundbildung immer, sonst in 5 % der Seeds
+`synth:sprachniveau` = einfache Sprache. Optional: Einsatz (50 %), Dauer (40 %), Veranstaltungsform (40 %;
+Abendkurs, Wochenendseminar, Bildungsurlaub, Online-Kurs, Vortrag, Selbstlernangebot). Gleichverteilung:
+`programmbereich` (Standard), `fachgebiet`, `thema`, `art`. Filter: `programmbereiche`, `quellen`, `art`,
+`eignung_status`, `fachgebiet_status`, `belege` (`wlo`, `llm_bestaetigt`). Eigener Volltext-Prompt
+(`prompts/erwachsenenbildung/volltext.md`) mit Zielsprache und einfacher Sprache.
+
 **Reproduzierbarkeit.** Gleiche Mappings, gleiche Einstellungen und gleicher Zufalls-Seed ergeben
 identische Seeds. Neben jeder Seed-Datei liegt eine `.stats.json` mit Parametern und Verteilungen.
 
@@ -439,6 +490,7 @@ Bedingte Abschnitte `{{#name}}…{{/name}}` erscheinen nur, wenn der Wert gesetz
 | `beruf`, `beruf_beschreibung`, `kompetenzart`, `lernort`, `querschnittsthema` | nur Berufsbildung (`lernort`, `querschnittsthema` optional) |
 | `themenart`, `sozialform` | Elementarbereich (`sozialform` optional, auch Schule) |
 | `thema_pfad`, `zielsprache`, `anforderungsbereich` | nur Schule (`anforderungsbereich` optional, `zielsprache` nur Fremdsprachen) |
+| `programmbereich`, `einfache_sprache`, `veranstaltungsform` | nur Erwachsenenbildung (auch `zielsprache`) |
 | `rolle`, `sprache` | Autorenrolle im Volltext-Prompt, Sprache als Wort |
 | `titel`, `beschreibung`, `keywords`, `volltext`, `auftrag` | nur in `material.md`: bisher erzeugte Felder („-“ = leer), Volltext, Auftrag aus der Felddatei |
 | `kategorien`, `beispiel_id` | nur in `inhaltstyp.md`: Liste „Name → id“ der Inhaltstypen |

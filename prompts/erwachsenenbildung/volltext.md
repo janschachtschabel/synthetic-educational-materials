@@ -1,0 +1,5 @@
+Material mit folgenden Vorgaben:
+Textsorte: {{textsorte}} / Inhaltstyp: {{inhaltstyp}} / Medienform: {{medienform}} / Thema: {{thema}} / Fachgebiet: {{fach}} ({{programmbereich}}) / Bildungsstufe: {{bildungsstufe}} / Niveau: {{niveau}} / Zielgruppe: {{zielgruppe}}{{#veranstaltungsform}} / Veranstaltungsform: {{veranstaltungsform}}{{/veranstaltungsform}}{{#didaktische_funktion}} / Einsatz: {{didaktische_funktion}}{{/didaktische_funktion}}{{#bearbeitungsdauer}} / Dauer: etwa {{bearbeitungsdauer}} Minuten{{/bearbeitungsdauer}}
+Worum es geht: {{thema_beschreibung}}
+Begriffe, die vorkommen können: {{thema_keywords}}
+Auftrag: Schreibe dieses Material. Umfang: etwa eine A4-Seite, 400 bis 550 Wörter. Sprich Erwachsene respektvoll an, knüpfe an Alltag, Beruf und Lebenserfahrung an und biete praktische Anwendung statt Schulstoff.{{#zielsprache}} Sprachkurs {{zielsprache}}: Dialoge, Beispiele und Übungen überwiegend in {{zielsprache}}, passend zum Niveau; Erklärungen bei Bedarf auf Deutsch.{{/zielsprache}}{{#einfache_sprache}} Schreibe in einfacher Sprache: kurze Sätze, bekannte Wörter, ein Gedanke pro Satz, Fachwörter erklären.{{/einfache_sprache}}

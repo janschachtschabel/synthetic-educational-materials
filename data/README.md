@@ -61,6 +61,16 @@ Die Themen (Beruf × Kompetenz) entstehen beim Laden aus beiden Dateien und werd
 | `pruefliste_themen.csv`, `korrekturen.csv` | Durchsicht (`korrektur_codes` = Stufen mit `|`, `-` = ausschließen; `korrektur_art`) |
 | `inhaltstypen.json`, `niveaus.json`, `optionale_felder.json` | Inhaltstypen mit Themenart, Zielgruppen, Stufen und Fachportalen; Jahrgänge; optionale Felder (u. a. Anforderungsbereich) |
 
+## `mappings/erwachsenenbildung/`
+
+| Datei | Inhalt |
+|---|---|
+| `programmbereiche.json` | 7 Programmbereiche und 85 Fachgebiete der Volkshochschul-Statistik (`notation`, `label`, `uri`, `uebergreifend` für die Sammelpositionen x.00) |
+| `sprachkurs_themen.json` | Handlungsfelder und Lernzielbereiche des Rahmencurriculums für Integrationskurse (`code`, `handlungsfeld`, `titel`, `label`, `fachgebiete`) |
+| `themen_erwachsenenbildung.jsonl` | ein Thema je Zeile: `id` (GND-URI, Rahmencurriculum-Code oder oehTopics-URI), `label_de`, `art` (`kursthema`, `kursleitungsthema`), `herkunft` (`gnd`, `rahmencurriculum`, `schulthemen`), `fachgebiet` und `programmbereich` [{`notation`, `uri`, `label`}] (Fremdsprachen als `4.fs`), `quelle`, `belege.wlo`, `mapping` |
+| `pruefliste_themen.csv`, `korrekturen.csv` | Durchsicht (`korrektur_codes` = Fachgebiete, optional `kursthema`/`kursleitungsthema`, `-` = ausschließen) |
+| `inhaltstypen.json`, `niveaus.json`, `optionale_felder.json` | Inhaltstypen mit Themenart, Zielgruppen und Programmbereichen; Niveaus je Programmbereich (GER, Alpha-Level, Abschlüsse); optionale Felder und Zielsprachen je Fachgebiet |
+
 ## `mappings/hochschule/`
 
 | Datei | Inhalt |
