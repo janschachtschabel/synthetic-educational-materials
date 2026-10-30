@@ -64,8 +64,7 @@ Die Themen (Beruf × Kompetenz) entstehen beim Laden aus beiden Dateien und werd
 | `themen_schule.jsonl` | ein Thema je Zeile: `id` (URI im OEH-Vokabular oehTopics bzw. bei `herkunft` = `wlo_keyword` die GND-URI), `label_de`, `portal`, `portal_uri`, `pfad`, `ebene`, `definition`, `keywords`, `faecher` (OEH discipline), `art` (`unterrichtsthema`, `lehrkraftthema`), `stufen` (`primar`, `sek1`, `sek2`), `herkunft` (`themenbaum`, `wlo_keyword`), `gnd` (exakter GND-Treffer), `quelle`, `belege.wlo` (Datensätze je Stufe, Node-IDs), `belege.wlo_keyword` (Themenbaum-Thema steht auch als Keyword in WLO-Datensätzen), `mapping` (Status, Konfidenz, Stimmen, `wlo_bestaetigt`; bei Keyword-Themen zusätzlich `fach`, `synonym_bedeutung`, `stufen_entfernt`). Nur Keyword-Themen: `label_gnd`, `oberbegriffe` (GND), `eltern` (Oberthema im Themenbaum, falls belegt) |
 | `pruefliste_themen.csv`, `korrekturen.csv` | Durchsicht (`korrektur_codes` = Stufen mit `|`, `-` = ausschließen; `korrektur_art`) |
 | `inhaltstypen.json`, `niveaus.json`, `optionale_felder.json` | Inhaltstypen mit Themenart, Zielgruppen, Stufen und Fachportalen; Jahrgänge; optionale Felder (u. a. Anforderungsbereich, Förderschwerpunkt) |
-| `bildungsstandards_gliederung.json` | Gliederung der KMK-Bildungsstandards: `quellen` (Dokument, Fach, Abschluss, Beschluss, URL, Quellenangabe), `eintraege` (`code`, `quelle`, `typ`, `pfad`, `label`), nur Überschriften |
-| `bildungsstandards.jsonl` | je Unterrichtsthema und Dokument: `id` (`<Themen-ID>|<Dokument>`), `thema`, `dokument`, `eintraege` (Code, Label, Typ, Pfad, Stimmen), `status`, `mapping` |
+| `bildungsstandards.jsonl` | je Unterrichtsthema und Dokument: `id` (`<Themen-ID>|<Dokument>`), `thema`, `dokument`, `eintraege` (Code, Typ, Stimmen; Überschrift und Pfad kommen beim Seed aus der lokalen Gliederung), `status`, `mapping` |
 
 ## `mappings/erwachsenenbildung/`
 
@@ -76,6 +75,17 @@ Die Themen (Beruf × Kompetenz) entstehen beim Laden aus beiden Dateien und werd
 | `themen_erwachsenenbildung.jsonl` | ein Thema je Zeile: `id` (GND-URI, Rahmencurriculum-Code oder oehTopics-URI), `label_de`, `art` (`kursthema`, `kursleitungsthema`), `herkunft` (`gnd`, `rahmencurriculum`, `schulthemen`), `fachgebiet` und `programmbereich` [{`notation`, `uri`, `label`}] (Fremdsprachen als `4.fs`), `quelle`, `belege.wlo`, `mapping` |
 | `pruefliste_themen.csv`, `korrekturen.csv` | Durchsicht (`korrektur_codes` = Fachgebiete, optional `kursthema`/`kursleitungsthema`, `-` = ausschließen) |
 | `inhaltstypen.json`, `niveaus.json`, `optionale_felder.json` | Inhaltstypen mit Themenart, Zielgruppen und Programmbereichen; Niveaus je Programmbereich (GER, Alpha-Level, Abschlüsse); optionale Felder und Zielsprachen je Fachgebiet |
+
+## `lokal/` (nicht im Repo)
+
+Vollständige Gliederungen urheberrechtlich geschützter Vorlagen liegen nur lokal als Build-Eingabe
+(`.gitignore`), damit das Repo keine Kopie der ganzen Gliederung veröffentlicht. In die Daten gelangen nur
+die einzelnen Überschriften, die ein Thema oder Seed braucht, jeweils mit Quellenangabe.
+
+| Datei | Inhalt | ohne die Datei |
+|---|---|---|
+| `schule/bildungsstandards_gliederung.json` | Gliederung der KMK-Bildungsstandards: `meta`, `quellen` (Dokument, Fach, Abschluss, Beschluss, URL, Quellenangabe), `eintraege` (`code`, `quelle`, `typ`, `pfad`, `label`), nur Überschriften | Seeds ohne `synth:bildungsstandards`; Schritt `bista` nicht ausführbar |
+| `erwachsenenbildung/grundbildung_themen.json` | Grundbildungs-Themen aus lea.-Alpha-Levels und DVV-Rahmencurricula: `quellen`, `themen` (`code`, `quelle`, `bereich`, `pfad`, `label`, `fachgebiet`, `niveau`) | beim Neubau der Themen entfallen die Grundbildungs-Themen (Warnung); die vorhandene `themen_erwachsenenbildung.jsonl` enthält sie |
 
 ## `mappings/hochschule/`
 

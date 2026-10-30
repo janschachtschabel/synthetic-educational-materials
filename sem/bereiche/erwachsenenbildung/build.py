@@ -17,6 +17,7 @@ import csv
 import hashlib
 import json
 import re
+import warnings
 from collections import Counter, defaultdict
 from concurrent.futures import ThreadPoolExecutor
 from datetime import date
@@ -26,7 +27,7 @@ from ...llm import LLMClient, LLMConfig, Progress, run_tasks
 from ...mapping import abstimmung, pruefung
 from ...mapping.abstimmung import Ziel
 from ...mapping.embeddings import DEFAULT_EMBEDDING_MODEL, Embedder, top_k
-from ...paths import DATA_DIR
+from ...paths import DATA_DIR, LOKAL_DIR
 from ...quellen import gnd
 from ..base import fertig
 from . import DIR, FREMDSPRACHEN, ZIEL_FS, load_jsonl, systematik
@@ -449,9 +450,11 @@ def sprachkurs_themen(s: dict) -> list[dict]:
 
 def grundbildung_themen(s: dict) -> list[dict]:
     """Grundbildungs-Themen aus Gliederung und Titeln der lea.-Alpha-Levels und der DVV-Rahmencurricula
-    (grundbildung_themen.json): Kompetenzbereiche und Themenfelder des Lesens, Schreibens und Rechnens."""
-    path = DIR / "grundbildung_themen.json"
+    (grundbildung_themen.json, nur lokal in data/lokal/): Kompetenzbereiche und Themenfelder des Lesens,
+    Schreibens und Rechnens. Fehlt die Datei, entfallen diese Themen (Warnung)."""
+    path = LOKAL_DIR / "erwachsenenbildung" / "grundbildung_themen.json"
     if not path.exists():
+        warnings.warn(f"{path} fehlt: Grundbildungs-Themen entfallen (siehe data/README.md, data/lokal/)")
         return []
     d = json.loads(path.read_text(encoding="utf-8"))
     quellen = {q["key"]: q for q in d["quellen"]}

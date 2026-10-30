@@ -2,7 +2,9 @@
 Chemie, Physik).
 
 Die Gliederung (Kompetenzbereiche, Leitideen, Basiskonzepte, Teilbereiche; nur Überschriften, keine
-Standardformulierungen) liegt in bildungsstandards_gliederung.json. Je Unterrichtsthema und passendem Dokument
+Standardformulierungen) liegt nur lokal in data/lokal/schule/bildungsstandards_gliederung.json (nicht im Repo);
+bildungsstandards.jsonl enthält je Zuordnung nur die Codes, Überschrift und Pfad kommen beim Seed aus der Gliederung.
+Fehlt sie, erhalten die Seeds kein Feld synth:bildungsstandards. Je Unterrichtsthema und passendem Dokument
 (Fach und Schulstufe: Primarstufe → Primarbereich, Sek I → ESA/MSA, Sek II → AHR) wählen drei Stimmen ein bis
 zwei inhaltliche Einträge. Prozessbezogene Kompetenzen gelten für alle Themen eines Fachs und werden nicht
 zugeordnet.
@@ -20,11 +22,11 @@ from functools import cache
 from ...llm import LLMConfig
 from ...mapping import abstimmung
 from ...mapping.abstimmung import Ziel
-from ...paths import DATA_DIR
+from ...paths import DATA_DIR, LOKAL_DIR
 from ..base import fertig
 from . import DIR, load_jsonl
 
-GLIEDERUNG_PATH = DIR / "bildungsstandards_gliederung.json"
+GLIEDERUNG_PATH = LOKAL_DIR / "schule" / "bildungsstandards_gliederung.json"
 ZUORDNUNG_PATH = DIR / "bildungsstandards.jsonl"
 STIMMEN_PATH = DATA_DIR / "cache" / "schule_stimmen_bista.jsonl"
 N_STIMMEN = 3
@@ -37,6 +39,8 @@ STUFE_ABSCHLUSS = {"primar": ["primar"], "sek1": ["msa", "esa"], "sek2": ["ahr"]
 
 @cache
 def gliederung() -> dict:
+    if not GLIEDERUNG_PATH.exists():
+        return {"meta": {"faecher": {}}, "quellen": [], "eintraege": []}
     return json.loads(GLIEDERUNG_PATH.read_text(encoding="utf-8"))
 
 
@@ -122,9 +126,8 @@ def zusammenfuehren(cfg: LLMConfig | None = None, stimmen: int = N_STIMMEN, mode
         if not a["details"] or a["details"][0]["stimmen"] < n // 2 + 1:  # keine Mehrheit für einen Eintrag
             continue
         rows.append({"id": o["id"], "thema": o["thema"], "dokument": o["dokument"],
-                     "eintraege": [{"code": d["code"], "label": by_code[d["code"]]["label"],
-                                    "typ": by_code[d["code"]]["typ"], "pfad": by_code[d["code"]]["pfad"],
-                                    "stimmen": d["stimmen"]} for d in a["details"] if d["code"] in by_code],
+                     "eintraege": [{"code": d["code"], "typ": by_code[d["code"]]["typ"], "stimmen": d["stimmen"]}
+                                   for d in a["details"] if d["code"] in by_code],
                      "status": a["status"], **({"stichwahl": True} if n > stimmen else {})})
     meta = {"methode": METHODE, "modell": modell or (cfg.model if cfg else None), "stimmen": stimmen,
             "datum": date.today().isoformat()}
@@ -143,8 +146,10 @@ def fuer_seed(thema_id: str, portal: str, stufe: str) -> dict | None:
     """Metadaten synth:bildungsstandards für einen Seed, oder None."""
     d = dokument(portal, stufe)
     z = zuordnungen().get(f"{thema_id}|{d['key']}") if d else None
-    if not z:
+    by_code = {e["code"]: e for e in gliederung()["eintraege"]}
+    ein = [{k: by_code[e["code"]][k] for k in ("code", "label", "typ", "pfad")} for e in z["eintraege"]
+           if e["code"] in by_code] if z else []
+    if not ein:
         return None
-    return {"dokument": d["name"], "beschluss": d["beschluss"], "uri": d["uri"],
-            "eintraege": [{k: e[k] for k in ("code", "label", "typ", "pfad")} for e in z["eintraege"]],
+    return {"dokument": d["name"], "beschluss": d["beschluss"], "uri": d["uri"], "eintraege": ein,
             "status": z["status"]}

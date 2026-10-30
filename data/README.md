@@ -64,8 +64,7 @@ Topics (occupation × skill) are generated when loading from both files and are 
 | `themen_schule.jsonl` | one topic per line: `id` (URI in the OEH oehTopics vocabulary, or the GND URI when `herkunft` = `wlo_keyword`), `label_de`, `portal`, `portal_uri`, `pfad`, `ebene`, `definition`, `keywords`, `faecher` (OEH discipline), `art` (`unterrichtsthema`, `lehrkraftthema`), `stufen` (`primar`, `sek1`, `sek2`), `herkunft` (`themenbaum`, `wlo_keyword`), `gnd` (exact GND match), `quelle`, `belege.wlo` (records per level, node IDs), `belege.wlo_keyword` (topic-tree topic also occurs as a keyword in WLO records), `mapping` (status, confidence, votes, `wlo_bestaetigt`; for keyword topics also `fach`, `synonym_bedeutung`, `stufen_entfernt`). Keyword topics only: `label_gnd`, `oberbegriffe` (GND), `eltern` (parent topic in the topic tree, where evidenced) |
 | `pruefliste_themen.csv`, `korrekturen.csv` | review (`korrektur_codes` = levels separated by `|`, `-` = exclude; `korrektur_art`) |
 | `inhaltstypen.json`, `niveaus.json`, `optionale_felder.json` | content types with topic type, target groups, levels, and subject portals; year groups; optional fields (including area of requirement, special-needs focus) |
-| `bildungsstandards_gliederung.json` | outline of the KMK educational standards: `quellen` (document, subject, qualification, resolution, URL, citation), `eintraege` (`code`, `quelle`, `typ`, `pfad`, `label`), headings only |
-| `bildungsstandards.jsonl` | per classroom topic and document: `id` (`<topic ID>|<document>`), `thema`, `dokument`, `eintraege` (code, label, type, path, votes), `status`, `mapping` |
+| `bildungsstandards.jsonl` | per classroom topic and document: `id` (`<topic ID>|<document>`), `thema`, `dokument`, `eintraege` (code, type, votes; heading and path are taken from the local outline when building seeds), `status`, `mapping` |
 
 ## `mappings/erwachsenenbildung/`
 
@@ -76,6 +75,17 @@ Topics (occupation × skill) are generated when loading from both files and are 
 | `themen_erwachsenenbildung.jsonl` | one topic per line: `id` (GND URI, Rahmencurriculum code, or oehTopics URI), `label_de`, `art` (`kursthema`, `kursleitungsthema`), `herkunft` (`gnd`, `rahmencurriculum`, `schulthemen`), `fachgebiet` and `programmbereich` [{`notation`, `uri`, `label`}] (foreign languages as `4.fs`), `quelle`, `belege.wlo`, `mapping` |
 | `pruefliste_themen.csv`, `korrekturen.csv` | review (`korrektur_codes` = subject areas, optionally `kursthema`/`kursleitungsthema`, `-` = exclude) |
 | `inhaltstypen.json`, `niveaus.json`, `optionale_felder.json` | content types with topic type, target groups, and programme areas; levels per programme area (GER, Alpha-Level, qualifications); optional fields and target languages per subject area |
+
+## `lokal/` (not in the repository)
+
+Complete outlines of copyrighted sources are kept locally as build input only (`.gitignore`), so the
+repository does not publish a copy of the whole outline. The data only contain the individual headings a
+topic or seed needs, each with its citation.
+
+| File | Content | without the file |
+|---|---|---|
+| `schule/bildungsstandards_gliederung.json` | outline of the KMK educational standards: `meta`, `quellen` (document, subject, qualification, resolution, URL, citation), `eintraege` (`code`, `quelle`, `typ`, `pfad`, `label`), headings only | seeds without `synth:bildungsstandards`; step `bista` cannot run |
+| `erwachsenenbildung/grundbildung_themen.json` | basic-education topics from the lea. alpha levels and DVV framework curricula: `quellen`, `themen` (`code`, `quelle`, `bereich`, `pfad`, `label`, `fachgebiet`, `niveau`) | rebuilding the topics drops the basic-education topics (warning); the existing `themen_erwachsenenbildung.jsonl` contains them |
 
 ## `mappings/hochschule/`
 
