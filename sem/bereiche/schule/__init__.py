@@ -42,10 +42,13 @@ class Schule(Bildungsbereich):
     }
     default_balance = "thema"
     mapping_folgen = {"themen": ["themen", "wlo", "gnd", "art", "stufen"],
-                      "keywords": ["keywords", "kw_gnd", "kw_bedeutung", "kw_art", "kw_fach", "kw_stufen"]}
+                      "keywords": ["keywords", "kw_gnd", "kw_bedeutung", "kw_art", "kw_fach", "kw_stufen"],
+                      # braucht themen_schule.jsonl: bei einem Neuaufbau nach den Themen ausführen
+                      "bildungsstandards": ["bista", "bista_zusammenfuehren"]}
     mapping_abschluss = ["zusammenfuehren"]
 
     def mapping_schritte(self) -> list[MappingSchritt]:
+        from . import bildungsstandards as bs
         from . import build as b
 
         S_ = MappingSchritt
@@ -69,6 +72,10 @@ class Schule(Bildungsbereich):
                b.build_kw_fach),
             S_("kw_stufen", "Keyword-Themen: Schulstufen", "Primarstufe, Sek I, Sek II (drei Stimmen)",
                b.build_kw_stufen),
+            S_("bista", "Bildungsstandards abstimmen", "Unterrichtsthemen auf Kompetenzbereiche, Leitideen und "
+               "Basiskonzepte der KMK-Bildungsstandards (drei Stimmen)", bs.build_bista),
+            S_("bista_zusammenfuehren", "Bildungsstandards zusammenführen", "bildungsstandards.jsonl",
+               bs.zusammenfuehren, llm=False),
             S_("zusammenfuehren", "Zusammenführen", "themen_schule.jsonl, Prüfliste, Korrekturen (läuft zuletzt)",
                b.zusammenfuehren, llm=False),
         ]
@@ -255,6 +262,17 @@ class Schule(Bildungsbereich):
                     **({"fach": m["fach"]["status"]} if m.get("fach") else {})},
             belege={"erfuellt": sorted(self.belege_des_themas(topic))})
 
+        from .bildungsstandards import fuer_seed
+
+        bista = fuer_seed(topic["id"], topic["portal"], stufe) if art == "unterrichtsthema" else None
+        if bista:
+            g = bista.pop("status")
+            seed[S.F_BILDUNGSSTANDARDS] = bista
+            seed[S.F_PROVENANCE][S.F_BILDUNGSSTANDARDS] = {
+                **S.provenance(bista["dokument"], uri=bista["uri"],
+                               license="urheberrechtlich geschützt; übernommen nur Gliederung und Titel",
+                               method="LLM-Mehrfachabstimmung über die inhaltliche Gliederung"), "status": g}
+
         seed[S.F_NIVEAU] = {"id": niveau["id"], "label": niveau["label"], "stufe": STUFEN_LABEL[stufe],
                             "exactMatch": niveau["exactMatch"]}
         seed[S.F_PROVENANCE][S.F_NIVEAU] = S.provenance(self.niveaus["quelle"]["name"],
@@ -271,6 +289,17 @@ class Schule(Bildungsbereich):
             seed["synth:anforderungsbereich"] = afb["werte"][rng.choice(ids)]
         if rng.random() < opt["sozialform"]["anteil"]:
             seed["synth:sozialform"] = rng.choice(opt["sozialform"]["werte"])
+        foe = opt["foerderschwerpunkt"]
+        if art == "unterrichtsthema" and stufe in foe["stufen"] and rng.random() < foe["anteil"]:
+            # Material für eine Förderschule bzw. den sonderpädagogischen Förderbedarf: zweite Bildungsstufe
+            seed[S.F_FOERDERSCHWERPUNKT] = rng.choice(foe["werte"])
+            ctx_f = CONTEXT_BASE + "foerderschule"
+            seed[S.F_CONTEXT].append(ctx_f)
+            seed[S.F_CONTEXT + "_DISPLAYNAME"].append(self.contexts.ref(ctx_f)["label"])
+            seed[S.F_PROVENANCE][S.F_FOERDERSCHWERPUNKT] = S.provenance(
+                foe["quelle"]["name"], uri=foe["quelle"]["uri"], license=None,
+                method=f"optional ({foe['anteil']:.0%} der Unterrichtsthemen in {', '.join(foe['stufen'])}), "
+                       "gleichverteilt; Bildungsstufe Förderschule ergänzt")
         return seed
 
     # --- Prompt-Werte ----------------------------------------------------------------------
@@ -304,4 +333,6 @@ class Schule(Bildungsbereich):
             "bearbeitungsdauer": seed.get(S.F_LEARNING_TIME, ""),
             "anforderungsbereich": seed.get("synth:anforderungsbereich", ""),
             "sozialform": seed.get("synth:sozialform", ""),
+            "foerderschwerpunkt": seed.get(S.F_FOERDERSCHWERPUNKT, ""),
+            "bildungsstandards": "; ".join(e["label"] for e in (seed.get(S.F_BILDUNGSSTANDARDS) or {}).get("eintraege", [])),
         }
