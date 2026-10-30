@@ -258,11 +258,17 @@ with tab_mat:
         lrt_check = st.checkbox("Inhaltstyp am fertigen Material prüfen", value=True,
                                 help="Bestimmt den Inhaltstyp ohne Kenntnis des Seeds und protokolliert, ob er "
                                      "passt. Ein Aufruf mehr je Material.")
+        from sem.generate import SPRACHEN
+        sprache = st.selectbox("Ausgabesprache", list(SPRACHEN), format_func=SPRACHEN.get, key="m-sprache",
+                               help="Sprache von Volltext, Titel, Beschreibung, Keywords und Fragen. Die Vorgaben "
+                                    "bleiben deutsch; bei einer anderen Sprache wird der Hinweis aus der Vorlage "
+                                    "„ausgabesprache“ (Reiter „Prompts“) angehängt. Steht in cclom:general_language.")
         laeuft = bool(jobs().get("mat") and not jobs()["mat"]["done"])
         st.caption(f"Einstellungen aus der Seitenleiste: {cfg.model}, {cfg.workers} Worker, "
                    f"Reasoning-Aufwand {cfg.reasoning_effort or 'Modellstandard'}.")
         if st.button("Start / Fortsetzen", type="primary", disabled=laeuft):
-            start_job("mat", generate, src, out, cfg, limit=int(limit) or None, inhaltstyp_pruefen=lrt_check)
+            start_job("mat", generate, src, out, cfg, limit=int(limit) or None, inhaltstyp_pruefen=lrt_check,
+                      ausgabesprache=sprache)
         job_status("mat")
         if out.exists() and not laeuft:
             letzte = letzter_datensatz(out)

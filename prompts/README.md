@@ -15,6 +15,7 @@ Platzhalter stehen in doppelten geschweiften Klammern, z. B. `{{thema}}`. Welche
 | `keywords.md` | Auftrag Schlagworte | kommagetrennte Liste, 5–8 |
 | `inhaltstyp.md` | Auftrag Inhaltstyp-Prüfung (ohne Seed-Wert) | eine id aus `{{kategorien}}` |
 | `fragen_antworten.md` | Auftrag Frage-Antwort-Paare | JSON `{"paare": [...]}` |
+| `ausgabesprache.md` | Hinweis an beide Systemprompts, nur wenn beim Erzeugen eine andere Ausgabesprache als Deutsch gewählt ist (App: „Ausgabesprache“, CLI: `--sprache en`) | – |
 
 Die Felder werden nacheinander erzeugt: Titel, Beschreibung, Keywords, Inhaltstyp, Fragen. Jeder Aufruf
 setzt den Felddatei-Text als `{{auftrag}}` in `material.md` ein und sieht die zuvor erzeugten Felder.

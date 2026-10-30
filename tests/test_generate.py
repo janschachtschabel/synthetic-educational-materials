@@ -17,9 +17,11 @@ class FakeClient:
     def __init__(self, kategorie):
         self.kategorie = kategorie
         self.calls = []
+        self.systeme = []
 
     def chat(self, system, user, json_mode=False):
         self.calls.append(user)
+        self.systeme.append(system)
         if "Auftrag: Schreibe dieses Material" in user:
             return VOLLTEXT
         if "Titel, der den INHALT" in user:
@@ -74,6 +76,20 @@ def test_generate_one_einzelaufrufe_und_inhaltstyp_pruefung(hochschule):
     assert len(client.calls) == 7
     # spätere Felder sehen die früheren
     assert "Titel: Eigenwerte Diagonalisierung" in client.calls[-1]
+
+
+def test_ausgabesprache(hochschule):
+    seed = build_seeds(hochschule, 1, seed=3)[0]
+    kat = {k["uri"]: k for k in hochschule.inhaltstyp_kategorien()}
+    client = FakeClient(kat[seed[S.F_LRT][0]]["id"])
+    prompts = {"hochschule": load_prompts("hochschule")}
+    rec = generate_one(client, seed, prompts, {"modell": "fake"})
+    assert rec[S.F_LANGUAGE] == ["de"] and not any("Ausgabesprache" in x for x in client.systeme)
+    client = FakeClient(kat[seed[S.F_LRT][0]]["id"])
+    rec = generate_one(client, seed, prompts, {"modell": "fake"}, ausgabesprache="en")
+    assert all("auf Englisch" in x for x in client.systeme)
+    assert "Sprache: Englisch" in client.calls[-1]
+    assert rec[S.F_LANGUAGE] == ["en"] and S.F_LANGUAGE in rec[S.F_PROVENANCE]
 
 
 def test_auswahl_nach_status_quelle_und_belegen(hochschule):

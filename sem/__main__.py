@@ -86,6 +86,9 @@ def main(argv=None):
     p.add_argument("--limit", type=int)
     p.add_argument("--ohne-inhaltstyp-pruefung", action="store_true",
                    help="Inhaltstyp nicht am fertigen Material prüfen (spart einen Aufruf je Material)")
+    p.add_argument("--sprache", default="de", metavar="CODE",
+                   help="Ausgabesprache als ISO-Code (de, en, fr, es, …; Standard de). Der Hinweis an das Modell "
+                        "steht in prompts/ausgabesprache.md")
     _llm_args(p)
 
     p = sub.add_parser("mappings", help="Mappings eines Bildungsbereichs neu bauen (Schritte siehe --liste)")
@@ -138,7 +141,8 @@ def main(argv=None):
         from .generate import generate
 
         out = ausgabe_pfad("materialien", a.out or a.seeds)
-        prog = generate(a.seeds, out, _cfg(a), limit=a.limit, inhaltstyp_pruefen=not a.ohne_inhaltstyp_pruefung)
+        prog = generate(a.seeds, out, _cfg(a), limit=a.limit, inhaltstyp_pruefen=not a.ohne_inhaltstyp_pruefung,
+                        ausgabesprache=a.sprache)
         print(f"{prog.done} neu, {prog.skipped} schon vorhanden, {prog.failed} fehlgeschlagen → {out}")
         if prog.status != "fertig":
             sys.exit(2)

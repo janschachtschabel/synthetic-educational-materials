@@ -416,7 +416,7 @@ def sprachkurs_themen(s: dict) -> list[dict]:
         fg, pb = _fg_ref(s, t["fachgebiete"])
         out.append({"id": f"{q['uri']}#{t['code']}", "label_de": t["label"], "handlungsfeld": t["handlungsfeld"],
                     "art": "kursthema", "fachgebiet": fg, "programmbereich": pb, "herkunft": "rahmencurriculum",
-                    "quelle": {"name": q["name"], "uri": q["uri"], "lizenz": q["lizenz"]},
+                    "quelle": {k: q[k] for k in ("name", "uri", "lizenz", "quellenangabe") if k in q},
                     "mapping": {"methode": "aus der Gliederung des Rahmencurriculums übernommen (Handlungsfeld und "
                                           "Lernzielbereich)", "status": "gesichert",
                                 "eignung": {"status": "gesichert", "art": "kursthema"}}})

@@ -10,6 +10,9 @@ Pro Seed nacheinander:
      Frage-Antwort-Paare (JSON)
 Liefert ein Feld nichts Brauchbares, wird nur dieses Feld erneut angefragt. Dauer und
 Neuanfragen je Feld stehen in synth:generierung.
+
+Ausgabesprache: Standard Deutsch. Bei einer anderen Sprache wird prompts/ausgabesprache.md an beide
+Systemprompts angehängt; die Vorgaben bleiben deutsch, cclom:general_language erhält die Ausgabesprache.
 """
 
 from __future__ import annotations
@@ -28,6 +31,10 @@ from .prompts import load_prompts, prompt_hash, render
 
 LEER = "-"
 FELD_VERSUCHE = 3
+# Ausgabesprachen (ISO 639-1 → Name im Prompt); andere Codes werden unverändert übergeben
+SPRACHEN = {"de": "Deutsch", "en": "Englisch", "fr": "Französisch", "es": "Spanisch", "it": "Italienisch",
+            "nl": "Niederländisch", "pl": "Polnisch", "tr": "Türkisch", "uk": "Ukrainisch", "ru": "Russisch",
+            "ar": "Arabisch"}
 _QUOTES = "\"'„“”«»‚‘’`"
 
 
@@ -112,23 +119,30 @@ def material_user(prompts: dict, values: dict, felder: dict, text: str, auftrag:
 
 
 def generate_one(client: LLMClient, seed: dict, prompts_by_bereich: dict, meta: dict, qa_min: int = 8,
-                 inhaltstyp_pruefen: bool = True) -> dict:
+                 inhaltstyp_pruefen: bool = True, ausgabesprache: str = "de") -> dict:
     bereich = get_bereich(seed[S.F_BEREICH])
     prompts = prompts_by_bereich[bereich.key]
     values = bereich.prompt_values(seed)
+    hinweis = ""
+    if ausgabesprache != "de":
+        name = SPRACHEN.get(ausgabesprache, ausgabesprache)
+        hinweis = "\n\n" + render(prompts["ausgabesprache"], {"ausgabesprache": name})
+        values["sprache"] = ", ".join(dict.fromkeys([name, *[x for x in values.get("sprache", "").split(", ")
+                                                             if x and x != "Deutsch"]]))
     start = time.time()
     neu: dict[str, int] = {}
     tokens = client.zaehler(neu=True) if hasattr(client, "zaehler") else {}
     sub = {"eingabe": 0, "davon_cache": 0, "ausgabe": 0, "davon_reasoning": 0, "aufrufe": 0}
     for i in range(FELD_VERSUCHE):
-        text = client.chat(render(prompts["volltext_system"], values), render(prompts["volltext"], values)).strip()
+        text = client.chat(render(prompts["volltext_system"], values) + hinweis,
+                           render(prompts["volltext"], values)).strip()
         if len(text.split()) >= 150:
             break
         neu["volltext"] = i + 1
     else:
         raise ValueError(f"Volltext nach {FELD_VERSUCHE} Versuchen zu kurz")
 
-    system = render(prompts["system"], values)
+    system = render(prompts["system"], values) + hinweis
     felder: dict = {}
     # Titel, Beschreibung, Keywords nacheinander: jedes Feld sieht die vorherigen
     for name, parse in (("titel", parse_titel), ("beschreibung", parse_beschreibung), ("keywords", parse_keywords)):
@@ -178,9 +192,13 @@ def generate_one(client: LLMClient, seed: dict, prompts_by_bereich: dict, meta: 
     rec[S.F_KEYWORD] = felder["keywords"]
     rec[S.F_FULLTEXT] = text
     rec[S.F_QA] = qa
+    if ausgabesprache != "de":
+        rec[S.F_LANGUAGE] = list(dict.fromkeys([ausgabesprache, *[x for x in rec.get(S.F_LANGUAGE, []) if x != "de"]]))
     if pruefung:
         rec[S.F_LRT_CHECK] = pruefung
     prov = rec.setdefault(S.F_PROVENANCE, {})
+    if ausgabesprache != "de":
+        prov[S.F_LANGUAGE] = S.provenance("Generierung", method=f"Ausgabesprache {ausgabesprache} beim Erzeugen gewählt")
     prov[S.F_FULLTEXT] = dict(S.provenance("LLM", method="aus dem Seed erzeugt (volltext)"), modell=meta["modell"])
     for f, datei in ((S.F_TITLE, "titel"), (S.F_DESCRIPTION, "beschreibung"), (S.F_KEYWORD, "keywords"),
                      (S.F_QA, "fragen_antworten")):
@@ -193,7 +211,8 @@ def generate_one(client: LLMClient, seed: dict, prompts_by_bereich: dict, meta: 
 
 
 def generate(seeds_path: Path, out_path: Path, cfg: LLMConfig, limit: int | None = None,
-             inhaltstyp_pruefen: bool = True, on_progress=print_progress, stop_event=None) -> Progress:
+             inhaltstyp_pruefen: bool = True, ausgabesprache: str = "de", on_progress=print_progress,
+             stop_event=None) -> Progress:
     seeds = read_seeds(seeds_path)
     if limit:
         seeds = seeds[:limit]
@@ -201,8 +220,9 @@ def generate(seeds_path: Path, out_path: Path, cfg: LLMConfig, limit: int | None
     prompts_by_bereich = {b: load_prompts(b) for b in bereiche}
     meta = {"modell": cfg.model, "base_url": cfg.public()["base_url"], "datum": date.today().isoformat(),
             "prompt_hash": {b: prompt_hash(p) for b, p in prompts_by_bereich.items()},
-            "inhaltstyp_pruefung": inhaltstyp_pruefen, **({"reasoning_effort": cfg.reasoning_effort}
+            "inhaltstyp_pruefung": inhaltstyp_pruefen, "ausgabesprache": ausgabesprache, **({"reasoning_effort": cfg.reasoning_effort}
                                                            if cfg.reasoning_effort else {})}
     return run_tasks(seeds, lambda client, seed: generate_one(client, seed, prompts_by_bereich, meta,
-                                                              inhaltstyp_pruefen=inhaltstyp_pruefen),
+                                                              inhaltstyp_pruefen=inhaltstyp_pruefen,
+                                                              ausgabesprache=ausgabesprache),
                      Path(out_path), cfg, on_progress=on_progress, stop_event=stop_event)

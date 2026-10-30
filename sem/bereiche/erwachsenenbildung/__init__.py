@@ -211,10 +211,14 @@ class Erwachsenenbildung(Bildungsbereich):
         m = topic.get("mapping", {})
         prov = {**S.provenance(q["name"], uri=q["uri"], license=q["lizenz"], method=m.get("methode", "aus dem Thema")),
                 **{k: m[k] for k in ("status", "konfidenz") if k in m}}
+        if q.get("quellenangabe"):
+            prov["quellenangabe"] = q["quellenangabe"]
         S.set_controlled(seed, F_FACHGEBIET, fachgebiete, prov)
         pbr = next(p for p in s["programmbereiche"] if p["notation"] == pb)
         S.set_controlled(seed, F_PROGRAMMBEREICH, [{"uri": pbr["uri"], "label": pbr["label"]}],
                          S.provenance(q["name"], uri=q["uri"], license=q["lizenz"], method="aus dem Fachgebiet"))
+        if q.get("quellenangabe"):
+            seed[S.F_PROVENANCE][F_PROGRAMMBEREICH]["quellenangabe"] = q["quellenangabe"]
         lrt = self.inhaltstypen["quelle"]
         S.set_controlled(seed, S.F_LRT, [{"uri": typ["uri"], "label": typ["label"]}], S.provenance(
             lrt["name"], uri=lrt["uri"], license=lrt["lizenz"],
@@ -233,6 +237,8 @@ class Erwachsenenbildung(Bildungsbereich):
         tq = topic["quelle"]
         seed[S.F_PROVENANCE][S.F_THEMA] = S.provenance(tq["name"], uri=tq["uri"], license=tq["lizenz"],
                                                        method=m.get("methode", "Thema aus der Quelle"))
+        if tq.get("quellenangabe"):
+            seed[S.F_PROVENANCE][S.F_THEMA]["quellenangabe"] = tq["quellenangabe"]
         seed[S.F_PROVENANCE][S.F_THEMA].update(
             status={"fachgebiet": m.get("status"), "eignung": (m.get("eignung") or {}).get("status")},
             belege={"erfuellt": sorted(self.belege_des_themas(topic))})

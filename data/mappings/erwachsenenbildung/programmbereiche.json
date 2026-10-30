@@ -3,7 +3,8 @@
  "quelle": {
   "name": "Deutsches Institut für Erwachsenenbildung (DIE), Volkshochschul-Statistik, Fachgebietsgliederung (z. B. 59. Folge, Berichtsjahr 2020, Statistikbericht 2022)",
   "uri": "https://www.die-bonn.de/weiterbildung/statistik/vhs-statistik/",
-  "lizenz": "CC BY 4.0 DE (Statistikbericht); Codes und Bezeichnungen als Fakten übernommen"
+  "lizenz": "CC BY 4.0 DE (Statistikbericht); Codes und Bezeichnungen als Fakten übernommen",
+  "quellenangabe": "Quelle: Deutsches Institut für Erwachsenenbildung – Leibniz-Zentrum für Lebenslanges Lernen (DIE), Volkshochschul-Statistik, Fachgebietsgliederung seit Berichtsjahr 2018 (https://www.die-bonn.de/weiterbildung/statistik/vhs-statistik/), Statistikbericht lizenziert unter CC BY 4.0 DE"
  },
  "uri_basis": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#",
  "programmbereiche": [
