@@ -228,7 +228,8 @@ die Bildungsstufe folgt daraus (Berufliche Bildung bzw. Fortbildung).
 
 **Lernfelder der Rahmenlehrpläne** (Folge `lernfeld`, zweite Themenquelle). Die KMK veröffentlicht die
 Rahmenlehrpläne der Berufsschule nur als PDF; eine maschinenlesbare Fassung (XML, API, Open Data) gibt es
-nicht. Eingelesen werden Markdown-Fassungen der PDFs (Docling), Ordner mit `--rlp ORDNER` oder
+nicht. Eingelesen werden Markdown-Fassungen der PDFs (Docling; die 12 im Jahr 2025/26 erneuerten Pläne
+je nach Ergebnis mit Docling oder pymupdf4llm), Ordner mit `--rlp ORDNER` oder
 `RLP_MARKDOWN_DIR`; sie bleiben außerhalb des Repos. Übernommen werden nur Nummer, Titel, Ausbildungsjahr
 und Zeitrichtwert je Lernfeld, keine Ziel- und Inhaltstexte.
 
@@ -237,8 +238,11 @@ und Zeitrichtwert je Lernfeld, keine Ziel- und Inhaltstexte.
    sind. Je Plan werden zwei Stellen gelesen und abgeglichen: die Übersichtstabelle in Teil V und die
    Kopfzeile jedes Lernfelds („Lernfeld 3: … 2. Ausbildungsjahr, Zeitrichtwert 80 Stunden“). Die
    Kopfzeilen fangen Umwandlungsfehler der Tabelle auf (zusammengezogene Zeilen, fehlende Stunden).
-   Stand 30.10.2026: 295 Pläne liegen als Markdown vor, 12 im Jahr 2025/26 erneuerte fehlen noch; 30 sind
-   ältere Fächerpläne ohne Lernfelder; 265 Pläne mit 3.697 Lernfeldern bleiben, 257 davon ohne Lücken.
+   Stand 30.10.2026: alle 307 Pläne liegen als Markdown vor; 30 sind ältere Fächerpläne ohne Lernfelder;
+   277 Pläne mit 3.835 Lernfeldern bleiben, 268 davon ohne Lücken. Die 12 im Jahr 2025/26 erneuerten
+   Pläne sind mit Docling umgewandelt, wo dessen Übersichtstabelle vollständig ist (9), sonst mit
+   pymupdf4llm (Justizfachangestellte, Schornsteinfeger, Verfahrensmechaniker Glastechnik; Fett-Markierungen
+   und `<br>` entfernt); alle 12 Lernfeldlisten sind mit der Übersichtstabelle im PDF abgeglichen.
 2. `rlp_kandidaten`: lokale Embeddings vergleichen Titel und erste Lernfelder des Plans mit allen
    ESCO-Berufen (Bezeichnung, Synonyme, Beschreibung); die 12 ähnlichsten sind Kandidaten.
 3. `rlp_berufe`: drei Stimmen (Berufsberatung, ESCO-Codierung, Berufsschullehrkraft) wählen ein bis drei
@@ -251,18 +255,20 @@ und Zeitrichtwert je Lernfeld, keine Ziel- und Inhaltstexte.
 Lernfeldtitel, die nur Umwandlungsreste sind (Fachrichtungskürzel wie „(SM)“, Abschnittsköpfe wie
 „Zielformulierung“), werden verworfen.
 
-**Redaktionelle Durchsicht.** Alle 69 Pläne der Prüfliste (65 ohne Mehrheit, 4 nur mit lückenhafter
-Lernfeldliste) sind durchgesehen; die Stimmen hatten oft gar keinen Kandidaten gewählt, weil die Embedding-
-Kandidaten danebenlagen. Ergebnis in `korrekturen_rahmenlehrplaene.csv` mit Kommentar: 64 Pläne mit
-ESCO-Beruf, auch außerhalb der Kandidaten gesucht (z. B. Berufskraftfahrer → Lastkraftwagen- und
-Omnibusfahrer, Chemikant → Steuerer Chemiewerksleitstand, Fachangestellte für Arbeitsmarktdienstleistungen →
-Arbeitsvermittler); wo ESCO keinen eigenen Beruf hat, der nächste (Estrichleger → Terrazzomacher, Brauer und
-Mälzer → Braumeister, Mälzermeister). 5 ausgeschlossen: Holz- und Bautenschutz (zwei Pläne), Rollladen- und
+**Redaktionelle Durchsicht.** Alle 72 Pläne der Prüfliste (69 im ersten Lauf, 3 der erneuerten Pläne;
+68 ohne Mehrheit, 4 nur mit lückenhafter Lernfeldliste) sind durchgesehen; die Stimmen hatten oft gar
+keinen Kandidaten gewählt, weil die Embedding-Kandidaten danebenlagen. Ergebnis in
+`korrekturen_rahmenlehrplaene.csv` mit Kommentar: 67 Pläne mit ESCO-Beruf, auch außerhalb der Kandidaten
+gesucht (z. B. Berufskraftfahrer → Lastkraftwagen- und Omnibusfahrer, Chemikant → Steuerer
+Chemiewerksleitstand, Fachangestellte für Arbeitsmarktdienstleistungen → Arbeitsvermittler, Kaufleute für
+Büromanagement → Büroassistent, Sekretär, Verfahrensmechaniker Glastechnik → Glasformer,
+Glaskühlofensteuerer); wo ESCO keinen eigenen Beruf hat, der nächste (Estrichleger → Terrazzomacher, Brauer
+und Mälzer → Braumeister, Mälzermeister, Florist → Fachverkäufer für Blumen und Pflanzen). 5 ausgeschlossen: Holz- und Bautenschutz (zwei Pläne), Rollladen- und
 Sonnenschutzmechatroniker und Vergolder ohne ESCO-Entsprechung, Fachangestellte für Medien- und
 Informationsdienste wegen unlesbarer Lernfeldtitel.
 
-**Ergebnis:** 260 Pläne mit 3.612 Lernfeldern und ESCO-Beruf (gesichert 168, wahrscheinlich 28,
-redaktionell 64); die Prüfliste ist leer. Mit der Voreinstellung gehen 4.416 Lernfeld-Themen (ESCO-Beruf ×
+**Ergebnis:** 272 Pläne mit 3.787 Lernfeldern und ESCO-Beruf (gesichert 177, wahrscheinlich 28,
+redaktionell 67); die Prüfliste ist leer. Mit der Voreinstellung gehen 4.619 Lernfeld-Themen (ESCO-Beruf ×
 Lernfeld) in die Seeds ein.
 
 ## Mappings Elementarbereich
