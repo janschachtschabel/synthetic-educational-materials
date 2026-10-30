@@ -21,12 +21,25 @@ Wie alles entsteht: [METHODIK.md](METHODIK.md). Die Daten im Einzelnen: [data/RE
 
 ## Installation
 
+Python 3.11 oder neuer. Empfohlen mit [uv](https://docs.astral.sh/uv/), das die Versionen aus `uv.lock` installiert:
+
+```
+uv sync --all-extras
+uv run streamlit run app.py
+```
+
+Ohne lokale Embeddings und Testwerkzeuge reicht `uv sync` (Extras: `mapping` = sentence-transformers,
+`dev` = pytest, ruff). Befehle laufen dann mit `uv run …`, z. B. `uv run python -m sem info`. Nach einer
+Änderung der Abhängigkeiten in `pyproject.toml` die Lock-Datei mit `uv lock` erneuern.
+
+Alternativ mit pip (Versionen nicht festgelegt):
+
 ```
 python -m pip install -r requirements.txt
 ```
 
 Das installiert das Paket mit allen Extras aus `pyproject.toml`; ohne lokale Embeddings und Testwerkzeuge
-reicht `python -m pip install -e .` (Extras: `mapping` = sentence-transformers, `dev` = pytest, ruff).
+reicht `python -m pip install -e .`.
 
 Für die LLM-Schritte: `OPENAI_API_KEY` setzen, optional `OPENAI_BASE_URL` (jeder OpenAI-kompatible
 Endpunkt), `LLM_MODEL` (Standard `gpt-6-luna`) und `LLM_WORKERS` (Standard 20). Alles lässt sich auch in

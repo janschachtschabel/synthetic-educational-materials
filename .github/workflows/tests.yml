@@ -14,12 +14,14 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0  # scripts/doku_paare.py vergleicht den Stand der Doku über die Git-Historie
-      - uses: actions/setup-python@v5
+      - uses: astral-sh/setup-uv@v6
         with:
           python-version: "3.12"
-          cache: pip
-      - run: pip install -e ".[dev]"  # ohne sentence-transformers: die Tests rechnen keine Embeddings
-      - run: ruff check --select F,B006,B008 sem tests app.py scripts
-      - run: pytest -q -rs
-      - run: python scripts/doku_paare.py
-      - run: python scripts/i18n_texte.py
+          enable-cache: true
+      # Versionen aus uv.lock (--frozen: Lock-Datei muss zu pyproject.toml passen); ohne sentence-transformers,
+      # die Tests rechnen keine Embeddings
+      - run: uv sync --extra dev --frozen
+      - run: uv run --frozen ruff check --select F,B006,B008 sem tests app.py scripts
+      - run: uv run --frozen pytest -q -rs
+      - run: uv run --frozen python scripts/doku_paare.py
+      - run: uv run --frozen python scripts/i18n_texte.py
