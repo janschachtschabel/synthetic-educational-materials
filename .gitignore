@@ -4,6 +4,8 @@ __pycache__/
 *.pyc
 .env
 *.lock
+!uv.lock
 .pytest_cache/
 data/lokal/
 *.egg-info/
+.venv/

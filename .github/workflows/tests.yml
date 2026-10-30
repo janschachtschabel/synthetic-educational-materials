@@ -17,9 +17,12 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-          cache: pip
-      - run: pip install -e ".[dev]"  # ohne sentence-transformers: die Tests rechnen keine Embeddings
-      - run: ruff check --select F,B006,B008 sem tests app.py scripts
-      - run: pytest -q -rs
-      - run: python scripts/doku_paare.py
-      - run: python scripts/i18n_texte.py
+      # uv per pip statt über eine Fremd-Action: nur GitHub-eigene Actions im Workflow
+      - run: pip install uv
+      # Versionen aus uv.lock (--frozen: Lock-Datei muss zu pyproject.toml passen); ohne sentence-transformers,
+      # die Tests rechnen keine Embeddings
+      - run: uv sync --extra dev --frozen
+      - run: uv run --frozen ruff check --select F,B006,B008 sem tests app.py scripts
+      - run: uv run --frozen pytest -q -rs
+      - run: uv run --frozen python scripts/doku_paare.py
+      - run: uv run --frozen python scripts/i18n_texte.py

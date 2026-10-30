@@ -24,12 +24,25 @@ How everything is created: [METHODOLOGY.md](METHODOLOGY.md). The data in detail:
 
 ## Installation
 
+Python 3.11 or newer. Recommended with [uv](https://docs.astral.sh/uv/), which installs the versions from `uv.lock`:
+
+```
+uv sync --all-extras
+uv run streamlit run app.py
+```
+
+Without local embeddings and test tools, `uv sync` is enough (extras: `mapping` = sentence-transformers,
+`dev` = pytest, ruff). Commands then run with `uv run …`, e.g. `uv run python -m sem info`. After changing the
+dependencies in `pyproject.toml`, renew the lock file with `uv lock`.
+
+Alternatively with pip (versions not pinned):
+
 ```
 python -m pip install -r requirements.txt
 ```
 
 This installs the package with all extras from `pyproject.toml`; without local embeddings and test tools,
-`python -m pip install -e .` is enough (extras: `mapping` = sentence-transformers, `dev` = pytest, ruff).
+`python -m pip install -e .` is enough.
 
 For the LLM steps: set `OPENAI_API_KEY`; optionally set `OPENAI_BASE_URL` (any OpenAI-compatible
 endpoint), `LLM_MODEL` (default `gpt-6-luna`), and `LLM_WORKERS` (default 20). Everything can also be set
