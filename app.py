@@ -305,6 +305,10 @@ with tab_seeds:
             st.error(str(e))
             st.stop()
         st.success(T("{n} Seeds in output/{datei}. Weiter im Reiter „Materialien“.", n=stats["anzahl"], datei=ziel.name))
+        fehlt = [k for k, v in stats.get("lokale_daten", {}).items() if v is None]
+        if fehlt:
+            st.warning(T("Lokale Dateien fehlen ({dateien}): Die Seeds weichen von einem Lauf mit diesen Dateien ab "
+                         "(siehe data/README.md, data/lokal/).", dateien=", ".join(fehlt)))
         with st.expander(T("Statistik")):
             st.json(stats, expanded=False)
         download(ziel, T("Seeds herunterladen"), "dl-seeds")

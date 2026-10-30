@@ -79,12 +79,12 @@ python -m sem auswahl berufsbildung             # Filter Berufsbildung (Qualifiz
 python -m sem seeds --anzahl berufsbildung=10000 --gleichverteilung berufsbildung=beruf --seed 42
 python -m sem mappings berufsbildung --wlo export.csv   # ESCO laden, KldB und Qualifizierung abstimmen, WLO-Belege
 python -m sem mappings berufsbildung lernfeld --rlp ORDNER   # Lernfelder der KMK-Rahmenlehrpläne (Markdown) → ESCO-Berufe
-python -m sem seeds --anzahl berufsbildung=2000 --auswahl berufsbildung.quellen=lernfeld --seed 42   # nur Lernfeld-Themen
+python -m sem seeds --anzahl berufsbildung=2000 --auswahl berufsbildung.quellen=lernfeld --seed 42   # nur Lernfeld-Themen (braucht data/lokal/)
 python -m sem seeds --anzahl schule=5000 --auswahl schule.stufen=sek1 --seed 42   # nur Sekundarstufe I
 python -m sem seeds --anzahl schule=5000 --auswahl schule.herkunft=themenbaum --seed 42   # nur Themenbäume, ohne Keyword-Themen
 python -m sem mappings schule keywords --wlo export.csv   # Schulthemen aus WLO-Keywords (danach kw_gnd … kw_stufen)
 python -m sem auswahl erwachsenenbildung        # Filter Erwachsenenbildung (Programmbereiche, Quellen, Status)
-python -m sem seeds --anzahl erwachsenenbildung=2000 --auswahl erwachsenenbildung.quellen=gnd,rahmencurriculum --seed 42
+python -m sem seeds --anzahl erwachsenenbildung=2000 --auswahl erwachsenenbildung.quellen=gnd,schulthemen --seed 42
 python -m sem seeds --anzahl elementar=1000 schule=3000 berufsbildung=3000 hochschule=3000 erwachsenenbildung=1000 --seed 42
 python -m sem materialien --seeds output/seeds_schule5000_s42.jsonl --sprache en   # Materialien auf Englisch
 ```
@@ -131,9 +131,18 @@ Alles unter `data/` ist ohne den Code nutzbar (JSON, JSONL, CSV, UTF-8):
 - `data/mappings/schule/themen_schule.jsonl`: 7.569 Schulthemen: 3.153 aus den WLO-Themenbäumen und 4.416
   feinere Themen aus WLO-Keywords je Fach (als GND-Sachbegriffe normiert), mit Fachportal, Pfad, Fach,
   Themenart, Schulstufen, Herkunft, Status, WLO-Belegen und GND-Abgleich
-- `data/mappings/erwachsenenbildung/themen_erwachsenenbildung.jsonl`: 1.917 Kursthemen mit Fachgebiet und
-  Programmbereich der Volkshochschul-Statistik, Herkunft (`gnd`, `rahmencurriculum`, `schulthemen`, `grundbildung`), Status;
+- `data/mappings/erwachsenenbildung/themen_erwachsenenbildung.jsonl`: 1.466 Kursthemen mit Fachgebiet und
+  Programmbereich der Volkshochschul-Statistik, Herkunft (`gnd`, `schulthemen`), Status;
   `programmbereiche.json`: die Systematik mit 85 Fachgebieten
+- `data/lokal/erwachsenenbildung/themen_lokal.jsonl` (nur lokal, nicht im Repo): 451 weitere Kursthemen aus
+  geschützten Gliederungen (`rahmencurriculum` 117, `grundbildung` 334)
+
+**Lokale Daten:** Vollständige Gliederungen urheberrechtlich geschützter Vorlagen und die daraus gebauten
+Themen liegen nur in `data/lokal/` (siehe [data/README.de.md](data/README.de.md)). Ohne sie läuft alles, nur
+ohne die Teile, die sie brauchen: keine Bildungsstandards an Schul-Seeds, keine Lernfeld-Themen, in der
+Erwachsenenbildung keine Integrationskurs- und Grundbildungs-Themen. Dann erscheint eine Warnung. Seeds
+(`synth:seed_parameter.lokale_daten`) und Statistik (`.stats.json`) vermerken die Kennung der genutzten lokalen
+Dateien (sha256, 12 Zeichen; `null` = fehlt): Gleicher Startwert ergibt nur bei gleicher Kennung dieselben Seeds.
 
 ## Aufbau
 

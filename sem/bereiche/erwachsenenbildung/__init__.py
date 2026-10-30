@@ -5,16 +5,19 @@ Themen: GND-Sachbegriffe aus LLM-Themenlisten je Fachgebiet, per Mehrfachabstimm
 Kursleitende eingestuft und ein bis zwei Fachgebieten zugeordnet. Fremdsprachen-Kursthemen gelten für alle Sprachen
 (Ziel „4.fs“); die konkrete Sprache wird beim Seed gezogen. Niveau je Programmbereich (GER, Alpha-Level, Abschluss).
 Die berufliche Aufstiegsfortbildung (Meister, Fachwirt) gehört zur Berufsbildung.
+Themen aus urheberrechtlich geschützten Gliederungen (Rahmencurriculum Integrationskurse, Grundbildung) stehen
+nur lokal in data/lokal/erwachsenenbildung/themen_lokal.jsonl und kommen dazu, wenn die Datei existiert.
 """
 
 from __future__ import annotations
 
 import json
 import random
+import warnings
 from functools import cache, cached_property
 
 from ... import schema as S
-from ...paths import MAPPING_DIR
+from ...paths import MAPPING_DIR, lokal_pfad
 from ...vocabs import load as load_vocab
 from ..base import Bildungsbereich, MappingSchritt, SeedState
 from ..hochschule import kurz_id, load_jsonl
@@ -24,6 +27,9 @@ CONTEXT_URI = "http://w3id.org/openeduhub/vocabs/educationalContext/erwachsenenb
 F_FACHGEBIET = "synth:fachgebiet_vhs"
 F_PROGRAMMBEREICH = "synth:programmbereich_vhs"
 ZIEL_FS = "4.fs"
+THEMEN_LOKAL = "erwachsenenbildung/themen_lokal.jsonl"  # unter data/lokal/
+# Herkünfte aus urheberrechtlich geschützten Gliederungen: Themen nur lokal
+LOKALE_HERKUNFT = ("rahmencurriculum", "grundbildung")
 # Fremdsprachen der Statistik (ohne Deutsch als Fremd-/Muttersprache, Dialekte, Gebärdensprache, Sammelposition)
 FREMDSPRACHEN = [f"4.{i:02d}" for i in range(1, 27) if i not in (4, 5)]
 SPRACHNAMEN = {"ar": "Arabisch", "zh": "Chinesisch", "da": "Dänisch", "de": "Deutsch", "en": "Englisch", "fi": "Finnisch",
@@ -32,12 +38,29 @@ SPRACHNAMEN = {"ar": "Arabisch", "zh": "Chinesisch", "da": "Dänisch", "de": "De
                "pt": "Portugiesisch", "ru": "Russisch", "sv": "Schwedisch", "hr": "Bosnisch/Kroatisch/Serbisch",
                "es": "Spanisch", "cs": "Tschechisch", "tr": "Türkisch", "hu": "Ungarisch"}
 
-__all__ = ["Erwachsenenbildung", "DIR", "FREMDSPRACHEN", "ZIEL_FS", "load_jsonl", "systematik"]
+__all__ = ["Erwachsenenbildung", "DIR", "FREMDSPRACHEN", "LOKALE_HERKUNFT", "THEMEN_LOKAL", "ZIEL_FS", "lade_themen",
+           "load_jsonl", "sortiert", "systematik"]
 
 
 @cache
 def systematik() -> dict:
     return json.loads((DIR / "programmbereiche.json").read_text(encoding="utf-8"))
+
+
+def sortiert(rows: list[dict]) -> list[dict]:
+    return sorted(rows, key=lambda r: (r["fachgebiet"][0]["notation"], r["label_de"].casefold()))
+
+
+def lade_themen() -> list[dict]:
+    """Themen aus dem Repo plus die lokalen Themen (Warnung, wenn sie fehlen)."""
+    path, lokal = DIR / "themen_erwachsenenbildung.jsonl", lokal_pfad(THEMEN_LOKAL)
+    out = load_jsonl(path) if path.exists() else []
+    if lokal.exists():
+        out += load_jsonl(lokal)
+    elif out:
+        warnings.warn(f"{lokal} fehlt: keine Themen aus Rahmencurriculum Integrationskurse und Grundbildung "
+                      "(siehe data/README.md, data/lokal/)")
+    return sortiert(out)
 
 
 class Erwachsenenbildung(Bildungsbereich):
@@ -160,8 +183,7 @@ class Erwachsenenbildung(Bildungsbereich):
 
     @cached_property
     def _topics(self) -> list[dict]:
-        path = DIR / "themen_erwachsenenbildung.jsonl"
-        out = load_jsonl(path) if path.exists() else []
+        out = lade_themen()
         if not out:
             raise FileNotFoundError(f"Keine Themen in {DIR}. Erst die Mappings bauen: "
                                     "python -m sem mappings erwachsenenbildung")

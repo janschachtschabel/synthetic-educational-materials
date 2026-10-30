@@ -82,12 +82,12 @@ python -m sem auswahl berufsbildung             # Vocational education and train
 python -m sem seeds --anzahl berufsbildung=10000 --gleichverteilung berufsbildung=beruf --seed 42
 python -m sem mappings berufsbildung --wlo export.csv   # Load ESCO, vote on KldB and qualification, WLO evidence
 python -m sem mappings berufsbildung lernfeld --rlp FOLDER   # Learning fields of the KMK framework curricula (Markdown) → ESCO occupations
-python -m sem seeds --anzahl berufsbildung=2000 --auswahl berufsbildung.quellen=lernfeld --seed 42   # learning-field topics only
+python -m sem seeds --anzahl berufsbildung=2000 --auswahl berufsbildung.quellen=lernfeld --seed 42   # learning-field topics only (needs data/lokal/)
 python -m sem seeds --anzahl schule=5000 --auswahl schule.stufen=sek1 --seed 42   # Secondary level I only
 python -m sem seeds --anzahl schule=5000 --auswahl schule.herkunft=themenbaum --seed 42   # topic trees only, without keyword topics
 python -m sem mappings schule keywords --wlo export.csv   # school topics from WLO keywords (then kw_gnd … kw_stufen)
 python -m sem auswahl erwachsenenbildung        # Adult education filters (program areas, sources, status)
-python -m sem seeds --anzahl erwachsenenbildung=2000 --auswahl erwachsenenbildung.quellen=gnd,rahmencurriculum --seed 42
+python -m sem seeds --anzahl erwachsenenbildung=2000 --auswahl erwachsenenbildung.quellen=gnd,schulthemen --seed 42
 python -m sem seeds --anzahl elementar=1000 schule=3000 berufsbildung=3000 hochschule=3000 erwachsenenbildung=1000 --seed 42
 python -m sem materialien --seeds output/seeds_schule5000_s42.jsonl --sprache en   # materials in English
 ```
@@ -134,10 +134,19 @@ Everything under `data/` can be used without the code (JSON, JSONL, CSV, UTF-8):
 - `data/mappings/schule/themen_schule.jsonl`: 7,569 school topics: 3,153 from the WLO topic trees and 4,416
   finer topics from WLO keywords per subject (normalized as GND subject headings), with subject portal, path,
   subject, topic type, school levels, provenance, status, WLO evidence, and GND alignment
-- `data/mappings/erwachsenenbildung/themen_erwachsenenbildung.jsonl`: 1,917 course topics with subject area and
-  program area from the Volkshochschul-Statistik, provenance (`gnd`, `rahmencurriculum`, `schulthemen`,
-  `grundbildung`), status;
+- `data/mappings/erwachsenenbildung/themen_erwachsenenbildung.jsonl`: 1,466 course topics with subject area and
+  program area from the Volkshochschul-Statistik, provenance (`gnd`, `schulthemen`), status;
   `programmbereiche.json`: the classification system with 85 subject areas
+- `data/lokal/erwachsenenbildung/themen_lokal.jsonl` (local only, not in the repository): 451 further course
+  topics from protected outlines (`rahmencurriculum` 117, `grundbildung` 334)
+
+**Local data:** Complete outlines of copyrighted sources and the topics built from them are kept only in
+`data/lokal/` (see [data/README.md](data/README.md)). Everything runs without them, just without the parts that
+need them: no educational standards on school seeds, no learning-field topics, no integration-course and
+basic-education topics in adult education. A warning is shown in that case. Seeds
+(`synth:seed_parameter.lokale_daten`) and statistics (`.stats.json`) record the fingerprint of the local files
+used (sha256, 12 characters; `null` = missing): the same random seed only yields the same seeds with the same
+fingerprint.
 
 ## Structure
 

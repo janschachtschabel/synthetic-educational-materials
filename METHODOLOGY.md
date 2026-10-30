@@ -16,7 +16,8 @@ open vocabularies and taxonomies ──► Mappings (topics with subject assignm
 1. **Mappings** assign topics from open sources to the subjects of an education sector. They are
    built once, stored in the repository, and can also be used independently.
 2. **Seeds** combine one topic each with hard-coded and drawn metadata (educational level, subject,
-   content type, level …). No LLM; reproducible using a random seed.
+   content type, level …). No LLM; reproducible using a random seed, provided the same local data
+   (`data/lokal/`) is present; its fingerprint is recorded in `synth:seed_parameter.lokale_daten`.
 3. **Materials** are generated from seeds using an LLM: first the full text, then the title, description, keywords,
    and question-answer pairs from the full text.
 
@@ -36,7 +37,7 @@ open vocabularies and taxonomies ──► Mappings (topics with subject assignm
 | OEH vocabularies `kldb` (KldB 2010, 2020 edition, levels 1–4 with short descriptions), `escoSkills`, `dqrCompetenceLevels` | Occupational field (like the WLO field `ccm:oeh_profession_group`), skills matching, DQR levels | CC0 1.0; KldB: “Quelle: Statistik der Bundesagentur für Arbeit” |
 | Gemeinsamer Rahmen der Länder für die frühe Bildung in Kindertageseinrichtungen (2022 edition, [according to Eurydice](https://eurydice.eacea.ec.europa.eu/de/eurypedia/germany/leitlinien-der-fruehkindlichen-bildung-betreuung-und-erziehung)) | Seven educational areas for early childhood education | Official work; list and short descriptions in the repository under CC0 |
 | Volkshochschul-Statistik des DIE, Fachgebietsgliederung seit 2018 (7 program areas, 85 subject areas): Echarti, Nicolas; Huntemann, Hella; Lux, Thomas; Reichart, Elisabeth (2022): *Volkshochschul-Statistik. 59. Folge, Berichtsjahr 2020.* DIE Survey. Bielefeld: wbv. [DOI 10.3278/70681](https://doi.org/10.3278/70681) | Adult education subjects (codes and labels from the tables, with line breaks joined) | [CC BY 4.0 DE](https://creativecommons.org/licenses/by/4.0/deed.de); full source citation in `programmbereiche.json` and in the provenance of every seed |
-| Buhlmann, Rosemarie; Ende, Karin; Kaufmann, Susan; Kilimann, Angela; Schmitz, Helen: *[Rahmencurriculum für Integrationskurse – Deutsch als Zweitsprache](https://www.goethe.de/resources/files/pdf209/rahmencurriculum-integrationskurs_20171.pdf).* Goethe-Institut im Auftrag des BMI (2007), überarbeitete Neuauflage im Auftrag des BAMF (2017) | Language-course topics for adult education (outline) | Copyright protected; only chapter codes and titles have been adopted (capitalization adjusted); full source citation in `sprachkurs_themen.json` and in the provenance of every seed |
+| Buhlmann, Rosemarie; Ende, Karin; Kaufmann, Susan; Kilimann, Angela; Schmitz, Helen: *[Rahmencurriculum für Integrationskurse – Deutsch als Zweitsprache](https://www.goethe.de/resources/files/pdf209/rahmencurriculum-integrationskurs_20171.pdf).* Goethe-Institut im Auftrag des BMI (2007), überarbeitete Neuauflage im Auftrag des BAMF (2017) | Language-course topics for adult education (outline) | Copyright protected; only chapter codes and titles have been adopted (capitalization adjusted); full source citation in the provenance of every seed; the outline file (`sprachkurs_themen.json`) and the topics built from it are kept locally only (`data/lokal/`) and are not published |
 | KMK framework curricula for vocational schools ([download area](https://www.kmk.org/themen/berufliche-schulen/duale-berufsausbildung/downloadbereich-rahmenlehrplaene.html), 307 curricula, as of 30 Oct 2026) | VET learning fields (number, title, training year, time allocation) | no open licence stated; only learning-field number, title, year and time allocation are taken, no goal or content texts; download URL per curriculum in the provenance of each seed; the complete learning-field list (`rahmenlehrplaene.jsonl`) is kept locally only (`data/lokal/`) and not published |
 | Secretariat of the KMK (ed.): [Bildungsstandards](https://www.kmk.org/themen/qualitaetssicherung-in-schulen/bildungsstandards.html) German, mathematics (primary, ESA/MSA as amended 2022; Abitur 2012), first foreign language (ESA/MSA as amended 2023; Abitur 2012), biology, chemistry, physics (MSA as amended 2024; Abitur 2020) | competence areas, key ideas and basic concepts as metadata of school topics | protected by copyright (Abitur editions © Wolters Kluwer and KMK); only outline and headings taken; full citation per document in the seed; the outline file is kept locally only (`data/lokal/`) and not published |
 | Special-needs focus areas (Förderschwerpunkte) of special educational support ([KMK statistics](https://www.kmk.org/dokumentation-statistik/statistik/schulstatistik/sonderpaedagogische-foerderung-an-schulen.html)) | optional school field special-needs focus | list of names |
@@ -288,7 +289,7 @@ target language in `cclom:general_language`.
 2. `rahmencurriculum` (117): language course topics from the outline of the Rahmencurriculum für
    Integrationskurse (Framework Curriculum for Integration Courses; Goethe-Institut on behalf of the BMI,
    2017): the twelve areas of action with their learning objective areas (e.g. “Housing: understanding and
-   signing rental agreements”) and the five cross-cutting areas (`sprachkurs_themen.json`; only codes and titles
+   signing rental agreements”) and the five cross-cutting areas (`sprachkurs_themen.json`, local only in `data/lokal/erwachsenenbildung/`; only codes and titles
    were carried over, with capitalization restored from all-caps by the LLM). All apply to German as a foreign
    language; everyday topics also apply to foreign languages. GND terms rarely capture such communication
    situations.
@@ -302,9 +303,13 @@ target language in `cclom:general_language`.
    can-do descriptors in full sentences, the labels are short names of our own. Reading and writing → 7.01
    literacy, arithmetic → 7.02, everyday topic fields → 7.03. No lea. model for arithmetic is published.
 
+The topics from 2. and 4. come entirely from protected outlines and are therefore kept locally only
+(`data/lokal/erwachsenenbildung/themen_lokal.jsonl`, written by the step `zusammenfuehren`); the sector adds
+them when the file exists. The repository contains 1,466 topics (`gnd`, `schulthemen`).
+
 When new candidates are added, only they are voted on; existing votes stay unchanged.
 
-**Result:** 1,917 topics in 54 subject areas (program areas: Politics–Society–Environment 332,
+**Result:** 1,917 topics (1,466 in the repository, 451 local only) in 54 subject areas (program areas: Politics–Society–Environment 332,
 Culture–Creative Activities 308, Health 108, Languages 146, Working Life–IT–Organization 146,
 School-Leaving Qualifications 505, Basic Education 372: literacy 222, arithmetic 120, everyday skills 22,
 vocational orientation 8). The 19 review cases were resolved editorially.

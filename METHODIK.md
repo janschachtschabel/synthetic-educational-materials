@@ -17,7 +17,8 @@ offene Vokabulare und Taxonomien ──► Mappings (Themen mit Fachzuordnung) �
 1. **Mappings** ordnen Themen aus offenen Quellen den Fächern eines Bildungsbereichs zu. Sie werden
    einmal gebaut, liegen im Repo und sind auch für sich nutzbar.
 2. **Seeds** kombinieren je ein Thema mit fest codierten und gezogenen Metadaten (Bildungsstufe, Fach,
-   Inhaltstyp, Niveau …). Kein LLM, reproduzierbar über einen Zufalls-Seed.
+   Inhaltstyp, Niveau …). Kein LLM, reproduzierbar über einen Zufalls-Seed, sofern dieselben lokalen Daten
+   (`data/lokal/`) vorliegen; deren Kennung steht in `synth:seed_parameter.lokale_daten`.
 3. **Materialien** entstehen aus Seeds per LLM: erst der Volltext, dann Titel, Beschreibung, Keywords
    und Frage-Antwort-Paare aus dem Volltext.
 
@@ -37,7 +38,7 @@ offene Vokabulare und Taxonomien ──► Mappings (Themen mit Fachzuordnung) �
 | OEH-Vokabulare `kldb` (KldB 2010, Fassung 2020, Ebenen 1–4 mit Kurzbeschreibungen), `escoSkills`, `dqrCompetenceLevels` | Berufsfeld (wie WLO-Feld `ccm:oeh_profession_group`), Abgleich der Kompetenzen, DQR-Niveaus | CC0 1.0; KldB: „Quelle: Statistik der Bundesagentur für Arbeit“ |
 | Gemeinsamer Rahmen der Länder für die frühe Bildung in Kindertageseinrichtungen (Fassung 2022, [nach Eurydice](https://eurydice.eacea.ec.europa.eu/de/eurypedia/germany/leitlinien-der-fruehkindlichen-bildung-betreuung-und-erziehung)) | sieben Bildungsbereiche Elementar | amtliches Werk; Liste und Kurzbeschreibungen im Repo CC0 |
 | Volkshochschul-Statistik des DIE, Fachgebietsgliederung seit 2018 (7 Programmbereiche, 85 Fachgebiete): Echarti, Nicolas; Huntemann, Hella; Lux, Thomas; Reichart, Elisabeth (2022): *Volkshochschul-Statistik. 59. Folge, Berichtsjahr 2020.* DIE Survey. Bielefeld: wbv. [DOI 10.3278/70681](https://doi.org/10.3278/70681) | Fach Erwachsenenbildung (Codes und Bezeichnungen aus den Tabellen, Zeilenumbrüche zusammengeführt) | [CC BY 4.0 DE](https://creativecommons.org/licenses/by/4.0/deed.de); vollständige Quellenangabe in `programmbereiche.json` und in der Herkunft jedes Seeds |
-| Buhlmann, Rosemarie; Ende, Karin; Kaufmann, Susan; Kilimann, Angela; Schmitz, Helen: *[Rahmencurriculum für Integrationskurse – Deutsch als Zweitsprache](https://www.goethe.de/resources/files/pdf209/rahmencurriculum-integrationskurs_20171.pdf).* Goethe-Institut im Auftrag des BMI (2007), überarbeitete Neuauflage im Auftrag des BAMF (2017) | Sprachkursthemen Erwachsenenbildung (Gliederung) | urheberrechtlich geschützt; nur Kapitelcodes und -titel übernommen (Schreibung aus Versalien angepasst); vollständige Quellenangabe in `sprachkurs_themen.json` und in der Herkunft jedes Seeds |
+| Buhlmann, Rosemarie; Ende, Karin; Kaufmann, Susan; Kilimann, Angela; Schmitz, Helen: *[Rahmencurriculum für Integrationskurse – Deutsch als Zweitsprache](https://www.goethe.de/resources/files/pdf209/rahmencurriculum-integrationskurs_20171.pdf).* Goethe-Institut im Auftrag des BMI (2007), überarbeitete Neuauflage im Auftrag des BAMF (2017) | Sprachkursthemen Erwachsenenbildung (Gliederung) | urheberrechtlich geschützt; nur Kapitelcodes und -titel übernommen (Schreibung aus Versalien angepasst); vollständige Quellenangabe in der Herkunft jedes Seeds; die Gliederungsdatei (`sprachkurs_themen.json`) und die daraus gebauten Themen liegen nur lokal (`data/lokal/`) und werden nicht veröffentlicht |
 | KMK-Rahmenlehrpläne für den berufsbezogenen Unterricht der Berufsschule ([Downloadbereich](https://www.kmk.org/themen/berufliche-schulen/duale-berufsausbildung/downloadbereich-rahmenlehrplaene.html), 307 Pläne, Stand 30.10.2026) | Lernfelder Berufsbildung (Nummer, Titel, Ausbildungsjahr, Zeitrichtwert) | keine offene Lizenz angegeben; nur Lernfeldnummer, -titel, Jahr und Zeitrichtwert übernommen, keine Ziel- oder Inhaltstexte; Download-URL je Plan in der Herkunft jedes Seeds; die vollständige Lernfeldliste (`rahmenlehrplaene.jsonl`) liegt nur lokal (`data/lokal/`) und wird nicht veröffentlicht |
 | Sekretariat der KMK (Hrsg.): [Bildungsstandards](https://www.kmk.org/themen/qualitaetssicherung-in-schulen/bildungsstandards.html) Deutsch, Mathematik (Primarbereich, ESA/MSA i. d. F. 2022; AHR 2012), erste Fremdsprache (ESA/MSA i. d. F. 2023; AHR 2012), Biologie, Chemie, Physik (MSA i. d. F. 2024; AHR 2020) | Kompetenzbereiche, Leitideen und Basiskonzepte als Metadaten der Schulthemen | urheberrechtlich geschützt (AHR-Ausgaben © Wolters Kluwer und KMK); nur Gliederung und Überschriften übernommen; vollständige Quellenangabe je Dokument im Seed; die Gliederungsdatei liegt nur lokal (`data/lokal/`) und wird nicht veröffentlicht |
 | Förderschwerpunkte der sonderpädagogischen Förderung ([KMK-Statistik](https://www.kmk.org/dokumentation-statistik/statistik/schulstatistik/sonderpaedagogische-foerderung-an-schulen.html)) | optionales Feld Förderschwerpunkt Schule | Liste der Bezeichnungen |
@@ -418,7 +419,7 @@ beim Seed gezogen (je Thema rotierend) und als Zielsprache in `cclom:general_lan
 2. `rahmencurriculum` (117): Sprachkursthemen aus der Gliederung des Rahmencurriculums für Integrationskurse
    (Goethe-Institut im Auftrag des BMI, 2017): die zwölf Handlungsfelder mit ihren Lernzielbereichen (z. B.
    „Wohnen: Mietverträge verstehen und abschließen“) und die fünf handlungsfeldübergreifenden Bereiche
-   (`sprachkurs_themen.json`; übernommen sind nur Codes und Titel, Schreibung aus den Versalien per LLM
+   (`sprachkurs_themen.json`, nur lokal in `data/lokal/erwachsenenbildung/`; übernommen sind nur Codes und Titel, Schreibung aus den Versalien per LLM
    wiederhergestellt). Alle für Deutsch als Fremdsprache, die alltagsnahen auch für Fremdsprachen. GND-Begriffe
    treffen solche Kommunikationssituationen kaum.
 3. `schulthemen` (485): für die Schulabschlusskurse die Unterrichtsthemen des Bereichs Schule in Deutsch,
@@ -431,9 +432,13 @@ beim Seed gezogen (je Thema rotierend) und als Zielsprache in `cclom:general_lan
    Schreiben → 7.01 Alphabetisierung, Rechnen → 7.02, Alltags-Themenfelder → 7.03. Ein lea.-Modell für
    Rechnen ist nicht veröffentlicht.
 
+Die Themen aus 2. und 4. stammen vollständig aus geschützten Gliederungen und liegen deshalb nur lokal
+(`data/lokal/erwachsenenbildung/themen_lokal.jsonl`, vom Schritt `zusammenfuehren` geschrieben); der Bereich
+nimmt sie dazu, wenn die Datei existiert. Im Repo stehen 1.466 Themen (`gnd`, `schulthemen`).
+
 Kommen neue Kandidaten hinzu, werden nur sie abgestimmt; vorhandene Stimmen bleiben unverändert.
 
-**Ergebnis:** 1.917 Themen in 54 Fachgebieten (Programmbereiche: Politik–Gesellschaft–Umwelt 332,
+**Ergebnis:** 1.917 Themen (davon 1.466 im Repo, 451 nur lokal) in 54 Fachgebieten (Programmbereiche: Politik–Gesellschaft–Umwelt 332,
 Kultur–Gestalten 308, Gesundheit 108, Sprachen 146, Arbeitsleben–IT–Organisation 146, Schulabschlüsse 505,
 Grundbildung 372: Alphabetisierung 222, Rechnen 120, Alltagskompetenzen 22, berufliche Orientierung 8).
 Die 19 Prüffälle sind redaktionell entschieden.

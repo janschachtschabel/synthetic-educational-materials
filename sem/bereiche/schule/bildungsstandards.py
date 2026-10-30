@@ -15,6 +15,7 @@ Schritte: bista (Abstimmung), bista_zusammenfuehren (bildungsstandards.jsonl).
 from __future__ import annotations
 
 import json
+import warnings
 from collections import Counter
 from datetime import date
 from functools import cache
@@ -22,11 +23,11 @@ from functools import cache
 from ...llm import LLMConfig
 from ...mapping import abstimmung
 from ...mapping.abstimmung import Ziel
-from ...paths import DATA_DIR, LOKAL_DIR
+from ...paths import DATA_DIR, lokal_pfad
 from ..base import fertig
 from . import DIR, load_jsonl
 
-GLIEDERUNG_PATH = LOKAL_DIR / "schule" / "bildungsstandards_gliederung.json"
+GLIEDERUNG = "schule/bildungsstandards_gliederung.json"  # unter data/lokal/
 ZUORDNUNG_PATH = DIR / "bildungsstandards.jsonl"
 STIMMEN_PATH = DATA_DIR / "cache" / "schule_stimmen_bista.jsonl"
 N_STIMMEN = 3
@@ -39,9 +40,18 @@ STUFE_ABSCHLUSS = {"primar": ["primar"], "sek1": ["msa", "esa"], "sek2": ["ahr"]
 
 @cache
 def gliederung() -> dict:
-    if not GLIEDERUNG_PATH.exists():
+    path = lokal_pfad(GLIEDERUNG)
+    if not path.exists():
+        warnings.warn(f"{path} fehlt: Seeds der Schule ohne synth:bildungsstandards (siehe data/README.md, data/lokal/)")
         return {"meta": {"faecher": {}}, "quellen": [], "eintraege": []}
-    return json.loads(GLIEDERUNG_PATH.read_text(encoding="utf-8"))
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def _gliederung_noetig():
+    """Die Mapping-Schritte brauchen die Gliederung; ohne sie würde bildungsstandards.jsonl geleert."""
+    if not lokal_pfad(GLIEDERUNG).exists():
+        raise FileNotFoundError(f"{lokal_pfad(GLIEDERUNG)} fehlt: Die Schritte bista und bista_zusammenfuehren "
+                                "brauchen die lokale Gliederung (siehe data/README.md).")
 
 
 def dokument(portal: str, stufe: str) -> dict | None:
@@ -88,6 +98,7 @@ PERSPEKTIVEN = [
 
 
 def build_bista(cfg: LLMConfig, on_progress=None, stop_event=None, stimmen: int = N_STIMMEN, **_):
+    _gliederung_noetig()
     objekte = _objekte()
     ziele = {e["code"]: Ziel(e["code"], e["code"], e["label"], " > ".join(e["pfad"][-1:]))
              for e in gliederung()["eintraege"] if e["typ"] in INHALTLICH}
@@ -115,6 +126,7 @@ METHODE = "LLM-Mehrfachabstimmung über die inhaltliche Gliederung der passenden
 
 
 def zusammenfuehren(cfg: LLMConfig | None = None, stimmen: int = N_STIMMEN, modell: str | None = None, **_):
+    _gliederung_noetig()
     st = abstimmung.lade_stimmen(STIMMEN_PATH)
     by_code = {e["code"]: e for e in gliederung()["eintraege"]}
     rows = []

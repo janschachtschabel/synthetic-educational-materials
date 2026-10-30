@@ -27,13 +27,16 @@ from ...llm import LLMClient, LLMConfig, Progress, run_tasks
 from ...mapping import abstimmung, pruefung
 from ...mapping.abstimmung import Ziel
 from ...mapping.embeddings import DEFAULT_EMBEDDING_MODEL, Embedder, top_k
-from ...paths import DATA_DIR, LOKAL_DIR
+from ...paths import DATA_DIR, lokal_pfad
 from ...quellen import gnd
 from ..base import fertig
-from . import DIR, FREMDSPRACHEN, ZIEL_FS, load_jsonl, systematik
+from . import DIR, FREMDSPRACHEN, THEMEN_LOKAL, ZIEL_FS, lade_themen, load_jsonl, sortiert, systematik
 
 CACHE = DATA_DIR / "cache"
 THEMEN_PATH = DIR / "themen_erwachsenenbildung.jsonl"
+# Build-Eingaben unter data/lokal/ (Gliederungen urheberrechtlich geschützter Vorlagen)
+SPRACHKURS = "erwachsenenbildung/sprachkurs_themen.json"
+GRUNDBILDUNG = "erwachsenenbildung/grundbildung_themen.json"
 PRUEFLISTE_PATH = DIR / "pruefliste_themen.csv"
 KORREKTUREN_PATH = DIR / "korrekturen.csv"
 KANDIDATEN_LLM = CACHE / "eb_kandidaten_llm.jsonl"
@@ -412,11 +415,15 @@ def zusammenfuehren(cfg: LLMConfig | None = None, stimmen: int = N_STIMMEN, mode
                           "fachgebiete": " | ".join(f"{f['notation']} {f['label']} ({f['stimmen']}/{stimmen})"
                                                     for f in mapping["fachgebiete"]) or " | ".join(codes) + " (Ersatz)",
                           "herkunft": " | ".join(p["llm_fachgebiete"])})
-    rows += sprachkurs_themen(s) + schulabschluss_themen(s) + grundbildung_themen(s)
-    rows.sort(key=lambda r: (r["fachgebiet"][0]["notation"], r["label_de"].casefold()))
-    _write_jsonl(THEMEN_PATH, rows)
+    rows += schulabschluss_themen(s)
+    # Themen aus geschützten Gliederungen nur lokal; fehlen beide Vorlagen, bleibt die lokale Themendatei stehen
+    lokal = sprachkurs_themen(s) + grundbildung_themen(s)
+    _write_jsonl(THEMEN_PATH, sortiert(rows))
+    if lokal:
+        _write_jsonl(lokal_pfad(THEMEN_LOKAL), sortiert(lokal))
     pruefung.schreibe_pruefliste(PRUEFLISTE_PATH, pruef, ["korrektur_codes", "korrektur_art", "kommentar"])
-    return fertig(f"{len(rows)} Themen, {ungeeignet} als ungeeignet verworfen, {len(pruef)} auf der Prüfliste")
+    return fertig(f"{len(rows)} Themen im Repo, {len(lokal)} lokal, {ungeeignet} als ungeeignet verworfen, "
+                  f"{len(pruef)} auf der Prüfliste")
 
 
 def _fg_ref(s: dict, codes: list[str]) -> tuple[list[dict], list[dict]]:
@@ -429,10 +436,12 @@ def _fg_ref(s: dict, codes: list[str]) -> tuple[list[dict], list[dict]]:
 
 
 def sprachkurs_themen(s: dict) -> list[dict]:
-    """Sprachkurs-Themen aus der Gliederung des Rahmencurriculums für Integrationskurse (sprachkurs_themen.json):
-    GND-Begriffe treffen Kommunikationssituationen wie „Formulare ausfüllen“ kaum."""
-    path = DIR / "sprachkurs_themen.json"
+    """Sprachkurs-Themen aus der Gliederung des Rahmencurriculums für Integrationskurse (sprachkurs_themen.json,
+    nur lokal in data/lokal/): GND-Begriffe treffen Kommunikationssituationen wie „Formulare ausfüllen“ kaum.
+    Fehlt die Datei, entfallen diese Themen (Warnung)."""
+    path = lokal_pfad(SPRACHKURS)
     if not path.exists():
+        warnings.warn(f"{path} fehlt: Sprachkurs-Themen entfallen (siehe data/README.md, data/lokal/)")
         return []
     d = json.loads(path.read_text(encoding="utf-8"))
     q = d["quelle"]
@@ -452,7 +461,7 @@ def grundbildung_themen(s: dict) -> list[dict]:
     """Grundbildungs-Themen aus Gliederung und Titeln der lea.-Alpha-Levels und der DVV-Rahmencurricula
     (grundbildung_themen.json, nur lokal in data/lokal/): Kompetenzbereiche und Themenfelder des Lesens,
     Schreibens und Rechnens. Fehlt die Datei, entfallen diese Themen (Warnung)."""
-    path = LOKAL_DIR / "erwachsenenbildung" / "grundbildung_themen.json"
+    path = lokal_pfad(GRUNDBILDUNG)
     if not path.exists():
         warnings.warn(f"{path} fehlt: Grundbildungs-Themen entfallen (siehe data/README.md, data/lokal/)")
         return []
@@ -507,7 +516,7 @@ def schulabschluss_themen(s: dict) -> list[dict]:
 
 
 def statistik(rows: list[dict] | None = None) -> dict:
-    rows = rows if rows is not None else (load_jsonl(THEMEN_PATH) if THEMEN_PATH.exists() else [])
+    rows = rows if rows is not None else lade_themen()
     m = [r.get("mapping", {}) for r in rows]
     return {
         "themen": len(rows),
