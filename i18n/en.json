@@ -1,5 +1,6 @@
 {
  "LLM-Anbindung": "LLM connection",
+ "Andere Base-URL als in OPENAI_BASE_URL: Der Key aus OPENAI_API_KEY wird dafür nicht verwendet. Bitte einen Key eintragen.": "Base URL differs from OPENAI_BASE_URL: the key from OPENAI_API_KEY is not used for it. Please enter a key.",
  "OpenAI-kompatibel. Leere Felder: Werte aus OPENAI_BASE_URL, OPENAI_API_KEY, LLM_MODEL.": "OpenAI-compatible. Blank fields use values from OPENAI_BASE_URL, OPENAI_API_KEY, LLM_MODEL.",
  "Modell": "Model",
  "Geschwindigkeit": "Speed",

@@ -95,7 +95,10 @@ def lade_stimmen(path: Path) -> dict[str, dict[int, list[dict]]]:
         return out
     for line in Path(path).read_text(encoding="utf-8").splitlines():
         if line.strip():
-            row = json.loads(line)
+            try:
+                row = json.loads(line)
+            except json.JSONDecodeError:
+                continue  # halbe Zeile nach Absturz; die Aufgabe wird beim nächsten Lauf neu gestellt
             for oid, wahl in row["antworten"].items():
                 out[oid][row["stimme"]] = wahl
     return out

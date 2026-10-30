@@ -13,7 +13,10 @@ def lade(path: Path | str, limit: int | None = None) -> list[dict]:
     with Path(path).open(encoding="utf-8") as f:
         for line in f:
             if line.strip():
-                out.append(json.loads(line))
+                try:
+                    out.append(json.loads(line))
+                except json.JSONDecodeError:
+                    continue  # halbe Zeile nach Absturz oder während ein Lauf schreibt
                 if limit and len(out) >= limit:
                     break
     return out

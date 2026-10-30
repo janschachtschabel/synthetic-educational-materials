@@ -25,6 +25,9 @@ Wie alles entsteht: [METHODIK.md](METHODIK.md). Die Daten im Einzelnen: [data/RE
 python -m pip install -r requirements.txt
 ```
 
+Das installiert das Paket mit allen Extras aus `pyproject.toml`; ohne lokale Embeddings und Testwerkzeuge
+reicht `python -m pip install -e .` (Extras: `mapping` = sentence-transformers, `dev` = pytest, ruff).
+
 Für die LLM-Schritte: `OPENAI_API_KEY` setzen, optional `OPENAI_BASE_URL` (jeder OpenAI-kompatible
 Endpunkt), `LLM_MODEL` (Standard `gpt-6-luna`) und `LLM_WORKERS` (Standard 20). Alles lässt sich auch in
 der Oberfläche oder per Parameter setzen.
@@ -34,6 +37,10 @@ der Oberfläche oder per Parameter setzen.
 ```
 streamlit run app.py
 ```
+
+Die Oberfläche ist nur auf diesem Rechner erreichbar (`.streamlit/config.toml`: `address = "localhost"`), weil sie
+keine Anmeldung hat und LLM-Läufe mit dem Key aus der Umgebung starten kann. Den Key aus `OPENAI_API_KEY`
+verwendet sie nur für die Base-URL aus `OPENAI_BASE_URL`; für eine andere Base-URL ist ein Key einzutragen.
 
 Reiter: **Seeds** (Anzahl je Bildungsbereich, Feld für die Gleichverteilung, Auswahl der Themen nach
 Status, Quelle und Belegen, Zufalls-Seed),
