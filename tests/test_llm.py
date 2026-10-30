@@ -2,9 +2,13 @@
 
 import json
 
-import httpx
 import openai
 import pytest
+
+try:  # openai ab 3.x baut auf httpx2, ältere Fassungen auf httpx
+    import httpx2 as httpx
+except ImportError:
+    import httpx
 
 from sem import llm
 from sem.llm import LLMConfig, read_done, run_tasks
