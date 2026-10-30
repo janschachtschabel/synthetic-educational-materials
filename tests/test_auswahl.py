@@ -16,3 +16,10 @@ def test_konfidenz_setzt_alle_status_filter_ausser_explizite():
     assert wahl["art_status"] == ["gesichert"] and wahl["fach_status"] == ["gesichert"]
     assert "herkunft" not in wahl
     assert b.mit_konfidenz(None, None) == {}
+
+
+def test_urls_aus_themenbeschreibung_entfernt():
+    from sem.bereiche.base import ohne_urls
+    assert ohne_urls("Darstellung eines Systems. (http://www.galileocomputing.de/glossar)") == "Darstellung eines Systems."
+    assert ohne_urls("Siehe www.example.org/x, dann weiter.") == "Siehe, dann weiter."
+    assert ohne_urls("ohne Adresse") == "ohne Adresse"

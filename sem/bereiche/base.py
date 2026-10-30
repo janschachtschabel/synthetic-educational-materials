@@ -12,11 +12,13 @@ Oberfläche zeigen diese Schritte ohne weitere Anpassung an.
 from __future__ import annotations
 
 import random
+import re
 from abc import ABC, abstractmethod
 from collections import Counter, defaultdict
 from dataclasses import dataclass
 from typing import Callable
 
+from .. import schema as S
 from ..llm import Progress
 
 
@@ -204,6 +206,15 @@ def allocate(n: int, groups: dict[str, list[dict]], rng: random.Random) -> list[
     return out
 
 
+_URL = re.compile(r"\s*[(\[]?\s*(?:https?://|www\.)[^\s)\]]*[^\s)\].,;:]\s*[)\]]?")
+
+
+def ohne_urls(text: str) -> str:
+    """Entfernt Web-Adressen (samt umschließender Klammer) aus einer Themenbeschreibung, z. B. Quellenverweise
+    in Definitionen des WLO-Themenbaums; sie gehören nicht in Prompt und Seed."""
+    return re.sub(r"\s+([.,;:])", r"\1", _URL.sub(" ", text)).strip()
+
+
 def build_seeds(bereich: Bildungsbereich, n: int, balance: str | None = None, seed: int = 42,
                 id_prefix: str | None = None, auswahl: dict[str, list[str]] | None = None) -> list[dict]:
     balance = balance or bereich.default_balance
@@ -224,6 +235,9 @@ def build_seeds(bereich: Bildungsbereich, n: int, balance: str | None = None, se
         state.group = group
         s = {"id": f"{prefix}-{seed}-{i:06d}"}
         s.update(bereich.make_seed(topic, rng, state))
+        thema = s.get(S.F_THEMA) or {}
+        if thema.get("beschreibung_de"):
+            thema["beschreibung_de"] = ohne_urls(thema["beschreibung_de"])
         s["synth:seed_parameter"] = {"gleichverteilung": balance, "gruppe": group, "zufalls_seed": seed,
                                      "auswahl": auswahl}
         seeds.append(s)
