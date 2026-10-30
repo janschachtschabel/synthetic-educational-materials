@@ -71,6 +71,8 @@ python -m sem auswahl berufsbildung             # Vocational education and train
 python -m sem seeds --anzahl berufsbildung=10000 --gleichverteilung berufsbildung=beruf --seed 42
 python -m sem mappings berufsbildung --wlo export.csv   # Load ESCO, vote on KldB and qualification, WLO evidence
 python -m sem seeds --anzahl schule=5000 --auswahl schule.stufen=sek1 --seed 42   # Secondary level I only
+python -m sem seeds --anzahl schule=5000 --auswahl schule.herkunft=themenbaum --seed 42   # topic trees only, without keyword topics
+python -m sem mappings schule keywords --wlo export.csv   # school topics from WLO keywords (then kw_gnd … kw_stufen)
 python -m sem seeds --anzahl elementar=1000 schule=3000 berufsbildung=3000 hochschule=3000 --seed 42
 ```
 
@@ -101,8 +103,9 @@ Everything under `data/` can be used without the code (JSON, JSONL, CSV, UTF-8):
 - `data/mappings/elementar/themen_elementar.jsonl`: 1,033 daycare topics (GND URI, synonyms, definition,
   topic type, age group, education sector, provenance, status, WLO evidence); `bildungsbereiche.json`: the seven
   educational areas with closeMatch to OEH school subjects
-- `data/mappings/schule/themen_schule.jsonl`: 3,153 topics from WLO topic trees with subject portal, path, subject,
-  topic type, school levels, status, WLO level evidence, and GND alignment
+- `data/mappings/schule/themen_schule.jsonl`: 7,569 school topics: 3,153 from the WLO topic trees and 4,416
+  finer topics from WLO keywords per subject (normalized as GND subject headings), with subject portal, path,
+  subject, topic type, school levels, provenance, status, WLO evidence, and GND alignment
 - `data/mappings/erwachsenenbildung/themen_erwachsenenbildung.jsonl`: 1,557 course topics with subject area and
   program area from the Volkshochschul-Statistik, provenance (`gnd`, `rahmencurriculum`, `schulthemen`), status;
   `programmbereiche.json`: the classification system with 85 subject areas

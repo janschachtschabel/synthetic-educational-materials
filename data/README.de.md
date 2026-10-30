@@ -59,7 +59,7 @@ Die Themen (Beruf × Kompetenz) entstehen beim Laden aus beiden Dateien und werd
 
 | Datei | Inhalt |
 |---|---|
-| `themen_schule.jsonl` | ein Thema je Zeile: `id` (URI im OEH-Vokabular oehTopics), `label_de`, `portal`, `portal_uri`, `pfad`, `ebene`, `definition`, `keywords`, `faecher` (OEH discipline), `art` (`unterrichtsthema`, `lehrkraftthema`), `stufen` (`primar`, `sek1`, `sek2`), `gnd` (exakter GND-Treffer), `quelle`, `belege.wlo` (Datensätze je Stufe, Node-IDs), `mapping` (Status, Konfidenz, Stimmen, `wlo_bestaetigt`) |
+| `themen_schule.jsonl` | ein Thema je Zeile: `id` (URI im OEH-Vokabular oehTopics bzw. bei `herkunft` = `wlo_keyword` die GND-URI), `label_de`, `portal`, `portal_uri`, `pfad`, `ebene`, `definition`, `keywords`, `faecher` (OEH discipline), `art` (`unterrichtsthema`, `lehrkraftthema`), `stufen` (`primar`, `sek1`, `sek2`), `herkunft` (`themenbaum`, `wlo_keyword`), `gnd` (exakter GND-Treffer), `quelle`, `belege.wlo` (Datensätze je Stufe, Node-IDs), `belege.wlo_keyword` (Themenbaum-Thema steht auch als Keyword in WLO-Datensätzen), `mapping` (Status, Konfidenz, Stimmen, `wlo_bestaetigt`; bei Keyword-Themen zusätzlich `fach`, `synonym_bedeutung`, `stufen_entfernt`). Nur Keyword-Themen: `label_gnd`, `oberbegriffe` (GND), `eltern` (Oberthema im Themenbaum, falls belegt) |
 | `pruefliste_themen.csv`, `korrekturen.csv` | Durchsicht (`korrektur_codes` = Stufen mit `|`, `-` = ausschließen; `korrektur_art`) |
 | `inhaltstypen.json`, `niveaus.json`, `optionale_felder.json` | Inhaltstypen mit Themenart, Zielgruppen, Stufen und Fachportalen; Jahrgänge; optionale Felder (u. a. Anforderungsbereich) |
 

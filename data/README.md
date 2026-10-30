@@ -59,7 +59,7 @@ Topics (occupation × skill) are generated when loading from both files and are 
 
 | File | Contents |
 |---|---|
-| `themen_schule.jsonl` | one topic per line: `id` (URI in the OEH oehTopics vocabulary), `label_de`, `portal`, `portal_uri`, `pfad`, `ebene`, `definition`, `keywords`, `faecher` (OEH discipline), `art` (`unterrichtsthema`, `lehrkraftthema`), `stufen` (`primar`, `sek1`, `sek2`), `gnd` (exact GND match), `quelle`, `belege.wlo` (records per level, node IDs), `mapping` (status, confidence, votes, `wlo_bestaetigt`) |
+| `themen_schule.jsonl` | one topic per line: `id` (URI in the OEH oehTopics vocabulary, or the GND URI when `herkunft` = `wlo_keyword`), `label_de`, `portal`, `portal_uri`, `pfad`, `ebene`, `definition`, `keywords`, `faecher` (OEH discipline), `art` (`unterrichtsthema`, `lehrkraftthema`), `stufen` (`primar`, `sek1`, `sek2`), `herkunft` (`themenbaum`, `wlo_keyword`), `gnd` (exact GND match), `quelle`, `belege.wlo` (records per level, node IDs), `belege.wlo_keyword` (topic-tree topic also occurs as a keyword in WLO records), `mapping` (status, confidence, votes, `wlo_bestaetigt`; for keyword topics also `fach`, `synonym_bedeutung`, `stufen_entfernt`). Keyword topics only: `label_gnd`, `oberbegriffe` (GND), `eltern` (parent topic in the topic tree, where evidenced) |
 | `pruefliste_themen.csv`, `korrekturen.csv` | review (`korrektur_codes` = levels separated by `|`, `-` = exclude; `korrektur_art`) |
 | `inhaltstypen.json`, `niveaus.json`, `optionale_felder.json` | content types with topic type, target groups, levels, and subject portals; year groups; optional fields (including area of requirement) |
 

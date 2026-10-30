@@ -70,6 +70,8 @@ python -m sem auswahl berufsbildung             # Filter Berufsbildung (Qualifiz
 python -m sem seeds --anzahl berufsbildung=10000 --gleichverteilung berufsbildung=beruf --seed 42
 python -m sem mappings berufsbildung --wlo export.csv   # ESCO laden, KldB und Qualifizierung abstimmen, WLO-Belege
 python -m sem seeds --anzahl schule=5000 --auswahl schule.stufen=sek1 --seed 42   # nur Sekundarstufe I
+python -m sem seeds --anzahl schule=5000 --auswahl schule.herkunft=themenbaum --seed 42   # nur Themenbäume, ohne Keyword-Themen
+python -m sem mappings schule keywords --wlo export.csv   # Schulthemen aus WLO-Keywords (danach kw_gnd … kw_stufen)
 python -m sem seeds --anzahl elementar=1000 schule=3000 berufsbildung=3000 hochschule=3000 --seed 42
 ```
 
@@ -100,8 +102,9 @@ Alles unter `data/` ist ohne den Code nutzbar (JSON, JSONL, CSV, UTF-8):
 - `data/mappings/elementar/themen_elementar.jsonl`: 1.033 Kita-Themen (GND-URI, Synonyme, Definition,
   Themenart, Altersgruppe, Bildungsbereich, Herkunft, Status, WLO-Belege); `bildungsbereiche.json`: die
   sieben Bildungsbereiche mit closeMatch auf OEH-Schulfächer
-- `data/mappings/schule/themen_schule.jsonl`: 3.153 Themen der WLO-Themenbäume mit Fachportal, Pfad, Fach,
-  Themenart, Schulstufen, Status, WLO-Stufenbelegen und GND-Abgleich
+- `data/mappings/schule/themen_schule.jsonl`: 7.569 Schulthemen: 3.153 aus den WLO-Themenbäumen und 4.416
+  feinere Themen aus WLO-Keywords je Fach (als GND-Sachbegriffe normiert), mit Fachportal, Pfad, Fach,
+  Themenart, Schulstufen, Herkunft, Status, WLO-Belegen und GND-Abgleich
 - `data/mappings/erwachsenenbildung/themen_erwachsenenbildung.jsonl`: 1.557 Kursthemen mit Fachgebiet und
   Programmbereich der Volkshochschul-Statistik, Herkunft (`gnd`, `rahmencurriculum`, `schulthemen`), Status;
   `programmbereiche.json`: die Systematik mit 85 Fachgebieten

@@ -2,7 +2,9 @@
 
 Themen: die Themenbäume der WLO-Fachportale (OEH-Vokabular oehTopics), je Thema per Mehrfachabstimmung als
 Unterrichtsthema oder Thema für Lehrkräfte eingestuft und den Schulstufen zugeordnet, in denen es unterrichtet
-wird; Gegenprobe über die Bildungsstufen der WLO-Datensätze. Die Schulstufe steht als Metadatum im Seed
+wird; Gegenprobe über die Bildungsstufen der WLO-Datensätze. Dazu feinere Themen aus den Keywords der
+WLO-Schuldatensätze, soweit sie exakt einem GND-Sachbegriff entsprechen (Herkunft „wlo_keyword“), mit Fach,
+Themenart und Stufen per Abstimmung und, wo belegt, einem Oberthema im Themenbaum. Die Schulstufe steht als Metadatum im Seed
 (ccm:educationalcontext: Primarstufe, Sekundarstufe I oder II) und ist über auswahl_optionen filterbar.
 Fach: OEH discipline aus dem Themenbaum.
 """
@@ -39,7 +41,8 @@ class Schule(Bildungsbereich):
         "stufe": "Primarstufe, Sekundarstufe I und II etwa gleich oft (maßgeblich: erste Stufe des Themas)",
     }
     default_balance = "thema"
-    mapping_folgen = {"themen": ["themen", "wlo", "gnd", "art", "stufen"]}
+    mapping_folgen = {"themen": ["themen", "wlo", "gnd", "art", "stufen"],
+                      "keywords": ["keywords", "kw_gnd", "kw_bedeutung", "kw_art", "kw_fach", "kw_stufen"]}
     mapping_abschluss = ["zusammenfuehren"]
 
     def mapping_schritte(self) -> list[MappingSchritt]:
@@ -54,6 +57,18 @@ class Schule(Bildungsbereich):
             S_("art", "Themenart abstimmen", "Unterrichtsthema, Lehrkräftethema oder Sammelknoten (drei Stimmen)",
                b.build_art),
             S_("stufen", "Schulstufen abstimmen", "Primarstufe, Sek I, Sek II (drei Stimmen)", b.build_stufen),
+            S_("keywords", "WLO-Keywords je Fach", "Keywords der Schuldatensätze mit Fach und Stufe zählen (--wlo)",
+               b.build_keywords, llm=False),
+            S_("kw_gnd", "Keywords → GND", "Keywords exakt auf GND-Sachbegriffe; Themenbaum-Treffer werden Belege",
+               b.build_kw_gnd, llm=False),
+            S_("kw_bedeutung", "Keyword-Themen: Bedeutung", "Nur Synonym-Treffer (z. B. Abkürzungen): gleiche "
+               "Bedeutung wie der GND-Begriff? (drei Stimmen)", b.build_kw_bedeutung),
+            S_("kw_art", "Keyword-Themen: Themenart", "Unterrichtsthema, Lehrkräftethema oder ungeeignet (drei Stimmen)",
+               b.build_kw_art),
+            S_("kw_fach", "Keyword-Themen: Schulfach", "Fach aus den Fächern der WLO-Datensätze (drei Stimmen)",
+               b.build_kw_fach),
+            S_("kw_stufen", "Keyword-Themen: Schulstufen", "Primarstufe, Sek I, Sek II (drei Stimmen)",
+               b.build_kw_stufen),
             S_("zusammenfuehren", "Zusammenführen", "themen_schule.jsonl, Prüfliste, Korrekturen (läuft zuletzt)",
                b.zusammenfuehren, llm=False),
         ]
@@ -71,6 +86,10 @@ class Schule(Bildungsbereich):
                   "redaktionell": "von Hand korrigiert (korrekturen.csv)"}
         std = ["gesichert", "wahrscheinlich", "redaktionell"]
         return {
+            "herkunft": {"label": "Herkunft der Themen", "beschreibung": "Themenbaum oder Schlagwörter der WLO-Materialien",
+                         "werte": {"themenbaum": "Thema aus den WLO-Themenbäumen (Lehrplanthemen)",
+                                   "wlo_keyword": "feineres Thema aus WLO-Keywords, als GND-Sachbegriff normiert"},
+                         "standard": ["themenbaum", "wlo_keyword"]},
             "stufen": {"label": "Schulstufen", "beschreibung": "nur Seeds dieser Stufen (z. B. nur Sekundarstufe II)",
                        "werte": {k: v for k, v in STUFEN_LABEL.items()}, "standard": list(STUFEN)},
             "art": {"label": "Themenart", "beschreibung": "Abstimmung",
@@ -81,9 +100,12 @@ class Schule(Bildungsbereich):
                               "standard": std},
             "art_status": {"label": "Status der Themenart", "beschreibung": "Abstimmung", "werte": status,
                            "standard": std},
+            "fach_status": {"label": "Status des Schulfachs (nur Keyword-Themen)", "beschreibung": "Abstimmung",
+                            "werte": status, "standard": std},
             "belege": {"label": "Belege (mindestens einer)", "beschreibung": "leer = keine Anforderung",
                        "werte": {"wlo": "WLO-Datensätze zu diesem Thema",
                                  "wlo_stufe": "Schulstufe durch die Bildungsstufen der WLO-Datensätze bestätigt",
+                                 "wlo_keyword": "Thema steht als Keyword in WLO-Datensätzen",
                                  "gnd": "Thema entspricht exakt einem GND-Sachbegriff"},
                        "standard": []},
         }
@@ -93,6 +115,8 @@ class Schule(Bildungsbereich):
         out = set()
         if (topic.get("belege") or {}).get("wlo"):
             out.add("wlo")
+        if topic.get("herkunft") == "wlo_keyword" or (topic.get("belege") or {}).get("wlo_keyword"):
+            out.add("wlo_keyword")
         if (topic.get("mapping") or {}).get("wlo_bestaetigt"):
             out.add("wlo_stufe")
         if topic.get("gnd"):
@@ -111,6 +135,10 @@ class Schule(Bildungsbereich):
         if m.get("status", "gesichert") not in auswahl["stufen_status"]:
             return False
         if (m.get("art") or {}).get("status", "gesichert") not in auswahl["art_status"]:
+            return False
+        if topic.get("herkunft", "themenbaum") not in auswahl["herkunft"]:
+            return False
+        if (m.get("fach") or {}).get("status", "gesichert") not in auswahl["fach_status"]:
             return False
         return not auswahl["belege"] or bool(self.belege_des_themas(topic) & set(auswahl["belege"]))
 
@@ -191,12 +219,20 @@ class Schule(Bildungsbereich):
         if faecher:
             S.set_controlled(seed, S.F_TAXON, [self.disciplines.ref(u) for u in faecher], S.provenance(
                 "OpenEduHub discipline", uri=self.disciplines.scheme["uri"], license="CC0-1.0",
-                method="relatedMatch des Themas im WLO-Themenbaum"))
+                method="relatedMatch des Themas im WLO-Themenbaum" if topic.get("herkunft", "themenbaum") == "themenbaum"
+                else "Abstimmung aus den Fächern der WLO-Datensätze mit diesem Keyword"))
         m = topic.get("mapping", {})
         q = topic["quelle"]
-        S.set_controlled(seed, S.F_CURRICULUM, [{"uri": topic["id"], "label": topic["label_de"]}], {
-            **S.provenance(q["name"], uri=q["uri"], license=q["lizenz"], method="Thema aus der Quelle"),
-            "status": {"stufen": m.get("status"), "art": (m.get("art") or {}).get("status")}})
+        if topic.get("herkunft", "themenbaum") == "themenbaum":
+            S.set_controlled(seed, S.F_CURRICULUM, [{"uri": topic["id"], "label": topic["label_de"]}], {
+                **S.provenance(q["name"], uri=q["uri"], license=q["lizenz"], method="Thema aus der Quelle"),
+                "status": {"stufen": m.get("status"), "art": (m.get("art") or {}).get("status")}})
+        elif topic.get("eltern"):
+            S.set_controlled(seed, S.F_CURRICULUM, [{"uri": topic["eltern"]["uri"], "label": topic["eltern"]["label"]}],
+                             S.provenance("WirLernenOnline-Themenbäume (OEH-Vokabular oehTopics)",
+                                          uri="http://w3id.org/openeduhub/vocabs/oeh-topics/", license="CC0-1.0",
+                                          method="Oberthema: häufigste Themenbaum-Zuordnung der WLO-Datensätze "
+                                                 "mit diesem Keyword"))
         lrt = self.inhaltstypen["quelle"]
         S.set_controlled(seed, S.F_LRT, [{"uri": typ["uri"], "label": typ["label"]}], S.provenance(
             lrt["name"], uri=lrt["uri"], license=lrt["lizenz"],

@@ -27,9 +27,9 @@ open vocabularies and taxonomies ──► Mappings (topics with subject assignm
 | [OpenEduHub vocabularies](https://github.com/openeduhub/oeh-metadata-vocabs) (`educationalContext`, `new_lrt`, `intendedEndUserRole`, `hochschulfaechersystematik`) | Educational level, content type, target group, higher education subjects | CC0 1.0 |
 | Destatis-Systematik der Fächergruppen, Studienbereiche und Studienfächer (Destatis classification of subject groups, study areas, and subjects) | Origin of the higher education subject classification; extracted from the OpenEduHub vocabulary `hochschulfaechersystematik`, not directly from Destatis | “Quelle: Statistisches Bundesamt (Destatis)”, included in the vocabulary (`quellenangabe`) and in the provenance of every seed |
 | [OpenAlex Topics](https://github.com/ourresearch/openalex-topic-classification) (4,516 topics with descriptions and keywords) | Higher education topics (specialization/research) | CC0 1.0 |
-| [Gemeinsame Normdatei (GND)](https://lobid.org/gnd) via lobid-gnd, [GND-Sachgruppen](https://d-nb.info/standards/vocab/gnd/gnd-sc.html) | GND higher education topics (label, synonyms, broader terms, subject group) | CC0 1.0 |
+| [Gemeinsame Normdatei (GND)](https://lobid.org/gnd) via lobid-gnd, [GND-Sachgruppen](https://d-nb.info/standards/vocab/gnd/gnd-sc.html) | GND higher education topics (label, synonyms, broader terms, subject group); normalization of topics from WLO keywords in early childhood, school and adult education | CC0 1.0 |
 | [hbz-Verbundkatalog](https://lobid.org/resources) via lobid-resources | Candidates and evidence: frequency of a keyword in textbooks and higher education publications | CC0 1.0 |
-| [WirLernenOnline](https://wirlernenonline.de) (editorial team export) | Keywords only, in connection with higher education subjects, as candidates and evidence; no titles, descriptions, or content | Keywords only as frequencies or matched against GND/OpenAlex |
+| [WirLernenOnline](https://wirlernenonline.de) (editorial team export) | Keywords only, in connection with subjects and educational levels (higher education, school, early childhood), plus topic-tree assignment and educational levels of the records, as candidates and evidence; no titles, descriptions, or content | Keywords only as frequencies or matched against GND/OpenAlex |
 | [KIM-Bildungsstufen](https://w3id.org/kim/educationalLevel/) | `exactMatch` for proficiency levels | CC0 1.0 |
 | [ESCO](https://esco.ec.europa.eu) via the public API (2,938 occupations, 12,564 skills, German labels and descriptions) | Vocational education and training occupations and skills, original ESCO URIs | EU reuse (Decision 2011/833/EU), “Quelle: ESCO, Europäische Kommission” in every provenance statement |
 | OEH vocabularies `oehTopics` (topic trees of the WLO subject portals, 3,182 topics) and `discipline` | School topics and subjects, subject `closeMatch` for early childhood education | CC0 1.0 |
@@ -174,10 +174,12 @@ A section for general education schools; the **school level** (primary, lower se
 metadata of the seed (`ccm:educationalcontext`) and can be selected using the `stufen` filter
 (e.g. `--auswahl schule.stufen=sek2` for upper-secondary seeds only).
 
-**Topics** are the topic hierarchies of the 29 WLO subject portals (OEH vocabulary `oehTopics`, “Taxonomy of
+**Topics** come from two sources (provenance `themenbaum` or `wlo_keyword`, selectable via the `herkunft`
+filter). First, the topic hierarchies of the 29 WLO subject portals (OEH vocabulary `oehTopics`, “Taxonomy of
 Curriculum Topics in WirLernenOnline”, CC0): 3,182 topics with subject portal, path, definition, keywords, and
 `relatedMatch` to OEH school subjects. WLO indexes materials with these URIs in the `ccm:curriculum` field;
-the seeds carry them there as well.
+the seeds carry them there as well. Second, finer topics from the keywords of the WLO school records
+(steps `keywords` to `kw_stufen`, see below).
 
 Steps (`python -m sem mappings schule --liste`):
 
@@ -190,14 +192,46 @@ Steps (`python -m sem mappings schule --liste`):
    aggregation node without its own content (discarded).
 5. `stufen`: three votes on which school levels the topic is taught at according to curricula (up to three).
    The LLM does not see the WLO levels; they serve as an independent cross-check (`wlo_bestaetigt`).
-6. `zusammenfuehren`: `themen_schule.jsonl`, review list (no majority, discrepancy with WLO, replacement from
+6. `keywords` (`--wlo`): keywords of WLO records with educational level primary, lower or upper secondary
+   and a school subject (`ccm:taxonid`, OEH discipline). Only keyword, subject, educational level,
+   topic-tree assignment (`ccm:curriculum`) and node ID are used. 20,384 keywords occur in at least five
+   records.
+7. `kw_gnd`: match keywords exactly to GND subject headings (preferred name or synonym). Matches that
+   correspond to a topic-tree topic (same label or same GND concept) become evidence for that topic
+   (`belege.wlo_keyword`, 876 topics); subject names are dropped. 6,376 new GND concepts remain.
+8. `kw_bedeutung`: only where the keyword matches merely a GND synonym (often abbreviations or English
+   words), three votes on whether it means the same in materials of these subjects (e.g. “adhs” →
+   Aufmerksamkeitsdefizit-Syndrom yes, “fish” → Fluoreszenz-in-situ-Hybridisierung no). Otherwise the
+   concept is dropped.
+9. `kw_art`: three votes as above; here, terms that are too general (“Bildung”, “Unterricht”), formats
+   (“Video”, “Zusammenfassung”) and GND concepts with a different meaning (“German <Brauch>”) are also
+   unsuitable. The LLM sees the GND concept with qualifier, synonyms, broader terms, definition and the
+   subjects of the records.
+10. `kw_fach`: three votes on the school subject, chosen from the subjects of the records (candidate from
+    10 % of the records, at most four; up to two are chosen). The subject portal is the subject's most
+    frequent portal in the topic tree.
+11. `kw_stufen`: three votes as in step 5, cross-checked against the educational levels of the records.
+    Levels that the subject portal does not have in the topic tree (less than 5 % of its topics) are
+    removed (`stufen_entfernt`; Sachunterricht primary only).
+12. `zusammenfuehren`: `themen_schule.jsonl`, review list (no majority, discrepancy with WLO, replacement from
    WLO); `korrekturen.csv` takes precedence (`korrektur_codes` = levels, `-` = exclude; `korrektur_art`).
+   Keyword topics get as parent topic (`eltern`, path and `ccm:curriculum` in the seed) the topic-tree
+   topic carried by at least 20 % of their records in the same subject portal.
 
-**Result:** 3,153 topics from 29 subject portals (3,030 classroom topics, 123 for teachers); 27 aggregation
+**Result, topic trees:** 3,153 topics from 29 subject portals (3,030 classroom topics, 123 for teachers); 27 aggregation
 nodes discarded. Levels: primary 995, lower secondary 2,763, upper secondary 2,419 topics; status: secured 3,047,
 probable 85, editorial 21. In 2,191 cases, the WLO records confirm at least one of the selected levels. The 22
 review cases were resolved editorially (OER and school development topics treated as teacher topics for all
 levels, pedagogy as an upper-secondary subject, one higher education topic excluded).
+
+**Result, keywords:** 4,416 additional topics (4,310 classroom topics, 106 for teachers) in 43 subjects,
+most often physics, geography, history, religion, biology and mathematics; levels: primary 1,726, lower
+secondary 3,761, upper secondary 3,011. 1,960 concepts were discarded (unsuitable, different meaning or no
+fitting level). Subject secured 3,761, probable 613, uncertain 42 (fallback to the most frequent WLO
+subject only, not in the seeds by default). 721 keyword topics have a parent topic in the topic tree. The
+56 review cases were resolved editorially (e.g. mismatches such as “Poker” in physics or training
+occupations in English lessons excluded). For keyword topics without a parent topic the seed carries no
+`ccm:curriculum`; topic and GND URI are in `synth:thema`.
 
 **Content types** (`inhaltstypen.json`, 19 from OEH `new_lrt`): e.g. worksheet, practice material,
 explainer video transcript, textbook chapter, fact sheet, blackboard diagram, class test, marking scheme, quiz,

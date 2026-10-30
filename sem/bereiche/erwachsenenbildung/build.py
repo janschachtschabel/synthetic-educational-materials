@@ -436,7 +436,7 @@ def schulabschluss_themen(s: dict) -> list[dict]:
         return []
     out = []
     for t in load_jsonl(path):
-        if t["portal"] not in SCHULABSCHLUSS_PORTALE or t["art"] != "unterrichtsthema":
+        if t["portal"] not in SCHULABSCHLUSS_PORTALE or t["art"] != "unterrichtsthema"                 or t.get("herkunft", "themenbaum") != "themenbaum":
             continue
         codes = (["6.02", "6.01"] if "sek1" in t["stufen"] else []) + (["6.04", "6.03"] if "sek2" in t["stufen"] else [])
         if not codes:

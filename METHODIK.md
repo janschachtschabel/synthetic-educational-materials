@@ -28,9 +28,9 @@ offene Vokabulare und Taxonomien ──► Mappings (Themen mit Fachzuordnung) �
 | [OpenEduHub-Vokabulare](https://github.com/openeduhub/oeh-metadata-vocabs) (`educationalContext`, `new_lrt`, `intendedEndUserRole`, `hochschulfaechersystematik`) | Bildungsstufe, Inhaltstyp, Zielgruppe, Hochschulfächer | CC0 1.0 |
 | Destatis-Systematik der Fächergruppen, Studienbereiche und Studienfächer | Ursprung der Hochschulfächersystematik; ausgelesen aus dem OpenEduHub-Vokabular `hochschulfaechersystematik`, nicht direkt bei Destatis | „Quelle: Statistisches Bundesamt (Destatis)“, steht im Vokabular (`quellenangabe`) und in der Herkunft jedes Seeds |
 | [OpenAlex Topics](https://github.com/ourresearch/openalex-topic-classification) (4.516 Themen mit Beschreibung und Keywords) | Themen Hochschule (Vertiefung/Forschung) | CC0 1.0 |
-| [Gemeinsame Normdatei (GND)](https://lobid.org/gnd) über lobid-gnd, [GND-Sachgruppen](https://d-nb.info/standards/vocab/gnd/gnd-sc.html) | GND-Themen Hochschule (Label, Synonyme, Oberbegriffe, Sachgruppe) | CC0 1.0 |
+| [Gemeinsame Normdatei (GND)](https://lobid.org/gnd) über lobid-gnd, [GND-Sachgruppen](https://d-nb.info/standards/vocab/gnd/gnd-sc.html) | GND-Themen Hochschule (Label, Synonyme, Oberbegriffe, Sachgruppe); Normierung der Themen aus WLO-Keywords in Elementarbereich, Schule und Erwachsenenbildung | CC0 1.0 |
 | [hbz-Verbundkatalog](https://lobid.org/resources) über lobid-resources | Kandidaten und Belege: Häufigkeit eines Schlagworts in Lehrbüchern und Hochschulschriften | CC0 1.0 |
-| [WirLernenOnline](https://wirlernenonline.de) (Export der Redaktion) | nur Keywords in Verbindung mit Hochschulfächern, als Kandidaten und Belege; keine Titel, Beschreibungen oder Inhalte | Keywords nur als Häufigkeiten bzw. Abgleich auf GND/OpenAlex |
+| [WirLernenOnline](https://wirlernenonline.de) (Export der Redaktion) | nur Keywords in Verbindung mit Fächern und Bildungsstufen (Hochschule, Schule, Elementarbereich), Themenbaum-Zuordnung und Bildungsstufen der Datensätze, als Kandidaten und Belege; keine Titel, Beschreibungen oder Inhalte | Keywords nur als Häufigkeiten bzw. Abgleich auf GND/OpenAlex |
 | [KIM-Bildungsstufen](https://w3id.org/kim/educationalLevel/) | `exactMatch` der Niveaustufen | CC0 1.0 |
 | [ESCO](https://esco.ec.europa.eu) über die öffentliche API (2.938 Berufe, 12.564 Kompetenzen, deutsche Labels und Beschreibungen) | Berufe und Kompetenzen Berufsbildung, ESCO-Original-URIs | EU-Weiterverwendung (Beschluss 2011/833/EU), „Quelle: ESCO, Europäische Kommission“ in jeder Herkunftsangabe |
 | OEH-Vokabulare `oehTopics` (Themenbäume der WLO-Fachportale, 3.182 Themen) und `discipline` | Themen und Fächer Schule, Fächer-closeMatch Elementar | CC0 1.0 |
@@ -262,10 +262,12 @@ Ein Bereich für die allgemeinbildende Schule; die **Schulstufe** (Primarstufe, 
 Metadatum des Seeds (`ccm:educationalcontext`) und über den Filter `stufen` wählbar
 (z. B. `--auswahl schule.stufen=sek2` für reine Oberstufen-Seeds).
 
-**Themen** sind die Themenbäume der 29 WLO-Fachportale (OEH-Vokabular `oehTopics`, „Taxonomie von
+**Themen** kommen aus zwei Quellen (Herkunft `themenbaum` bzw. `wlo_keyword`, über den Filter `herkunft`
+wählbar). Erstens die Themenbäume der 29 WLO-Fachportale (OEH-Vokabular `oehTopics`, „Taxonomie von
 Lehrplanthemen in WirLernenOnline“, CC0): 3.182 Themen mit Fachportal, Pfad, Definition, Keywords und
 `relatedMatch` auf OEH-Schulfächer. WLO erschließt Materialien mit diesen URIs im Feld `ccm:curriculum`;
-die Seeds tragen sie dort ebenfalls.
+die Seeds tragen sie dort ebenfalls. Zweitens feinere Themen aus den Keywords der WLO-Schuldatensätze
+(Schritte `keywords` bis `kw_stufen`, siehe unten).
 
 Schritte (`python -m sem mappings schule --liste`):
 
@@ -278,14 +280,46 @@ Schritte (`python -m sem mappings schule --liste`):
    oder Sammelknoten ohne eigenen Inhalt (verworfen).
 5. `stufen`: drei Stimmen, in welchen Schulstufen das Thema laut Lehrplänen unterrichtet wird (bis zu drei).
    Die WLO-Stufen sieht das LLM nicht; sie dienen als unabhängige Gegenprobe (`wlo_bestaetigt`).
-6. `zusammenfuehren`: `themen_schule.jsonl`, Prüfliste (keine Mehrheit, Abweichung von WLO, Ersatz aus
+6. `keywords` (`--wlo`): Keywords der WLO-Datensätze mit Bildungsstufe Primarstufe, Sek I oder II und
+   Schulfach (`ccm:taxonid`, OEH discipline). Genutzt werden nur Keyword, Fach, Bildungsstufe,
+   Themenbaum-Zuordnung (`ccm:curriculum`) und Node-ID. 20.384 Keywords kommen in mindestens fünf
+   Datensätzen vor.
+7. `kw_gnd`: Keywords exakt auf GND-Sachbegriffe (Vorzugsname oder Synonym). Treffer, die einem
+   Themenbaum-Thema entsprechen (gleiches Label oder gleicher GND-Begriff), werden dessen Beleg
+   (`belege.wlo_keyword`, 876 Themen); Fachnamen fallen weg. Übrig bleiben 6.376 neue GND-Begriffe.
+8. `kw_bedeutung`: Nur wo das Keyword bloß einem GND-Synonym entspricht (oft Abkürzungen oder englische
+   Wörter), drei Stimmen, ob es in Materialien dieser Fächer dasselbe meint (z. B. „adhs“ →
+   Aufmerksamkeitsdefizit-Syndrom ja, „fish“ → Fluoreszenz-in-situ-Hybridisierung nein). Sonst fällt
+   der Begriff weg.
+9. `kw_art`: drei Stimmen wie oben; ungeeignet sind hier auch zu allgemeine Begriffe („Bildung“,
+   „Unterricht“), Formate („Video“, „Zusammenfassung“) und GND-Begriffe in anderer Bedeutung
+   („German <Brauch>“). Das LLM sieht den GND-Begriff mit Zusatz, Synonyme, Oberbegriffe, Definition
+   und die Fächer der Datensätze.
+10. `kw_fach`: drei Stimmen, Schulfach aus den Fächern der Datensätze (Kandidat ab 10 % der Datensätze,
+    höchstens vier; gewählt werden bis zu zwei). Das Fachportal ist das häufigste Portal des Fachs im
+    Themenbaum.
+11. `kw_stufen`: drei Stimmen wie in Schritt 5, Gegenprobe über die Bildungsstufen der Datensätze. Stufen,
+    die das Fachportal im Themenbaum nicht hat (weniger als 5 % seiner Themen), entfallen
+    (`stufen_entfernt`; Sachunterricht nur Primarstufe).
+12. `zusammenfuehren`: `themen_schule.jsonl`, Prüfliste (keine Mehrheit, Abweichung von WLO, Ersatz aus
    WLO); `korrekturen.csv` hat Vorrang (`korrektur_codes` = Stufen, `-` = ausschließen; `korrektur_art`).
+   Keyword-Themen bekommen als Oberthema (`eltern`, Pfad und `ccm:curriculum` im Seed) das
+   Themenbaum-Thema, das mindestens 20 % ihrer Datensätze im selben Fachportal tragen.
 
-**Ergebnis:** 3.153 Themen aus 29 Fachportalen (3.030 Unterrichtsthemen, 123 für Lehrkräfte), 27
+**Ergebnis Themenbaum:** 3.153 Themen aus 29 Fachportalen (3.030 Unterrichtsthemen, 123 für Lehrkräfte), 27
 Sammelknoten verworfen. Stufen: Primarstufe 995, Sek I 2.763, Sek II 2.419 Themen; Status gesichert 3.047,
 wahrscheinlich 85, redaktionell 21. In 2.191 Fällen bestätigen die WLO-Datensätze mindestens eine der
 gewählten Stufen. Die 22 Prüffälle sind redaktionell entschieden (OER- und Schulentwicklungsthemen als
 Lehrkräftethemen für alle Stufen, Pädagogik als Oberstufenfach, ein Hochschulthema ausgeschlossen).
+
+**Ergebnis Keywords:** 4.416 zusätzliche Themen (4.310 Unterrichtsthemen, 106 für Lehrkräfte) in 43
+Fächern, am häufigsten Physik, Geographie, Geschichte, Religion, Biologie und Mathematik; Stufen:
+Primarstufe 1.726, Sek I 3.761, Sek II 3.011. 1.960 Begriffe sind verworfen (ungeeignet, andere Bedeutung
+oder keine passende Stufe). Fach gesichert 3.761, wahrscheinlich 613, unsicher 42 (nur Ersatz aus dem
+häufigsten WLO-Fach, standardmäßig nicht in den Seeds). 721 Keyword-Themen haben ein Oberthema im
+Themenbaum. Die 56 Prüffälle sind redaktionell entschieden (u. a. Fehlzuordnungen wie „Poker“ in Physik
+oder Ausbildungsberufe im Englischunterricht ausgeschlossen). Bei Keyword-Themen ohne Oberthema trägt der
+Seed kein `ccm:curriculum`; Thema und GND-URI stehen in `synth:thema`.
 
 **Inhaltstypen** (`inhaltstypen.json`, 19 aus OEH `new_lrt`): u. a. Arbeitsblatt, Übungsmaterial,
 Erklärvideo-Transkript, Schulbuchkapitel, Merkblatt, Tafelbild, Klassenarbeit, Erwartungshorizont, Quiz,
