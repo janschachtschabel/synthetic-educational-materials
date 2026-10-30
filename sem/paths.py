@@ -4,6 +4,8 @@ ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = ROOT / "data"
 VOCAB_DIR = DATA_DIR / "vocabs"
 MAPPING_DIR = DATA_DIR / "mappings"
+# Nur lokal (nicht im Repo): vollständige Gliederungen urheberrechtlich geschützter Vorlagen als Build-Eingabe
+LOKAL_DIR = DATA_DIR / "lokal"
 PROMPT_DIR = ROOT / "prompts"
 OUTPUT_DIR = ROOT / "output"
 

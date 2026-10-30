@@ -116,7 +116,7 @@ Alles unter `data/` ist ohne den Code nutzbar (JSON, JSONL, CSV, UTF-8):
   optionalen Kompetenzen
 - `data/mappings/berufsbildung/kompetenzen.jsonl`: 12.539 ESCO-Kompetenzen (Label, Beschreibung, Art,
   Reichweite, ISCED-F-Feld, `oeh_uri` im OEH-Vokabular escoSkills, WLO-Belege)
-- `data/mappings/berufsbildung/rahmenlehrplaene.jsonl`: 272 KMK-Rahmenlehrpläne mit 3.787 Lernfeldern
+- `data/lokal/berufsbildung/rahmenlehrplaene.jsonl` (nur lokal, nicht im Repo): 272 KMK-Rahmenlehrpläne mit 3.787 Lernfeldern
   (Nummer, Titel, Ausbildungsjahr, Zeitrichtwert; keine Zieltexte) und zugeordneten ESCO-Berufen
 - `data/mappings/elementar/themen_elementar.jsonl`: 1.033 Kita-Themen (GND-URI, Synonyme, Definition,
   Themenart, Altersgruppe, Bildungsbereich, Herkunft, Status, WLO-Belege); `bildungsbereiche.json`: die
