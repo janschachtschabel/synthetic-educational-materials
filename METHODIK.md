@@ -32,6 +32,7 @@ offene Vokabulare und Taxonomien ──► Mappings (Themen mit Fachzuordnung) �
 | [KIM-Bildungsstufen](https://w3id.org/kim/educationalLevel/) | `exactMatch` der Niveaustufen | CC0 1.0 |
 | [ESCO](https://esco.ec.europa.eu) über die öffentliche API (2.938 Berufe, 12.564 Kompetenzen, deutsche Labels und Beschreibungen) | Berufe und Kompetenzen Berufsbildung, ESCO-Original-URIs | EU-Weiterverwendung (Beschluss 2011/833/EU), „Quelle: ESCO, Europäische Kommission“ in jeder Herkunftsangabe |
 | OEH-Vokabulare `kldb` (KldB 2010, Fassung 2020, Ebenen 1–4 mit Kurzbeschreibungen), `escoSkills`, `dqrCompetenceLevels` | Berufsfeld (wie WLO-Feld `ccm:oeh_profession_group`), Abgleich der Kompetenzen, DQR-Niveaus | CC0 1.0; KldB: „Quelle: Statistik der Bundesagentur für Arbeit“ |
+| Gemeinsamer Rahmen der Länder für die frühe Bildung in Kindertageseinrichtungen (Fassung 2022, [nach Eurydice](https://eurydice.eacea.ec.europa.eu/de/eurypedia/germany/leitlinien-der-fruehkindlichen-bildung-betreuung-und-erziehung)) | sieben Bildungsbereiche Elementar | amtliches Werk; Liste und Kurzbeschreibungen im Repo CC0 |
 | [Umsteigeschlüssel KldB 2020 → ISCO-08](https://statistik.arbeitsagentur.de/DE/Navigation/Grundlagen/Klassifikationen/Klassifikation-der-Berufe/KldB2010-Fassung2020/Arbeitsmittel/Arbeitsmittel-Nav.html) (BA, Stand 06.08.2021) | Handmapping-Hinweise ESCO-Beruf → KldB und Anforderungsniveaus | „Quelle: Statistik der Bundesagentur für Arbeit“; nur im Zwischenspeicher |
 
 Die Vokabulare liegen aufbereitet unter `data/vocabs/` (Abruf mit `scripts/fetch_vocabs.py`, Datum in
@@ -215,6 +216,41 @@ Anlernen (2), Ausbildung 1. Jahr (3), Ausbildung 2. und 3. Jahr (4), Fortbildung
 Bachelor Professional (6), Master Professional (7). Gezogen wird nur, was zum Qualifizierungsweg passt;
 die Bildungsstufe folgt daraus (Berufliche Bildung bzw. Fortbildung).
 
+## Mappings Elementarbereich
+
+**Bildungsbereiche** sind die sieben des Gemeinsamen Rahmens der Länder für die frühe Bildung in
+Kindertageseinrichtungen (Fassung 2022, nach Eurydice): Alltagsintegrierte sprachliche Bildung; personale
+und sozial-emotionale Entwicklung, Werte, Religiosität; MINT; Medien und digitale Bildung; Ästhetische
+Bildung; Körper, Bewegung, Gesundheit, Prävention; Umweltbildung und BNE (`bildungsbereiche.json` mit
+Kurzbeschreibung und `closeMatch` auf OEH-Schulfächer, mit denen WLO Kita-Materialien erschließt).
+
+**Themen** sind GND-Sachbegriffe (`python -m sem mappings elementar --liste`):
+
+1. `kandidaten_llm`: je Bildungsbereich 60–80 typische Kita-Themen aus drei Perspektiven (Erzieherin,
+   Fachberatung, Material für Eltern), zusammen 1.374 Nennungen.
+2. `wlo` (`--wlo export.csv`): Keywords der WLO-Datensätze mit Bildungsstufe Elementarbereich, die in
+   mindestens zwei Datensätzen vorkommen (4.122).
+3. `gnd`: alle 4.626 Kandidaten exakt auf GND-Sachbegriffe (lobid), nur Sachbegriffe: 1.462.
+4. `eignung`: drei Stimmen je Begriff: Thema für Angebote mit Kindern (`kinderthema`), Thema für
+   Fachkräfte und Eltern (`fachthema`) oder ungeeignet (zu speziell, nicht kindgerecht, ohne Bezug).
+5. `bereiche`: drei Stimmen, ein bis zwei Bildungsbereiche je geeignetem Thema.
+6. `alter`: drei Stimmen, unter 3 (`u3`), ab 3 (`ue3`) oder beide Altersgruppen.
+7. `zusammenfuehren`: `themen_elementar.jsonl`, `pruefliste_themen.csv`; `korrekturen.csv` hat Vorrang
+   (`korrektur_codes`: Bildungsbereich-IDs und optional die Themenart, `-` = ausschließen;
+   `korrektur_alter`).
+
+**Ergebnis:** 1.033 Themen (874 für Angebote mit Kindern, 159 für Fachkräfte und Eltern), 416 Begriffe
+als ungeeignet verworfen. Je Bildungsbereich 51 (Medien) bis 280 (personal-sozial) Themen; Altersgruppe
+meist „beide“ (581) oder „ab 3“ (439), nur 13 ausdrücklich „unter 3“. Herkunft: 664 nur WLO, 200 nur
+LLM, 169 beides; 833 Themen haben einen WLO-Beleg. Die 34 Prüffälle sind redaktionell entschieden (23
+bestätigt oder korrigiert, 11 ausgeschlossen, z. B. Methoden statt Themen und zu allgemeine Begriffe).
+
+**Inhaltstypen** (`inhaltstypen.json`, 14 aus OEH `new_lrt`): Aktivitäts- und Projektidee, Forscher-
+experiment (nur MINT und Umwelt), Bastelanleitung, Spielidee, Lied/Fingerspiel/Reim, Vorlesegeschichte,
+Rollenspiel, Angebotsplanung, Beobachtungsbogen, Elternbrief, Fachbeitrag, Anleitung, Podcast. Jeder Typ
+ist auf Themenart und Zielgruppe beschränkt. **Niveaus**: Krippe (unter 3), Kindergarten (3–6),
+Vorschuljahr (5–6), passend zur Altersgruppe; `exactMatch` KIM-Bildungsstufe 0.
+
 ## Seeds
 
 Ein Seed ist ein JSON-Objekt (eine Zeile in JSONL). Feldnamen folgen dem edu-sharing/OEH-Schema:
@@ -287,6 +323,15 @@ Ausbildungsbetrieb, überbetriebliche Ausbildungsstätte bzw. Fortbildungsorte) 
 Der Volltext-Prompt der Berufsbildung (`prompts/berufsbildung/volltext.md`) nennt Beruf, Kompetenz,
 Berufsfeld, Lernort und Querschnittsthema und verlangt Bezug auf typische Arbeitsaufgaben im Beruf.
 
+**Seeds Elementarbereich.** Bildungsstufe fest Elementarbereich; `synth:bildungsbereich_elementar`
+(Bildungsbereich des Gemeinsamen Rahmens) und `ccm:taxonid` (closeMatch auf OEH-Schulfächer). Zielgruppe je
+Themenart: Kinderthemen 65 % Fachkräfte, 20 % Eltern, 15 % Kinder (Vorlesegeschichte, Lied); Fachthemen
+75 % Fachkräfte, 25 % Eltern. Optional: didaktische Funktion, Dauer, Sozialform (je 40 %). Gleichverteilung:
+`bildungsbereich` (Standard), `thema`, `altersgruppe`, `art`. Filter: `art`, `herkunft` (`llm`, `wlo`),
+`eignung_status`, `bereich_status`, `alter_status`, `belege` (`wlo`, `llm_bestaetigt`). Eigener
+Volltext-Prompt (`prompts/elementar/volltext.md`): altersgerecht, ohne Tests und Noten, mit Hinweisen zu
+Sicherheit und Vielfalt.
+
 **Reproduzierbarkeit.** Gleiche Mappings, gleiche Einstellungen und gleicher Zufalls-Seed ergeben
 identische Seeds. Neben jeder Seed-Datei liegt eine `.stats.json` mit Parametern und Verteilungen.
 
@@ -343,6 +388,7 @@ Bedingte Abschnitte `{{#name}}…{{/name}}` erscheinen nur, wenn der Wert gesetz
 | `fach`, `bildungsstufe`, `niveau`, `zielgruppe` | aus den Metadaten (bereinigte Labels) |
 | `didaktische_funktion`, `bearbeitungsdauer` | optional |
 | `beruf`, `beruf_beschreibung`, `kompetenzart`, `lernort`, `querschnittsthema` | nur Berufsbildung (`lernort`, `querschnittsthema` optional) |
+| `themenart`, `sozialform` | Elementarbereich (`sozialform` optional, auch Schule) |
 | `rolle`, `sprache` | Autorenrolle im Volltext-Prompt, Sprache als Wort |
 | `titel`, `beschreibung`, `keywords`, `volltext`, `auftrag` | nur in `material.md`: bisher erzeugte Felder („-“ = leer), Volltext, Auftrag aus der Felddatei |
 | `kategorien`, `beispiel_id` | nur in `inhaltstyp.md`: Liste „Name → id“ der Inhaltstypen |

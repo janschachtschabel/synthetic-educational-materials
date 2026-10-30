@@ -15,6 +15,7 @@ F_TAXON_UNI = "ccm:oeh_taxonid_university"         # Hochschulfach (OEH hochschu
 F_LRT = "ccm:oeh_lrt"                              # Inhaltstyp (OEH new_lrt)
 F_ROLE = "ccm:educationalintendedenduserrole"      # Zielgruppe (OEH intendedEndUserRole)
 F_PROFESSION = "ccm:oeh_profession_group"          # Berufsgruppe (OEH kldb, Klassifikation der Berufe)
+F_CURRICULUM = "ccm:curriculum"                    # Thema im WLO-Themenbaum (OEH oehTopics)
 F_LANGUAGE = "cclom:general_language"
 F_TITLE = "cclom:title"
 F_DESCRIPTION = "cclom:general_description"

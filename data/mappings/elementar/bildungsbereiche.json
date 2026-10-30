@@ -1,0 +1,32 @@
+{
+ "beschreibung": "Bildungsbereiche des Gemeinsamen Rahmens der Länder für die frühe Bildung in Kindertageseinrichtungen (JMK/KMK 2004, aktualisiert März 2022) in der Fassung, die Eurydice wiedergibt. Kurzbeschreibungen redaktionell (Projekt). closeMatch: OEH-Schulfächer (discipline), mit denen WLO Materialien des Elementarbereichs erschließt; Handmapping des Projekts.",
+ "quelle": {
+  "name": "Gemeinsamer Rahmen der Länder für die frühe Bildung in Kindertageseinrichtungen (Fassung 2022), nach Eurydice",
+  "uri": "https://eurydice.eacea.ec.europa.eu/de/eurypedia/germany/leitlinien-der-fruehkindlichen-bildung-betreuung-und-erziehung",
+  "lizenz": "amtliches Werk; Liste und Kurzbeschreibungen CC0-1.0 (Projekt)"
+ },
+ "uri_basis": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/elementar/bildungsbereiche.json#",
+ "bildungsbereiche": [
+  {"id": "sprache", "label": "Alltagsintegrierte sprachliche Bildung und Kommunikation",
+   "beschreibung": "Sprechen, Zuhören, Wortschatz, Erzählen, Bilderbücher, Reime, erste Begegnung mit Schrift und Mehrsprachigkeit im Kita-Alltag",
+   "closeMatch": ["http://w3id.org/openeduhub/vocabs/discipline/120", "http://w3id.org/openeduhub/vocabs/discipline/28002"]},
+  {"id": "personal_sozial", "label": "Personale und sozial-emotionale Entwicklung, Werteorientierung und Religiosität, kultursensitive Kompetenzen",
+   "beschreibung": "Gefühle, Selbstbild, Freundschaft, Konflikte, Regeln, Werte, Feste und Religionen, Vielfalt von Familien und Kulturen, Beteiligung",
+   "closeMatch": ["http://w3id.org/openeduhub/vocabs/discipline/520", "http://w3id.org/openeduhub/vocabs/discipline/160", "http://w3id.org/openeduhub/vocabs/discipline/340"]},
+  {"id": "mint", "label": "MINT – Mathematik, Informatik, Naturwissenschaft und Technik",
+   "beschreibung": "Zahlen, Mengen, Formen, Muster, Messen; Naturphänomene, Experimente, Tiere und Pflanzen; Technik im Alltag, erste informatische Grundideen",
+   "closeMatch": ["http://w3id.org/openeduhub/vocabs/discipline/380", "http://w3id.org/openeduhub/vocabs/discipline/28010", "http://w3id.org/openeduhub/vocabs/discipline/04003"]},
+  {"id": "medien", "label": "Medien und digitale Bildung",
+   "beschreibung": "Bilderbuch, Hörmedien, Fotos und Filme, digitale Geräte verstehen und gestalten, Mediennutzung in Familie und Kita",
+   "closeMatch": ["http://w3id.org/openeduhub/vocabs/discipline/900"]},
+  {"id": "aesthetik", "label": "Ästhetische Bildung",
+   "beschreibung": "Malen, Gestalten, Bauen, Musik, Singen, Tanz, Theater und Rollenspiel, Wahrnehmung mit allen Sinnen",
+   "closeMatch": ["http://w3id.org/openeduhub/vocabs/discipline/060", "http://w3id.org/openeduhub/vocabs/discipline/420", "http://w3id.org/openeduhub/vocabs/discipline/12002"]},
+  {"id": "koerper", "label": "Körper, Bewegung, Gesundheit, Prävention",
+   "beschreibung": "Bewegung und Motorik, Körperwahrnehmung, Ernährung, Hygiene, Zahngesundheit, Ruhe und Entspannung, Sicherheit und Unfallverhütung, Kinderschutz",
+   "closeMatch": ["http://w3id.org/openeduhub/vocabs/discipline/600", "http://w3id.org/openeduhub/vocabs/discipline/260"]},
+  {"id": "umwelt_bne", "label": "Umweltbildung und Bildung für nachhaltige Entwicklung",
+   "beschreibung": "Natur erleben, Jahreszeiten, Wasser, Müll und Recycling, Energie, Lebensmittel und ihre Herkunft, achtsamer Umgang mit Ressourcen",
+   "closeMatch": ["http://w3id.org/openeduhub/vocabs/discipline/64018", "http://w3id.org/openeduhub/vocabs/discipline/640"]}
+ ]
+}

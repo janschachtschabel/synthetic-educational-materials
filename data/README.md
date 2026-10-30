@@ -44,6 +44,15 @@ Beruf-Struktur:
 
 Die Themen (Beruf × Kompetenz) entstehen beim Laden aus beiden Dateien und werden nicht gespeichert.
 
+## `mappings/elementar/`
+
+| Datei | Inhalt |
+|---|---|
+| `bildungsbereiche.json` | die sieben Bildungsbereiche des Gemeinsamen Rahmens (Fassung 2022) mit `id`, Label, Kurzbeschreibung und `closeMatch` auf OEH `discipline` |
+| `themen_elementar.jsonl` | ein Thema je Zeile: `id` (GND-URI), `label_de` (ohne GND-Qualifikator), `label_gnd`, `synonyme`, `definition`, `oberbegriffe`, `gnd_sachgruppen`, `art` (`kinderthema`, `fachthema`), `altersgruppe` (`u3`, `ue3`, `beide`), `bildungsbereich` [{`id`, `uri`, `label`}], `herkunft` (`llm`, `wlo`), `quelle`, `belege.wlo`, `mapping` (Status, Konfidenz und Stimmen zu Bereich, Eignung und Alter) |
+| `pruefliste_themen.csv`, `korrekturen.csv` | Durchsicht (`korrektur_codes` = Bildungsbereich-IDs, optional `kinderthema`/`fachthema`, `-` = ausschließen; `korrektur_alter`) |
+| `inhaltstypen.json`, `niveaus.json`, `optionale_felder.json` | Inhaltstypen mit Themenart und Zielgruppen, Altersstufen, optionale Felder |
+
 ## `mappings/hochschule/`
 
 | Datei | Inhalt |

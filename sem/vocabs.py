@@ -20,7 +20,7 @@ OEH_VOCABS_PUBLIC = "https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/{na
 
 # Vokabulare, die das Repo aufbereitet mitliefert (Dateiname = OEH-Vokabularname)
 OEH_VOCABS = ["educationalContext", "new_lrt", "hochschulfaechersystematik", "intendedEndUserRole", "kldb",
-              "dqrCompetenceLevels"]
+              "dqrCompetenceLevels", "discipline"]
 
 # Quellenangabe für Vokabulare, die auf einer fremden Systematik beruhen
 QUELLENANGABEN = {
