@@ -17,7 +17,7 @@ from sem.bereiche import BEREICHE
 from sem.bereiche.base import STANDARD_KONFIDENZ, STATUS_WERTE, filtergruppe
 from sem.generate import generate
 from sem.i18n import UI_SPRACHEN, t
-from sem.llm import DEFAULT_MODEL, DEFAULT_WORKERS, LLMConfig, Progress
+from sem.llm import DEFAULT_MODEL, DEFAULT_WORKERS, LLMConfig, Progress, api_key_fuer
 from sem.mapping.embeddings import DEFAULT_EMBEDDING_MODEL
 from sem.paths import (MAPPING_DIR, OUTPUT_DIR, PRAEFIX, PROMPT_DIR, ROOT, VOCAB_DIR, ausgabe_pfad,
                        ausgabedateien)
@@ -107,6 +107,9 @@ with st.sidebar:
     base_url = st.text_input("Base-URL", value=env.base_url or "", placeholder="https://api.openai.com/v1")
     model = st.text_input(T("Modell"), value=env.model or DEFAULT_MODEL)
     api_key = st.text_input("API-Key", type="password", placeholder=T("aus OPENAI_API_KEY") if env.api_key else "")
+    if env.api_key and not api_key and (base_url or None) != env.base_url:
+        st.warning(T("Andere Base-URL als in OPENAI_BASE_URL: Der Key aus OPENAI_API_KEY wird dafür nicht verwendet. "
+                     "Bitte einen Key eintragen."))
     st.header(T("Geschwindigkeit"))
     workers = st.number_input(T("Worker (parallel)"), 1, 1000, env.workers or DEFAULT_WORKERS,
                               help=T("Materialien, die gleichzeitig erzeugt werden. Mehr Worker = schneller, "
@@ -125,8 +128,8 @@ with st.sidebar:
     emb_model = st.text_input(T("Embedding-Modell (lokal, CPU)"), value=DEFAULT_EMBEDDING_MODEL,
                               help=T("z. B. intfloat/multilingual-e5-small oder "
                                      "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"))
-    cfg = LLMConfig(base_url=base_url or None, api_key=api_key or env.api_key, model=model, workers=int(workers),
-                    max_retries=int(retries), outage_minutes=float(outage),
+    cfg = LLMConfig(base_url=base_url or None, api_key=api_key_fuer(base_url, api_key, env), model=model,
+                    workers=int(workers), max_retries=int(retries), outage_minutes=float(outage),
                     reasoning_effort=None if effort == "Modellstandard" else effort)
 
 # --- Helfer für Dateien in output/ ------------------------------------------------------------

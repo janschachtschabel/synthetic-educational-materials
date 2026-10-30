@@ -28,6 +28,9 @@ How everything is created: [METHODOLOGY.md](METHODOLOGY.md). The data in detail:
 python -m pip install -r requirements.txt
 ```
 
+This installs the package with all extras from `pyproject.toml`; without local embeddings and test tools,
+`python -m pip install -e .` is enough (extras: `mapping` = sentence-transformers, `dev` = pytest, ruff).
+
 For the LLM steps: set `OPENAI_API_KEY`; optionally set `OPENAI_BASE_URL` (any OpenAI-compatible
 endpoint), `LLM_MODEL` (default `gpt-6-luna`), and `LLM_WORKERS` (default 20). Everything can also be set
 in the user interface or via parameters.
@@ -37,6 +40,10 @@ in the user interface or via parameters.
 ```
 streamlit run app.py
 ```
+
+The interface is only reachable from this computer (`.streamlit/config.toml`: `address = "localhost"`), because
+it has no login and can start LLM runs with the key from the environment. It uses the key from
+`OPENAI_API_KEY` only for the base URL from `OPENAI_BASE_URL`; for a different base URL, enter a key.
 
 Tabs: **Seeds** (number per education sector, field for even distribution, topic selection by
 status, source, and evidence, random seed),

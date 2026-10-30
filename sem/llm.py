@@ -22,6 +22,9 @@ from typing import Callable, Iterable
 DEFAULT_MODEL = "gpt-6-luna"
 DEFAULT_WORKERS = 20
 DEFAULT_REASONING_EFFORT = "low"  # gemessen: ein Drittel schneller als der Modellstandard, gleiche Prüfwerte
+# Ein HTTP 400 betrifft meist eine einzelne Aufgabe (z. B. Kontext zu lang): protokollieren und weitermachen.
+# Scheitern so viele Aufgaben in Folge damit, liegt es an der Konfiguration: Lauf pausieren.
+MAX_BAD_REQUESTS_IN_FOLGE = 5
 
 
 @dataclass
@@ -57,6 +60,14 @@ class LLMConfig:
         if self.reasoning_effort:
             out["reasoning_effort"] = self.reasoning_effort
         return out
+
+
+def api_key_fuer(base_url: str | None, api_key: str | None, env: LLMConfig) -> str | None:
+    """Eingetragener Key, sonst der aus OPENAI_API_KEY, diesen aber nur für die Base-URL aus der Umgebung:
+    Eine in der Oberfläche eingetragene andere Base-URL erhält den Key aus der Umgebung nicht."""
+    if api_key:
+        return api_key
+    return env.api_key if (base_url or None) == env.base_url else None
 
 
 def _effort(value: str | None) -> str | None:
@@ -127,8 +138,25 @@ def _is_connection_error(e: Exception) -> bool:
 def _is_fatal(e: Exception) -> bool:
     import openai
 
-    return isinstance(e, (openai.AuthenticationError, openai.PermissionDeniedError, openai.NotFoundError,
-                          openai.BadRequestError))
+    return isinstance(e, (openai.AuthenticationError, openai.PermissionDeniedError, openai.NotFoundError))
+
+
+def _is_bad_request(e: Exception) -> bool:
+    import openai
+
+    return isinstance(e, openai.BadRequestError)
+
+
+def _zeilenende(path: Path):
+    """Endet die Datei nach einem Absturz mitten in einer Zeile, wird die halbe Zeile abgeschlossen, damit der
+    nächste Datensatz in einer eigenen Zeile steht (read_done überspringt die halbe)."""
+    if path.exists() and path.stat().st_size:
+        with path.open("rb") as f:
+            f.seek(-1, 2)
+            fehlt = f.read(1) != b"\n"
+        if fehlt:
+            with path.open("ab") as f:
+                f.write(b"\n")
 
 
 def read_done(path: Path) -> set[str]:
@@ -218,6 +246,7 @@ def run_tasks(
     client = LLMClient(cfg)
     write_lock = threading.Lock()
     outage = {"since": None}
+    bad_requests = {"in_folge": 0}
     stop = stop_event or threading.Event()
 
     def attempt(task):
@@ -228,10 +257,18 @@ def run_tasks(
             try:
                 result = worker(client, task)
                 outage["since"] = None
+                with write_lock:
+                    bad_requests["in_folge"] = 0
                 return result, None
             except Exception as e:  # noqa: BLE001 - alles außer fatalen Fehlern wird wiederholt
                 if _is_fatal(e):
                     stop.set()
+                    return None, f"{type(e).__name__}: {e}"
+                if _is_bad_request(e):  # Wiederholen hilft nicht
+                    with write_lock:
+                        bad_requests["in_folge"] += 1
+                        if bad_requests["in_folge"] >= MAX_BAD_REQUESTS_IN_FOLGE:
+                            stop.set()
                     return None, f"{type(e).__name__}: {e}"
                 last = f"{type(e).__name__}: {e}"
                 with write_lock:
@@ -246,6 +283,7 @@ def run_tasks(
         return None, last
 
     try:
+        _zeilenende(out_path)
         with out_path.open("a", encoding="utf-8") as fout, err_path.open("a", encoding="utf-8") as ferr, \
                 ThreadPoolExecutor(cfg.workers) as pool:
             it = iter(todo)

@@ -1,6 +1,6 @@
 """Sammelt alle Oberflächentexte und ergänzt fehlende Übersetzungen in i18n/en.json.
 
-    python scripts/i18n_texte.py               # zeigt fehlende Texte
+    python scripts/i18n_texte.py               # zeigt fehlende Texte (Rückgabewert 1, wenn welche fehlen)
     python scripts/i18n_texte.py --uebersetzen # übersetzt fehlende Texte per LLM (OPENAI_API_KEY)
 
 Quellen: Aufrufe T("…")/t("…") in app.py, Labels und Beschreibungen der Bildungsbereiche (Gleichverteilung,
@@ -71,7 +71,7 @@ def main():
     if "--uebersetzen" not in sys.argv:
         for x in fehlend:
             print(" -", x)
-        return
+        sys.exit(1 if fehlend else 0)  # für CI: Rückgabewert 1, wenn Übersetzungen fehlen
     from sem.llm import LLMClient, LLMConfig
 
     client = LLMClient(LLMConfig.from_env())
