@@ -1,11 +1,12 @@
 import pytest
+from conftest import lokal_vorhanden
 
 from sem import schema as S
 from sem.bereiche import get
 from sem.bereiche.base import build_seeds
 from sem.bereiche.berufsbildung import Berufsbildung
 from sem.bereiche.berufsbildung import build as B
-from sem.bereiche.berufsbildung.lernfelder import PLAENE_PATH
+from sem.bereiche.berufsbildung.lernfelder import PLAENE
 from sem.mapping import pruefung
 from sem.prompts import load_prompts, render
 from sem.vocabs import load as load_vocab
@@ -81,7 +82,7 @@ def test_prompt_enthaelt_beruf_und_kompetenz():
     assert "{{" not in text
 
 
-@pytest.mark.skipif(not PLAENE_PATH.exists(), reason="rahmenlehrplaene.jsonl liegt nur lokal (data/lokal/)")
+@pytest.mark.skipif(not lokal_vorhanden(PLAENE), reason="rahmenlehrplaene.jsonl liegt nur lokal (data/lokal/)")
 def test_lernfeld_themen_als_eigene_quelle():
     b = _bereich()
     wahl = {**b.standard_auswahl(), "quellen": ["lernfeld"]}

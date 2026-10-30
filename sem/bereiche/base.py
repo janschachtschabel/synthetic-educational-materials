@@ -20,6 +20,7 @@ from typing import Callable
 
 from .. import schema as S
 from ..llm import Progress
+from ..paths import lokale_daten
 
 
 @dataclass
@@ -231,6 +232,8 @@ def build_seeds(bereich: Bildungsbereich, n: int, balance: str | None = None, se
     state = SeedState()
     seeds = []
     prefix = id_prefix or bereich.key
+    # Kennung der lokalen Dateien des Bereichs: gleicher Startwert ergibt nur bei gleicher Kennung dieselben Seeds
+    lokal = lokale_daten(bereich.key)
     for i, (group, topic) in enumerate(allocate(n, groups, rng), 1):
         state.group = group
         s = {"id": f"{prefix}-{seed}-{i:06d}"}
@@ -239,6 +242,6 @@ def build_seeds(bereich: Bildungsbereich, n: int, balance: str | None = None, se
         if thema.get("beschreibung_de"):
             thema["beschreibung_de"] = ohne_urls(thema["beschreibung_de"])
         s["synth:seed_parameter"] = {"gleichverteilung": balance, "gruppe": group, "zufalls_seed": seed,
-                                     "auswahl": auswahl}
+                                     "auswahl": auswahl, **({"lokale_daten": lokal} if lokal else {})}
         seeds.append(s)
     return seeds

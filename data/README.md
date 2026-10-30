@@ -70,8 +70,7 @@ Topics (occupation × skill) are generated when loading from both files and are 
 | File | Contents |
 |---|---|
 | `programmbereiche.json` | 7 programme areas and 85 subject areas from the Volkshochschul-Statistik (Adult Education Center Statistics) (`notation`, `label`, `uri`, `uebergreifend` for the collective entries x.00) |
-| `sprachkurs_themen.json` | fields of action and learning objective areas from the Rahmencurriculum für Integrationskurse (Framework Curriculum for Integration Courses) (`code`, `handlungsfeld`, `titel`, `label`, `fachgebiete`) |
-| `themen_erwachsenenbildung.jsonl` | one topic per line: `id` (GND URI, Rahmencurriculum code, or oehTopics URI), `label_de`, `art` (`kursthema`, `kursleitungsthema`), `herkunft` (`gnd`, `rahmencurriculum`, `schulthemen`), `fachgebiet` and `programmbereich` [{`notation`, `uri`, `label`}] (foreign languages as `4.fs`), `quelle`, `belege.wlo`, `mapping` |
+| `themen_erwachsenenbildung.jsonl` | one topic per line: `id` (GND URI or oehTopics URI), `label_de`, `art` (`kursthema`, `kursleitungsthema`), `herkunft` (`gnd`, `schulthemen`; `rahmencurriculum` and `grundbildung` local only, see `lokal/`), `fachgebiet` and `programmbereich` [{`notation`, `uri`, `label`}] (foreign languages as `4.fs`), `quelle`, `belege.wlo`, `mapping` |
 | `pruefliste_themen.csv`, `korrekturen.csv` | review (`korrektur_codes` = subject areas, optionally `kursthema`/`kursleitungsthema`, `-` = exclude) |
 | `inhaltstypen.json`, `niveaus.json`, `optionale_felder.json` | content types with topic type, target groups, and programme areas; levels per programme area (GER, Alpha-Level, qualifications); optional fields and target languages per subject area |
 
@@ -79,13 +78,21 @@ Topics (occupation × skill) are generated when loading from both files and are 
 
 Complete outlines of copyrighted sources are kept locally as build input only (`.gitignore`), so the
 repository does not publish a copy of the whole outline. The data only contain the individual headings a
-topic or seed needs, each with its citation.
+seed needs, each with its citation. Topics taken entirely from such an outline are also kept here only.
+
+If a file is missing, everything keeps running, just without the dependent parts (column "without the file"),
+and a warning is shown. The fingerprint of the files seeds depend on (sha256, 12 characters; `null` = missing)
+is recorded in every seed under `synth:seed_parameter.lokale_daten` and in the statistics (`.stats.json`,
+`lokale_daten`): the same random seed only yields the same seeds with the same fingerprint. Versions that were in the
+repository until October 2026 remain available in the Git history.
 
 | File | Content | without the file |
 |---|---|---|
-| `schule/bildungsstandards_gliederung.json` | outline of the KMK educational standards: `meta`, `quellen` (document, subject, qualification, resolution, URL, citation), `eintraege` (`code`, `quelle`, `typ`, `pfad`, `label`), headings only | seeds without `synth:bildungsstandards`; step `bista` cannot run |
+| `schule/bildungsstandards_gliederung.json` | outline of the KMK educational standards: `meta`, `quellen` (document, subject, qualification, resolution, URL, citation), `eintraege` (`code`, `quelle`, `typ`, `pfad`, `label`), headings only | seeds without `synth:bildungsstandards`; steps `bista` and `bista_zusammenfuehren` stop with a notice (`bildungsstandards.jsonl` stays unchanged) |
 | `berufsbildung/rahmenlehrplaene.jsonl` | one KMK framework curriculum per line: `id` (`kmk:<download ID>`), `titel`, `datum`, `url`, `datei`, `lernfelder` (`nr`, `titel`, `jahr`, `stunden`), `vollstaendig`, `berufe` (ESCO `uri`, `label`, `code`, `stimmen`), `quelle`, `mapping` (status, method) | no learning-field topics in the seeds; rebuild with the `lernfeld` sequence from the Markdown versions of the curricula |
-| `erwachsenenbildung/grundbildung_themen.json` | basic-education topics from the lea. alpha levels and DVV framework curricula: `quellen`, `themen` (`code`, `quelle`, `bereich`, `pfad`, `label`, `fachgebiet`, `niveau`) | rebuilding the topics drops the basic-education topics (warning); the existing `themen_erwachsenenbildung.jsonl` contains them |
+| `erwachsenenbildung/grundbildung_themen.json` | basic-education topics from the lea. alpha levels and DVV framework curricula: `quellen`, `themen` (`code`, `quelle`, `bereich`, `pfad`, `label`, `fachgebiet`, `niveau`) | step `zusammenfuehren` builds no basic-education topics (warning) |
+| `erwachsenenbildung/sprachkurs_themen.json` | outline of the Rahmencurriculum für Integrationskurse (Framework Curriculum for Integration Courses): fields of action and learning objective areas (`code`, `handlungsfeld`, `titel`, `label`, `fachgebiete`), `quelle` | step `zusammenfuehren` builds no language-course topics (warning) |
+| `erwachsenenbildung/themen_lokal.jsonl` | the adult-education topics with provenance `rahmencurriculum` (117) and `grundbildung` (334), same fields as `themen_erwachsenenbildung.jsonl`; written by the step `zusammenfuehren` as long as one of the two outlines is present | adult education only with the 1,466 topics from the repository |
 
 ## `mappings/hochschule/`
 

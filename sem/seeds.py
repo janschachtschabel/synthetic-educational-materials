@@ -9,6 +9,7 @@ from pathlib import Path
 
 from . import schema as S
 from .bereiche import get as get_bereich
+from .paths import lokale_daten
 
 
 def build(counts: dict[str, int], balance: dict[str, str] | None = None, seed: int = 42,
@@ -61,6 +62,9 @@ def write(seeds: list[dict], out_path: Path, params: dict) -> dict:
     with out_path.open("w", encoding="utf-8") as f:
         for s in seeds:
             f.write(json.dumps(s, ensure_ascii=False) + "\n")
-    st = {"parameter": params, "erzeugt": date.today().isoformat(), **stats(seeds)}
+    bereiche = {s[S.F_BEREICH] for s in seeds}
+    lokal = {k: v for b in sorted(bereiche) for k, v in lokale_daten(b).items()}
+    st = {"parameter": params, "erzeugt": date.today().isoformat(), **({"lokale_daten": lokal} if lokal else {}),
+          **stats(seeds)}
     out_path.with_suffix(".stats.json").write_text(json.dumps(st, ensure_ascii=False, indent=1), encoding="utf-8")
     return st

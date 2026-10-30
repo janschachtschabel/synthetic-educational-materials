@@ -14,7 +14,7 @@ import random
 from functools import cached_property
 
 from ... import schema as S
-from ...paths import MAPPING_DIR
+from ...paths import MAPPING_DIR, lokal_pfad
 from ...vocabs import load as load_vocab
 from ..base import Bildungsbereich, MappingSchritt, SeedState
 from ..hochschule import kurz_id, load_jsonl
@@ -78,7 +78,7 @@ class Berufsbildung(Bildungsbereich):
         from . import build, lernfelder
 
         out = build.statistik() if (DIR / "berufe.jsonl").exists() else {}
-        return {**out, "lernfelder": lernfelder.statistik()} if lernfelder.PLAENE_PATH.exists() else out
+        return {**out, "lernfelder": lernfelder.statistik()} if lokal_pfad(lernfelder.PLAENE).exists() else out
 
     # --- Auswahl der Themen ------------------------------------------------------------------
 

@@ -15,6 +15,7 @@ from __future__ import annotations
 import json
 import os
 import re
+import warnings
 from collections import Counter
 from datetime import date
 from pathlib import Path
@@ -23,7 +24,7 @@ from ...llm import LLMConfig
 from ...mapping import abstimmung, pruefung
 from ...mapping.abstimmung import Ziel
 from ...mapping.embeddings import DEFAULT_EMBEDDING_MODEL, Embedder, top_k
-from ...paths import DATA_DIR, LOKAL_DIR
+from ...paths import DATA_DIR, lokal_pfad
 from ...quellen import rahmenlehrplaene as rlp
 from ..base import fertig
 from . import DIR, load_jsonl
@@ -32,7 +33,7 @@ CACHE = DATA_DIR / "cache"
 ROH_PATH = CACHE / "kmk" / "lernfelder_roh.jsonl"
 KANDIDATEN_PATH = CACHE / "berufsbildung_rlp_kandidaten.json"
 STIMMEN_PATH = CACHE / "berufsbildung_stimmen_rlp.jsonl"
-PLAENE_PATH = LOKAL_DIR / "berufsbildung" / "rahmenlehrplaene.jsonl"  # nur lokal, nicht im Repo
+PLAENE = "berufsbildung/rahmenlehrplaene.jsonl"  # unter data/lokal/, nicht im Repo
 PRUEFLISTE_PATH = DIR / "pruefliste_rahmenlehrplaene.csv"
 KORREKTUREN_PATH = DIR / "korrekturen_rahmenlehrplaene.csv"
 N_KANDIDATEN = 12
@@ -207,7 +208,7 @@ def zusammenfuehren(cfg: LLMConfig | None = None, stimmen: int = N_STIMMEN, mode
                                                    for c in list(kand_all["plaene"].get(p["id"], {}))[:6]
                                                    if c in by_code),
                           "lernfelder": len(p["lernfelder"]), "url": p["url"]})
-    _write_jsonl(PLAENE_PATH, rows)
+    _write_jsonl(lokal_pfad(PLAENE), rows)
     pruefung.schreibe_pruefliste(PRUEFLISTE_PATH, pruef, ["korrektur_codes", "kommentar"])
     mit = sum(1 for r in rows if r["berufe"])
     return fertig(f"{len(rows)} Rahmenlehrpläne, {mit} mit ESCO-Beruf, "
@@ -216,7 +217,11 @@ def zusammenfuehren(cfg: LLMConfig | None = None, stimmen: int = N_STIMMEN, mode
 
 
 def lade_plaene() -> list[dict]:
-    return load_jsonl(PLAENE_PATH) if PLAENE_PATH.exists() else []
+    path = lokal_pfad(PLAENE)
+    if not path.exists():
+        warnings.warn(f"{path} fehlt: keine Lernfeld-Themen in der Berufsbildung (siehe data/README.md, data/lokal/)")
+        return []
+    return load_jsonl(path)
 
 
 def statistik(rows: list[dict] | None = None) -> dict:
