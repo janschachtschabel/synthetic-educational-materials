@@ -385,6 +385,11 @@ immediately, one line at a time. Restarting with the same output file skips ever
 retries failed items (`<ausgabe>.fehler.jsonl`). A lock file prevents two simultaneous runs on the
 same file.
 
+**Output language.** The default is German. For another language (app: “Output language”, CLI: `--sprache`),
+`prompts/ausgabesprache.md` is appended to both system prompts; seeds and instructions stay German and the
+education context stays Germany. `cclom:general_language` gets the output language (with provenance), and
+`synth:generierung` records it. Resuming does not check the language, so use one output file per language.
+
 ## Placeholders
 
 In the prompt templates (`prompts/`, editable in the user interface), placeholders use the form

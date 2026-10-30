@@ -512,6 +512,11 @@ geschrieben. Ein erneuter Start mit derselben Ausgabedatei überspringt alles Fe
 Fehlgeschlagenes erneut (`<ausgabe>.fehler.jsonl`). Eine Lock-Datei verhindert zwei gleichzeitige Läufe
 auf derselben Datei.
 
+**Ausgabesprache.** Standard ist Deutsch. Bei einer anderen Sprache (App: „Ausgabesprache“, CLI: `--sprache`)
+wird `prompts/ausgabesprache.md` an beide Systemprompts angehängt; Seeds und Vorgaben bleiben deutsch, der
+Bildungskontext bleibt Deutschland. `cclom:general_language` erhält die Ausgabesprache (mit Herkunft),
+`synth:generierung` vermerkt sie. Die Fortsetzung prüft die Sprache nicht: je Sprache eine eigene Ausgabedatei.
+
 ## Platzhalter
 
 In den Prompt-Vorlagen (`prompts/`, in der Oberfläche editierbar) stehen Platzhalter als `{{name}}`.

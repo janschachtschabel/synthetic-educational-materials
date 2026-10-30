@@ -11,8 +11,8 @@ OpenAlex-Themen, Lehrthemen aus GND und hbz-Katalog, Keyword-Belege aus WirLerne
 **Berufliche Bildung** (ESCO-Berufe × Kompetenzen, KldB-Berufsfelder, Qualifizierungsweg und DQR-Niveau,
 Handmapping über den BA-Umsteigeschlüssel ISCO → KldB) und **Elementarbereich** (sieben Bildungsbereiche
 des Gemeinsamen Rahmens der Länder, Kita-Themen als GND-Sachbegriffe aus LLM-Themenlisten und WLO-Keywords,
-Eignung und Altersgruppe per Abstimmung) und **Schule** (Themenbäume der WLO-Fachportale, Primarstufe,
-Sekundarstufe I und II als Metadatum und Filter) und **Erwachsenenbildung** (Programmbereiche und
+Eignung und Altersgruppe per Abstimmung) und **Schule** (Themenbäume der WLO-Fachportale und feinere Themen aus
+WLO-Keywords je Fach als GND-Sachbegriffe, Primarstufe, Sekundarstufe I und II als Metadatum und Filter) und **Erwachsenenbildung** (Programmbereiche und
 Fachgebiete der Volkshochschul-Statistik, Kursthemen aus GND, Sprachkursthemen aus dem Rahmencurriculum für
 Integrationskurse, Schulabschlusskurse). Weitere Bereiche lassen sich ergänzen.
 
@@ -36,7 +36,7 @@ streamlit run app.py
 
 Reiter: **Seeds** (Anzahl je Bildungsbereich, Feld für die Gleichverteilung, Auswahl der Themen nach
 Status, Quelle und Belegen, Zufalls-Seed),
-**Materialien** (Start/Fortsetzen mit Fortschrittsanzeige), **Vorschau** (Seeds und fertige Materialien
+**Materialien** (Start/Fortsetzen mit Fortschrittsanzeige, Ausgabesprache), **Vorschau** (Seeds und fertige Materialien
 durchblättern und durchsuchen: Titel, Beschreibung, Keywords, Volltext, Frage-Antwort-Paare,
 Inhaltstyp-Prüfung, Metadaten und Herkunft), **Prompts** (bearbeiten und speichern),
 **Mappings** (ansehen, herunterladen, neu bauen), **Methodik**.
@@ -72,8 +72,21 @@ python -m sem mappings berufsbildung --wlo export.csv   # ESCO laden, KldB und Q
 python -m sem seeds --anzahl schule=5000 --auswahl schule.stufen=sek1 --seed 42   # nur Sekundarstufe I
 python -m sem seeds --anzahl schule=5000 --auswahl schule.herkunft=themenbaum --seed 42   # nur Themenbäume, ohne Keyword-Themen
 python -m sem mappings schule keywords --wlo export.csv   # Schulthemen aus WLO-Keywords (danach kw_gnd … kw_stufen)
-python -m sem seeds --anzahl elementar=1000 schule=3000 berufsbildung=3000 hochschule=3000 --seed 42
+python -m sem auswahl erwachsenenbildung        # Filter Erwachsenenbildung (Programmbereiche, Quellen, Status)
+python -m sem seeds --anzahl erwachsenenbildung=2000 --auswahl erwachsenenbildung.quellen=gnd,rahmencurriculum --seed 42
+python -m sem seeds --anzahl elementar=1000 schule=3000 berufsbildung=3000 hochschule=3000 erwachsenenbildung=1000 --seed 42
+python -m sem materialien --seeds output/seeds_schule5000_s42.jsonl --sprache en   # Materialien auf Englisch
 ```
+
+**Themen auswählen:** Jeder Bereich hat eigene Filter für Quellen bzw. Herkunft, Abstimmungsstatus (Konfidenz:
+`gesichert`, `wahrscheinlich`, `unsicher`, `redaktionell`) und Belege; `python -m sem auswahl <bereich>` zeigt
+sie mit der Zahl der Themen. Voreinstellung: alles außer `unsicher`. In der Oberfläche stehen dieselben Filter
+im Reiter „Seeds“ unter jedem Bereich.
+
+**Ausgabesprache:** Materialien entstehen standardmäßig auf Deutsch. `--sprache en` (auch `fr`, `es`, `it`, `nl`,
+`pl`, `tr`, `uk`, `ru`, `ar`) oder „Ausgabesprache“ im Reiter „Materialien“ schreibt alle Felder in dieser
+Sprache; der Bildungskontext bleibt Deutschland. Der Hinweis an das Modell steht in `prompts/ausgabesprache.md`,
+die Sprache in `cclom:general_language`. Je Sprache eine neue Ausgabedatei wählen, die Fortsetzung prüft sie nicht.
 
 LLM-Optionen für `materialien` und `mappings`: `--base-url`, `--api-key`, `--model`, `--workers`
 (Standard 20, `LLM_WORKERS`), `--reasoning-effort` (Standard `low`, `LLM_REASONING_EFFORT`; `standard`
@@ -127,4 +140,6 @@ output/                    erzeugte Seeds und Materialien (nicht versioniert)
 
 Code: Apache 2.0. Daten unter `data/`: aus CC0-Quellen abgeleitet; ESCO-Labels und -Beschreibungen unter
 den Weiterverwendungsbedingungen der EU-Kommission (Quelle: ESCO, Europäische Kommission), KldB mit
-Quellenangabe der Bundesagentur für Arbeit. Herkunft siehe METHODIK.md.
+Quellenangabe der Bundesagentur für Arbeit, Codes und Bezeichnungen der Volkshochschul-Statistik aus dem
+DIE-Statistikbericht (CC BY 4.0 DE), aus dem Rahmencurriculum für Integrationskurse nur Kapitelcodes und -titel
+(urheberrechtlich geschützt, in jeder Herkunftsangabe zitiert). Herkunft siehe METHODIK.md.

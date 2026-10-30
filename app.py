@@ -251,16 +251,22 @@ with tab_seeds:
     rnd = st.number_input(T("Startwert für den Zufall"), 0, 2**31 - 1, 42,
                           help=T("Gleicher Startwert und gleiche Einstellungen ergeben dieselben Seeds."))
     ziel = dateiname_feld(T("Dateiname"), "seeds", "_".join(f"{k}{v}" for k, v in counts.items() if v) + f"_s{rnd}",
-                          "s-name", T("Frei wählbar, z. B. hochschule30000_s42"))
+                          # Schlüssel mit Vorschlag: der Name folgt geänderten Anzahlen und Startwert
+                          f"s-name-{'_'.join(f'{k}{v}' for k, v in counts.items() if v)}-{rnd}",
+                          T("Frei wählbar, z. B. hochschule30000_s42"))
     vorhanden = ziel.exists()
     if vorhanden:
         st.warning(T("{datei} gibt es schon ({anzahl}) und wird beim Erzeugen überschrieben.",
                      datei=ziel.name, anzahl=anzahl(zeilen(ziel), "Seed", "Seeds")))
     if st.button(T("Seeds erzeugen"), type="primary", disabled=sum(counts.values()) == 0):
-        with st.spinner(T("erzeuge …")):
-            data = seedlib.build(counts, balance, int(rnd), auswahl)
-            stats = seedlib.write(data, ziel, {"anzahl": counts, "gleichverteilung": balance,
-                                               "zufalls_seed": int(rnd), "auswahl": auswahl})
+        try:
+            with st.spinner(T("erzeuge …")):
+                data = seedlib.build(counts, balance, int(rnd), auswahl)
+                stats = seedlib.write(data, ziel, {"anzahl": counts, "gleichverteilung": balance,
+                                                   "zufalls_seed": int(rnd), "auswahl": auswahl})
+        except ValueError as e:  # z. B. Filter ohne verbleibende Themen
+            st.error(str(e))
+            st.stop()
         st.success(T("{n} Seeds in output/{datei}. Weiter im Reiter „Materialien“.", n=stats["anzahl"], datei=ziel.name))
         with st.expander(T("Statistik")):
             st.json(stats, expanded=False)

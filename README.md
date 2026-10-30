@@ -12,7 +12,8 @@ OpenAlex topics, teaching topics from GND and the hbz catalog, keyword evidence 
 pathway and DQR level, manual mapping via the BA conversion key ISCO → KldB), **early childhood education**
 (seven educational areas of the Gemeinsamer Rahmen der Länder, daycare topics as GND subject headings from
 LLM topic lists and WLO keywords, suitability and age group determined by vote), **school** (topic trees
-from WLO subject portals, primary, lower secondary and upper secondary levels as metadata and filters),
+from WLO subject portals plus finer topics from WLO keywords per subject as GND subject headings, primary,
+lower secondary and upper secondary levels as metadata and filters),
 and **adult education** (program areas and subject areas from the Volkshochschul-Statistik, course topics
 from GND, language course topics from the Rahmencurriculum für Integrationskurse, school-leaving
 qualification courses). More sectors can be added.
@@ -37,7 +38,7 @@ streamlit run app.py
 
 Tabs: **Seeds** (number per education sector, field for even distribution, topic selection by
 status, source, and evidence, random seed),
-**Materials** (start/resume with progress indicator), **Preview** (browse and search seeds and completed
+**Materials** (start/resume with progress indicator, output language), **Preview** (browse and search seeds and completed
 materials: titles, descriptions, keywords, full text, question-answer pairs,
 content type check, metadata, and provenance), **Prompts** (edit and save),
 **Mappings** (view, download, rebuild), **Methodology**. The prompt templates themselves are in German.
@@ -73,8 +74,21 @@ python -m sem mappings berufsbildung --wlo export.csv   # Load ESCO, vote on Kld
 python -m sem seeds --anzahl schule=5000 --auswahl schule.stufen=sek1 --seed 42   # Secondary level I only
 python -m sem seeds --anzahl schule=5000 --auswahl schule.herkunft=themenbaum --seed 42   # topic trees only, without keyword topics
 python -m sem mappings schule keywords --wlo export.csv   # school topics from WLO keywords (then kw_gnd … kw_stufen)
-python -m sem seeds --anzahl elementar=1000 schule=3000 berufsbildung=3000 hochschule=3000 --seed 42
+python -m sem auswahl erwachsenenbildung        # Adult education filters (program areas, sources, status)
+python -m sem seeds --anzahl erwachsenenbildung=2000 --auswahl erwachsenenbildung.quellen=gnd,rahmencurriculum --seed 42
+python -m sem seeds --anzahl elementar=1000 schule=3000 berufsbildung=3000 hochschule=3000 erwachsenenbildung=1000 --seed 42
+python -m sem materialien --seeds output/seeds_schule5000_s42.jsonl --sprache en   # materials in English
 ```
+
+**Selecting topics:** each sector offers its own filters for sources/origin, voting status (confidence:
+`gesichert`, `wahrscheinlich`, `unsicher`, `redaktionell`) and evidence; `python -m sem auswahl <bereich>`
+lists them with the number of topics. Default: everything except `unsicher`. In the user interface, the same
+filters are in the “Seeds” tab under each sector.
+
+**Output language:** materials are written in German by default. `--sprache en` (also `fr`, `es`, `it`, `nl`,
+`pl`, `tr`, `uk`, `ru`, `ar`) or “Output language” in the “Materials” tab writes all fields in that language;
+the education context stays Germany. The note to the model is in `prompts/ausgabesprache.md`; the language is
+stored in `cclom:general_language`. Use a new output file per language, because resuming does not check it.
 
 LLM options for `materialien` and `mappings`: `--base-url`, `--api-key`, `--model`, `--workers`
 (default 20, `LLM_WORKERS`), `--reasoning-effort` (default `low`, `LLM_REASONING_EFFORT`; `standard`
@@ -128,4 +142,6 @@ output/                    Generated seeds and materials (not versioned)
 
 Code: Apache 2.0. Data under `data/`: derived from CC0 sources; ESCO labels and descriptions are subject to
 the European Commission's reuse conditions (source: ESCO, European Commission), KldB with
-attribution to the Bundesagentur für Arbeit. See METHODOLOGY.md for provenance.
+attribution to the Bundesagentur für Arbeit, Volkshochschul-Statistik codes and labels from the DIE statistics
+report (CC BY 4.0 DE), only chapter codes and titles from the Rahmencurriculum für Integrationskurse (copyrighted,
+cited in every provenance entry). See METHODOLOGY.md for provenance.
