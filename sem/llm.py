@@ -25,6 +25,13 @@ DEFAULT_REASONING_EFFORT = "low"  # gemessen: ein Drittel schneller als der Mode
 # Ein HTTP 400 betrifft meist eine einzelne Aufgabe (z. B. Kontext zu lang): protokollieren und weitermachen.
 # Scheitern so viele Aufgaben in Folge damit, liegt es an der Konfiguration: Lauf pausieren.
 MAX_BAD_REQUESTS_IN_FOLGE = 5
+# Flex (OpenAI): halber Preis, aber langsamere Antworten und bei Engpässen Ablehnung (429, wird wiederholt);
+# deshalb längere Wartezeit je Anfrage
+FLEX_TIMEOUT = 900.0
+# Hat Flex keine Kapazität (429), wird die Anfrage so oft mit Flex wiederholt (Wartezeit verdoppelt sich) und dann
+# zum Standardpreis gestellt; gemessen am 30.10.2026 lehnte Flex sonst die Hälfte der Materialien ab
+FLEX_VERSUCHE = 3
+FLEX_WARTEN = 10.0
 
 
 @dataclass
@@ -38,6 +45,7 @@ class LLMConfig:
     timeout: float = 180.0
     temperature: float | None = None  # None = Standard des Modells (manche Modelle akzeptieren keinen Wert)
     reasoning_effort: str | None = DEFAULT_REASONING_EFFORT  # Reasoning-Modelle; None = Modellstandard
+    service_tier: str | None = None  # "flex" = halber Preis, langsamer (OpenAI); None = Standard
     extra: dict = field(default_factory=dict)  # weitere Parameter für chat.completions.create
 
     @classmethod
@@ -59,7 +67,24 @@ class LLMConfig:
         out = {"base_url": self.base_url or "https://api.openai.com/v1", "model": self.model}
         if self.reasoning_effort:
             out["reasoning_effort"] = self.reasoning_effort
+        if self.service_tier:
+            out["service_tier"] = self.service_tier
         return out
+
+    def parameter(self, system: str, user: str, json_mode: bool = False, batch: bool = False) -> dict:
+        """Parameter für chat.completions.create; batch=True für den Body einer Batch-Anfrage (ohne service_tier,
+        Batch ist schon die günstige Verarbeitung)."""
+        kwargs = dict(self.extra)
+        if self.temperature is not None:
+            kwargs["temperature"] = self.temperature
+        if self.reasoning_effort:
+            kwargs["reasoning_effort"] = self.reasoning_effort
+        if self.service_tier and not batch:
+            kwargs["service_tier"] = self.service_tier
+        if json_mode:
+            kwargs["response_format"] = {"type": "json_object"}
+        return {"model": self.model,
+                "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}], **kwargs}
 
 
 def api_key_fuer(base_url: str | None, api_key: str | None, env: LLMConfig) -> str | None:
@@ -79,6 +104,27 @@ class APIUnavailable(Exception):
     """Die API war länger als outage_minutes nicht erreichbar."""
 
 
+TOKEN_FELDER = ("aufrufe", "eingabe", "davon_cache", "ausgabe", "davon_reasoning")
+
+
+def tokens_aus_usage(u) -> dict:
+    """Tokenzahlen einer Antwort; u ist das usage-Objekt der API oder (Batch-Ergebnis) ein dict."""
+    def wert(obj, name):
+        return (obj.get(name) if isinstance(obj, dict) else getattr(obj, name, None)) if obj is not None else None
+
+    return {"aufrufe": 1, "eingabe": wert(u, "prompt_tokens") or 0, "ausgabe": wert(u, "completion_tokens") or 0,
+            "davon_reasoning": wert(wert(u, "completion_tokens_details"), "reasoning_tokens") or 0,
+            "davon_cache": wert(wert(u, "prompt_tokens_details"), "cached_tokens") or 0}
+
+
+def json_aus_text(text: str):
+    """JSON aus einer Modellantwort, auch wenn sie in ```json … ``` steht."""
+    text = text.strip()
+    if text.startswith("```"):
+        text = text.strip("`").removeprefix("json").strip()
+    return json.loads(text)
+
+
 class LLMClient:
     def __init__(self, cfg: LLMConfig):
         from openai import OpenAI
@@ -87,44 +133,42 @@ class LLMClient:
             raise ValueError("Kein API-Key: OPENAI_API_KEY setzen oder in der Oberfläche eintragen.")
         self.cfg = cfg
         self.usage = threading.local()  # Tokenzähler je Thread (eine Aufgabe läuft in einem Thread)
-        self.client = OpenAI(base_url=cfg.base_url, api_key=cfg.api_key, timeout=cfg.timeout, max_retries=0)
+        timeout = max(cfg.timeout, FLEX_TIMEOUT) if cfg.service_tier == "flex" else cfg.timeout
+        self.client = OpenAI(base_url=cfg.base_url, api_key=cfg.api_key, timeout=timeout, max_retries=0)
 
     def chat(self, system: str, user: str, json_mode: bool = False) -> str:
-        kwargs = dict(self.cfg.extra)
-        if self.cfg.temperature is not None:
-            kwargs["temperature"] = self.cfg.temperature
-        if self.cfg.reasoning_effort:
-            kwargs["reasoning_effort"] = self.cfg.reasoning_effort
-        if json_mode:
-            kwargs["response_format"] = {"type": "json_object"}
-        resp = self.client.chat.completions.create(
-            model=self.cfg.model,
-            messages=[{"role": "system", "content": system}, {"role": "user", "content": user}],
-            **kwargs,
-        )
+        params = self.cfg.parameter(system, user, json_mode)
+        resp = self._flex(params) if params.get("service_tier") == "flex" else             self.client.chat.completions.create(**params)
         u = getattr(resp, "usage", None)
         if u is not None:
             z = self.zaehler()
-            z["aufrufe"] += 1
-            z["eingabe"] += u.prompt_tokens or 0
-            z["ausgabe"] += u.completion_tokens or 0
-            det = getattr(u, "completion_tokens_details", None)
-            z["davon_reasoning"] += (getattr(det, "reasoning_tokens", 0) or 0) if det else 0
-            pdet = getattr(u, "prompt_tokens_details", None)
-            z["davon_cache"] += (getattr(pdet, "cached_tokens", 0) or 0) if pdet else 0
+            for k, v in tokens_aus_usage(u).items():
+                z[k] += v
         return resp.choices[0].message.content or ""
+
+    def _flex(self, params: dict):
+        """Flex-Anfrage; ohne Flex-Kapazität nach FLEX_VERSUCHE zum Standardpreis (gezählt als aufrufe_standard)."""
+        import openai
+
+        for i in range(FLEX_VERSUCHE):
+            try:
+                return self.client.chat.completions.create(**params)
+            except openai.RateLimitError as e:
+                if "flex" not in str(e).lower():
+                    raise  # gewöhnliches Rate-Limit: run_tasks wiederholt
+                time.sleep(FLEX_WARTEN * 2 ** i)
+        z = self.zaehler()
+        z["aufrufe_standard"] = z.get("aufrufe_standard", 0) + 1
+        return self.client.chat.completions.create(**{k: v for k, v in params.items() if k != "service_tier"})
 
     def zaehler(self, neu: bool = False) -> dict:
         """Tokenzähler des aktuellen Threads; neu=True setzt ihn zurück."""
         if neu or not hasattr(self.usage, "z"):
-            self.usage.z = {"aufrufe": 0, "eingabe": 0, "davon_cache": 0, "ausgabe": 0, "davon_reasoning": 0}
+            self.usage.z = dict.fromkeys(TOKEN_FELDER, 0)
         return self.usage.z
 
     def chat_json(self, system: str, user: str) -> dict:
-        text = self.chat(system, user, json_mode=True).strip()
-        if text.startswith("```"):
-            text = text.strip("`").removeprefix("json").strip()
-        return json.loads(text)
+        return json_aus_text(self.chat(system, user, json_mode=True))
 
 
 def _is_connection_error(e: Exception) -> bool:
@@ -145,6 +189,50 @@ def _is_bad_request(e: Exception) -> bool:
     import openai
 
     return isinstance(e, openai.BadRequestError)
+
+
+def _prozess_laeuft(pid: int) -> bool:
+    """Ob ein Prozess dieser Nummer auf diesem Rechner läuft."""
+    if os.name == "nt":
+        import ctypes
+
+        k = ctypes.windll.kernel32
+        h = k.OpenProcess(0x1000, False, pid)  # PROCESS_QUERY_LIMITED_INFORMATION
+        if not h:
+            return k.GetLastError() == 5  # Zugriff verweigert: der Prozess existiert
+        code = ctypes.c_ulong()
+        k.GetExitCodeProcess(h, ctypes.byref(code))
+        k.CloseHandle(h)
+        return code.value == 259  # STILL_ACTIVE
+    try:
+        os.kill(pid, 0)
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True
+    return True
+
+
+def sperre_nehmen(lock_path: Path):
+    """Legt die Sperrdatei eines Laufs an (Prozessnummer und Rechner). Gehört eine vorhandene Sperre zu einem
+    Prozess, der auf diesem Rechner nicht mehr läuft (Absturz, Abbruch), wird sie übernommen; sonst RuntimeError."""
+    import socket
+
+    rechner = socket.gethostname()
+    for _ in range(2):
+        try:
+            fd = os.open(lock_path, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+            os.write(fd, f"{os.getpid()} {rechner}".encode())
+            os.close(fd)
+            return
+        except FileExistsError:
+            teile = Path(lock_path).read_text(encoding="utf-8", errors="replace").split()
+            if len(teile) == 2 and teile[0].isdigit() and teile[1] == rechner and not _prozess_laeuft(int(teile[0])):
+                Path(lock_path).unlink(missing_ok=True)  # verwaist
+                continue
+            break
+    raise RuntimeError(f"{Path(lock_path).name} existiert: Es läuft schon ein Lauf auf dieser Datei. Falls nicht "
+                       "(z. B. nach Absturz auf einem anderen Rechner), die Datei löschen und neu starten.")
 
 
 def _zeilenende(path: Path):
@@ -236,12 +324,7 @@ def run_tasks(
             on_progress(prog)
         return prog
 
-    try:
-        fd = os.open(lock_path, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
-        os.close(fd)
-    except FileExistsError:
-        raise RuntimeError(f"{lock_path.name} existiert: Es läuft schon ein Lauf auf dieser Datei. "
-                           "Falls nicht (z. B. nach Absturz), die Datei löschen und neu starten.")
+    sperre_nehmen(lock_path)
 
     client = LLMClient(cfg)
     write_lock = threading.Lock()

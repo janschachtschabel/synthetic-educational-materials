@@ -20,7 +20,8 @@ offene Vokabulare und Taxonomien ──► Mappings (Themen mit Fachzuordnung) �
    Inhaltstyp, Niveau …). Kein LLM, reproduzierbar über einen Zufalls-Seed, sofern dieselben lokalen Daten
    (`data/lokal/`) vorliegen; deren Kennung steht in `synth:seed_parameter.lokale_daten`.
 3. **Materialien** entstehen aus Seeds per LLM: erst der Volltext, dann Titel, Beschreibung, Keywords
-   und Frage-Antwort-Paare aus dem Volltext.
+   und Frage-Antwort-Paare aus dem Volltext. Sofort, mit Flex oder gesammelt per Batch-Schnittstelle (halber
+   Preis); Prompts, Prüfungen und Ergebnis sind gleich, `synth:generierung.verarbeitung` vermerkt den Weg.
 
 ## Quellen
 

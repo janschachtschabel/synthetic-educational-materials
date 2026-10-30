@@ -4,7 +4,10 @@
     python -m sem seeds --anzahl hochschule=30000 [--gleichverteilung hochschule=thema] [--seed 42] [--out …]
                         [--auswahl hochschule.fach_status=gesichert,wahrscheinlich hochschule.belege=lehrbuch,wlo]
     python -m sem auswahl hochschule   (Filter, Standardwerte und Themenzahl anzeigen)
-    python -m sem materialien --seeds output/seeds.jsonl [--out …] [--limit N] [--workers 20] [--model …]
+    python -m sem materialien --seeds output/seeds.jsonl [--out …] [--limit N] [--workers 20] [--model …] [--flex]
+    python -m sem materialien --seeds output/seeds.jsonl --batch [--warten]   (Batch: halber Preis, Runden bis 24 h)
+    python -m sem laeufe                          (Läufe, die ihr Ziel nicht erreicht haben)
+    python -m sem materialien --fortsetzen NAME   (unfertigen Lauf mit seinen Einstellungen fortsetzen)
     python -m sem mappings hochschule [alle|openalex|gnd|schritt …] [--limit N] [--stimmen 3] [--wlo export.csv …]
     python -m sem mappings hochschule --liste
 """
@@ -14,6 +17,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+import time
 from pathlib import Path
 
 from .paths import ausgabe_pfad
@@ -51,13 +55,17 @@ def _llm_args(p):
     g.add_argument("--reasoning-effort", choices=["standard", "minimal", "low", "medium", "high"],
                    help="nur für Reasoning-Modelle: weniger Denkaufwand = schneller; Standard low "
                         "(LLM_REASONING_EFFORT), „standard“ = Parameter nicht senden")
+    g.add_argument("--flex", action="store_const", const="flex", dest="service_tier",
+                   help="Flex-Verarbeitung (OpenAI): halber Preis, langsamere Antworten, bei Engpässen Ablehnungen "
+                        "(werden wiederholt)")
 
 
 def _cfg(a):
     from .llm import LLMConfig
 
     return LLMConfig.from_env(base_url=a.base_url, api_key=a.api_key, model=a.model, workers=a.workers,
-                              max_retries=a.max_retries, reasoning_effort=a.reasoning_effort)
+                              max_retries=a.max_retries, reasoning_effort=a.reasoning_effort,
+                              service_tier=getattr(a, "service_tier", None))
 
 
 def main(argv=None):
@@ -87,7 +95,10 @@ def main(argv=None):
     p.add_argument("--auswahl", nargs="*", metavar="BEREICH.FILTER=W1,W2")
 
     p = sub.add_parser("materialien", help="Materialien aus Seeds erzeugen (LLM, fortsetzbar)")
-    p.add_argument("--seeds", type=Path, required=True)
+    p.add_argument("--seeds", type=Path, help="Seed-Datei (entfällt mit --fortsetzen)")
+    p.add_argument("--fortsetzen", metavar="NAME",
+                   help="unfertigen Lauf fortsetzen (Name der Ausgabe, siehe python -m sem laeufe): Seed-Datei, Anzahl, "
+                        "Sprache, Modell und Verarbeitung kommen aus dem Lauf")
     p.add_argument("--out", type=Path, help="Dateiname; das Präfix materialien_ wird ergänzt "
                                             "(Standard: Name der Seed-Datei)")
     p.add_argument("--limit", type=int)
@@ -96,7 +107,14 @@ def main(argv=None):
     p.add_argument("--sprache", default="de", metavar="CODE",
                    help="Ausgabesprache als ISO-Code (de, en, fr, es, …; Standard de). Der Hinweis an das Modell "
                         "steht in prompts/ausgabesprache.md")
+    p.add_argument("--batch", action="store_true",
+                   help="über die Batch-Schnittstelle (OpenAI): halber Preis, Ergebnis je Runde bis 24 h; jeder Aufruf "
+                        "holt Fertiges ab und schickt die nächste Runde (Stand in <ausgabe>.batch/)")
+    p.add_argument("--warten", action="store_true", help="mit --batch: wiederholen, bis alles fertig ist")
+    p.add_argument("--intervall", type=float, default=60, help="mit --warten: Sekunden zwischen den Abfragen")
     _llm_args(p)
+
+    sub.add_parser("laeufe", help="Materialläufe, die ihr Ziel nicht erreicht haben (abgebrochen oder mit Fehlern)")
 
     p = sub.add_parser("mappings", help="Mappings eines Bildungsbereichs neu bauen (Schritte siehe --liste)")
     p.add_argument("bereich")
@@ -152,10 +170,46 @@ def main(argv=None):
                 print(f"  [{'x' if w in wahl[k] else ' '}] {w:16} {txt}")
         print(f"{len(b.themen_auswahl(wahl))} von {len(b.topics())} Themen")
 
+    elif a.cmd == "laeufe":
+        from .laeufe import unfertige_laeufe
+
+        laeufe = unfertige_laeufe()
+        for L in laeufe:
+            print(f"{L['name']}: {L['fertig']} von {L['ziel']} fertig, {L['fehlgeschlagen']} fehlgeschlagen · "
+                  f"{L['verarbeitung']} · zuletzt {L['zuletzt']}" + (" · gesperrt (läuft oder abgebrochen)"
+                                                                       if L["gesperrt"] else ""))
+        print(f"{len(laeufe)} unfertige Läufe. Fortsetzen: python -m sem materialien --fortsetzen NAME"
+              if laeufe else "Keine unfertigen Läufe.")
+
     elif a.cmd == "materialien":
         from .generate import generate
 
+        if a.fortsetzen:
+            from .laeufe import lauf_stand
+
+            lauf = lauf_stand(ausgabe_pfad("materialien", a.fortsetzen))
+            if not lauf:
+                raise SystemExit(f"Kein Lauf {a.fortsetzen!r}; siehe python -m sem laeufe")
+            a.seeds, a.out, a.limit, a.sprache = Path(lauf["seeds"]), Path(lauf["ausgabe"]), lauf["limit"],                 lauf["ausgabesprache"]
+            a.ohne_inhaltstyp_pruefung = not lauf["inhaltstyp_pruefen"]
+            a.batch = lauf["verarbeitung"] == "batch"
+            a.model = a.model or lauf["modell"]
+            a.reasoning_effort = a.reasoning_effort or lauf["reasoning_effort"] or "standard"
+            a.service_tier = "flex" if lauf["verarbeitung"] == "flex" else None
+        elif not a.seeds:
+            raise SystemExit("--seeds oder --fortsetzen angeben")
         out = ausgabe_pfad("materialien", a.out or a.seeds)
+        if a.batch:
+            from .batch import BatchLauf, status_zeile
+
+            lauf = BatchLauf(a.seeds, out, _cfg(a), limit=a.limit, inhaltstyp_pruefen=not a.ohne_inhaltstyp_pruefung,
+                             ausgabesprache=a.sprache)
+            show = lambda st: print(time.strftime("%H:%M:%S"), status_zeile(st), flush=True)  # noqa: E731
+            st = lauf.warten(a.intervall, on_status=show) if a.warten else lauf.weiter()
+            if not a.warten:
+                show(st)
+            print(f"→ {out}" + ("" if st["abgeschlossen"] else "  (später erneut aufrufen, um fortzusetzen)"))
+            return
         prog = generate(a.seeds, out, _cfg(a), limit=a.limit, inhaltstyp_pruefen=not a.ohne_inhaltstyp_pruefung,
                         ausgabesprache=a.sprache)
         print(f"{prog.done} neu, {prog.skipped} schon vorhanden, {prog.failed} fehlgeschlagen → {out}")
