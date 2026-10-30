@@ -26,7 +26,6 @@ stehen zusätzlich `definition` und `note` (KldB: Kurzbeschreibung und typische 
 | `inhaltstypen.json` | genutzte Inhaltstypen aus OEH `new_lrt` mit Textsorte, Medienform, Kompetenzarten, Zielgruppen |
 | `niveaus.json` | DQR-Niveaus mit Qualifizierungsweg und Bildungsstufe |
 | `optionale_felder.json` | Werte und Anteile der optionalen Steuerfelder (Lernort, Querschnittsthema …) |
-| `rahmenlehrplaene.jsonl` | ein KMK-Rahmenlehrplan je Zeile: `id` (`kmk:<Download-ID>`), `titel`, `datum`, `url`, `datei`, `lernfelder` (`nr`, `titel`, `jahr`, `stunden`), `vollstaendig`, `berufe` (ESCO `uri`, `label`, `code`, `stimmen`), `quelle`, `mapping` (Status, Methode) |
 | `pruefliste_rahmenlehrplaene.csv`, `korrekturen_rahmenlehrplaene.csv` | Pläne ohne Mehrheit für einen ESCO-Beruf oder mit lückenhafter Lernfeldliste; Korrekturen mit `korrektur_codes` = ESCO-Kürzel (erste acht Zeichen der UUID) mit `|`, `-` = ausschließen |
 
 Beruf-Struktur:
@@ -85,6 +84,7 @@ die einzelnen Überschriften, die ein Thema oder Seed braucht, jeweils mit Quell
 | Datei | Inhalt | ohne die Datei |
 |---|---|---|
 | `schule/bildungsstandards_gliederung.json` | Gliederung der KMK-Bildungsstandards: `meta`, `quellen` (Dokument, Fach, Abschluss, Beschluss, URL, Quellenangabe), `eintraege` (`code`, `quelle`, `typ`, `pfad`, `label`), nur Überschriften | Seeds ohne `synth:bildungsstandards`; Schritt `bista` nicht ausführbar |
+| `berufsbildung/rahmenlehrplaene.jsonl` | ein KMK-Rahmenlehrplan je Zeile: `id` (`kmk:<Download-ID>`), `titel`, `datum`, `url`, `datei`, `lernfelder` (`nr`, `titel`, `jahr`, `stunden`), `vollstaendig`, `berufe` (ESCO `uri`, `label`, `code`, `stimmen`), `quelle`, `mapping` (Status, Methode) | keine Lernfeld-Themen in den Seeds; neu erzeugen mit der Folge `lernfeld` aus den Markdown-Fassungen der Pläne |
 | `erwachsenenbildung/grundbildung_themen.json` | Grundbildungs-Themen aus lea.-Alpha-Levels und DVV-Rahmencurricula: `quellen`, `themen` (`code`, `quelle`, `bereich`, `pfad`, `label`, `fachgebiet`, `niveau`) | beim Neubau der Themen entfallen die Grundbildungs-Themen (Warnung); die vorhandene `themen_erwachsenenbildung.jsonl` enthält sie |
 
 ## `mappings/hochschule/`

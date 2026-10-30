@@ -23,7 +23,7 @@ from ...llm import LLMConfig
 from ...mapping import abstimmung, pruefung
 from ...mapping.abstimmung import Ziel
 from ...mapping.embeddings import DEFAULT_EMBEDDING_MODEL, Embedder, top_k
-from ...paths import DATA_DIR
+from ...paths import DATA_DIR, LOKAL_DIR
 from ...quellen import rahmenlehrplaene as rlp
 from ..base import fertig
 from . import DIR, load_jsonl
@@ -32,7 +32,7 @@ CACHE = DATA_DIR / "cache"
 ROH_PATH = CACHE / "kmk" / "lernfelder_roh.jsonl"
 KANDIDATEN_PATH = CACHE / "berufsbildung_rlp_kandidaten.json"
 STIMMEN_PATH = CACHE / "berufsbildung_stimmen_rlp.jsonl"
-PLAENE_PATH = DIR / "rahmenlehrplaene.jsonl"
+PLAENE_PATH = LOKAL_DIR / "berufsbildung" / "rahmenlehrplaene.jsonl"  # nur lokal, nicht im Repo
 PRUEFLISTE_PATH = DIR / "pruefliste_rahmenlehrplaene.csv"
 KORREKTUREN_PATH = DIR / "korrekturen_rahmenlehrplaene.csv"
 N_KANDIDATEN = 12

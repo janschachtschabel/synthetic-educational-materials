@@ -26,7 +26,6 @@ One file `<name>.json` per vocabulary:
 | `inhaltstypen.json` | content types used from OEH `new_lrt`, with text type, media format, skill types, and target groups |
 | `niveaus.json` | DQR levels with qualification pathway and educational level |
 | `optionale_felder.json` | values and proportions of the optional control fields (learning location, cross-cutting topic …) |
-| `rahmenlehrplaene.jsonl` | one KMK framework curriculum per line: `id` (`kmk:<download ID>`), `titel`, `datum`, `url`, `datei`, `lernfelder` (`nr`, `titel`, `jahr`, `stunden`), `vollstaendig`, `berufe` (ESCO `uri`, `label`, `code`, `stimmen`), `quelle`, `mapping` (status, method) |
 | `pruefliste_rahmenlehrplaene.csv`, `korrekturen_rahmenlehrplaene.csv` | curricula without a majority for an ESCO occupation or with gaps in the learning-field list; corrections with `korrektur_codes` = ESCO short codes (first eight characters of the UUID) separated by `|`, `-` = exclude |
 
 Occupation structure:
@@ -85,6 +84,7 @@ topic or seed needs, each with its citation.
 | File | Content | without the file |
 |---|---|---|
 | `schule/bildungsstandards_gliederung.json` | outline of the KMK educational standards: `meta`, `quellen` (document, subject, qualification, resolution, URL, citation), `eintraege` (`code`, `quelle`, `typ`, `pfad`, `label`), headings only | seeds without `synth:bildungsstandards`; step `bista` cannot run |
+| `berufsbildung/rahmenlehrplaene.jsonl` | one KMK framework curriculum per line: `id` (`kmk:<download ID>`), `titel`, `datum`, `url`, `datei`, `lernfelder` (`nr`, `titel`, `jahr`, `stunden`), `vollstaendig`, `berufe` (ESCO `uri`, `label`, `code`, `stimmen`), `quelle`, `mapping` (status, method) | no learning-field topics in the seeds; rebuild with the `lernfeld` sequence from the Markdown versions of the curricula |
 | `erwachsenenbildung/grundbildung_themen.json` | basic-education topics from the lea. alpha levels and DVV framework curricula: `quellen`, `themen` (`code`, `quelle`, `bereich`, `pfad`, `label`, `fachgebiet`, `niveau`) | rebuilding the topics drops the basic-education topics (warning); the existing `themen_erwachsenenbildung.jsonl` contains them |
 
 ## `mappings/hochschule/`
