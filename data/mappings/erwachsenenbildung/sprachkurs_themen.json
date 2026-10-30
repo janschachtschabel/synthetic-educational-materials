@@ -1,10 +1,10 @@
 {
  "beschreibung": "Sprachkurs-Themen: Handlungsfelder und Lernzielbereiche des Rahmencurriculums für Integrationskurse (Deutsch als Zweitsprache). Übernommen werden nur Kapitelcodes und -titel; fachgebiete: 4.04 Deutsch als Fremdsprache, 4.fs Fremdsprachen (alltagsnahe Handlungsfelder). Groß- und Kleinschreibung der Titel (im Original in Versalien) per LLM wiederhergestellt, nur Schreibung geprüft.",
  "quelle": {
-  "name": "Rahmencurriculum für Integrationskurse – Deutsch als Zweitsprache, überarbeitete Neuauflage 2017, Goethe-Institut im Auftrag des Bundesministeriums des Innern",
+  "name": "Rahmencurriculum für Integrationskurse – Deutsch als Zweitsprache",
   "uri": "https://www.goethe.de/resources/files/pdf209/rahmencurriculum-integrationskurs_20171.pdf",
   "lizenz": "urheberrechtlich geschützt; übernommen sind nur Gliederung und Kapiteltitel",
-  "quellenangabe": "Quelle: Rahmencurriculum für Integrationskurse – Deutsch als Zweitsprache, überarbeitete Neuauflage 2017, Goethe-Institut im Auftrag des Bundesministeriums des Innern, hrsg. vom Bundesamt für Migration und Flüchtlinge (https://www.goethe.de/resources/files/pdf209/rahmencurriculum-integrationskurs_20171.pdf); übernommen sind nur Gliederung und Kapiteltitel"
+  "quellenangabe": "Buhlmann, Rosemarie; Ende, Karin; Kaufmann, Susan; Kilimann, Angela; Schmitz, Helen: Rahmencurriculum für Integrationskurse – Deutsch als Zweitsprache. Goethe-Institut im Auftrag des Bundesministeriums des Innern (2007); überarbeitete Neuauflage im Auftrag des Bundesamts für Migration und Flüchtlinge (2017). Übernommen: Codes und Titel der Handlungsfelder und Lernzielbereiche; verändert: Groß- und Kleinschreibung (Original in Versalien)."
  },
  "themen": [
   {

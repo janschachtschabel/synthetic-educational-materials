@@ -8,3 +8,4 @@ Formuliere einen suchoptimierten, inhaltsbeschreibenden Titel, der den INHALT pr
 - Vermeide Füllwörter und irrelevante Zusatzinformationen.
 - Beispiele: „Fotosynthese Lichtreaktion Dunkelreaktion“, „Bruchrechnung Kürzen Erweitern“, „Kirche Mittelalter Macht Ablasshandel Glaubensvorstellungen“, „Eigenwerte Diagonalisierung symmetrischer Matrizen“
 Ausgabe: Nur der Titel, ohne weitere Erklärungen oder Zusätze.
+{{#ausgabesprache}}- Schreibe auf {{ausgabesprache}} (Beispiele zeigen nur das Format).{{/ausgabesprache}}

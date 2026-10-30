@@ -6,3 +6,4 @@ Beachte dabei folgende Vorgaben:
 - Schließe Materialtypen, Bildungsstufen, Markennamen, Personen (außer bei historischen oder literarischen Themen), Orte und irrelevante Kategorien aus.
 - Gib die Schlagworte als einfache, kommagetrennte Liste ohne zusätzliche Formatierungen aus.
 - Beispiel: "Bruchrechnung, Dezimalzahl, Prozentrechnung, Kürzen, Hauptnenner"
+{{#ausgabesprache}}- Schreibe auf {{ausgabesprache}} (Beispiele zeigen nur das Format).{{/ausgabesprache}}

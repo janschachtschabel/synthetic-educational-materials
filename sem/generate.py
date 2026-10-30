@@ -127,6 +127,7 @@ def generate_one(client: LLMClient, seed: dict, prompts_by_bereich: dict, meta: 
     if ausgabesprache != "de":
         name = SPRACHEN.get(ausgabesprache, ausgabesprache)
         hinweis = "\n\n" + render(prompts["ausgabesprache"], {"ausgabesprache": name})
+        values["ausgabesprache"] = name  # für {{#ausgabesprache}}-Abschnitte in den Feldaufträgen (Beispiele sind deutsch)
         values["sprache"] = ", ".join(dict.fromkeys([name, *[x for x in values.get("sprache", "").split(", ")
                                                              if x and x != "Deutsch"]]))
     start = time.time()

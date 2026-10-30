@@ -7,3 +7,4 @@ Erstelle eine zusammenfassende Beschreibung des Inhalts mit folgenden Anforderun
 - Verwende ausschließlich Inhalte, die im Ausgangsmaterial belegt sind. Keine erfundenen Details, keine Ergänzungen ohne Beleg.
 - Vermeide Floskeln wie "Dieses Material …", "Hier finden Sie …" sowie URLs, Dateinamen oder andere technische Angaben.
 Ausgabe: Nur der reine Beschreibungstext, ohne zusätzliche Formatierungen, Überschriften oder Felder.
+{{#ausgabesprache}}- Schreibe auf {{ausgabesprache}} (Beispiele zeigen nur das Format).{{/ausgabesprache}}

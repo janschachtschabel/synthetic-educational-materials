@@ -4,3 +4,4 @@ Erstelle genau 10 didaktisch sinnvolle Frage-Antwort-Paare zum Inhalt, wie sie L
 - Verwende ausschließlich Inhalte, die im Volltext belegt sind.
 - Keine Ja/Nein-Fragen, keine Fragen nach Seitenzahlen, Aufbau oder Formatierung des Materials.
 Ausgabe: Ein JSON-Objekt in genau dieser Form, ohne Codeblock: {"paare": [{"frage": "...", "antwort": "...", "typ": "..."}]}
+{{#ausgabesprache}}- Schreibe auf {{ausgabesprache}} (Beispiele zeigen nur das Format).{{/ausgabesprache}}

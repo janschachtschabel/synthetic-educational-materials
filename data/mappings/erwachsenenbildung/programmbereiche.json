@@ -1,10 +1,12 @@
 {
  "beschreibung": "Programmbereiche und Fachgebiete der Volkshochschul-Statistik (Fachgebietsgliederung seit Berichtsjahr 2018). uebergreifend: Sammelposition „fachgebietsübergreifende/sonstige Kurse“, wird nicht als Ziel einer Themenzuordnung genutzt.",
  "quelle": {
-  "name": "Deutsches Institut für Erwachsenenbildung (DIE), Volkshochschul-Statistik, Fachgebietsgliederung (z. B. 59. Folge, Berichtsjahr 2020, Statistikbericht 2022)",
-  "uri": "https://www.die-bonn.de/weiterbildung/statistik/vhs-statistik/",
-  "lizenz": "CC BY 4.0 DE (Statistikbericht); Codes und Bezeichnungen als Fakten übernommen",
-  "quellenangabe": "Quelle: Deutsches Institut für Erwachsenenbildung – Leibniz-Zentrum für Lebenslanges Lernen (DIE), Volkshochschul-Statistik, Fachgebietsgliederung seit Berichtsjahr 2018 (https://www.die-bonn.de/weiterbildung/statistik/vhs-statistik/), Statistikbericht lizenziert unter CC BY 4.0 DE"
+  "name": "Volkshochschul-Statistik des Deutschen Instituts für Erwachsenenbildung (DIE), Fachgebietsgliederung seit Berichtsjahr 2018",
+  "uri": "https://doi.org/10.3278/70681",
+  "lizenz": "CC BY 4.0 DE",
+  "lizenz_uri": "https://creativecommons.org/licenses/by/4.0/deed.de",
+  "quellenangabe": "Echarti, Nicolas; Huntemann, Hella; Lux, Thomas; Reichart, Elisabeth (2022): Volkshochschul-Statistik. 59. Folge, Berichtsjahr 2020. DIE Survey. Bielefeld: wbv. DOI 10.3278/70681. Lizenz: CC BY 4.0 DE. Übernommen: Programmbereiche und Fachgebiete (Codes und Bezeichnungen) aus den Tabellen; verändert: Zeilenumbrüche in Bezeichnungen zusammengeführt.",
+  "weitere": "https://www.die-bonn.de/weiterbildung/statistik/vhs-statistik/"
  },
  "uri_basis": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/data/mappings/erwachsenenbildung/programmbereiche.json#",
  "programmbereiche": [
