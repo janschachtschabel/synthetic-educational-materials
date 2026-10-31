@@ -22,7 +22,7 @@ import time
 from datetime import datetime
 from pathlib import Path
 
-from .llm import LLMConfig, Progress, _prozess_laeuft
+from .llm import LLMConfig, Progress, _prozess_laeuft, env_namen
 from .paths import OUTPUT_DIR, ROOT
 
 PROZESS_DIR = OUTPUT_DIR / ".prozesse"
@@ -51,9 +51,11 @@ def _json_lesen(p: Path) -> dict | None:
 def llm_umgebung(cfg: LLMConfig) -> tuple[list[str], dict]:
     """Argumente und Umgebung, mit denen der Lauf genau diese Konfiguration bekommt. Der Schlüssel geht nur über die
     Umgebung (nicht in der Prozessliste sichtbar), und nur der eingetragene: Ein Schlüssel aus OPENAI_API_KEY darf
-    nicht an eine andere Base-URL gehen."""
-    env = {"OPENAI_API_KEY": cfg.api_key or "", "OPENAI_BASE_URL": cfg.base_url or "", "LLM_MODEL": cfg.model,
-           "LLM_WORKERS": str(cfg.workers), "LLM_REASONING_EFFORT": cfg.reasoning_effort or "standard"}
+    nicht an eine andere Base-URL gehen (bei Anthropic entsprechend ANTHROPIC_API_KEY)."""
+    n = env_namen(cfg.anbieter)
+    env = {n["api_key"]: cfg.api_key or "", n["base_url"]: cfg.base_url or "", "LLM_ANBIETER": cfg.anbieter,
+           "LLM_MODEL": cfg.model, "LLM_WORKERS": str(cfg.workers),
+           "LLM_REASONING_EFFORT": cfg.reasoning_effort or "standard"}
     args = ["--retries", str(cfg.max_retries), "--ausfall-minuten", str(cfg.outage_minutes)]
     if cfg.service_tier == "flex":
         args.append("--flex")

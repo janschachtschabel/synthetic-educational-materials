@@ -6,6 +6,7 @@
     python -m sem auswahl hochschule   (Filter, Standardwerte und Themenzahl anzeigen)
     python -m sem materialien --seeds output/seeds.jsonl [--out …] [--limit N] [--workers 20] [--model …] [--flex]
     python -m sem materialien --seeds output/seeds.jsonl --batch [--warten]   (Batch: halber Preis, Runden bis 24 h)
+    python -m sem materialien --seeds output/seeds.jsonl --anbieter anthropic [--batch]   (Claude, Standard Haiku 5.5)
     python -m sem laeufe                          (Läufe, die ihr Ziel nicht erreicht haben)
     python -m sem materialien --fortsetzen NAME   (unfertigen Lauf mit seinen Einstellungen fortsetzen)
     python -m sem mappings hochschule [alle|openalex|gnd|schritt …] [--limit N] [--stimmen 3] [--wlo export.csv …]
@@ -46,7 +47,12 @@ def _auswahl(values: list[str]) -> dict:
 
 
 def _llm_args(p):
-    g = p.add_argument_group("LLM (Standard aus OPENAI_BASE_URL, OPENAI_API_KEY, LLM_MODEL, LLM_WORKERS)")
+    g = p.add_argument_group("LLM (Standard aus LLM_ANBIETER, OPENAI_BASE_URL, OPENAI_API_KEY bzw. ANTHROPIC_BASE_URL, "
+                             "ANTHROPIC_API_KEY, LLM_MODEL, LLM_WORKERS)")
+    g.add_argument("--anbieter", choices=["openai", "anthropic"],
+                   help="openai = jede OpenAI-kompatible API (Standard), anthropic = Claude über die Anthropic-API "
+                        "(Standardmodell claude-haiku-5-5, Key aus ANTHROPIC_API_KEY); Flex gibt es dort nicht, "
+                        "halber Preis über --batch")
     g.add_argument("--base-url")
     g.add_argument("--api-key")
     g.add_argument("--model")
@@ -54,9 +60,10 @@ def _llm_args(p):
     g.add_argument("--retries", type=int, dest="max_retries")
     g.add_argument("--ausfall-minuten", type=float, dest="outage_minutes",
                    help="so lange wird bei nicht erreichbarer API gewartet, dann pausiert der Lauf (Standard 10)")
-    g.add_argument("--reasoning-effort", choices=["standard", "minimal", "low", "medium", "high"],
+    g.add_argument("--reasoning-effort", choices=["standard", "minimal", "low", "medium", "high", "xhigh", "max"],
                    help="nur für Reasoning-Modelle: weniger Denkaufwand = schneller; Standard low "
-                        "(LLM_REASONING_EFFORT), „standard“ = Parameter nicht senden")
+                        "(LLM_REASONING_EFFORT), „standard“ = Parameter nicht senden; bei Anthropic als effort "
+                        "gesendet (minimal = low; xhigh und max nur dort)")
     g.add_argument("--flex", action="store_const", const="flex", dest="service_tier",
                    help="Flex-Verarbeitung (OpenAI): halber Preis, langsamere Antworten, bei Engpässen Ablehnungen "
                         "(werden wiederholt)")
@@ -89,10 +96,14 @@ def _mit_stand(a, fn, **kwargs):
 def _cfg(a):
     from .llm import LLMConfig
 
-    return LLMConfig.from_env(base_url=a.base_url, api_key=a.api_key, model=a.model, workers=a.workers,
-                              max_retries=a.max_retries, outage_minutes=a.outage_minutes,
-                              reasoning_effort=a.reasoning_effort,
-                              service_tier=getattr(a, "service_tier", None))
+    try:
+        cfg = LLMConfig.from_env(anbieter=a.anbieter, base_url=a.base_url, api_key=a.api_key, model=a.model,
+                                 workers=a.workers, max_retries=a.max_retries, outage_minutes=a.outage_minutes,
+                                 reasoning_effort=a.reasoning_effort, service_tier=getattr(a, "service_tier", None))
+        cfg.pruefen()
+    except ValueError as e:
+        raise SystemExit(str(e)) from e
+    return cfg
 
 
 def main(argv=None):
@@ -231,6 +242,7 @@ def main(argv=None):
             a.seeds, a.out, a.limit, a.sprache = Path(lauf["seeds"]), Path(lauf["ausgabe"]), lauf["limit"],                 lauf["ausgabesprache"]
             a.ohne_inhaltstyp_pruefung = not lauf["inhaltstyp_pruefen"]
             a.batch = lauf["verarbeitung"] == "batch"
+            a.anbieter = a.anbieter or lauf["anbieter"]
             a.model = a.model or lauf["modell"]
             a.reasoning_effort = a.reasoning_effort or lauf["reasoning_effort"] or "standard"
             if getattr(a, "ohne_flex", False):

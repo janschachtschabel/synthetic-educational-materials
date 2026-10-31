@@ -45,6 +45,14 @@ Für die LLM-Schritte: `OPENAI_API_KEY` setzen, optional `OPENAI_BASE_URL` (jede
 Endpunkt), `LLM_MODEL` (Standard `gpt-6-luna`) und `LLM_WORKERS` (Standard 20). Alles lässt sich auch in
 der Oberfläche oder per Parameter setzen.
 
+**Anthropic (Claude) statt OpenAI:** `LLM_ANBIETER=anthropic` und `ANTHROPIC_API_KEY` setzen (optional
+`ANTHROPIC_BASE_URL`), oder `--anbieter anthropic` bzw. „Anbieter“ unter „Einstellungen“. Standardmodell ist dann
+`claude-haiku-5-5`. Die Anfragen gehen über das Anthropic-SDK (nicht über dessen OpenAI-Kompatibilitätsschicht, die
+keinen JSON-Modus und kein Caching kann): Der Systemprompt wird als Cache-Block geschickt, ab der Mindestlänge des
+Modells kosten Wiederholungen nur ein Zehntel; der Reasoning-Aufwand geht als `effort` mit (`minimal` = `low`).
+Mehrere Worker funktionieren wie bei OpenAI, Batch ebenso (halber Preis, Anthropic Message Batches). Flex gibt es bei
+Anthropic nicht. Jeder Lauf merkt sich seinen Anbieter und wird mit ihm fortgesetzt.
+
 ## Oberfläche
 
 ```
@@ -69,7 +77,7 @@ Materialien durchblättern und durchsuchen: Titel, Beschreibung, Keywords, Vollt
 Inhaltstyp-Prüfung, Metadaten und Herkunft; blättert direkt in der Datei, auch bei mehreren hundert MB),
 **Prompts** (bearbeiten und speichern), **Mappings** (getrennt: Daten ansehen und herunterladen; Neubau für
 Betreiber mit Kennzeichnung, welcher Schritt LLM, WLO-Export, Embeddings oder lokale Daten braucht), **Methodik**,
-**Einstellungen** (LLM-Anbindung, Worker, Reasoning-Aufwand, Flex; gespeichert in
+**Einstellungen** (Anbieter, LLM-Anbindung, Worker, Reasoning-Aufwand, Flex; gespeichert in
 `output/.oberflaeche.json`, der API-Key nur im Speicher des Servers).
 
 **Statusanzeige:** Phase (startet, läuft, hält an, keine Rückmeldung, pausiert, fertig, Fehler), Fortschrittsbalken,
@@ -122,6 +130,7 @@ python -m sem seeds --anzahl elementar=1000 schule=3000 berufsbildung=3000 hochs
 python -m sem materialien --seeds output/seeds_schule5000_s42.jsonl --sprache en   # Materialien auf Englisch
 python -m sem materialien --seeds output/seeds_schule5000_s42.jsonl --flex         # halber Preis, langsamer
 python -m sem materialien --seeds output/seeds_schule5000_s42.jsonl --batch --warten   # Batch, bis alles fertig ist
+python -m sem materialien --seeds output/seeds_schule5000_s42.jsonl --anbieter anthropic --batch   # Claude Haiku, Batch
 python -m sem laeufe                                # Läufe, die ihr Ziel nicht erreicht haben
 python -m sem materialien --fortsetzen schule5000_s42   # einen davon mit seinen Einstellungen fortsetzen
 ```
@@ -136,7 +145,7 @@ im Reiter „Seeds“ unter jedem Bereich.
 Sprache; der Bildungskontext bleibt Deutschland. Der Hinweis an das Modell steht in `prompts/ausgabesprache.md`,
 die Sprache in `cclom:general_language`. Je Sprache eine neue Ausgabedatei wählen, die Fortsetzung prüft sie nicht.
 
-**Halber Preis: Flex oder Batch** (nur OpenAI). `--flex` bzw. „Flex-Verarbeitung“ in der Seitenleiste erzeugt wie
+**Halber Preis: Flex oder Batch** (Flex nur OpenAI, Batch bei OpenAI und Anthropic). `--flex` bzw. „Flex-Verarbeitung“ in der Seitenleiste erzeugt wie
 gewohnt Material für Material, zum halben Preis, aber langsamer (gemessen am 30.10.2026: 50–90 s statt rund 30 s je
 Material). Hat Flex keine Kapazität (Fehler 429), wird eine Anfrage zweimal wiederholt und dann zum Standardpreis
 gestellt; wie oft, steht je Material unter `synth:generierung.tokens.aufrufe_standard`. `--batch` bzw.

@@ -11,6 +11,7 @@
     <caption class="nur-vorlesen">{{ T("Gespeicherte Einstellungen des Laufs") }}</caption>
     <tbody>
       <tr><th scope="row">{{ T("Seed-Datei") }}</th><td class="dateiname">{{ L.seeds.replace('\\', '/').split('/')[-1] }}</td></tr>
+      <tr><th scope="row">{{ T("Anbieter") }}</th><td>{{ "Anthropic" if L.anbieter == "anthropic" else "OpenAI" }}</td></tr>
       <tr><th scope="row">{{ T("Modell") }}</th><td>{{ L.modell }}</td></tr>
       <tr><th scope="row">{{ T("Reasoning-Aufwand") }}</th><td>{{ L.reasoning_effort or T("Modellstandard") }}</td></tr>
       <tr><th scope="row">{{ T("Ausgabesprache") }}</th><td>{{ L.ausgabesprache }}</td></tr>
@@ -35,10 +36,12 @@
     {% if L.verarbeitung != 'batch' %}
     <fieldset class="feld">
       <legend>{{ T("Verarbeitung") }}</legend>
-      <div class="wahl"><input type="radio" id="f-sofort" name="verarbeitung" value="sofort" {% if L.verarbeitung != 'flex' and not e.flex %}checked{% endif %}>
+      <div class="wahl"><input type="radio" id="f-sofort" name="verarbeitung" value="sofort" {% if L.anbieter != 'openai' or (L.verarbeitung != 'flex' and not e.flex) %}checked{% endif %}>
         <label for="f-sofort" class="inline">{{ T("Standard") }}</label> <span class="hilfe">{{ T("voller Preis, schnellste Antworten") }}</span></div>
+      {% if L.anbieter == 'openai' %}
       <div class="wahl"><input type="radio" id="f-flex" name="verarbeitung" value="flex" {% if L.verarbeitung == 'flex' or e.flex %}checked{% endif %}>
         <label for="f-flex" class="inline">Flex</label> <span class="hilfe">{{ T("halber Preis, langsamere Antworten") }}</span></div>
+      {% endif %}
     </fieldset>
     <div class="feld schmal">
       <label for="f-workers">{{ T("Worker (parallel)") }}</label>

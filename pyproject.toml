@@ -8,7 +8,7 @@ version = "0.1.0"
 description = "Seeds und synthetische Bildungsmaterialien aus offenen Vokabularen und Taxonomien"
 requires-python = ">=3.11"
 license = {text = "Apache-2.0"}
-dependencies = ["openai>=1.40", "numpy>=1.26", "rdflib>=7.0",
+dependencies = ["openai>=1.40", "anthropic>=2.3", "numpy>=1.26", "rdflib>=7.0",
                 "fastapi>=0.115", "uvicorn>=0.30", "jinja2>=3.1", "python-multipart>=0.0.9", "markdown-it-py>=3.0"]
 
 [project.optional-dependencies]

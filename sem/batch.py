@@ -1,4 +1,4 @@
-"""Materialien über die Batch-Schnittstelle von OpenAI erzeugen: halber Preis, Ergebnis je Runde bis zu 24 h.
+"""Materialien über die Batch-Schnittstelle von OpenAI oder Anthropic erzeugen: halber Preis, je Runde bis zu 24 h.
 
 Jedes Material durchläuft dieselben Stufen wie bei der sofortigen Erzeugung (generate.Material: Volltext,
 Titel, Beschreibung, Keywords, dann Inhaltstyp-Prüfung und Frage-Antwort-Paare). Eine Runde schickt die
@@ -9,6 +9,9 @@ Der Stand liegt in <ausgabe>.batch/stand.json (dazu die hochgeladenen Anfragedat
 BatchLauf.weiter() holt fertige Batches ab, wertet sie aus, schreibt fertige Materialien in die Ausgabedatei
 und schickt die nächste Runde; er kann jederzeit wiederholt werden. Fertige Materialien sehen aus wie bei der
 sofortigen Erzeugung, mit "verarbeitung": "batch" in synth:generierung.
+
+Die Unterschiede der Anbieter stecken in OpenAIBatches und AnthropicBatches: Beide schicken eine Liste von Anfragen
+und liefern die Ergebnisse in der Form der OpenAI-Batch-Ausgabe zurück.
 """
 
 from __future__ import annotations
@@ -23,7 +26,8 @@ from . import schema as S
 from .bereiche import get as get_bereich
 from .generate import Material, meta_fuer, read_seeds
 from .laeufe import lauf_speichern
-from .llm import LLMConfig, _zeilenende, read_done, sperre_nehmen, tokens_aus_usage
+from .llm import (LLMConfig, _zeilenende, anthropic_text, anthropic_usage, env_namen, read_done, sperre_nehmen,
+                  tokens_aus_usage)
 from .prompts import load_prompts
 
 ENDPUNKT = "/v1/chat/completions"
@@ -33,6 +37,80 @@ MAX_API_FEHLER = 3               # so oft wird eine Anfrage neu gestellt, die im
 MAX_BATCH_FEHLER_IN_FOLGE = 3    # so viele ganze Batches dürfen nacheinander scheitern, dann hält der Lauf an
 DATEI_TIMEOUT = 1800.0           # Sekunden für Hoch- und Herunterladen der Batch-Dateien (bis 190 MB)
 FERTIG = {"completed", "failed", "expired", "cancelled"}
+
+
+class OpenAIBatches:
+    """Batch über hochgeladene JSONL-Dateien (files + batches)."""
+
+    def __init__(self, client):
+        self.client = client
+
+    def anlegen(self, datei: Path, runde: int, teil: list[tuple[str, dict]]) -> tuple[str, str]:
+        """Schickt die Anfragen (custom_id, body) als einen Batch; gibt (Batch-ID, Status) zurück."""
+        datei.write_text("".join(json.dumps({"custom_id": cid, "method": "POST", "url": ENDPUNKT, "body": body},
+                                            ensure_ascii=False) + "\n" for cid, body in teil), encoding="utf-8")
+        with datei.open("rb") as f:
+            hochgeladen = self.client.files.create(file=f, purpose="batch", timeout=DATEI_TIMEOUT)
+        b = self.client.batches.create(input_file_id=hochgeladen.id, endpoint=ENDPUNKT, completion_window="24h",
+                                       metadata={"zweck": "synthetic-educational-materials", "runde": str(runde)})
+        return b.id, b.status
+
+    def abrufen(self, bid: str, cids: list[str]):
+        """(Status, Ergebniszeilen oder None, solange nicht fertig, Fehlertext bei Ablehnung als Ganzes)."""
+        info = self.client.batches.retrieve(bid)
+        if info.status not in FERTIG:
+            return info.status, None, ""
+        zeilen = []
+        for datei_id in (getattr(info, "output_file_id", None), getattr(info, "error_file_id", None)):
+            if datei_id:
+                zeilen += [json.loads(z) for z in self.client.files.content(datei_id, timeout=DATEI_TIMEOUT)
+                           .text.splitlines() if z.strip()]
+        return info.status, zeilen, _batch_fehler(info) if info.status == "failed" else ""
+
+
+class AnthropicBatches:
+    """Message Batches von Anthropic. Eine custom_id darf dort nur Buchstaben, Ziffern, - und _ enthalten
+    (höchstens 64 Zeichen): geschickt wird die Nummer der Anfrage im Batch, zurückübersetzt über die gespeicherte
+    Liste der Anfragen. Abgelaufene und abgebrochene Anfragen fehlen im Ergebnis und werden neu gestellt."""
+
+    def __init__(self, client):
+        self.client = client
+
+    def anlegen(self, datei: Path, runde: int, teil: list[tuple[str, dict]]) -> tuple[str, str]:
+        anfragen = [{"custom_id": f"a{i}", "params": body} for i, (_, body) in enumerate(teil)]
+        datei.write_text("".join(json.dumps({"cid": cid, **a}, ensure_ascii=False) + "\n"
+                                 for (cid, _), a in zip(teil, anfragen)), encoding="utf-8")  # zum Nachsehen
+        b = self.client.messages.batches.create(requests=anfragen, timeout=DATEI_TIMEOUT)
+        return b.id, _anthropic_status(b.processing_status)
+
+    def abrufen(self, bid: str, cids: list[str]):
+        info = self.client.messages.batches.retrieve(bid)
+        status = _anthropic_status(info.processing_status)
+        if info.processing_status != "ended":
+            return status, None, ""
+        zeilen = []
+        for r in self.client.messages.batches.results(bid, timeout=DATEI_TIMEOUT):
+            i = int(r.custom_id.removeprefix("a"))
+            if i >= len(cids):
+                continue
+            res = r.result
+            if res.type == "succeeded":
+                try:
+                    text = anthropic_text(res.message)
+                except ValueError as e:  # abgelehnt: wie ein Fehler der Anfrage zählen
+                    zeilen.append({"custom_id": cids[i], "response": {"status_code": 422, "body": {"error": str(e)}}})
+                    continue
+                body = {"choices": [{"message": {"content": text}}], "usage": anthropic_usage(res.message.usage)}
+                zeilen.append({"custom_id": cids[i], "response": {"status_code": 200, "body": body}})
+            elif res.type == "errored":
+                fehler = getattr(getattr(res, "error", None), "error", None) or getattr(res, "error", None)
+                zeilen.append({"custom_id": cids[i], "response": {"status_code": 400, "body": {"error": str(fehler)}}})
+            # expired, canceled: keine Zeile, die Anfrage wird in der nächsten Runde neu gestellt
+        return status, zeilen, ""
+
+
+def _anthropic_status(s: str) -> str:
+    return {"in_progress": "in_progress", "canceling": "cancelling", "ended": "completed"}.get(s, s)
 
 
 def batch_ordner(out_path: Path) -> Path:
@@ -55,16 +133,26 @@ class BatchLauf:
         self.bereiche = {k: get_bereich(k) for k in keys}
         self.prompts = {k: load_prompts(k) for k in keys}
         self.meta = meta_fuer(cfg, self.prompts, inhaltstyp_pruefen, ausgabesprache, verarbeitung="batch")
+        cfg.pruefen()
         if client is None:
-            from openai import OpenAI
-
             if not cfg.api_key:
-                raise ValueError("Kein API-Key: OPENAI_API_KEY setzen oder in der Oberfläche eintragen.")
-            client = OpenAI(base_url=cfg.base_url, api_key=cfg.api_key, timeout=cfg.timeout)
+                raise ValueError(f"Kein API-Key: {env_namen(cfg.anbieter)['api_key']} setzen oder in der Oberfläche "
+                                 "eintragen.")
+            if cfg.anbieter == "anthropic":
+                from anthropic import Anthropic
+
+                client = Anthropic(base_url=cfg.base_url, api_key=cfg.api_key, timeout=cfg.timeout)
+            else:
+                from openai import OpenAI
+
+                client = OpenAI(base_url=cfg.base_url, api_key=cfg.api_key, timeout=cfg.timeout)
         self.client = client
+        self.api = AnthropicBatches(client) if cfg.anbieter == "anthropic" else OpenAIBatches(client)
         parameter = {"modell": cfg.model, "prompt_hash": self.meta["prompt_hash"],
                      "inhaltstyp_pruefung": inhaltstyp_pruefen, "ausgabesprache": ausgabesprache,
                      "reasoning_effort": cfg.reasoning_effort}
+        if cfg.anbieter != "openai":  # fehlt bei OpenAI, damit ältere Läufe weiterhin passen
+            parameter["anbieter"] = cfg.anbieter
         if self.stand_path.exists():
             self.stand = json.loads(self.stand_path.read_text(encoding="utf-8"))
             if self.stand["parameter"] != parameter:
@@ -123,23 +211,17 @@ class BatchLauf:
         return self.status()
 
     def _abholen(self, b: dict):
-        info = self.client.batches.retrieve(b["id"])
-        b["status"] = info.status
-        if info.status not in FERTIG:
+        status, zeilen, grund = self.api.abrufen(b["id"], b["anfragen"])
+        b["status"] = status
+        if zeilen is None:
             return
         beantwortet = set()
-        for datei_id in (getattr(info, "output_file_id", None), getattr(info, "error_file_id", None)):
-            if not datei_id:
-                continue
-            for zeile in self.client.files.content(datei_id, timeout=DATEI_TIMEOUT).text.splitlines():
-                if zeile.strip():
-                    r = json.loads(zeile)
-                    beantwortet.add(r["custom_id"])
-                    self._ergebnis(r)
+        for r in zeilen:
+            beantwortet.add(r["custom_id"])
+            self._ergebnis(r)
         # Abgelaufen, abgebrochen oder vom Batch als Ganzes abgelehnt (z. B. Warteschlangen-Limit des Kontos):
         # Die Anfragen ohne Zeile werden in der nächsten Runde neu gestellt, ohne als Fehlversuch zu zählen.
-        if info.status == "failed" and not beantwortet:
-            grund = _batch_fehler(info)
+        if status == "failed" and not beantwortet:
             if "token_limit" in grund:
                 # Limit der Warteschlange: künftig höchstens halb so viel gleichzeitig unterwegs
                 self.stand["token_budget"] = max(1, int((self.stand["token_budget"] or b.get("tokens", 0)) / 2))
@@ -153,7 +235,7 @@ class BatchLauf:
         self._speichern()
         if self.stand["batch_fehler_in_folge"] >= MAX_BATCH_FEHLER_IN_FOLGE:
             raise RuntimeError(f"{MAX_BATCH_FEHLER_IN_FOLGE} Batches nacheinander abgelehnt, zuletzt: "
-                               f"{_batch_fehler(info)}. Lauf angehalten; nach Klärung mit „weiter“ fortsetzen.")
+                               f"{grund}. Lauf angehalten; nach Klärung mit „weiter“ fortsetzen.")
 
     def _ergebnis(self, r: dict):
         cid = r["custom_id"]
@@ -215,10 +297,9 @@ class BatchLauf:
                     voll = True  # Rest in einer späteren Runde, wenn Platz in der Warteschlange ist
                     break
                 body = self.cfg.parameter(a.system, a.user, a.json_mode, batch=True)
-                zeile = json.dumps({"custom_id": f"{sid}|{a.feld}|{runde}", "method": "POST",
-                                    "url": ENDPUNKT, "body": body}, ensure_ascii=False)
+                cid = f"{sid}|{a.feld}|{runde}"
                 tokens += n
-                zeilen.append((f"{sid}|{a.feld}|{runde}", zeile, n))
+                zeilen.append((cid, body, n, len(json.dumps(body, ensure_ascii=False).encode("utf-8")) + 200))
             if voll:
                 break
         if not zeilen:
@@ -226,24 +307,19 @@ class BatchLauf:
         self.stand["runde"] = runde
         self.ordner.mkdir(parents=True, exist_ok=True)
         teil, groesse, nr = [], 0, 0
-        for cid, zeile, t in zeilen + [(None, None, 0)]:
-            n = len(zeile.encode("utf-8")) + 1 if zeile else 0
-            if teil and (zeile is None or len(teil) >= MAX_ANFRAGEN or groesse + n > MAX_BYTES):
+        for cid, body, t, n in zeilen + [(None, None, 0, 0)]:
+            if teil and (body is None or len(teil) >= MAX_ANFRAGEN or groesse + n > MAX_BYTES):
                 nr += 1
                 self._batch_anlegen(runde, nr, teil)
                 teil, groesse = [], 0
-            if zeile is not None:
-                teil.append((cid, zeile, t))
+            if body is not None:
+                teil.append((cid, body, t))
                 groesse += n
 
-    def _batch_anlegen(self, runde: int, nr: int, teil: list[tuple[str, str, int]]):
+    def _batch_anlegen(self, runde: int, nr: int, teil: list[tuple[str, dict, int]]):
         datei = self.ordner / f"runde{runde:03d}_{nr:02d}.jsonl"
-        datei.write_text("".join(z + "\n" for _, z, _ in teil), encoding="utf-8")
-        with datei.open("rb") as f:
-            hochgeladen = self.client.files.create(file=f, purpose="batch", timeout=DATEI_TIMEOUT)
-        b = self.client.batches.create(input_file_id=hochgeladen.id, endpoint=ENDPUNKT, completion_window="24h",
-                                       metadata={"zweck": "synthetic-educational-materials", "runde": str(runde)})
-        self.stand["batches"].append({"id": b.id, "runde": runde, "datei": datei.name, "status": b.status,
+        bid, status = self.api.anlegen(datei, runde, [(c, body) for c, body, _ in teil])
+        self.stand["batches"].append({"id": bid, "runde": runde, "datei": datei.name, "status": status,
                                       "gestartet": datetime.now().isoformat(timespec="seconds"),
                                       "anfragen": [c for c, _, _ in teil], "tokens": sum(t for _, _, t in teil),
                                       "ausgewertet": False})

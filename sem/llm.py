@@ -1,4 +1,4 @@
-"""OpenAI-kompatible LLM-Anbindung mit parallelen Workern, Wiederholung und Fortsetzung.
+"""LLM-Anbindung (OpenAI-kompatibel oder Anthropic) mit parallelen Workern, Wiederholung und Fortsetzung.
 
 Jede Aufgabe hat eine eindeutige id. Ergebnisse werden zeilenweise an eine JSONL-Datei
 angehängt; ein erneuter Lauf überspringt alle ids, die dort schon stehen. Fällt die API aus,
@@ -20,7 +20,15 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Callable, Iterable
 
-DEFAULT_MODEL = "gpt-6-luna"
+ANBIETER = ("openai", "anthropic")  # openai = jede OpenAI-kompatible API (OpenAI, OpenRouter, …)
+DEFAULT_MODELLE = {"openai": "gpt-6-luna", "anthropic": "claude-haiku-5-5"}
+DEFAULT_MODEL = DEFAULT_MODELLE["openai"]
+DEFAULT_BASE_URLS = {"openai": "https://api.openai.com/v1", "anthropic": "https://api.anthropic.com"}
+# Anthropic verlangt eine Obergrenze für die Antwort (inklusive Denken); ein Volltext braucht weit weniger
+ANTHROPIC_MAX_TOKENS = 16000
+# OpenAI-Stufen ohne Gegenstück bei Anthropic (dort: low, medium, high, xhigh, max)
+ANTHROPIC_EFFORT = {"none": "low", "minimal": "low"}
+ANTHROPIC_JSON_HINWEIS = "Antworte ausschließlich mit einem JSON-Objekt, ohne Erklärung und ohne Codeblock."
 DEFAULT_WORKERS = 20
 DEFAULT_REASONING_EFFORT = "low"  # gemessen: ein Drittel schneller als der Modellstandard, gleiche Prüfwerte
 # Ein HTTP 400 betrifft meist eine einzelne Aufgabe (z. B. Kontext zu lang): protokollieren und weitermachen.
@@ -37,6 +45,7 @@ FLEX_WARTEN = 10.0
 
 @dataclass
 class LLMConfig:
+    anbieter: str = "openai"        # "openai" (OpenAI-kompatibel) oder "anthropic"
     base_url: str | None = None
     api_key: str | None = None
     model: str = DEFAULT_MODEL
@@ -46,15 +55,23 @@ class LLMConfig:
     timeout: float = 180.0
     temperature: float | None = None  # None = Standard des Modells (manche Modelle akzeptieren keinen Wert)
     reasoning_effort: str | None = DEFAULT_REASONING_EFFORT  # Reasoning-Modelle; None = Modellstandard
-    service_tier: str | None = None  # "flex" = halber Preis, langsamer (OpenAI); None = Standard
-    extra: dict = field(default_factory=dict)  # weitere Parameter für chat.completions.create
+    service_tier: str | None = None  # "flex" = halber Preis, langsamer (nur OpenAI); None = Standard
+    max_tokens: int = ANTHROPIC_MAX_TOKENS  # nur Anthropic
+    extra: dict = field(default_factory=dict)  # weitere Parameter für chat.completions.create bzw. messages.create
 
     @classmethod
     def from_env(cls, **overrides) -> "LLMConfig":
+        """Werte aus der Umgebung: LLM_ANBIETER (openai oder anthropic), dazu OPENAI_BASE_URL/OPENAI_API_KEY bzw.
+        ANTHROPIC_BASE_URL/ANTHROPIC_API_KEY, LLM_MODEL, LLM_WORKERS, LLM_REASONING_EFFORT."""
+        anbieter = overrides.get("anbieter") or os.environ.get("LLM_ANBIETER") or "openai"
+        if anbieter not in ANBIETER:
+            raise ValueError(f"Unbekannter Anbieter {anbieter!r}, möglich: {', '.join(ANBIETER)}")
+        env = env_namen(anbieter)
         cfg = cls(
-            base_url=os.environ.get("OPENAI_BASE_URL") or None,
-            api_key=os.environ.get("OPENAI_API_KEY") or None,
-            model=os.environ.get("LLM_MODEL") or DEFAULT_MODEL,
+            anbieter=anbieter,
+            base_url=os.environ.get(env["base_url"]) or None,
+            api_key=os.environ.get(env["api_key"]) or None,
+            model=os.environ.get("LLM_MODEL") or DEFAULT_MODELLE[anbieter],
             workers=int(os.environ.get("LLM_WORKERS") or DEFAULT_WORKERS),
             reasoning_effort=_effort(os.environ.get("LLM_REASONING_EFFORT") or DEFAULT_REASONING_EFFORT),
         )
@@ -65,16 +82,27 @@ class LLMConfig:
 
     def public(self) -> dict:
         """Konfiguration ohne Schlüssel, für Herkunftsangaben."""
-        out = {"base_url": self.base_url or "https://api.openai.com/v1", "model": self.model}
+        out = {"base_url": self.base_url or DEFAULT_BASE_URLS[self.anbieter], "model": self.model}
+        if self.anbieter != "openai":
+            out["anbieter"] = self.anbieter
         if self.reasoning_effort:
             out["reasoning_effort"] = self.reasoning_effort
         if self.service_tier:
             out["service_tier"] = self.service_tier
         return out
 
+    def pruefen(self):
+        """Fehler in der Konfiguration, bevor eine Anfrage gestellt wird."""
+        if self.anbieter not in ANBIETER:
+            raise ValueError(f"Unbekannter Anbieter {self.anbieter!r}, möglich: {', '.join(ANBIETER)}")
+        if self.anbieter == "anthropic" and self.service_tier:
+            raise ValueError("Flex gibt es bei Anthropic nicht. Für den halben Preis Batch verwenden.")
+
     def parameter(self, system: str, user: str, json_mode: bool = False, batch: bool = False) -> dict:
-        """Parameter für chat.completions.create; batch=True für den Body einer Batch-Anfrage (ohne service_tier,
-        Batch ist schon die günstige Verarbeitung)."""
+        """Parameter für chat.completions.create bzw. (Anthropic) messages.create; batch=True für den Body einer
+        Batch-Anfrage (ohne service_tier, Batch ist schon die günstige Verarbeitung)."""
+        if self.anbieter == "anthropic":
+            return self._anthropic_parameter(system, user, json_mode)
         kwargs = dict(self.extra)
         if self.temperature is not None:
             kwargs["temperature"] = self.temperature
@@ -87,9 +115,28 @@ class LLMConfig:
         return {"model": self.model,
                 "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}], **kwargs}
 
+    def _anthropic_parameter(self, system: str, user: str, json_mode: bool) -> dict:
+        """Systemprompt als Cache-Block: Er ist für alle Materialien eines Felds gleich, ab der Mindestlänge des
+        Modells kosten Wiederholungen nur ein Zehntel (kürzere werden ohne Aufpreis nicht gecacht). temperature
+        wird nicht gesendet: Aktuelle Claude-Modelle lehnen Sampling-Parameter ab."""
+        if json_mode:  # Anthropic hat keinen JSON-Modus ohne Schema; json_aus_text liest auch ```json-Blöcke
+            system = f"{system}\n\n{ANTHROPIC_JSON_HINWEIS}"
+        kwargs = {"model": self.model, "max_tokens": self.max_tokens,
+                  "system": [{"type": "text", "text": system, "cache_control": {"type": "ephemeral"}}],
+                  "messages": [{"role": "user", "content": user}]}
+        if self.reasoning_effort:
+            kwargs["output_config"] = {"effort": ANTHROPIC_EFFORT.get(self.reasoning_effort, self.reasoning_effort)}
+        return {**kwargs, **self.extra}
+
+
+def env_namen(anbieter: str) -> dict:
+    """Namen der Umgebungsvariablen für Base-URL und Key eines Anbieters."""
+    p = "ANTHROPIC" if anbieter == "anthropic" else "OPENAI"
+    return {"base_url": f"{p}_BASE_URL", "api_key": f"{p}_API_KEY"}
+
 
 def api_key_fuer(base_url: str | None, api_key: str | None, env: LLMConfig) -> str | None:
-    """Eingetragener Key, sonst der aus OPENAI_API_KEY, diesen aber nur für die Base-URL aus der Umgebung:
+    """Eingetragener Key, sonst der aus OPENAI_API_KEY (bzw. ANTHROPIC_API_KEY), aber nur für die Base-URL aus der Umgebung:
     Eine in der Oberfläche eingetragene andere Base-URL erhält den Key aus der Umgebung nicht."""
     if api_key:
         return api_key
@@ -131,43 +178,88 @@ def tokens_aus_usage(u) -> dict:
             "davon_cache": wert(wert(u, "prompt_tokens_details"), "cached_tokens") or 0}
 
 
+def anthropic_usage(u) -> dict:
+    """usage einer Anthropic-Antwort in der Form von OpenAI (für tokens_aus_usage und Batch-Ergebnisse). Eingabe =
+    alle Eingabe-Tokens, auch die aus dem Cache gelesenen und die in den Cache geschriebenen."""
+    def wert(obj, name):
+        return (obj.get(name) if isinstance(obj, dict) else getattr(obj, name, None)) if obj is not None else None
+
+    lesen = wert(u, "cache_read_input_tokens") or 0
+    eingabe = (wert(u, "input_tokens") or 0) + lesen + (wert(u, "cache_creation_input_tokens") or 0)
+    return {"prompt_tokens": eingabe, "completion_tokens": wert(u, "output_tokens") or 0,
+            "prompt_tokens_details": {"cached_tokens": lesen},
+            "completion_tokens_details": {"reasoning_tokens": wert(wert(u, "output_tokens_details"),
+                                                                   "thinking_tokens") or 0}}
+
+
+def anthropic_text(msg) -> str:
+    """Text einer Anthropic-Antwort (Denk-Blöcke weggelassen). Lehnt das Modell ab, ValueError (wird wiederholt)."""
+    def wert(obj, name):
+        return obj.get(name) if isinstance(obj, dict) else getattr(obj, name, None)
+
+    if wert(msg, "stop_reason") == "refusal":
+        raise ValueError("Anthropic: Anfrage vom Modell abgelehnt (refusal)")
+    return "".join(wert(b, "text") or "" for b in wert(msg, "content") or [] if wert(b, "type") == "text")
+
+
 def json_aus_text(text: str):
     """JSON aus einer Modellantwort, auch wenn sie in ```json … ``` steht."""
     text = text.strip()
     if text.startswith("```"):
         text = text.strip("`").removeprefix("json").strip()
-    return json.loads(text)
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError:
+        a, b = text.find("{"), text.rfind("}")  # Satz vor oder nach dem Objekt
+        if 0 <= a < b:
+            return json.loads(text[a:b + 1])
+        raise
 
 
 class LLMClient:
     def __init__(self, cfg: LLMConfig):
-        from openai import OpenAI
-
+        cfg.pruefen()
         if not cfg.api_key:
-            raise ValueError("Kein API-Key: OPENAI_API_KEY setzen oder in der Oberfläche eintragen.")
+            raise ValueError(f"Kein API-Key: {env_namen(cfg.anbieter)['api_key']} setzen oder in der Oberfläche "
+                             "eintragen.")
         self.cfg = cfg
         self.usage = threading.local()  # Tokenzähler je Thread (eine Aufgabe läuft in einem Thread)
         self.stop: threading.Event | None = None  # gesetzt: keine neue Anfrage mehr (Lauf hält an)
         self.nach_anfrage: Callable[[], None] | None = None  # nach jeder beantworteten Anfrage (Fortschritt)
         timeout = max(cfg.timeout, FLEX_TIMEOUT) if cfg.service_tier == "flex" else cfg.timeout
-        self.client = OpenAI(base_url=cfg.base_url, api_key=cfg.api_key, timeout=timeout, max_retries=0)
+        if cfg.anbieter == "anthropic":
+            from anthropic import Anthropic
+
+            self.client = Anthropic(base_url=cfg.base_url, api_key=cfg.api_key, timeout=timeout, max_retries=0)
+        else:
+            from openai import OpenAI
+
+            self.client = OpenAI(base_url=cfg.base_url, api_key=cfg.api_key, timeout=timeout, max_retries=0)
 
     def chat(self, system: str, user: str, json_mode: bool = False) -> str:
         if self.stop is not None and self.stop.is_set():
             raise Abgebrochen()
         params = self.cfg.parameter(system, user, json_mode)
+        if self.cfg.anbieter == "anthropic":
+            msg = self.client.messages.create(**params)
+            self._zaehlen(anthropic_usage(getattr(msg, "usage", None)))
+            return anthropic_text(msg)
         if params.get("service_tier") == "flex":
             resp = self._flex(params)
         else:
             resp = self.client.chat.completions.create(**params)
         u = getattr(resp, "usage", None)
+        self._zaehlen(u)
+        return resp.choices[0].message.content or ""
+
+    def _zaehlen(self, u):
+        """Tokens einer beantworteten Anfrage zählen und den Fortschritt melden."""
         if u is not None:
             z = self.zaehler()
             for k, v in tokens_aus_usage(u).items():
                 z[k] += v
         if self.nach_anfrage:
             self.nach_anfrage()
-        return resp.choices[0].message.content or ""
 
     def _flex(self, params: dict):
         """Flex-Anfrage; ohne Flex-Kapazität nach FLEX_VERSUCHE zum Standardpreis (gezählt als aufrufe_standard)."""
@@ -195,26 +287,36 @@ class LLMClient:
         return json_aus_text(self.chat(system, user, json_mode=True))
 
 
-def _is_connection_error(e: Exception) -> bool:
+def _sdks():
+    """Die Fehlerklassen beider SDKs (anthropic nur, wenn installiert)."""
     import openai
 
-    if isinstance(e, (openai.APIConnectionError, openai.APITimeoutError)):
+    try:
+        import anthropic
+    except ImportError:
+        return (openai,)
+    return openai, anthropic
+
+
+def _ist(e: Exception, *namen: str) -> bool:
+    return any(isinstance(e, getattr(m, n)) for m in _sdks() for n in namen)
+
+
+def _is_connection_error(e: Exception) -> bool:
+    if _ist(e, "APIConnectionError", "APITimeoutError"):
         return True
-    return isinstance(e, openai.APIStatusError) and e.status_code >= 500
+    return _ist(e, "APIStatusError") and e.status_code >= 500  # bei Anthropic auch 529 (überlastet)
 
 
 def _is_fatal(e: Exception) -> bool:
-    import openai
-
-    if isinstance(e, openai.RateLimitError):  # Guthaben aufgebraucht: Wiederholen hilft nicht, sonst scheitert der Rest
-        return any(k in str(e) for k in ("insufficient_quota", "credit_balance_exhausted"))
-    return isinstance(e, (openai.AuthenticationError, openai.PermissionDeniedError, openai.NotFoundError))
+    # Guthaben aufgebraucht: Wiederholen hilft nicht, sonst scheitert der Rest (Anthropic meldet das mit 400)
+    if _ist(e, "RateLimitError", "BadRequestError"):
+        return any(k in str(e) for k in ("insufficient_quota", "credit_balance_exhausted", "credit balance is too low"))
+    return _ist(e, "AuthenticationError", "PermissionDeniedError", "NotFoundError")
 
 
 def _is_bad_request(e: Exception) -> bool:
-    import openai
-
-    return isinstance(e, openai.BadRequestError)
+    return _ist(e, "BadRequestError")
 
 
 def _prozess_laeuft(pid: int) -> bool:
