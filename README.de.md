@@ -128,9 +128,15 @@ Fertiges ab und schickt die nächste Runde; `--warten` wiederholt das bis zum En
 
 **Abgebrochene Läufe:** Jeder Lauf hält in `output/materialien_<name>.lauf.json` fest, was er erzeugen soll (Seed-Datei,
 Anzahl, Sprache, Modell, Verarbeitung). Hat er sein Ziel nicht erreicht, etwa nach einer Internet-Unterbrechung oder
-mit fehlgeschlagenen Materialien, steht er in `python -m sem laeufe` und im Reiter „Materialien“ unter „Unfertige
-Läufe“: „Fortsetzen“ (`--fortsetzen NAME`) macht mit denselben Einstellungen weiter und überspringt Fertiges, „Neu
-starten“ beginnt unter neuem Namen. Die Sperrdatei eines abgestürzten Laufs wird beim Fortsetzen übernommen.
+mit fehlgeschlagenen Materialien, steht er in `python -m sem laeufe` und im Reiter „Materialien“ unter „Unfertigen
+Lauf fortsetzen“. Dort stehen die Einstellungen des Laufs; Worker und Standard oder Flex wählt man vor dem Start.
+„Fortsetzen“ (`--fortsetzen NAME`) macht mit denselben Einstellungen weiter und überspringt Fertiges, „Neu starten“
+beginnt unter neuem Namen. Die Sperrdatei eines abgestürzten Laufs wird beim Fortsetzen übernommen.
+
+**Läufe aus der Oberfläche** starten als eigener Prozess (`python -m sem … --stand`, siehe `sem/prozess.py`): Die
+Seite bleibt flüssig, und der Lauf geht weiter, wenn sie geschlossen oder die App neu gestartet wird. Die Oberfläche
+liest nur eine kleine Stand-Datei in `output/.prozesse/`; „Anhalten“ legt dort eine Stop-Datei an. Die Ausgabe des
+Prozesses (Fehlermeldungen) steht in `output/.prozesse/<name>.log`.
 
 LLM-Optionen für `materialien` und `mappings`: `--base-url`, `--api-key`, `--model`, `--workers`
 (Standard 20, `LLM_WORKERS`), `--reasoning-effort` (Standard `low`, `LLM_REASONING_EFFORT`; `standard`

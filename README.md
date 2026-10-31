@@ -130,9 +130,15 @@ and results are the same in all cases; `synth:generierung.verarbeitung` records 
 
 **Interrupted runs:** every run records in `output/materialien_<name>.lauf.json` what it is meant to produce (seed
 file, number, language, model, processing). If it did not reach its target, e.g. after an internet interruption or
-with failed materials, it is listed by `python -m sem laeufe` and in the “Materials” tab under “Unfertige Läufe”
-(unfinished runs): “Resume” (`--fortsetzen NAME`) continues with the same settings and skips finished materials,
+with failed materials, it is listed by `python -m sem laeufe` and in the “Materials” tab under “Unfertigen Lauf
+fortsetzen” (resume an unfinished run). The run's settings are shown there; workers and Standard or Flex are chosen
+before starting. “Resume” (`--fortsetzen NAME`) continues with the same settings and skips finished materials,
 “Start new” begins under a new name. The lock file of a crashed run is taken over when resuming.
+
+**Runs from the user interface** start as a separate process (`python -m sem … --stand`, see `sem/prozess.py`): the
+page stays responsive, and the run continues if the page is closed or the app is restarted. The interface only reads
+a small status file in `output/.prozesse/`; “Anhalten” (stop) creates a stop file there. The process output (error
+messages) is in `output/.prozesse/<name>.log`.
 
 LLM options for `materialien` and `mappings`: `--base-url`, `--api-key`, `--model`, `--workers`
 (default 20, `LLM_WORKERS`), `--reasoning-effort` (default `low`, `LLM_REASONING_EFFORT`; `standard`
