@@ -22,7 +22,7 @@ jobs:
       # Versionen aus uv.lock (--frozen: Lock-Datei muss zu pyproject.toml passen); ohne sentence-transformers,
       # die Tests rechnen keine Embeddings
       - run: uv sync --extra dev --frozen
-      - run: uv run --frozen ruff check --select F,B006,B008 sem tests app.py scripts
+      - run: uv run --frozen ruff check --select F,B006,B008 sem tests app.py scripts training
       - run: uv run --frozen pytest -q -rs
       - run: uv run --frozen python scripts/doku_paare.py
       - run: uv run --frozen python scripts/i18n_texte.py
