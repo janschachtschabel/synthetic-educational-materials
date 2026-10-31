@@ -4,7 +4,7 @@
 <h1>{{ T("Vokabulare und Mappings") }}</h1>
 <p class="einleitung">{{ T("Mappings ordnen Themen den Vokabularen zu (Fach, Stufe, Beruf, Inhaltstyp …). Sie liegen fertig im Repository unter data/; Seeds und Materialien lesen nur diese Dateien. Neu bauen muss man sie nur, um die Themenbasis selbst zu ändern.") }}</p>
 
-<nav class="umschalter" aria-label="{{ T('Teile dieser Seite') }}">
+<nav class="sprunglinks" aria-label="{{ T('Teile dieser Seite') }}">
   <a href="#daten">{{ T("Daten ansehen") }}</a>
   <a href="#neubau">{{ T("Mappings neu bauen (für Betreiber)") }}</a>
 </nav>
@@ -14,7 +14,7 @@
   <p class="klein">{{ T("Nur zum Nachschlagen: Inhalt anzeigen (die ersten 200 Zeilen) oder herunterladen. Alle Dateien sind auch ohne die App nutzbar; die Felder beschreibt data/README.md.") }}</p>
   {% for titel, liste in gruppen.items() %}
   <details class="gruppe">
-    <summary><span class="gruppen-titel">{{ T(titel) if titel == "Vokabulare" else titel }}</span> <span class="klein">({{ T("{n} Dateien", n=liste|length) }})</span></summary>
+    <summary><span class="gruppen-titel">{{ T(titel) }}</span> <span class="klein">({{ T("{n} Dateien", n=liste|length) }})</span></summary>
     <ul class="dateiliste">
     {% for pfad, name, groesse in liste %}
       <li>

@@ -147,8 +147,10 @@ details > summary { cursor: pointer; padding: .3rem 0; }
 .klein-titel { font-size: 1rem; margin: 0 0 .3rem; }
 .umfaenge { display: grid; gap: .8rem; grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr)); margin: .5rem 0; }
 .umfang { background: var(--grund); border: 1px solid var(--rand); border-radius: var(--radius); padding: .6rem .8rem; }
-.umfang-zeile { display: grid; grid-template-columns: minmax(7rem, auto) 1fr auto; gap: .6rem; align-items: center; font-size: .92rem; }
-.umfang-zeile meter { width: 100%; height: .9rem; }
+.umfang-zeile { display: grid; grid-template-columns: 1fr auto; gap: .1rem .6rem; align-items: baseline; font-size: .92rem; margin: .3rem 0; }
+.umfang-zeile meter { grid-column: 1 / -1; width: 100%; height: .9rem; }
+.sprunglinks { display: flex; flex-wrap: wrap; gap: .3rem 1.2rem; margin: .8rem 0 1.2rem; }
+.sprunglinks a::before { content: "↓ "; }
 
 /* Vorschau */
 .treffer { font-weight: 600; }

@@ -9,14 +9,14 @@
       <h3 id="u-{{ k }}" class="klein-titel">{{ T(labels[k]) }}: {{ anzahl(f.counts[k], "Seed", "Seeds") }}</h3>
       <div class="umfang-zeile">
         <span>{{ T(u.label) if u.komb_max == u.themen_max else T("Themen") }}</span>
-        <meter min="0" max="{{ [u.themen_max, 1]|max }}" value="{{ u.themen }}" aria-hidden="true"></meter>
         <span>{{ T("{n} von max. {m}", n=zahl(u.themen), m=zahl(u.themen_max)) }}</span>
+        <meter min="0" max="{{ [u.themen_max, 1]|max }}" value="{{ u.themen }}" aria-hidden="true"></meter>
       </div>
       {% if u.komb_max != u.themen_max %}
       <div class="umfang-zeile">
         <span>{{ T("Kombinationen ({art})", art=T(u.label)) }}</span>
-        <meter min="0" max="{{ [u.komb_max, 1]|max }}" value="{{ u.komb }}" aria-hidden="true"></meter>
         <span>{{ T("{n} von max. {m}", n=zahl(u.komb), m=zahl(u.komb_max)) }}</span>
+        <meter min="0" max="{{ [u.komb_max, 1]|max }}" value="{{ u.komb }}" aria-hidden="true"></meter>
       </div>
       {% endif %}
       {% if u.komb and f.counts[k] %}

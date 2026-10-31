@@ -446,7 +446,7 @@ def umfang(key: str, auswahl: dict | None, anzahl_seeds: int, balance: str) -> d
     return {"themen": len(gewaehlt), "themen_max": t_max, "komb": komb, "komb_max": k_max,
             "label": b.kombination_label, "je_komb": anzahl_seeds / komb if komb else 0,
             "je_thema": anzahl_seeds / len(gewaehlt) if gewaehlt else 0, "ausgeschlossen": aus,
-            "tipp_thema": balance != "thema" and "thema" in b.balance_options and komb and anzahl_seeds < komb}
+            "tipp_thema": balance != "thema" and "thema" in b.balance_options and 0 < anzahl_seeds < komb / 2}
 
 
 @app.post("/seeds/pruefen", response_class=HTMLResponse)
@@ -664,7 +664,8 @@ def prompts_speichern(scope: str = Form("alle"), which: str = Form(...), text: s
 def mappings_seite(request: Request):
     gruppen = {"Vokabulare": sorted(paths.VOCAB_DIR.glob("*.json"))}
     for d in sorted(p for p in paths.MAPPING_DIR.iterdir() if p.is_dir()):
-        gruppen[f"Mappings {d.name}"] = sorted(p for p in d.iterdir() if p.suffix in (".json", ".jsonl", ".csv"))
+        titel = bereich(d.name).label if d.name in BEREICHE else d.name  # Ordner heißt wie der Bereichsschlüssel
+        gruppen[titel] = sorted(p for p in d.iterdir() if p.suffix in (".json", ".jsonl", ".csv"))
     gruppen = {k: [(p.relative_to(paths.DATA_DIR).as_posix(), p.name, p.stat().st_size) for p in v]
                for k, v in gruppen.items()}
     bereiche = []
