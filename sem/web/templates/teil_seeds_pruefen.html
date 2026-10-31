@@ -3,11 +3,47 @@
   {% if not f.gewaehlt %}
     <p class="meldung warnung">{{ T("Mindestens einen Bildungsbereich mit einer Anzahl über 0 wählen.") }}</p>
   {% else %}
-  <ul>
-    {% for k in f.gewaehlt %}
-      <li>{{ T(labels[k]) }}: {{ anzahl(f.counts[k], "Seed", "Seeds") }} · {{ T("{n} Themen ausgewählt", n=zahl(f.themen[k])) }}</li>
-    {% endfor %}
-  </ul>
+  <div class="umfaenge">
+  {% for k in f.gewaehlt %}{% set u = umfaenge[k] %}
+    <section class="umfang" aria-labelledby="u-{{ k }}">
+      <h3 id="u-{{ k }}" class="klein-titel">{{ T(labels[k]) }}: {{ anzahl(f.counts[k], "Seed", "Seeds") }}</h3>
+      <div class="umfang-zeile">
+        <span>{{ T(u.label) if u.komb_max == u.themen_max else T("Themen") }}</span>
+        <meter min="0" max="{{ [u.themen_max, 1]|max }}" value="{{ u.themen }}" aria-hidden="true"></meter>
+        <span>{{ T("{n} von max. {m}", n=zahl(u.themen), m=zahl(u.themen_max)) }}</span>
+      </div>
+      {% if u.komb_max != u.themen_max %}
+      <div class="umfang-zeile">
+        <span>{{ T("Kombinationen ({art})", art=T(u.label)) }}</span>
+        <meter min="0" max="{{ [u.komb_max, 1]|max }}" value="{{ u.komb }}" aria-hidden="true"></meter>
+        <span>{{ T("{n} von max. {m}", n=zahl(u.komb), m=zahl(u.komb_max)) }}</span>
+      </div>
+      {% endif %}
+      {% if u.komb and f.counts[k] %}
+        <p class="klein">
+        {% if u.je_komb >= 1 %}
+          {{ T("Im Schnitt {x} Seeds je Kombination: Kombinationen wiederholen sich, unterscheiden sich aber in Inhaltstyp, Niveau und Textsorte.", x=komma(u.je_komb)) }}
+        {% else %}
+          {{ T("Etwa {p} % der möglichen Kombinationen kommen vor (meist je ein Seed).", p=komma(100 * u.je_komb)) }}
+        {% endif %}
+        </p>
+      {% endif %}
+      {% if u.tipp_thema %}
+        <p class="klein">{{ T("Für möglichst viele verschiedene Themen: Gleichverteilung „thema“ wählen.") }}</p>
+      {% endif %}
+      {% if u.ausgeschlossen %}
+        <details>
+          <summary class="klein">{{ T("Was die Filter ausschließen") }}</summary>
+          <ul class="klein">
+          {% for label, werte, pflicht in u.ausgeschlossen %}
+            <li>{% if pflicht %}{{ T("Verlangt Beleg:") }} {% for w in werte %}{{ T(w) }}{% if not loop.last %}, {% endif %}{% endfor %}{% else %}<strong>{{ T(label) }}:</strong> {% for w in werte %}{{ T(w) }}{% if not loop.last %}, {% endif %}{% endfor %}{% endif %}</li>
+          {% endfor %}
+          </ul>
+        </details>
+      {% endif %}
+    </section>
+  {% endfor %}
+  </div>
   {% if f.leer %}
     <p class="meldung warnung">{{ T("Keine Themen ausgewählt für: {bereiche}. Filter erweitern.", bereiche=leer_labels) }}</p>
   {% endif %}

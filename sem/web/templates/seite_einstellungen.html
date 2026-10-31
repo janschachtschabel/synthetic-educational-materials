@@ -59,14 +59,6 @@
         <p id="e-ausfall-h" class="hilfe">{{ T("Danach pausiert der Lauf und lässt sich später fortsetzen.") }}</p></div>
     </div>
   </fieldset>
-  <fieldset>
-    <legend>Embeddings</legend>
-    <div class="feld">
-      <label for="e-emb">{{ T("Embedding-Modell (lokal, CPU)") }}</label>
-      <input type="text" id="e-emb" name="embedding_modell" value="{{ e.embedding_modell }}" spellcheck="false" aria-describedby="e-emb-h">
-      <p id="e-emb-h" class="hilfe">{{ T("z. B. intfloat/multilingual-e5-small oder sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2") }}</p>
-    </div>
-  </fieldset>
   <button type="submit" class="haupt">{{ T("Speichern") }}</button>
 </form>
 {% endblock %}

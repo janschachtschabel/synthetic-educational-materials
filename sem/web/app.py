@@ -158,6 +158,7 @@ def seite(request: Request, vorlage: str, **ctx) -> HTMLResponse:
     return vorlagen.TemplateResponse(request, vorlage, {
         "T": T, "ui": ui, "UI_SPRACHEN": UI_SPRACHEN, "pfad": request.url.path,
         "voll": vorlage.startswith("seite_"), "zahl": zahl, "dauer": dauer,
+        "komma": lambda x: (f"{x:.1f}" if ui == "en" else f"{x:.1f}".replace(".", ",")),
         "anzahl": lambda n, eins, viele: anzahl(T, n, eins, viele), **ctx})
 
 
@@ -352,12 +353,12 @@ def einstellungen_seite(request: Request, gespeichert: bool = False):
 def einstellungen_speichern(base_url: str = Form(""), model: str = Form(""), api_key: str = Form(""),
                             key_loeschen: bool = Form(False), workers: int = Form(DEFAULT_WORKERS),
                             reasoning_effort: str = Form("low"), flex: bool = Form(False), retries: int = Form(6),
-                            ausfall_minuten: float = Form(10), embedding_modell: str = Form("")):
+                            ausfall_minuten: float = Form(10)):
     e = Einstellungen(base_url=base_url.strip(), model=model.strip() or DEFAULT_MODEL,
                       workers=max(1, min(1000, workers)),
                       reasoning_effort=reasoning_effort if reasoning_effort in EFFORTS else "low", flex=flex,
                       retries=max(1, min(20, retries)), ausfall_minuten=max(1, min(240, ausfall_minuten)),
-                      embedding_modell=embedding_modell.strip())
+                      embedding_modell=einstellungen().embedding_modell)  # wird je Mapping-Lauf gewählt
     Ordner.output.mkdir(parents=True, exist_ok=True)
     Ordner.einstellungen().write_text(json.dumps(dataclasses.asdict(e), ensure_ascii=False, indent=1), encoding="utf-8")
     if key_loeschen:
@@ -418,6 +419,36 @@ def seeds_seite(request: Request):
                  erster=next(iter(BEREICHE)))
 
 
+_maximum: dict[str, tuple[int, int]] = {}
+
+
+def umfang(key: str, auswahl: dict | None, anzahl_seeds: int, balance: str) -> dict:
+    """Themen und Kombinationen der Auswahl gegenüber dem größtmöglichen Umfang (alle Filterwerte), dazu was die
+    Filter ausschließen und wie oft eine Kombination bei anzahl_seeds Seeds im Schnitt vorkommt."""
+    b = bereich(key)
+    if key not in _maximum:
+        alle = b.alle_auswahl()
+        t = b.themen_auswahl(alle)
+        _maximum[key] = (len(t), b.kombinationen(t, alle))
+    gewaehlt = b.themen_auswahl(auswahl)
+    komb = b.kombinationen(gewaehlt, auswahl)
+    pruef = b.auswahl_pruefen(auswahl)
+    aus = []
+    for name, o in b.auswahl_optionen().items():
+        if name == "belege":
+            if pruef.get(name):
+                aus.append((o["label"], [o["werte"][w] for w in pruef[name]], True))
+            continue
+        fehlt = [o["werte"][w] for w in o["werte"] if w not in pruef.get(name, [])]
+        if fehlt:
+            aus.append((o["label"], fehlt, False))
+    t_max, k_max = _maximum[key]
+    return {"themen": len(gewaehlt), "themen_max": t_max, "komb": komb, "komb_max": k_max,
+            "label": b.kombination_label, "je_komb": anzahl_seeds / komb if komb else 0,
+            "je_thema": anzahl_seeds / len(gewaehlt) if gewaehlt else 0, "ausgeschlossen": aus,
+            "tipp_thema": balance != "thema" and "thema" in b.balance_options and komb and anzahl_seeds < komb}
+
+
 @app.post("/seeds/pruefen", response_class=HTMLResponse)
 async def seeds_pruefen(request: Request):
     f = seeds_formular(await request.form())
@@ -425,6 +456,7 @@ async def seeds_pruefen(request: Request):
     T = uebersetzer(sprache(request))
     return seite(request, "teil_seeds_pruefen.html", f=f, vorhanden=vorhanden,
                  labels={k: bereich(k).label for k in BEREICHE},
+                 umfaenge={k: umfang(k, f["auswahl"].get(k), f["counts"][k], f["balance"][k]) for k in f["gewaehlt"]},
                  leer_labels=", ".join(T(bereich(k).label) for k in f["leer"]))
 
 
@@ -638,11 +670,33 @@ def mappings_seite(request: Request):
     bereiche = []
     for k in BEREICHE:
         b = bereich(k)
-        schritte = b.mapping_schritte()
-        if schritte:
-            bereiche.append({"key": k, "label": b.label, "schritte": schritte, "lauf": lauf_ansicht(f"map-{k}")})
+        schritte = [schritt_info(b, x) for x in b.mapping_schritte()]
+        if not schritte:
+            continue
+        nach_key = {x["key"]: x for x in schritte}
+        folgen = [(name, [nach_key[s] for s in keys if s in nach_key]) for name, keys in b.mapping_folgen.items()]
+        in_folgen = {s for _, keys in b.mapping_folgen.items() for s in keys}
+        rest = [x for x in schritte if x["key"] not in in_folgen]
+        if rest:
+            folgen.append(("weitere", rest))
+        bereiche.append({"key": k, "label": b.label, "folgen": folgen, "lauf": lauf_ansicht(f"map-{k}"),
+                         "wlo": any(x["wlo"] for x in schritte), "emb": any(x["emb"] for x in schritte)})
     e = einstellungen()
     return seite(request, "seite_mappings.html", gruppen=gruppen, bereiche=bereiche, e=e, key=key_zustand(e))
+
+
+def schritt_info(b, x) -> dict:
+    """Was ein Mapping-Schritt braucht. LLM steht am Schritt; WLO-Export, Embeddings und lokale Daten werden aus
+    Beschreibung und Code des Schritts abgelesen (Hinweis für die Oberfläche, keine Garantie)."""
+    import inspect
+
+    try:
+        code = inspect.getsource(x.run)
+    except (OSError, TypeError):
+        code = ""
+    return {"key": x.key, "label": x.label, "beschreibung": x.beschreibung, "llm": x.llm,
+            "wlo": "--wlo" in x.beschreibung or "wlo_dateien" in code, "emb": "embed" in code.lower(),
+            "lokal": "rlp_ordner" in code, "abschluss": x.key in b.mapping_abschluss}
 
 
 @app.get("/mappings/datei", response_class=HTMLResponse)
@@ -684,7 +738,8 @@ async def mappings_start(request: Request, key: str):
         lim, stimmen = ganz("limit", 0, 0, 100_000), ganz("stimmen", 3, 1, 7)
         wlo = [x.strip() for x in str(form.get("wlo") or "").split(",") if x.strip()]
         e = einstellungen()
-        argv = ["mappings", key, *wahl, "--stimmen", str(stimmen), "--embedding-modell", e.embedding_modell] \
+        emb = str(form.get("embedding_modell") or "").strip() or e.embedding_modell
+        argv = ["mappings", key, *wahl, "--stimmen", str(stimmen), "--embedding-modell", emb] \
             + (["--limit", str(lim)] if lim else []) + (["--wlo", *wlo] if wlo else [])
         starten(job, argv, llm_cfg(e))
     return seite(request, "teil_status.html", lauf=lauf_ansicht(job), name=job, fehler=fehler)

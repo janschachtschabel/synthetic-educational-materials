@@ -64,12 +64,15 @@ other websites. It uses the key from
 `OPENAI_API_KEY` only for the base URL from `OPENAI_BASE_URL`; for a different base URL, enter a key.
 
 Tabs: **Seeds** (number per education sector, field for even distribution, topic selection by
-status, source, and evidence, random seed, summary before starting),
+status, source, and evidence, random seed; the summary shows topics and possible combinations of the selection per
+sector compared with the maximum over all filter values, how often a combination occurs on average and what the
+filters exclude),
 **Materials** (start a new run or resume an unfinished one, status display), **Preview** (browse and search seeds and
 completed materials: titles, descriptions, keywords, full text, question-answer pairs, content type check, metadata,
 and provenance; reads directly from the file, even with several hundred MB), **Prompts** (edit and save),
-**Mappings** (view, download, rebuild), **Methodology**, **Settings** (LLM connection, workers, reasoning effort,
-Flex, embedding model; saved in `output/.oberflaeche.json`, the API key only in the server's memory). The prompt
+**Mappings** (separate: view and download data; rebuild for operators, marking which step needs the LLM, a WLO export,
+embeddings or local data), **Methodology**, **Settings** (LLM connection, workers, reasoning effort,
+Flex; saved in `output/.oberflaeche.json`, the API key only in the server's memory). The prompt
 templates themselves are in German.
 
 **Status display:** phase (starting, running, stopping, no response, paused, finished, error), progress bar,

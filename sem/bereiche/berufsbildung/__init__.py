@@ -38,6 +38,7 @@ class Berufsbildung(Bildungsbereich):
         "berufsbereich": "jeder KldB-Berufsbereich (1-Steller) etwa gleich oft",
     }
     default_balance = "beruf"
+    kombination_label = "Beruf × Kompetenz"
     mapping_folgen = {
         "esco": ["esco", "hinweise", "kandidaten", "kldb", "qualifizierung"],
         "wlo": ["wlo"],

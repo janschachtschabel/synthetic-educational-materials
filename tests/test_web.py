@@ -185,3 +185,30 @@ def test_einstellungen_speichern_ohne_key_in_datei(client, ordner):
     cfg = web.llm_cfg()
     assert cfg.api_key == "sk-geheim" and cfg.model == "m2" and cfg.reasoning_effort == "medium"
     web._api_key.clear()
+
+
+def test_seeds_zusammenfassung_zeigt_umfang_und_ausgeschlossenes(client):
+    from sem.bereiche import BEREICHE
+
+    std = BEREICHE["berufsbildung"]().standard_auswahl()
+    form = {"an-berufsbildung": "1", "n-berufsbildung": "1000", "bal-berufsbildung": "beruf", "zufall": "1",
+            **{f"f-berufsbildung-{k}": v for k, v in std.items()}}
+    t = client.post("/seeds/pruefen", headers=HX, data=form).text
+    assert "Beruf × Kompetenz" in t and "von max." in t and "Gleichverteilung „thema“" in t
+    assert "optionale Kompetenz des Berufs" in t  # Standardfilter schließt optionale Kompetenzen aus
+
+
+def test_maximale_auswahl_umfasst_die_standardauswahl():
+    from sem.bereiche import BEREICHE
+
+    for cls in BEREICHE.values():
+        b = cls()
+        std, alle = b.themen_auswahl(None), b.themen_auswahl(b.alle_auswahl())
+        assert len(alle) >= len(std) and b.kombinationen(alle, b.alle_auswahl()) >= b.kombinationen(std)
+
+
+def test_mappings_trennt_daten_und_neubau(client):
+    t = client.get("/mappings").text
+    assert 'id="daten"' in t and 'id="neubau"' in t and "für Betreiber" in t
+    assert 'class="marke-llm"' in t and "Embedding-Modell" in t
+    assert "Embedding" not in client.get("/einstellungen").text

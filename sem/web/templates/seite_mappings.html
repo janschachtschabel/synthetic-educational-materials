@@ -2,60 +2,98 @@
 {% block titel %}Mappings{% endblock %}
 {% block inhalt %}
 <h1>{{ T("Vokabulare und Mappings") }}</h1>
-<p class="einleitung">{{ T("Alle Dateien sind auch einzeln nutzbar. Beschreibung der Felder: data/README.md") }}</p>
+<p class="einleitung">{{ T("Mappings ordnen Themen den Vokabularen zu (Fach, Stufe, Beruf, Inhaltstyp …). Sie liegen fertig im Repository unter data/; Seeds und Materialien lesen nur diese Dateien. Neu bauen muss man sie nur, um die Themenbasis selbst zu ändern.") }}</p>
 
-{% for titel, liste in gruppen.items() %}
-<section aria-labelledby="g-{{ loop.index }}">
-  <h2 id="g-{{ loop.index }}">{{ T(titel) if titel == "Vokabulare" else titel }}</h2>
-  <ul class="dateiliste">
-  {% for pfad, name, groesse in liste %}
-    <li>
-      <details hx-get="/mappings/datei?pfad={{ pfad|urlencode }}" hx-trigger="toggle once" hx-target="find .inhalt">
-        <summary><span class="dateiname">{{ name }}</span> <span class="klein">({{ groesse // 1024 }} KB)</span></summary>
-        <a class="download" href="/download?ort=data&amp;datei={{ pfad|urlencode }}" download>{{ T("Herunterladen") }}</a>
-        <div class="inhalt"><p class="klein">{{ T("lädt …") }}</p></div>
-      </details>
-    </li>
-  {% endfor %}
-  </ul>
-</section>
-{% endfor %}
+<nav class="umschalter" aria-label="{{ T('Teile dieser Seite') }}">
+  <a href="#daten">{{ T("Daten ansehen") }}</a>
+  <a href="#neubau">{{ T("Mappings neu bauen (für Betreiber)") }}</a>
+</nav>
 
-<h2>{{ T("Mappings neu bauen") }}</h2>
-<p class="klein">{{ T("Fortsetzbar; bereits Erledigtes wird übersprungen. Die Daten im Repo sind fertig gebaut.") }}</p>
-{% include "teil_key_hinweis.html" %}
-{% for b in bereiche %}
-<section class="bereich" aria-labelledby="m-{{ b.key }}">
-  <h3 id="m-{{ b.key }}">{{ T(b.label) }}</h3>
-  <details hx-get="/mappings/statistik/{{ b.key }}" hx-trigger="toggle once" hx-target="find .inhalt">
-    <summary>{{ T("Aktuellen Stand des Mappings anzeigen") }}</summary><div class="inhalt"><p class="klein">{{ T("lädt …") }}</p></div>
+<section id="daten" aria-labelledby="h-daten">
+  <h2 id="h-daten">{{ T("Daten ansehen") }}</h2>
+  <p class="klein">{{ T("Nur zum Nachschlagen: Inhalt anzeigen (die ersten 200 Zeilen) oder herunterladen. Alle Dateien sind auch ohne die App nutzbar; die Felder beschreibt data/README.md.") }}</p>
+  {% for titel, liste in gruppen.items() %}
+  <details class="gruppe">
+    <summary><span class="gruppen-titel">{{ T(titel) if titel == "Vokabulare" else titel }}</span> <span class="klein">({{ T("{n} Dateien", n=liste|length) }})</span></summary>
+    <ul class="dateiliste">
+    {% for pfad, name, groesse in liste %}
+      <li>
+        <details hx-get="/mappings/datei?pfad={{ pfad|urlencode }}" hx-trigger="toggle once" hx-target="find .inhalt">
+          <summary><span class="dateiname">{{ name }}</span> <span class="klein">({{ groesse // 1024 }} KB)</span></summary>
+          <a class="download" href="/download?ort=data&amp;datei={{ pfad|urlencode }}" download>{{ T("Herunterladen") }}</a>
+          <div class="inhalt"><p class="klein">{{ T("lädt …") }}</p></div>
+        </details>
+      </li>
+    {% endfor %}
+    </ul>
   </details>
-  <div id="map-status-{{ b.key }}" tabindex="-1">
-    {% if b.lauf %}{% with lauf=b.lauf, name="map-" ~ b.key %}{% include "teil_status.html" %}{% endwith %}{% endif %}
-  </div>
-  <form class="formular" hx-post="/mappings/{{ b.key }}/start" hx-target="#map-status-{{ b.key }}" hx-swap="innerHTML">
-    <fieldset class="feld">
-      <legend>{{ T("Schritte") }}</legend>
-      {% for s in b.schritte %}
-        <div class="wahl">
-          <input type="checkbox" id="ms-{{ b.key }}-{{ s.key }}" name="schritte" value="{{ s.key }}" aria-describedby="ms-{{ b.key }}-{{ s.key }}-h">
-          <label for="ms-{{ b.key }}-{{ s.key }}" class="inline">{{ T(s.label) }}{% if s.llm %} <span class="marke-llm">LLM</span>{% endif %}</label>
-          <span id="ms-{{ b.key }}-{{ s.key }}-h" class="hilfe">{{ T(s.beschreibung) }}</span>
-        </div>
-      {% endfor %}
-      <p class="hilfe">{{ T("Mit „LLM“ markierte Schritte rufen das LLM auf und verursachen Kosten.") }}</p>
-    </fieldset>
-    <div class="zeile">
-      <div class="feld schmal"><label for="ml-{{ b.key }}">{{ T("Nur die ersten N Themen (0 = alle)") }}</label>
-        <input type="number" id="ml-{{ b.key }}" name="limit" min="0" max="100000" value="0"></div>
-      <div class="feld schmal"><label for="mv-{{ b.key }}">{{ T("Stimmen je Zuordnung") }}</label>
-        <input type="number" id="mv-{{ b.key }}" name="stimmen" min="1" max="7" value="3"></div>
-    </div>
-    <div class="feld"><label for="mw-{{ b.key }}">{{ T("WLO-Exporte (CSV-Pfade, durch Komma getrennt; bleiben lokal)") }}</label>
-      <input type="text" id="mw-{{ b.key }}" name="wlo" spellcheck="false"></div>
-    <p class="klein">{{ T("Modell {modell}, {worker} Worker, Embedding-Modell {emb} – ändern unter „Einstellungen“.", modell=e.model, worker=e.workers, emb=e.embedding_modell) }}</p>
-    <button type="submit" class="haupt">{{ T("Start / Fortsetzen") }}</button>
-  </form>
+  {% endfor %}
 </section>
-{% endfor %}
+
+<section id="neubau" aria-labelledby="h-neubau">
+  <h2 id="h-neubau">{{ T("Mappings neu bauen (für Betreiber)") }}</h2>
+  <div class="meldung info">
+    <p>{{ T("Nur nötig, wenn sich Quellen, Prompts oder Korrekturen ändern. Ein Neubau überschreibt die Dateien unter data/mappings/; Zwischenstände liegen in data/cache/, bereits Erledigtes wird übersprungen.") }}</p>
+    <ul class="klein">
+      <li><span class="marke-llm">LLM</span> {{ T("ruft das LLM auf (meist drei Stimmen je Zuordnung) und kostet Geld.") }}</li>
+      <li><span class="marke-eingabe">WLO</span> {{ T("braucht einen WLO-Export (CSV der Redaktion, nicht im Repository); ohne ihn wird der Schritt übersprungen.") }}</li>
+      <li><span class="marke-eingabe">Embeddings</span> {{ T("rechnet lokale Embeddings auf der CPU; das Modell wird beim ersten Lauf von Hugging Face geladen.") }}</li>
+      <li><span class="marke-eingabe">{{ T("lokal") }}</span> {{ T("braucht lokale Dateien (data/lokal/, z. B. Rahmenlehrpläne), die nicht im Repository liegen.") }}</li>
+      <li><span class="marke-eingabe">{{ T("zuletzt") }}</span> {{ T("läuft immer am Ende und führt die Teilergebnisse zusammen.") }}</li>
+    </ul>
+  </div>
+  {% include "teil_key_hinweis.html" %}
+
+  {% for b in bereiche %}
+  <details class="bereich-neubau" {% if b.lauf and b.lauf.laeuft %}open{% endif %}>
+    <summary><h3 id="m-{{ b.key }}" class="inline-titel">{{ T(b.label) }}</h3></summary>
+    <div id="map-status-{{ b.key }}" tabindex="-1">
+      {% if b.lauf %}{% with lauf=b.lauf, name="map-" ~ b.key %}{% include "teil_status.html" %}{% endwith %}{% endif %}
+    </div>
+    <details hx-get="/mappings/statistik/{{ b.key }}" hx-trigger="toggle once" hx-target="find .inhalt">
+      <summary>{{ T("Aktuellen Stand des Mappings anzeigen") }}</summary><div class="inhalt"><p class="klein">{{ T("lädt …") }}</p></div>
+    </details>
+    <form class="formular" hx-post="/mappings/{{ b.key }}/start" hx-target="#map-status-{{ b.key }}" hx-swap="innerHTML"
+          hx-confirm="{{ T('Ausgewählte Schritte jetzt ausführen? Schritte mit LLM verursachen Kosten.') }}">
+      {% for folge, schritte in b.folgen %}
+      <fieldset class="feld">
+        <legend>{{ T("Folge „{name}“", name=folge) if folge != "weitere" else T("Weitere Schritte") }}</legend>
+        {% for s in schritte %}
+          <div class="wahl">
+            <input type="checkbox" id="ms-{{ b.key }}-{{ s.key }}" name="schritte" value="{{ s.key }}" aria-describedby="ms-{{ b.key }}-{{ s.key }}-h">
+            <label for="ms-{{ b.key }}-{{ s.key }}" class="inline">{{ T(s.label) }}</label>
+            {% if s.llm %}<span class="marke-llm">LLM</span>{% endif %}
+            {% if s.wlo %}<span class="marke-eingabe">WLO</span>{% endif %}
+            {% if s.emb %}<span class="marke-eingabe">Embeddings</span>{% endif %}
+            {% if s.lokal %}<span class="marke-eingabe">{{ T("lokal") }}</span>{% endif %}
+            {% if s.abschluss %}<span class="marke-eingabe">{{ T("zuletzt") }}</span>{% endif %}
+            <span id="ms-{{ b.key }}-{{ s.key }}-h" class="hilfe">{{ T(s.beschreibung) }}</span>
+          </div>
+        {% endfor %}
+      </fieldset>
+      {% endfor %}
+      <div class="zeile">
+        <div class="feld schmal"><label for="ml-{{ b.key }}">{{ T("Nur die ersten N Themen (0 = alle)") }}</label>
+          <input type="number" id="ml-{{ b.key }}" name="limit" min="0" max="100000" value="0" aria-describedby="ml-{{ b.key }}-h">
+          <p id="ml-{{ b.key }}-h" class="hilfe">{{ T("Zum Ausprobieren mit wenig Kosten.") }}</p></div>
+        <div class="feld schmal"><label for="mv-{{ b.key }}">{{ T("Stimmen je Zuordnung") }}</label>
+          <input type="number" id="mv-{{ b.key }}" name="stimmen" min="1" max="7" value="3" aria-describedby="mv-{{ b.key }}-h">
+          <p id="mv-{{ b.key }}-h" class="hilfe">{{ T("So oft fragt ein LLM-Schritt je Zuordnung; die Mehrheit entscheidet.") }}</p></div>
+      </div>
+      {% if b.wlo %}
+      <div class="feld"><label for="mw-{{ b.key }}">{{ T("WLO-Exporte (CSV-Pfade, durch Komma getrennt; bleiben lokal)") }}</label>
+        <input type="text" id="mw-{{ b.key }}" name="wlo" spellcheck="false" aria-describedby="mw-{{ b.key }}-h">
+        <p id="mw-{{ b.key }}-h" class="hilfe">{{ T("Nur für Schritte mit „WLO“. Gelesen werden nur Keywords, Fächer, Stufen und Themenbaum-Zuordnungen, keine Inhalte.") }}</p></div>
+      {% endif %}
+      {% if b.emb %}
+      <div class="feld"><label for="me-{{ b.key }}">{{ T("Embedding-Modell (lokal, CPU)") }}</label>
+        <input type="text" id="me-{{ b.key }}" name="embedding_modell" value="{{ e.embedding_modell }}" spellcheck="false" aria-describedby="me-{{ b.key }}-h">
+        <p id="me-{{ b.key }}-h" class="hilfe">{{ T("Nur für Schritte mit „Embeddings“, z. B. intfloat/multilingual-e5-small oder sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2") }}</p></div>
+      {% endif %}
+      <p class="klein">{{ T("Modell {modell}, {worker} Worker – ändern unter „Einstellungen“.", modell=e.model, worker=e.workers) }}</p>
+      <button type="submit" class="haupt">{{ T("Ausgewählte Schritte ausführen") }}</button>
+    </form>
+  </details>
+  {% endfor %}
+</section>
 {% endblock %}

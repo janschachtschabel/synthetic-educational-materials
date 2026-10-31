@@ -54,7 +54,7 @@ def aus_bereichen() -> list[str]:
     out = []
     for cls in BEREICHE.values():
         b = cls()
-        out.append(b.label)
+        out += [b.label, b.kombination_label]
         out += list(b.balance_options.values())
         for o in b.auswahl_optionen().values():
             out += [o["label"], o["beschreibung"], *o["werte"].values()]

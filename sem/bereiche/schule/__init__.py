@@ -135,6 +135,13 @@ class Schule(Bildungsbereich):
         self._stufen_auswahl = list(auswahl["stufen"])  # make_seed zieht die Stufe nur aus der Auswahl
         return [t for t in self.topics() if self.passt(t, auswahl)]
 
+    kombination_label = "Thema × Fach × Stufe"
+
+    def kombinationen(self, themen: list[dict], auswahl: dict[str, list[str]] | None = None) -> int:
+        """Je Thema jedes Fach mit jeder gewählten Stufe (Keyword-Themen haben bis zu zwei Fächer)."""
+        stufen = set(self.auswahl_pruefen(auswahl)["stufen"])
+        return sum(max(1, len(t.get("faecher") or [])) * max(1, len(set(t["stufen"]) & stufen)) for t in themen)
+
     def passt(self, topic: dict, auswahl: dict[str, list[str]]) -> bool:
         m = topic.get("mapping") or {}
         if not set(topic["stufen"]) & set(auswahl["stufen"]) or topic["art"] not in auswahl["art"]:

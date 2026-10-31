@@ -61,12 +61,15 @@ Seiten weist sie ab. Den Key aus `OPENAI_API_KEY`
 verwendet sie nur für die Base-URL aus `OPENAI_BASE_URL`; für eine andere Base-URL ist ein Key einzutragen.
 
 Reiter: **Seeds** (Anzahl je Bildungsbereich, Feld für die Gleichverteilung, Auswahl der Themen nach
-Status, Quelle und Belegen, Zufalls-Seed, Zusammenfassung vor dem Start),
+Status, Quelle und Belegen, Zufalls-Seed; die Zusammenfassung zeigt je Bereich Themen und mögliche Kombinationen der
+Auswahl gegenüber dem Maximum aller Filterwerte, wie oft eine Kombination im Schnitt vorkommt und was die Filter
+ausschließen),
 **Materialien** (neuen Lauf starten oder unfertigen Lauf fortsetzen, Statusanzeige), **Vorschau** (Seeds und fertige
 Materialien durchblättern und durchsuchen: Titel, Beschreibung, Keywords, Volltext, Frage-Antwort-Paare,
 Inhaltstyp-Prüfung, Metadaten und Herkunft; blättert direkt in der Datei, auch bei mehreren hundert MB),
-**Prompts** (bearbeiten und speichern), **Mappings** (ansehen, herunterladen, neu bauen), **Methodik**,
-**Einstellungen** (LLM-Anbindung, Worker, Reasoning-Aufwand, Flex, Embedding-Modell; gespeichert in
+**Prompts** (bearbeiten und speichern), **Mappings** (getrennt: Daten ansehen und herunterladen; Neubau für
+Betreiber mit Kennzeichnung, welcher Schritt LLM, WLO-Export, Embeddings oder lokale Daten braucht), **Methodik**,
+**Einstellungen** (LLM-Anbindung, Worker, Reasoning-Aufwand, Flex; gespeichert in
 `output/.oberflaeche.json`, der API-Key nur im Speicher des Servers).
 
 **Statusanzeige:** Phase (startet, läuft, hält an, keine Rückmeldung, pausiert, fertig, Fehler), Fortschrittsbalken,
