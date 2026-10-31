@@ -274,6 +274,8 @@ def meta_fuer(cfg: LLMConfig, prompts_by_bereich: dict, inhaltstyp_pruefen: bool
     meta = {"modell": cfg.model, "base_url": pub["base_url"], "datum": date.today().isoformat(),
             "prompt_hash": {b: prompt_hash(p) for b, p in prompts_by_bereich.items()},
             "inhaltstyp_pruefung": inhaltstyp_pruefen, "ausgabesprache": ausgabesprache}
+    if cfg.anbieter != "openai":
+        meta["anbieter"] = cfg.anbieter  # fehlt = OpenAI-kompatibel
     if cfg.reasoning_effort:
         meta["reasoning_effort"] = cfg.reasoning_effort
     if verarbeitung or cfg.service_tier:

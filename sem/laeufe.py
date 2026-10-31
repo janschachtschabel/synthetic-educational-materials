@@ -30,7 +30,7 @@ def lauf_speichern(out_path: Path, seeds_path: Path, cfg: LLMConfig, limit: int 
     alt = json.loads(p.read_text(encoding="utf-8")) if p.exists() else {}
     lauf = {"seeds": str(seeds_path.resolve()), "limit": limit, "ziel": min(limit, n_seeds) if limit else n_seeds,
             "ausgabesprache": ausgabesprache, "inhaltstyp_pruefen": inhaltstyp_pruefen, "verarbeitung": verarbeitung,
-            "modell": cfg.model, "reasoning_effort": cfg.reasoning_effort,
+            "anbieter": cfg.anbieter, "modell": cfg.model, "reasoning_effort": cfg.reasoning_effort,
             "gestartet": alt.get("gestartet") or datetime.now().isoformat(timespec="seconds"),
             "zuletzt": datetime.now().isoformat(timespec="seconds")}
     p.parent.mkdir(parents=True, exist_ok=True)
@@ -48,7 +48,7 @@ def lauf_stand(out_path: Path) -> dict | None:
     fertig = len(done)
     err = out_path.with_suffix(".fehler.jsonl")
     fehl = len(read_done(err) - done) if err.exists() else 0
-    return {**lauf, "name": out_path.name, "ausgabe": str(out_path), "fertig": fertig, "fehlgeschlagen": fehl,
+    return {"anbieter": "openai", **lauf, "name": out_path.name, "ausgabe": str(out_path), "fertig": fertig, "fehlgeschlagen": fehl,
             "gesperrt": out_path.with_suffix(".lock").exists(), "ziel_erreicht": fertig >= lauf["ziel"]}
 
 

@@ -48,6 +48,13 @@ For the LLM steps: set `OPENAI_API_KEY`; optionally set `OPENAI_BASE_URL` (any O
 endpoint), `LLM_MODEL` (default `gpt-6-luna`), and `LLM_WORKERS` (default 20). Everything can also be set
 in the user interface or via parameters.
 
+**Anthropic (Claude) instead of OpenAI:** set `LLM_ANBIETER=anthropic` and `ANTHROPIC_API_KEY` (optionally
+`ANTHROPIC_BASE_URL`), or use `--anbieter anthropic` or “Provider” under “Settings”. The default model is then
+`claude-haiku-5-5`. Requests go through the Anthropic SDK (not its OpenAI compatibility layer, which has no JSON mode
+and no caching): the system prompt is sent as a cache block, so above the model's minimum length repeats cost a tenth;
+the reasoning effort is sent as `effort` (`minimal` = `low`). Multiple workers work as with OpenAI, and so does batch
+(half price, Anthropic Message Batches). Anthropic has no Flex. Every run remembers its provider and resumes with it.
+
 ## User interface
 
 ```
@@ -124,6 +131,7 @@ python -m sem seeds --anzahl erwachsenenbildung=2000 --auswahl erwachsenenbildun
 python -m sem seeds --anzahl elementar=1000 schule=3000 berufsbildung=3000 hochschule=3000 erwachsenenbildung=1000 --seed 42
 python -m sem materialien --seeds output/seeds_schule5000_s42.jsonl --sprache en   # materials in English
 python -m sem materialien --seeds output/seeds_schule5000_s42.jsonl --flex         # half price, slower
+python -m sem materialien --seeds output/seeds_schule5000_s42.jsonl --anbieter anthropic --batch   # Claude Haiku, batch
 python -m sem materialien --seeds output/seeds_schule5000_s42.jsonl --batch --warten   # batch, until everything is done
 python -m sem laeufe                                # runs that did not reach their target
 python -m sem materialien --fortsetzen schule5000_s42   # resume one of them with its settings
@@ -139,7 +147,7 @@ filters are in the “Seeds” tab under each sector.
 the education context stays Germany. The note to the model is in `prompts/ausgabesprache.md`; the language is
 stored in `cclom:general_language`. Use a new output file per language, because resuming does not check it.
 
-**Half price: Flex or batch** (OpenAI only). `--flex` or “Flex-Verarbeitung” in the sidebar generates material by
+**Half price: Flex or batch** (Flex OpenAI only, batch with OpenAI and Anthropic). `--flex` or “Flex-Verarbeitung” in the sidebar generates material by
 material as usual, at half price but slower (measured on 30 Oct 2026: 50–90 s instead of about 30 s per material).
 If Flex has no capacity (error 429), a request is retried twice and then sent at the standard price; how often is
 recorded per material under `synth:generierung.tokens.aufrufe_standard`. `--batch` or “Verarbeitung: Batch” in the

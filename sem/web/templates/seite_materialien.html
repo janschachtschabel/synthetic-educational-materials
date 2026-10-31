@@ -81,10 +81,15 @@
     </div>
     <fieldset class="feld">
       <legend>{{ T("Verarbeitung") }}</legend>
-      {% set std = 'flex' if e.flex else 'sofort' %}
-      {% for wert, text, hilfe in [("sofort", T("Standard"), T("Material für Material, schnellste Antworten, voller Preis.")),
-                                    ("flex", "Flex", T("Halber Preis, langsamere Antworten; Engpässe werden automatisch wiederholt.")),
-                                    ("batch", "Batch", T("Halber Preis, alle Anfragen gesammelt an OpenAI; je Stufe eine Runde bis zu 24 h."))] %}
+      {% set std = 'flex' if e.flex and e.anbieter == 'openai' else 'sofort' %}
+      {% set wahl = [("sofort", T("Standard"), T("Material für Material, schnellste Antworten, voller Preis."))] %}
+      {% if e.anbieter == 'openai' %}
+        {% set wahl = wahl + [("flex", "Flex", T("Halber Preis, langsamere Antworten; Engpässe werden automatisch wiederholt.")),
+                              ("batch", "Batch", T("Halber Preis, alle Anfragen gesammelt an OpenAI; je Stufe eine Runde bis zu 24 h."))] %}
+      {% else %}
+        {% set wahl = wahl + [("batch", "Batch", T("Halber Preis, alle Anfragen gesammelt an Anthropic; je Stufe eine Runde, meist unter einer Stunde, höchstens 24 h."))] %}
+      {% endif %}
+      {% for wert, text, hilfe in wahl %}
         <div class="wahl">
           <input type="radio" id="v-{{ wert }}" name="verarbeitung" value="{{ wert }}" {% if wert == std %}checked{% endif %} aria-describedby="v-{{ wert }}-h">
           <label for="v-{{ wert }}" class="inline">{{ text }}</label>
@@ -97,7 +102,7 @@
       <input type="number" id="workers" name="workers" min="1" max="1000" value="{{ e.workers }}" aria-describedby="workers-hilfe">
       <p id="workers-hilfe" class="hilfe">{{ T("Materialien, die gleichzeitig erzeugt werden. Mehr Worker = schneller, solange das Rate-Limit des Anbieters reicht.") }}</p>
     </div>
-    <p class="klein">{{ T("Modell {modell}, Reasoning-Aufwand {aufwand} – ändern unter „Einstellungen“.", modell=e.model, aufwand=T(e.reasoning_effort)) }}</p>
+    <p class="klein">{{ T("Anbieter {anbieter}, Modell {modell}, Reasoning-Aufwand {aufwand} – ändern unter „Einstellungen“.", anbieter=("Anthropic" if e.anbieter == "anthropic" else "OpenAI"), modell=e.model, aufwand=T(e.reasoning_effort)) }}</p>
     <button type="submit" class="haupt" {% if laeuft %}disabled aria-disabled="true"{% endif %}>{{ T("Lauf starten") }}</button>
     {% if laeuft %}<p class="klein">{{ T("Es läuft schon ein Materiallauf. Erst anhalten oder abwarten.") }}</p>{% endif %}
   </form>

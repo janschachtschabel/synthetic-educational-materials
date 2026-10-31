@@ -29,7 +29,7 @@ from ..bereiche import BEREICHE
 from ..bereiche.base import STANDARD_KONFIDENZ, STATUS_WERTE, filtergruppe
 from ..generate import SPRACHEN
 from ..i18n import UI_SPRACHEN, t
-from ..llm import DEFAULT_MODEL, DEFAULT_WORKERS, LLMConfig, _prozess_laeuft, api_key_fuer
+from ..llm import ANBIETER, DEFAULT_MODELLE, DEFAULT_WORKERS, LLMConfig, _prozess_laeuft, api_key_fuer
 from ..prompts import PROMPT_FILES, placeholders, prompt_path
 from . import dateien
 
@@ -75,6 +75,7 @@ class Ordner:
 # --- Einstellungen (LLM) -----------------------------------------------------------------------------------------
 @dataclasses.dataclass
 class Einstellungen:
+    anbieter: str = "openai"
     base_url: str = ""
     model: str = ""
     workers: int = 0
@@ -85,39 +86,49 @@ class Einstellungen:
     embedding_modell: str = ""
 
 
-_api_key: dict[str, str] = {}  # nur im Speicher, nie in einer Datei
+_api_key: dict[str, str] = {}  # je Anbieter, nur im Speicher, nie in einer Datei
 
 
 def einstellungen() -> Einstellungen:
-    env = LLMConfig.from_env()
     try:
         gespeichert = json.loads(Ordner.einstellungen().read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError):
         gespeichert = {}
+    anbieter = gespeichert.get("anbieter")
+    env = LLMConfig.from_env(anbieter=anbieter if anbieter in ANBIETER else None)
     from ..mapping.embeddings import DEFAULT_EMBEDDING_MODEL
 
-    e = Einstellungen(base_url=env.base_url or "", model=env.model or DEFAULT_MODEL,
+    e = Einstellungen(anbieter=env.anbieter, base_url=env.base_url or "", model=env.model,
                       workers=env.workers or DEFAULT_WORKERS, reasoning_effort=env.reasoning_effort or "Modellstandard",
                       embedding_modell=DEFAULT_EMBEDDING_MODEL)
     felder = {f.name for f in dataclasses.fields(Einstellungen)}
     return dataclasses.replace(e, **{k: v for k, v in gespeichert.items() if k in felder})
 
 
-def llm_cfg(e: Einstellungen | None = None, **aenderungen) -> LLMConfig:
+def llm_cfg(e: Einstellungen | None = None, anbieter: str | None = None, **aenderungen) -> LLMConfig:
+    """Konfiguration aus den Einstellungen. anbieter: ein anderer als in den Einstellungen (Fortsetzen eines Laufs
+    mit dem Anbieter, mit dem er lief): dann Base-URL und Key dieses Anbieters aus der Umgebung bzw. eingetragen."""
     e = e or einstellungen()
-    env = LLMConfig.from_env()
-    cfg = LLMConfig(base_url=e.base_url or None, api_key=api_key_fuer(e.base_url, _api_key.get("key"), env),
+    if anbieter and anbieter != e.anbieter:
+        e = dataclasses.replace(e, anbieter=anbieter, base_url=LLMConfig.from_env(anbieter=anbieter).base_url or "")
+    env = LLMConfig.from_env(anbieter=e.anbieter)
+    cfg = LLMConfig(anbieter=e.anbieter, base_url=e.base_url or None,
+                    api_key=api_key_fuer(e.base_url, _api_key.get(e.anbieter), env),
                     model=e.model, workers=int(e.workers), max_retries=int(e.retries),
                     outage_minutes=float(e.ausfall_minuten),
                     reasoning_effort=None if e.reasoning_effort == "Modellstandard" else e.reasoning_effort,
-                    service_tier="flex" if e.flex else None)
-    return dataclasses.replace(cfg, **aenderungen)
+                    service_tier="flex" if e.flex and e.anbieter == "openai" else None)
+    cfg = dataclasses.replace(cfg, **aenderungen)
+    if cfg.anbieter != "openai":
+        cfg.service_tier = None  # Flex gibt es nur bei OpenAI
+    return cfg
 
 
 def key_zustand(e: Einstellungen) -> str:
-    """„eingetragen“, „umgebung“ (OPENAI_API_KEY gilt für diese Base-URL), „fremde_url“ oder „fehlt“."""
-    env = LLMConfig.from_env()
-    if _api_key.get("key"):
+    """„eingetragen“, „umgebung“ (OPENAI_API_KEY bzw. ANTHROPIC_API_KEY gilt für diese Base-URL), „fremde_url“ oder
+    „fehlt“."""
+    env = LLMConfig.from_env(anbieter=e.anbieter)
+    if _api_key.get(e.anbieter):
         return "eingetragen"
     if env.api_key:
         return "umgebung" if (e.base_url or None) == env.base_url else "fremde_url"
@@ -346,25 +357,43 @@ def download(datei: str, ort: str = "output"):
 def einstellungen_seite(request: Request, gespeichert: bool = False):
     e = einstellungen()
     return seite(request, "seite_einstellungen.html", e=e, efforts=EFFORTS, key=key_zustand(e),
-                 env_url=LLMConfig.from_env().base_url, gespeichert=gespeichert)
+                 env_url=LLMConfig.from_env(anbieter=e.anbieter).base_url, gespeichert=gespeichert,
+                 anbieter_liste=ANBIETER, modelle=DEFAULT_MODELLE)
+
+
+def _modell_fuer(anbieter: str, model: str) -> str:
+    """Leeres Modell oder das Standardmodell des anderen Anbieters (Wechsel ohne das Feld anzupassen): Standardmodell
+    des gewählten Anbieters."""
+    model = model.strip()
+    andere = {m for a, m in DEFAULT_MODELLE.items() if a != anbieter}
+    if not model or model in andere or (anbieter == "anthropic" and model.startswith("gpt-")) \
+            or (anbieter == "openai" and model.startswith("claude-")):
+        return DEFAULT_MODELLE[anbieter]
+    return model
 
 
 @app.post("/einstellungen")
-def einstellungen_speichern(base_url: str = Form(""), model: str = Form(""), api_key: str = Form(""),
+def einstellungen_speichern(anbieter: str = Form("openai"), base_url: str = Form(""), model: str = Form(""),
+                            api_key: str = Form(""),
                             key_loeschen: bool = Form(False), workers: int = Form(DEFAULT_WORKERS),
                             reasoning_effort: str = Form("low"), flex: bool = Form(False), retries: int = Form(6),
                             ausfall_minuten: float = Form(10)):
-    e = Einstellungen(base_url=base_url.strip(), model=model.strip() or DEFAULT_MODEL,
+    anbieter = anbieter if anbieter in ANBIETER else "openai"
+    alt = einstellungen()
+    if anbieter != alt.anbieter and base_url.strip() == alt.base_url:
+        base_url = ""  # Base-URL des bisherigen Anbieters nicht mitnehmen
+    e = Einstellungen(anbieter=anbieter, base_url=base_url.strip(), model=_modell_fuer(anbieter, model),
                       workers=max(1, min(1000, workers)),
-                      reasoning_effort=reasoning_effort if reasoning_effort in EFFORTS else "low", flex=flex,
+                      reasoning_effort=reasoning_effort if reasoning_effort in EFFORTS else "low",
+                      flex=flex and anbieter == "openai",
                       retries=max(1, min(20, retries)), ausfall_minuten=max(1, min(240, ausfall_minuten)),
                       embedding_modell=einstellungen().embedding_modell)  # wird je Mapping-Lauf gewählt
     Ordner.output.mkdir(parents=True, exist_ok=True)
     Ordner.einstellungen().write_text(json.dumps(dataclasses.asdict(e), ensure_ascii=False, indent=1), encoding="utf-8")
     if key_loeschen:
-        _api_key.pop("key", None)
+        _api_key.pop(anbieter, None)
     elif api_key.strip():
-        _api_key["key"] = api_key.strip()
+        _api_key[anbieter] = api_key.strip()
     return Response(status_code=204, headers={"HX-Redirect": "/einstellungen?gespeichert=1"})
 
 
@@ -565,7 +594,8 @@ def fortsetzen(request: Request, name: str, aktion: str = Form("fortsetzen"), ve
         return seite(request, "teil_status.html", lauf=lauf_ansicht("mat"), name="mat",
                      fehler=T("Es läuft schon ein Materiallauf. Erst anhalten oder abwarten."))
     batch = L["verarbeitung"] == "batch"
-    cfg = llm_cfg(model=L["modell"], reasoning_effort=L["reasoning_effort"], workers=max(1, min(1000, workers)),
+    cfg = llm_cfg(anbieter=L["anbieter"], model=L["modell"], reasoning_effort=L["reasoning_effort"],
+                  workers=max(1, min(1000, workers)),
                   service_tier="flex" if verarbeitung == "flex" and not batch else None)
     if aktion == "neu":
         argv = _mat_argv(Path(L["seeds"]), freier_name(Path(L["ausgabe"])), L["ausgabesprache"], L["limit"] or 0,
