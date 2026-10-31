@@ -196,3 +196,33 @@ def test_verwaiste_sperre_wird_uebernommen(tmp_path):
     lock.write_text("", encoding="utf-8")  # alte Sperrdatei ohne Angaben: nicht anfassen
     with pytest.raises(RuntimeError):
         sperre_nehmen(lock)
+
+
+def test_anhalten_stellt_keine_neue_anfrage_mehr(tmp_path, monkeypatch):
+    """Nach dem Anhalten bricht ein Material vor seiner nächsten Anfrage ab, statt erst fertig zu laufen."""
+    import threading
+    from types import SimpleNamespace
+
+    stop = threading.Event()
+    gesendet = []
+
+    def create(**params):
+        gesendet.append(1)
+        if len(gesendet) == 2:
+            stop.set()  # Anhalten mitten im zweiten Material
+        return SimpleNamespace(usage=None, choices=[SimpleNamespace(message=SimpleNamespace(content="ok"))])
+
+    def worker(client, t):
+        if not hasattr(client.client.chat.completions, "_fake"):
+            monkeypatch.setattr(client.client.chat.completions, "create", create)
+            client.client.chat.completions._fake = True
+        for _ in range(3):  # drei Anfragen je Material
+            client.chat("s", "u")
+        return {"id": t["id"]}
+
+    stand = []
+    p = run_tasks(_tasks(5), worker, tmp_path / "out.jsonl", _cfg(workers=1), stop_event=stop,
+                  on_progress=lambda pr: stand.append((pr.anfragen, pr.status)))
+    assert len(gesendet) == 2 and p.done == 0 and p.failed == 0
+    assert p.status.startswith("pausiert")
+    assert stand[0][0] == 1  # Fortschritt schon nach der ersten Anfrage gemeldet

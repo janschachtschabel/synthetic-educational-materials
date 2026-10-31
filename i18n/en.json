@@ -383,11 +383,13 @@
  "Batch (halber Preis, Runden bis 24 h)": "Batch (half price, rounds up to 24 h)",
  "frage Batches ab …": "checking batches …",
  "Unfertige Läufe ({n})": "Unfinished runs ({n})",
- "Läufe, die ihr Ziel nicht erreicht haben, z. B. nach einer Internet-Unterbrechung oder mit fehlgeschlagenen Materialien. Fortsetzen nutzt die Einstellungen des Laufs (Seed-Datei, Anzahl, Sprache, Modell, Verarbeitung) und überspringt Fertiges; „Neu starten“ beginnt mit denselben Einstellungen unter neuem Namen, die bisherige Datei bleibt.": "Runs that did not reach their target, e.g. after an internet interruption or with failed materials. Resume uses the run's settings (seed file, number, language, model, processing) and skips finished materials; “Start new” begins with the same settings under a new name, and the previous file is kept.",
+ "Läufe, die ihr Ziel nicht erreicht haben, z. B. nach einer Internet-Unterbrechung oder mit fehlgeschlagenen Materialien. Fortsetzen nutzt die Einstellungen des Laufs (Seed-Datei, Anzahl, Sprache, Modell) und überspringt Fertiges; „Neu starten“ beginnt mit denselben Einstellungen unter neuem Namen, die bisherige Datei bleibt. Standard oder Flex lässt sich je Lauf wählen, die Worker-Zahl kommt aus der Seitenleiste.": "Runs that did not reach their target, e.g. after an internet interruption or with failed materials. Resume uses the run's settings (seed file, number, language, model) and skips finished materials; “Start new” begins with the same settings under a new name, and the previous file is kept. Standard or Flex can be chosen per run; the number of workers comes from the sidebar.",
+ "Standard": "Standard",
  "Seed-Datei fehlt": "Seed file missing",
  "Fortsetzen": "Resume",
  "Neu starten": "Start new",
  "Sperre aufheben": "Release lock",
  "{n} fehlgeschlagen": "{n} failed",
- "Die Sperrdatei bleibt nach einem Absturz liegen. Nur aufheben, wenn sicher kein anderer Lauf (z. B. auf der Kommandozeile) auf dieser Datei arbeitet.": "The lock file is left behind after a crash. Only release it if you are sure no other run (e.g. on the command line) is working on this file."
+ "Die Sperrdatei bleibt nach einem Absturz liegen. Nur aufheben, wenn sicher kein anderer Lauf (z. B. auf der Kommandozeile) auf dieser Datei arbeitet.": "The lock file is left behind after a crash. Only release it if you are sure no other run (e.g. on the command line) is working on this file.",
+ "Wird angehalten: Es startet keine neue Anfrage mehr, laufende werden noch beendet. Halb fertige Materialien werden beim Fortsetzen neu erzeugt.": "Stopping: no new requests are started, running ones are still finished. Half-finished materials are generated again when resuming."
 }

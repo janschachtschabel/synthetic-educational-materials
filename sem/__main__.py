@@ -96,6 +96,8 @@ def main(argv=None):
 
     p = sub.add_parser("materialien", help="Materialien aus Seeds erzeugen (LLM, fortsetzbar)")
     p.add_argument("--seeds", type=Path, help="Seed-Datei (entfällt mit --fortsetzen)")
+    p.add_argument("--ohne-flex", action="store_true",
+                   help="mit --fortsetzen: zum Standardpreis weiter, auch wenn der Lauf mit Flex lief")
     p.add_argument("--fortsetzen", metavar="NAME",
                    help="unfertigen Lauf fortsetzen (Name der Ausgabe, siehe python -m sem laeufe): Seed-Datei, Anzahl, "
                         "Sprache, Modell und Verarbeitung kommen aus dem Lauf")
@@ -195,7 +197,10 @@ def main(argv=None):
             a.batch = lauf["verarbeitung"] == "batch"
             a.model = a.model or lauf["modell"]
             a.reasoning_effort = a.reasoning_effort or lauf["reasoning_effort"] or "standard"
-            a.service_tier = "flex" if lauf["verarbeitung"] == "flex" else None
+            if getattr(a, "ohne_flex", False):
+                a.service_tier = None
+            elif not a.service_tier:  # --flex wählt Flex auch für einen Lauf, der ohne lief
+                a.service_tier = "flex" if lauf["verarbeitung"] == "flex" else None
         elif not a.seeds:
             raise SystemExit("--seeds oder --fortsetzen angeben")
         out = ausgabe_pfad("materialien", a.out or a.seeds)
