@@ -35,3 +35,25 @@ def test_neu_starten_waehlt_freien_namen(tmp_path):
     assert freier_name(out).name == "materialien_t_2.jsonl"
     lauf_pfad(tmp_path / "materialien_t_2.jsonl").write_text("{}", encoding="utf-8")
     assert freier_name(out).name == "materialien_t_3.jsonl"
+
+
+def test_fortsetzen_mit_flex_ueberschreibt_gespeicherte_verarbeitung(tmp_path, monkeypatch):
+    import sem.__main__ as cli
+    import sem.generate as gen
+
+    seeds, out = _seeds(tmp_path, 3), tmp_path / "materialien_t.jsonl"
+    lauf_speichern(out, seeds, LLMConfig(model="m"), limit=None, inhaltstyp_pruefen=True, ausgabesprache="de",
+                   verarbeitung="sofort")
+    gesehen = {}
+
+    def generate(seeds_path, out_path, cfg, **kw):
+        gesehen.update(service_tier=cfg.service_tier, seeds=seeds_path, out=out_path, model=cfg.model)
+        return type("P", (), {"done": 0, "skipped": 3, "failed": 0, "status": "fertig"})()
+
+    monkeypatch.setattr(gen, "generate", generate)
+    monkeypatch.setattr(cli, "ausgabe_pfad", lambda art, name: out)
+    monkeypatch.setenv("OPENAI_API_KEY", "x")
+    cli.main(["materialien", "--fortsetzen", "t", "--flex"])
+    assert gesehen["service_tier"] == "flex" and gesehen["model"] == "m"
+    cli.main(["materialien", "--fortsetzen", "t"])
+    assert gesehen["service_tier"] is None  # gespeicherte Verarbeitung „sofort“
