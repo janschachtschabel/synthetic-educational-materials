@@ -253,8 +253,7 @@ Lowering the threshold from five to three records (October 2026) added 1,947 top
 The 56 review cases of the first version were resolved editorially (e.g. mismatches such as “Poker” in
 physics or training occupations in English lessons excluded); the 54 review cases of the new topics were also
 resolved editorially (17 excluded, again mainly training occupations in English lessons and mismatches to
-physics such as “Totenstarre” or “Whisky”). The educational standards (step `bista`)
-have not yet been assigned for the new topics. For keyword topics without a parent topic the seed carries no
+physics such as “Totenstarre” or “Whisky”). For keyword topics without a parent topic the seed carries no
 `ccm:curriculum`; topic and GND URI are in `synth:thema`.
 
 **Content types** (`inhaltstypen.json`, 19 from OEH `new_lrt`): e.g. worksheet, practice material,
@@ -265,7 +264,7 @@ portals.
 **Levels**: grades 1–2, 3–4, 5–6, 7–8, 9–10, introductory and qualification phases, `exactMatch`
 KIM educational levels 1–3.
 
-**KMK educational standards** (sequence `bildungsstandards`, steps `bista` and `bista_zusammenfuehren`; run after the topics). `bildungsstandards_gliederung.json` (local only in `data/lokal/schule/`, not in the repository) holds the outline of the 14 current documents (German and mathematics for primary, ESA/MSA and Abitur; first foreign language for ESA/MSA and Abitur; biology, chemistry and physics for MSA and Abitur): 314 headings (competence areas, sub-areas, key ideas, basic concepts, process-related competences) with code and path, no standard texts. For each classroom topic and school level the matching document applies (primary → primary, lower secondary → ESA/MSA, upper secondary → Abitur); three votes select one or two content entries (sub-area before competence area, empty selection allowed); if they disagree, two more votes decide (majority three of five). Process-related competences apply to all topics of a subject and are not assigned. **Result:** 4,395 of 5,052 topic-document pairs have an entry (3,289 `gesichert`, 1,106 `wahrscheinlich`, 73 of them by tie-break), `bildungsstandards.jsonl`. 320 pairs where no vote chose an entry (often general vocabulary or subject topics in the foreign languages) and around 340 still disagreeing remain without an entry; they get no field rather than a guessed assignment.
+**KMK educational standards** (sequence `bildungsstandards`, steps `bista` and `bista_zusammenfuehren`; run after the topics). `bildungsstandards_gliederung.json` (local only in `data/lokal/schule/`, not in the repository) holds the outline of the 14 current documents (German and mathematics for primary, ESA/MSA and Abitur; first foreign language for ESA/MSA and Abitur; biology, chemistry and physics for MSA and Abitur): 314 headings (competence areas, sub-areas, key ideas, basic concepts, process-related competences) with code and path, no standard texts. For each classroom topic and school level the matching document applies (primary → primary, lower secondary → ESA/MSA, upper secondary → Abitur); three votes select one or two content entries (sub-area before competence area, empty selection allowed); if they disagree, two more votes decide (majority three of five). Process-related competences apply to all topics of a subject and are not assigned. **Result:** 5,350 topic-document pairs have an entry (3,930 `gesichert`, 1,420 `wahrscheinlich`), `bildungsstandards.jsonl`; in the first version (before the additional keyword topics) it was 4,395 of 5,052 pairs. Pairs where no vote chose an entry (often general vocabulary or subject topics in the foreign languages) or that still disagree get no field rather than a guessed assignment.
 
 ## Mappings: Adult Education
 

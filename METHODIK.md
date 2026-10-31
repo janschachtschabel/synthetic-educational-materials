@@ -373,7 +373,7 @@ Themenbaum. Die Senkung der Schwelle von fünf auf drei Datensätze (Oktober 202
 dazu (vorher 4.416). Die 56 Prüffälle der ersten Fassung sind redaktionell entschieden (u. a.
 Fehlzuordnungen wie „Poker“ in Physik oder Ausbildungsberufe im Englischunterricht ausgeschlossen); auch die 54
 Prüffälle der neuen Themen sind redaktionell entschieden (17 ausgeschlossen, wieder vor allem
-Ausbildungsberufe im Englischunterricht und Fehlzuordnungen zur Physik wie „Totenstarre“ oder „Whisky“). Die Bildungsstandards (Schritt `bista`) sind für die neuen Themen noch nicht abgestimmt. Bei Keyword-Themen ohne Oberthema trägt der
+Ausbildungsberufe im Englischunterricht und Fehlzuordnungen zur Physik wie „Totenstarre“ oder „Whisky“). Bei Keyword-Themen ohne Oberthema trägt der
 Seed kein `ccm:curriculum`; Thema und GND-URI stehen in `synth:thema`.
 
 **Inhaltstypen** (`inhaltstypen.json`, 19 aus OEH `new_lrt`): u. a. Arbeitsblatt, Übungsmaterial,
@@ -392,11 +392,11 @@ keine Standardformulierungen. Je Unterrichtsthema und Schulstufe gilt das passen
 Primarbereich, Sek I → ESA/MSA, Sek II → AHR); drei Stimmen wählen ein bis zwei inhaltliche Einträge
 (Teilbereich vor Kompetenzbereich, leere Auswahl erlaubt); sind sie uneinig, entscheiden zwei weitere Stimmen
 (Mehrheit drei von fünf). Prozessbezogene Kompetenzen gelten für alle Themen
-eines Fachs und werden nicht zugeordnet. **Ergebnis:** 4.395 von 5.052 Paaren aus Thema und Dokument haben
-einen Eintrag (gesichert 3.289, wahrscheinlich 1.106, davon 73 per Stichwahl), `bildungsstandards.jsonl`. Ohne
-Eintrag bleiben 320 Paare, bei denen keine Stimme einen Eintrag gewählt hat (oft allgemeiner Wortschatz oder
-Sachthemen in den Fremdsprachen), und rund 340 weiter uneinige; sie bekommen kein Feld statt einer geratenen
-Zuordnung.
+eines Fachs und werden nicht zugeordnet. **Ergebnis:** 5.350 Paare aus Thema und Dokument haben einen
+Eintrag (gesichert 3.930, wahrscheinlich 1.420), `bildungsstandards.jsonl`; in der ersten Fassung (vor den
+zusätzlichen Keyword-Themen) waren es 4.395 von 5.052 Paaren. Paare, bei denen keine Stimme einen Eintrag
+gewählt hat (oft allgemeiner Wortschatz oder Sachthemen in den Fremdsprachen) oder die weiter uneinig sind,
+bekommen kein Feld statt einer geratenen Zuordnung.
 
 ## Mappings Erwachsenenbildung
 
