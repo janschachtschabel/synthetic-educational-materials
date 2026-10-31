@@ -195,7 +195,8 @@ def main(argv=None):
             a.batch = lauf["verarbeitung"] == "batch"
             a.model = a.model or lauf["modell"]
             a.reasoning_effort = a.reasoning_effort or lauf["reasoning_effort"] or "standard"
-            a.service_tier = "flex" if lauf["verarbeitung"] == "flex" else None
+            # --flex beim Fortsetzen hat Vorrang (z. B. einen Standard-Lauf günstiger zu Ende bringen)
+            a.service_tier = a.service_tier or ("flex" if lauf["verarbeitung"] == "flex" else None)
         elif not a.seeds:
             raise SystemExit("--seeds oder --fortsetzen angeben")
         out = ausgabe_pfad("materialien", a.out or a.seeds)
