@@ -1,4 +1,0 @@
-# Nur auf diesem Rechner erreichbar: Die Oberfläche hat keine Anmeldung und kann LLM-Läufe mit dem
-# API-Key aus der Umgebung starten. Für den Zugriff aus dem Netz bewusst ändern (z. B. hinter einem Proxy mit Anmeldung).
-[server]
-address = "localhost"
