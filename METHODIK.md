@@ -364,16 +364,16 @@ wahrscheinlich 85, redaktionell 21. In 2.191 Fällen bestätigen die WLO-Datens�
 gewählten Stufen. Die 22 Prüffälle sind redaktionell entschieden (OER- und Schulentwicklungsthemen als
 Lehrkräftethemen für alle Stufen, Pädagogik als Oberstufenfach, ein Hochschulthema ausgeschlossen).
 
-**Ergebnis Keywords:** 6.380 zusätzliche Themen (6.233 Unterrichtsthemen, 147 für Lehrkräfte) in 50
+**Ergebnis Keywords:** 6.363 zusätzliche Themen (6.220 Unterrichtsthemen, 143 für Lehrkräfte) in 50
 Fächern, am häufigsten Physik, Geografie, Geschichte, Biologie, Religion und Politik; Stufen:
-Primarstufe 2.229, Sek I 5.222, Sek II 4.334. 2.692 Begriffe sind verworfen (ungeeignet, andere Bedeutung
-oder keine passende Stufe). Fach gesichert 5.459, wahrscheinlich 856, unsicher 65 (nur Ersatz aus dem
+Primarstufe 2.231, Sek I 5.225, Sek II 4.330. 2.709 Begriffe sind verworfen (ungeeignet, andere Bedeutung
+oder keine passende Stufe). Fach gesichert 5.445, wahrscheinlich 854, unsicher 64 (nur Ersatz aus dem
 häufigsten WLO-Fach, standardmäßig nicht in den Seeds). 986 Keyword-Themen haben ein Oberthema im
-Themenbaum. Die Senkung der Schwelle von fünf auf drei Datensätze (Oktober 2026) brachte 1.964 Themen
+Themenbaum. Die Senkung der Schwelle von fünf auf drei Datensätze (Oktober 2026) brachte 1.947 Themen
 dazu (vorher 4.416). Die 56 Prüffälle der ersten Fassung sind redaktionell entschieden (u. a.
-Fehlzuordnungen wie „Poker“ in Physik oder Ausbildungsberufe im Englischunterricht ausgeschlossen); die 54
-Prüffälle der neuen Themen stehen in `pruefliste_themen.csv` und gehen bis zur Entscheidung nicht in die
-Seeds. Die Bildungsstandards (Schritt `bista`) sind für die neuen Themen noch nicht abgestimmt. Bei Keyword-Themen ohne Oberthema trägt der
+Fehlzuordnungen wie „Poker“ in Physik oder Ausbildungsberufe im Englischunterricht ausgeschlossen); auch die 54
+Prüffälle der neuen Themen sind redaktionell entschieden (17 ausgeschlossen, wieder vor allem
+Ausbildungsberufe im Englischunterricht und Fehlzuordnungen zur Physik wie „Totenstarre“ oder „Whisky“). Die Bildungsstandards (Schritt `bista`) sind für die neuen Themen noch nicht abgestimmt. Bei Keyword-Themen ohne Oberthema trägt der
 Seed kein `ccm:curriculum`; Thema und GND-URI stehen in `synth:thema`.
 
 **Inhaltstypen** (`inhaltstypen.json`, 19 aus OEH `new_lrt`): u. a. Arbeitsblatt, Übungsmaterial,

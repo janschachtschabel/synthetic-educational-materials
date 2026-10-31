@@ -191,7 +191,7 @@ Everything under `data/` can be used without the code (JSON, JSONL, CSV, UTF-8):
 - `data/mappings/elementar/themen_elementar.jsonl`: 1,033 daycare topics (GND URI, synonyms, definition,
   topic type, age group, education sector, provenance, status, WLO evidence); `bildungsbereiche.json`: the seven
   educational areas with closeMatch to OEH school subjects
-- `data/mappings/schule/themen_schule.jsonl`: 9,533 school topics: 3,153 from the WLO topic trees and 6,380
+- `data/mappings/schule/themen_schule.jsonl`: 9,516 school topics: 3,153 from the WLO topic trees and 6,363
   finer topics from WLO keywords per subject (normalized as GND subject headings), with subject portal, path,
   subject, topic type, school levels, provenance, status, WLO evidence, and GND alignment
 - `data/mappings/erwachsenenbildung/themen_erwachsenenbildung.jsonl`: 1,466 course topics with subject area and

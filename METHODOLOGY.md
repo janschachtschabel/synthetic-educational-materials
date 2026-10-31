@@ -244,15 +244,16 @@ probable 85, editorial 21. In 2,191 cases, the WLO records confirm at least one 
 review cases were resolved editorially (OER and school development topics treated as teacher topics for all
 levels, pedagogy as an upper-secondary subject, one higher education topic excluded).
 
-**Result, keywords:** 6,380 additional topics (6,233 classroom topics, 147 for teachers) in 50 subjects,
-most often physics, geography, history, biology, religion and politics; levels: primary 2,229, lower
-secondary 5,222, upper secondary 4,334. 2,692 concepts were discarded (unsuitable, different meaning or no
-fitting level). Subject secured 5,459, probable 856, uncertain 65 (fallback to the most frequent WLO
+**Result, keywords:** 6,363 additional topics (6,220 classroom topics, 143 for teachers) in 50 subjects,
+most often physics, geography, history, biology, religion and politics; levels: primary 2,231, lower
+secondary 5,225, upper secondary 4,330. 2,709 concepts were discarded (unsuitable, different meaning or no
+fitting level). Subject secured 5,445, probable 854, uncertain 64 (fallback to the most frequent WLO
 subject only, not in the seeds by default). 986 keyword topics have a parent topic in the topic tree.
-Lowering the threshold from five to three records (October 2026) added 1,964 topics (previously 4,416).
+Lowering the threshold from five to three records (October 2026) added 1,947 topics (previously 4,416).
 The 56 review cases of the first version were resolved editorially (e.g. mismatches such as “Poker” in
-physics or training occupations in English lessons excluded); the 54 review cases of the new topics are in
-`pruefliste_themen.csv` and stay out of the seeds until decided. The educational standards (step `bista`)
+physics or training occupations in English lessons excluded); the 54 review cases of the new topics were also
+resolved editorially (17 excluded, again mainly training occupations in English lessons and mismatches to
+physics such as “Totenstarre” or “Whisky”). The educational standards (step `bista`)
 have not yet been assigned for the new topics. For keyword topics without a parent topic the seed carries no
 `ccm:curriculum`; topic and GND URI are in `synth:thema`.
 
