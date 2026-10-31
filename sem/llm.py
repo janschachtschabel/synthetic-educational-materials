@@ -104,6 +104,19 @@ class APIUnavailable(Exception):
     """Die API war länger als outage_minutes nicht erreichbar."""
 
 
+class Abgebrochen(Exception):
+    """Der Lauf soll anhalten: keine neue Anfrage mehr stellen."""
+
+
+def _warten(stop: threading.Event | None, sekunden: float) -> bool:
+    """Wartet in kleinen Schritten; True, sobald angehalten wurde (dann ohne die Wartezeit auszuschöpfen)."""
+    for _ in range(int(sekunden / 0.5) + 1):
+        if stop is not None and stop.is_set():
+            return True
+        time.sleep(min(0.5, sekunden))
+    return stop is not None and stop.is_set()
+
+
 TOKEN_FELDER = ("aufrufe", "eingabe", "davon_cache", "ausgabe", "davon_reasoning")
 
 
@@ -133,10 +146,14 @@ class LLMClient:
             raise ValueError("Kein API-Key: OPENAI_API_KEY setzen oder in der Oberfläche eintragen.")
         self.cfg = cfg
         self.usage = threading.local()  # Tokenzähler je Thread (eine Aufgabe läuft in einem Thread)
+        self.stop: threading.Event | None = None  # gesetzt: keine neue Anfrage mehr (Lauf hält an)
+        self.nach_anfrage: Callable[[], None] | None = None  # nach jeder beantworteten Anfrage (Fortschritt)
         timeout = max(cfg.timeout, FLEX_TIMEOUT) if cfg.service_tier == "flex" else cfg.timeout
         self.client = OpenAI(base_url=cfg.base_url, api_key=cfg.api_key, timeout=timeout, max_retries=0)
 
     def chat(self, system: str, user: str, json_mode: bool = False) -> str:
+        if self.stop is not None and self.stop.is_set():
+            raise Abgebrochen()
         params = self.cfg.parameter(system, user, json_mode)
         if params.get("service_tier") == "flex":
             resp = self._flex(params)
@@ -147,6 +164,8 @@ class LLMClient:
             z = self.zaehler()
             for k, v in tokens_aus_usage(u).items():
                 z[k] += v
+        if self.nach_anfrage:
+            self.nach_anfrage()
         return resp.choices[0].message.content or ""
 
     def _flex(self, params: dict):
@@ -159,7 +178,8 @@ class LLMClient:
             except openai.RateLimitError as e:
                 if "flex" not in str(e).lower():
                     raise  # gewöhnliches Rate-Limit: run_tasks wiederholt
-                time.sleep(FLEX_WARTEN * 2 ** i)
+                if _warten(self.stop, FLEX_WARTEN * 2 ** i):
+                    raise Abgebrochen() from e
         z = self.zaehler()
         z["aufrufe_standard"] = z.get("aufrufe_standard", 0) + 1
         return self.client.chat.completions.create(**{k: v for k, v in params.items() if k != "service_tier"})
@@ -270,6 +290,8 @@ class Progress:
     failed: int = 0
     skipped: int = 0
     retries: int = 0                # wiederholte Versuche (Aufgabe neu gestartet), auch wenn sie danach klappten
+    aktiv: int = 0                  # Aufgaben, an denen gerade ein Worker arbeitet
+    anfragen: int = 0               # beantwortete API-Anfragen (zeigt auch zwischen fertigen Aufgaben, dass es läuft)
     started: float = field(default_factory=time.time)
     status: str = "läuft"
     last_error: str | None = None
@@ -290,6 +312,8 @@ class Progress:
         line = (f"{self.done + self.failed} von {self.total} bearbeitet: {self.done} erfolgreich, "
                 f"{self.failed} fehlgeschlagen, {self.retries} Wiederholungen · {self.rate * 60:.1f} pro Minute · "
                 f"Rest {eta_s} · {self.status}")
+        if self.aktiv or self.anfragen:
+            line += f" · {self.aktiv} in Arbeit, {self.anfragen} Anfragen beantwortet"
         if self.last_error and self.status == "läuft":
             line += f"  letzte Meldung: {self.last_error[:120]}"
         return line
@@ -331,11 +355,31 @@ def run_tasks(
 
     client = LLMClient(cfg)
     write_lock = threading.Lock()
+
+    def nach_anfrage():
+        with write_lock:
+            prog.anfragen += 1
+        if on_progress:
+            on_progress(prog)
+
+    client.nach_anfrage = nach_anfrage
     outage = {"since": None}
     bad_requests = {"in_folge": 0}
     stop = stop_event or threading.Event()
+    client.stop = stop  # nach dem Anhalten stellt kein Worker mehr eine neue Anfrage
 
     def attempt(task):
+        if stop.is_set():
+            return None, "abgebrochen"
+        with write_lock:
+            prog.aktiv += 1
+        try:
+            return _attempt(task)
+        finally:
+            with write_lock:
+                prog.aktiv -= 1
+
+    def _attempt(task):
         last = None
         for i in range(cfg.max_retries):
             if stop.is_set():
@@ -346,6 +390,8 @@ def run_tasks(
                 with write_lock:
                     bad_requests["in_folge"] = 0
                 return result, None
+            except Abgebrochen:
+                return None, "abgebrochen"
             except Exception as e:  # noqa: BLE001 - alles außer fatalen Fehlern wird wiederholt
                 if _is_fatal(e):
                     stop.set()
@@ -365,7 +411,8 @@ def run_tasks(
                     if time.time() - outage["since"] > cfg.outage_minutes * 60:
                         stop.set()
                         return None, "API nicht erreichbar"
-                time.sleep(min(60, 2 ** i) + random.random())
+                if _warten(stop, min(60, 2 ** i) + random.random()):
+                    return None, "abgebrochen"
         return None, last
 
     try:
@@ -379,7 +426,11 @@ def run_tasks(
                 if len(running) >= cfg.workers * 2:
                     break
             while running:
-                finished, _ = wait(running, return_when=FIRST_COMPLETED)
+                finished, _ = wait(running, timeout=2, return_when=FIRST_COMPLETED)
+                if stop.is_set() and prog.status == "läuft":
+                    prog.status = "wird angehalten – laufende Anfragen werden noch beendet"
+                    if on_progress:
+                        on_progress(prog)
                 for fut in finished:
                     task = running.pop(fut)
                     result, error = fut.result()

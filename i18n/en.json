@@ -390,5 +390,6 @@
  "Neu starten": "Start new",
  "Sperre aufheben": "Release lock",
  "{n} fehlgeschlagen": "{n} failed",
- "Die Sperrdatei bleibt nach einem Absturz liegen. Nur aufheben, wenn sicher kein anderer Lauf (z. B. auf der Kommandozeile) auf dieser Datei arbeitet.": "The lock file is left behind after a crash. Only release it if you are sure no other run (e.g. on the command line) is working on this file."
+ "Die Sperrdatei bleibt nach einem Absturz liegen. Nur aufheben, wenn sicher kein anderer Lauf (z. B. auf der Kommandozeile) auf dieser Datei arbeitet.": "The lock file is left behind after a crash. Only release it if you are sure no other run (e.g. on the command line) is working on this file.",
+ "Wird angehalten: Es startet keine neue Anfrage mehr, laufende werden noch beendet. Halb fertige Materialien werden beim Fortsetzen neu erzeugt.": "Stopping: no new requests are started, running ones are still finished. Half-finished materials are generated again when resuming."
 }

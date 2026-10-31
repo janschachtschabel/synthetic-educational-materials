@@ -96,8 +96,12 @@ def job_status(name: str):
         st.info(T("startet …"))
     if job["error"]:
         st.error(job["error"])
-    if not job["done"] and st.button(T("Anhalten"), key=f"stop-{name}"):
-        job["stop"].set()
+    if not job["done"]:
+        if job["stop"].is_set():
+            st.caption(T("Wird angehalten: Es startet keine neue Anfrage mehr, laufende werden noch beendet. "
+                         "Halb fertige Materialien werden beim Fortsetzen neu erzeugt."))
+        elif st.button(T("Anhalten"), key=f"stop-{name}"):
+            job["stop"].set()
 
 
 # --- Seitenleiste: LLM ---------------------------------------------------------------------
