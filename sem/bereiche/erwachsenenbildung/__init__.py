@@ -200,6 +200,13 @@ class Erwachsenenbildung(Bildungsbereich):
 
     # --- Seed ---------------------------------------------------------------------------
 
+    kombination_label = "Thema × Fremdsprache"
+
+    def kombinationen(self, themen: list[dict], auswahl: dict[str, list[str]] | None = None) -> int:
+        """Themen; Fremdsprachen-Themen zählen je konkreter Sprache (sie wird je Seed rotiert)."""
+        return sum(len(FREMDSPRACHEN) if any(f["notation"] == ZIEL_FS for f in t["fachgebiet"]) else 1
+                   for t in themen)
+
     def make_seed(self, topic: dict, rng: random.Random, state: SeedState) -> dict:
         opt = self.optionen
         s = systematik()

@@ -1,0 +1,7 @@
+<div class="tabelle-rahmen" tabindex="0" role="region" aria-label="{{ titel }}">
+<table>
+  <caption class="klein">{{ T("Die ersten {n} Zeilen", n=zeilen|length) }}</caption>
+  <thead><tr>{% for s in spalten %}<th scope="col">{{ s }}</th>{% endfor %}</tr></thead>
+  <tbody>{% for z in zeilen %}<tr>{% for c in z %}<td>{{ c }}</td>{% endfor %}</tr>{% endfor %}</tbody>
+</table>
+</div>

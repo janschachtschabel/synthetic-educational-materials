@@ -334,11 +334,11 @@ Schritte (`python -m sem mappings schule --liste`):
    Die WLO-Stufen sieht das LLM nicht; sie dienen als unabhängige Gegenprobe (`wlo_bestaetigt`).
 6. `keywords` (`--wlo`): Keywords der WLO-Datensätze mit Bildungsstufe Primarstufe, Sek I oder II und
    Schulfach (`ccm:taxonid`, OEH discipline). Genutzt werden nur Keyword, Fach, Bildungsstufe,
-   Themenbaum-Zuordnung (`ccm:curriculum`) und Node-ID. 20.384 Keywords kommen in mindestens fünf
-   Datensätzen vor.
+   Themenbaum-Zuordnung (`ccm:curriculum`) und Node-ID. 34.237 Keywords kommen in mindestens drei
+   Datensätzen vor (bis Oktober 2026 galt eine Schwelle von fünf Datensätzen: 20.384 Keywords).
 7. `kw_gnd`: Keywords exakt auf GND-Sachbegriffe (Vorzugsname oder Synonym). Treffer, die einem
    Themenbaum-Thema entsprechen (gleiches Label oder gleicher GND-Begriff), werden dessen Beleg
-   (`belege.wlo_keyword`, 876 Themen); Fachnamen fallen weg. Übrig bleiben 6.376 neue GND-Begriffe.
+   (`belege.wlo_keyword`, 1.007 Themen); Fachnamen fallen weg. Übrig bleiben 9.072 neue GND-Begriffe.
 8. `kw_bedeutung`: Nur wo das Keyword bloß einem GND-Synonym entspricht (oft Abkürzungen oder englische
    Wörter), drei Stimmen, ob es in Materialien dieser Fächer dasselbe meint (z. B. „adhs“ →
    Aufmerksamkeitsdefizit-Syndrom ja, „fish“ → Fluoreszenz-in-situ-Hybridisierung nein). Sonst fällt
@@ -364,13 +364,16 @@ wahrscheinlich 85, redaktionell 21. In 2.191 Fällen bestätigen die WLO-Datens�
 gewählten Stufen. Die 22 Prüffälle sind redaktionell entschieden (OER- und Schulentwicklungsthemen als
 Lehrkräftethemen für alle Stufen, Pädagogik als Oberstufenfach, ein Hochschulthema ausgeschlossen).
 
-**Ergebnis Keywords:** 4.416 zusätzliche Themen (4.310 Unterrichtsthemen, 106 für Lehrkräfte) in 43
-Fächern, am häufigsten Physik, Geographie, Geschichte, Religion, Biologie und Mathematik; Stufen:
-Primarstufe 1.726, Sek I 3.761, Sek II 3.011. 1.960 Begriffe sind verworfen (ungeeignet, andere Bedeutung
-oder keine passende Stufe). Fach gesichert 3.761, wahrscheinlich 613, unsicher 42 (nur Ersatz aus dem
-häufigsten WLO-Fach, standardmäßig nicht in den Seeds). 721 Keyword-Themen haben ein Oberthema im
-Themenbaum. Die 56 Prüffälle sind redaktionell entschieden (u. a. Fehlzuordnungen wie „Poker“ in Physik
-oder Ausbildungsberufe im Englischunterricht ausgeschlossen). Bei Keyword-Themen ohne Oberthema trägt der
+**Ergebnis Keywords:** 6.363 zusätzliche Themen (6.220 Unterrichtsthemen, 143 für Lehrkräfte) in 50
+Fächern, am häufigsten Physik, Geografie, Geschichte, Biologie, Religion und Politik; Stufen:
+Primarstufe 2.231, Sek I 5.225, Sek II 4.330. 2.709 Begriffe sind verworfen (ungeeignet, andere Bedeutung
+oder keine passende Stufe). Fach gesichert 5.445, wahrscheinlich 854, unsicher 64 (nur Ersatz aus dem
+häufigsten WLO-Fach, standardmäßig nicht in den Seeds). 986 Keyword-Themen haben ein Oberthema im
+Themenbaum. Die Senkung der Schwelle von fünf auf drei Datensätze (Oktober 2026) brachte 1.947 Themen
+dazu (vorher 4.416). Die 56 Prüffälle der ersten Fassung sind redaktionell entschieden (u. a.
+Fehlzuordnungen wie „Poker“ in Physik oder Ausbildungsberufe im Englischunterricht ausgeschlossen); auch die 54
+Prüffälle der neuen Themen sind redaktionell entschieden (17 ausgeschlossen, wieder vor allem
+Ausbildungsberufe im Englischunterricht und Fehlzuordnungen zur Physik wie „Totenstarre“ oder „Whisky“). Bei Keyword-Themen ohne Oberthema trägt der
 Seed kein `ccm:curriculum`; Thema und GND-URI stehen in `synth:thema`.
 
 **Inhaltstypen** (`inhaltstypen.json`, 19 aus OEH `new_lrt`): u. a. Arbeitsblatt, Übungsmaterial,
@@ -389,11 +392,11 @@ keine Standardformulierungen. Je Unterrichtsthema und Schulstufe gilt das passen
 Primarbereich, Sek I → ESA/MSA, Sek II → AHR); drei Stimmen wählen ein bis zwei inhaltliche Einträge
 (Teilbereich vor Kompetenzbereich, leere Auswahl erlaubt); sind sie uneinig, entscheiden zwei weitere Stimmen
 (Mehrheit drei von fünf). Prozessbezogene Kompetenzen gelten für alle Themen
-eines Fachs und werden nicht zugeordnet. **Ergebnis:** 4.395 von 5.052 Paaren aus Thema und Dokument haben
-einen Eintrag (gesichert 3.289, wahrscheinlich 1.106, davon 73 per Stichwahl), `bildungsstandards.jsonl`. Ohne
-Eintrag bleiben 320 Paare, bei denen keine Stimme einen Eintrag gewählt hat (oft allgemeiner Wortschatz oder
-Sachthemen in den Fremdsprachen), und rund 340 weiter uneinige; sie bekommen kein Feld statt einer geratenen
-Zuordnung.
+eines Fachs und werden nicht zugeordnet. **Ergebnis:** 5.350 Paare aus Thema und Dokument haben einen
+Eintrag (gesichert 3.930, wahrscheinlich 1.420), `bildungsstandards.jsonl`; in der ersten Fassung (vor den
+zusätzlichen Keyword-Themen) waren es 4.395 von 5.052 Paaren. Paare, bei denen keine Stimme einen Eintrag
+gewählt hat (oft allgemeiner Wortschatz oder Sachthemen in den Fremdsprachen) oder die weiter uneinig sind,
+bekommen kein Feld statt einer geratenen Zuordnung.
 
 ## Mappings Erwachsenenbildung
 

@@ -52,6 +52,8 @@ def _llm_args(p):
     g.add_argument("--model")
     g.add_argument("--workers", type=int)
     g.add_argument("--retries", type=int, dest="max_retries")
+    g.add_argument("--ausfall-minuten", type=float, dest="outage_minutes",
+                   help="so lange wird bei nicht erreichbarer API gewartet, dann pausiert der Lauf (Standard 10)")
     g.add_argument("--reasoning-effort", choices=["standard", "minimal", "low", "medium", "high"],
                    help="nur für Reasoning-Modelle: weniger Denkaufwand = schneller; Standard low "
                         "(LLM_REASONING_EFFORT), „standard“ = Parameter nicht senden")
@@ -60,11 +62,36 @@ def _llm_args(p):
                         "(werden wiederholt)")
 
 
+def _stand_arg(p):
+    p.add_argument("--stand", type=Path, metavar="DATEI",
+                   help="Fortschritt als JSON in DATEI (NAME.stand.json) schreiben und anhalten, sobald NAME.stop "
+                        "existiert; so startet die Oberfläche Läufe als eigenen Prozess (sem/prozess.py)")
+
+
+def _mit_stand(a, fn, **kwargs):
+    """fn(on_progress=…, stop_event=…, **kwargs) mit Fortschritt im Terminal oder, mit --stand, in der Stand-Datei."""
+    from .llm import print_progress
+
+    if not a.stand:
+        return fn(on_progress=print_progress, **kwargs)
+    from .prozess import StandSchreiber, stop_beobachten
+
+    schreiber = StandSchreiber(a.stand)
+    try:
+        prog = fn(on_progress=schreiber, stop_event=stop_beobachten(a.stand), **kwargs)
+    except BaseException as e:
+        schreiber.ende(None, fehler=f"{type(e).__name__}: {e}")
+        raise
+    schreiber.ende(prog)
+    return prog
+
+
 def _cfg(a):
     from .llm import LLMConfig
 
     return LLMConfig.from_env(base_url=a.base_url, api_key=a.api_key, model=a.model, workers=a.workers,
-                              max_retries=a.max_retries, reasoning_effort=a.reasoning_effort,
+                              max_retries=a.max_retries, outage_minutes=a.outage_minutes,
+                              reasoning_effort=a.reasoning_effort,
                               service_tier=getattr(a, "service_tier", None))
 
 
@@ -89,6 +116,7 @@ def main(argv=None):
                    help="Status aller Zuordnungen in allen Bereichen, z. B. gesichert oder gesichert,wahrscheinlich "
                         "(Standard: gesichert,wahrscheinlich,redaktionell); --auswahl hat Vorrang")
     p.add_argument("--out", type=Path, help="Dateiname; das Präfix seeds_ wird ergänzt")
+    _stand_arg(p)
 
     p = sub.add_parser("auswahl", help="Filter eines Bildungsbereichs mit Standardwerten und Themenzahl")
     p.add_argument("bereich")
@@ -114,6 +142,7 @@ def main(argv=None):
                         "holt Fertiges ab und schickt die nächste Runde (Stand in <ausgabe>.batch/)")
     p.add_argument("--warten", action="store_true", help="mit --batch: wiederholen, bis alles fertig ist")
     p.add_argument("--intervall", type=float, default=60, help="mit --warten: Sekunden zwischen den Abfragen")
+    _stand_arg(p)
     _llm_args(p)
 
     sub.add_parser("laeufe", help="Materialläufe, die ihr Ziel nicht erreicht haben (abgebrochen oder mit Fehlern)")
@@ -129,6 +158,7 @@ def main(argv=None):
     p.add_argument("--wlo", nargs="+", metavar="CSV", help="WLO-Exporte für Keyword-Fach-Belege (bleiben lokal)")
     p.add_argument("--rlp", metavar="ORDNER", help="Markdown-Fassungen der KMK-Rahmenlehrpläne (Berufsbildung, "
                                                   "Schritt lernfelder; Standard RLP_MARKDOWN_DIR)")
+    _stand_arg(p)
     _llm_args(p)
 
     a = ap.parse_args(argv)
@@ -154,6 +184,12 @@ def main(argv=None):
         st = seeds.write(seeds.build(counts, balance, a.seed, auswahl), out,
                          {"anzahl": counts, "gleichverteilung": balance, "zufalls_seed": a.seed, "auswahl": auswahl})
         print(f"{st['anzahl']} Seeds → {out}")
+        if a.stand:  # Oberfläche: Abschlussmeldung samt Ausgabedatei
+            from .llm import Progress
+            from .prozess import StandSchreiber
+
+            StandSchreiber(a.stand).ende(Progress(total=st["anzahl"], done=st["anzahl"], status="fertig"),
+                                         ausgabe=str(out))
         print(json.dumps({k: st[k] for k in ("themen_abgedeckt", "seeds_je_gruppe", "seeds_je_thema", "niveau",
                                              "status", "belege")}, ensure_ascii=False))
         fehlt = [k for k, v in st.get("lokale_daten", {}).items() if v is None]
@@ -214,16 +250,22 @@ def main(argv=None):
             if not a.warten:
                 show(st)
             print(f"→ {out}" + ("" if st["abgeschlossen"] else "  (später erneut aufrufen, um fortzusetzen)"))
+            if a.stand:  # Oberfläche: Stand der Batch-Runde
+                from .llm import Progress
+                from .prozess import StandSchreiber
+
+                p = Progress(total=st["materialien"], done=st["fertig"], failed=st["fehlgeschlagen"],
+                             status="fertig" if st["abgeschlossen"] else "Runde verschickt")
+                StandSchreiber(a.stand).ende(p, batch=status_zeile(st), abgeschlossen=st["abgeschlossen"])
             return
-        prog = generate(a.seeds, out, _cfg(a), limit=a.limit, inhaltstyp_pruefen=not a.ohne_inhaltstyp_pruefung,
-                        ausgabesprache=a.sprache)
+        prog = _mit_stand(a, lambda **kw: generate(a.seeds, out, _cfg(a), **kw), limit=a.limit,
+                          inhaltstyp_pruefen=not a.ohne_inhaltstyp_pruefung, ausgabesprache=a.sprache)
         print(f"{prog.done} neu, {prog.skipped} schon vorhanden, {prog.failed} fehlgeschlagen → {out}")
         if prog.status != "fertig":
             sys.exit(2)
 
     elif a.cmd == "mappings":
         from .bereiche import get
-        from .llm import print_progress
 
         b = get(a.bereich)
         schritte = {x.key: x for x in b.mapping_schritte()}
@@ -241,8 +283,8 @@ def main(argv=None):
         if unbekannt:
             raise SystemExit(f"Unbekannte Schritte {unbekannt}. Möglich: {', '.join(schritte)}, "
                              f"{', '.join(b.mapping_folgen)}, alle")
-        prog = b.mapping_ausfuehren(keys, _cfg(a), on_progress=print_progress, limit=a.limit, stimmen=a.stimmen,
-                                    embedding_modell=a.embedding_modell, wlo_dateien=a.wlo, rlp_ordner=a.rlp)
+        prog = _mit_stand(a, lambda **kw: b.mapping_ausfuehren(keys, _cfg(a), **kw), limit=a.limit, stimmen=a.stimmen,
+                          embedding_modell=a.embedding_modell, wlo_dateien=a.wlo, rlp_ordner=a.rlp)
         print("\n" + prog.line())
         if "fertig" not in prog.status:
             sys.exit(2)

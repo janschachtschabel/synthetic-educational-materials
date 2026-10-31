@@ -214,11 +214,11 @@ Steps (`python -m sem mappings schule --liste`):
    The LLM does not see the WLO levels; they serve as an independent cross-check (`wlo_bestaetigt`).
 6. `keywords` (`--wlo`): keywords of WLO records with educational level primary, lower or upper secondary
    and a school subject (`ccm:taxonid`, OEH discipline). Only keyword, subject, educational level,
-   topic-tree assignment (`ccm:curriculum`) and node ID are used. 20,384 keywords occur in at least five
-   records.
+   topic-tree assignment (`ccm:curriculum`) and node ID are used. 34,237 keywords occur in at least three
+   records (until October 2026 the threshold was five records: 20,384 keywords).
 7. `kw_gnd`: match keywords exactly to GND subject headings (preferred name or synonym). Matches that
    correspond to a topic-tree topic (same label or same GND concept) become evidence for that topic
-   (`belege.wlo_keyword`, 876 topics); subject names are dropped. 6,376 new GND concepts remain.
+   (`belege.wlo_keyword`, 1,007 topics); subject names are dropped. 9,072 new GND concepts remain.
 8. `kw_bedeutung`: only where the keyword matches merely a GND synonym (often abbreviations or English
    words), three votes on whether it means the same in materials of these subjects (e.g. “adhs” →
    Aufmerksamkeitsdefizit-Syndrom yes, “fish” → Fluoreszenz-in-situ-Hybridisierung no). Otherwise the
@@ -244,13 +244,16 @@ probable 85, editorial 21. In 2,191 cases, the WLO records confirm at least one 
 review cases were resolved editorially (OER and school development topics treated as teacher topics for all
 levels, pedagogy as an upper-secondary subject, one higher education topic excluded).
 
-**Result, keywords:** 4,416 additional topics (4,310 classroom topics, 106 for teachers) in 43 subjects,
-most often physics, geography, history, religion, biology and mathematics; levels: primary 1,726, lower
-secondary 3,761, upper secondary 3,011. 1,960 concepts were discarded (unsuitable, different meaning or no
-fitting level). Subject secured 3,761, probable 613, uncertain 42 (fallback to the most frequent WLO
-subject only, not in the seeds by default). 721 keyword topics have a parent topic in the topic tree. The
-56 review cases were resolved editorially (e.g. mismatches such as “Poker” in physics or training
-occupations in English lessons excluded). For keyword topics without a parent topic the seed carries no
+**Result, keywords:** 6,363 additional topics (6,220 classroom topics, 143 for teachers) in 50 subjects,
+most often physics, geography, history, biology, religion and politics; levels: primary 2,231, lower
+secondary 5,225, upper secondary 4,330. 2,709 concepts were discarded (unsuitable, different meaning or no
+fitting level). Subject secured 5,445, probable 854, uncertain 64 (fallback to the most frequent WLO
+subject only, not in the seeds by default). 986 keyword topics have a parent topic in the topic tree.
+Lowering the threshold from five to three records (October 2026) added 1,947 topics (previously 4,416).
+The 56 review cases of the first version were resolved editorially (e.g. mismatches such as “Poker” in
+physics or training occupations in English lessons excluded); the 54 review cases of the new topics were also
+resolved editorially (17 excluded, again mainly training occupations in English lessons and mismatches to
+physics such as “Totenstarre” or “Whisky”). For keyword topics without a parent topic the seed carries no
 `ccm:curriculum`; topic and GND URI are in `synth:thema`.
 
 **Content types** (`inhaltstypen.json`, 19 from OEH `new_lrt`): e.g. worksheet, practice material,
@@ -261,7 +264,7 @@ portals.
 **Levels**: grades 1–2, 3–4, 5–6, 7–8, 9–10, introductory and qualification phases, `exactMatch`
 KIM educational levels 1–3.
 
-**KMK educational standards** (sequence `bildungsstandards`, steps `bista` and `bista_zusammenfuehren`; run after the topics). `bildungsstandards_gliederung.json` (local only in `data/lokal/schule/`, not in the repository) holds the outline of the 14 current documents (German and mathematics for primary, ESA/MSA and Abitur; first foreign language for ESA/MSA and Abitur; biology, chemistry and physics for MSA and Abitur): 314 headings (competence areas, sub-areas, key ideas, basic concepts, process-related competences) with code and path, no standard texts. For each classroom topic and school level the matching document applies (primary → primary, lower secondary → ESA/MSA, upper secondary → Abitur); three votes select one or two content entries (sub-area before competence area, empty selection allowed); if they disagree, two more votes decide (majority three of five). Process-related competences apply to all topics of a subject and are not assigned. **Result:** 4,395 of 5,052 topic-document pairs have an entry (3,289 `gesichert`, 1,106 `wahrscheinlich`, 73 of them by tie-break), `bildungsstandards.jsonl`. 320 pairs where no vote chose an entry (often general vocabulary or subject topics in the foreign languages) and around 340 still disagreeing remain without an entry; they get no field rather than a guessed assignment.
+**KMK educational standards** (sequence `bildungsstandards`, steps `bista` and `bista_zusammenfuehren`; run after the topics). `bildungsstandards_gliederung.json` (local only in `data/lokal/schule/`, not in the repository) holds the outline of the 14 current documents (German and mathematics for primary, ESA/MSA and Abitur; first foreign language for ESA/MSA and Abitur; biology, chemistry and physics for MSA and Abitur): 314 headings (competence areas, sub-areas, key ideas, basic concepts, process-related competences) with code and path, no standard texts. For each classroom topic and school level the matching document applies (primary → primary, lower secondary → ESA/MSA, upper secondary → Abitur); three votes select one or two content entries (sub-area before competence area, empty selection allowed); if they disagree, two more votes decide (majority three of five). Process-related competences apply to all topics of a subject and are not assigned. **Result:** 5,350 topic-document pairs have an entry (3,930 `gesichert`, 1,420 `wahrscheinlich`), `bildungsstandards.jsonl`; in the first version (before the additional keyword topics) it was 4,395 of 5,052 pairs. Pairs where no vote chose an entry (often general vocabulary or subject topics in the foreign languages) or that still disagree get no field rather than a guessed assignment.
 
 ## Mappings: Adult Education
 

@@ -1,0 +1,109 @@
+<nav class="umschalter" aria-label="{{ T('Dateiart') }}">
+  <a href="/vorschau?art=materialien" hx-get="/vorschau?art=materialien" hx-target="#vorschau" hx-push-url="true"
+     {% if art == 'materialien' %}aria-current="page"{% endif %}>{{ T("Erzeugte Materialien (materialien_…)") }}</a>
+  <a href="/vorschau?art=seeds" hx-get="/vorschau?art=seeds" hx-target="#vorschau" hx-push-url="true"
+     {% if art == 'seeds' %}aria-current="page"{% endif %}>Seeds (seeds_…)</a>
+</nav>
+
+{% if not datei %}
+  <p class="hinweis">{{ T("Noch keine erzeugten Materialien in output/ – erst im Reiter „Materialien“ starten.") if art == 'materialien' else T("Noch keine Seeds in output/.") }}</p>
+{% else %}
+<form class="formular vorschau-wahl" hx-get="/vorschau" hx-target="#vorschau" hx-push-url="true"
+      hx-trigger="change from:#v-datei, submit" role="search">
+  <input type="hidden" name="art" value="{{ art }}">
+  <div class="zeile">
+    <div class="feld">
+      <label for="v-datei">{{ T("Datei (neueste zuerst)") }}</label>
+      <select id="v-datei" name="datei">
+        {% for p, n in liste %}<option value="{{ p.name }}" {% if p == datei %}selected{% endif %}>{{ p.name }} – {{ anzahl(n, "Material" if art == "materialien" else "Seed", "Materialien" if art == "materialien" else "Seeds") }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="feld">
+      <label for="v-q">{{ T("Suchen (in allen Feldern, z. B. Thema, Fach, Titel, Keyword, id)") }}</label>
+      <div class="suche">
+        <input type="search" id="v-q" name="q" value="{{ q }}" autocomplete="off">
+        <button type="submit">{{ T("Suchen") }}</button>
+      </div>
+    </div>
+  </div>
+  <a class="download" href="/download?datei={{ datei.name|urlencode }}" download>{{ T("Datei herunterladen") }} ({{ "%.1f"|format(datei.stat().st_size / 1048576) }} MB)</a>
+</form>
+
+<p class="treffer" role="status">
+  {% if q %}{{ T("{n} Treffer für „{q}“ in {gesamt} Datensätzen", n=zahl(n), q=q, gesamt=zahl(gesamt)) }}{% if gekappt %} {{ T("(die ersten 10.000)") }}{% endif %}
+  {% else %}{{ T("{gesamt} Datensätze", gesamt=zahl(gesamt)) }}{% endif %}
+</p>
+
+{% if n %}
+{% set basis = url("/vorschau", art=art, datei=datei.name, q=q) %}
+{% set trenner = "&" %}
+<nav class="blaettern" aria-label="{{ T('Blättern') }}">
+  {% for ziel, text, aus in [(1, T("Erster"), nr == 1), (nr - 1, T("Zurück"), nr == 1), (nr + 1, T("Weiter"), nr >= n), (n, T("Letzter"), nr >= n)] %}
+    {% if aus %}<span class="knopf aus" aria-disabled="true">{{ text }}</span>
+    {% else %}<a class="knopf" href="{{ basis }}{{ trenner }}nr={{ ziel }}" hx-get="{{ basis }}{{ trenner }}nr={{ ziel }}" hx-target="#vorschau" hx-push-url="true">{{ text }}</a>{% endif %}
+  {% endfor %}
+  <form hx-get="/vorschau" hx-target="#vorschau" hx-push-url="true" class="nr-form">
+    <input type="hidden" name="art" value="{{ art }}"><input type="hidden" name="datei" value="{{ datei.name }}"><input type="hidden" name="q" value="{{ q }}">
+    <label for="v-nr">{{ T("Nr.") }}</label>
+    <input type="number" id="v-nr" name="nr" min="1" max="{{ n }}" value="{{ nr }}">
+    <span>{{ T("von {n}", n=zahl(n)) }}</span>
+    <button type="submit">{{ T("Gehe zu") }}</button>
+  </form>
+  <a class="knopf" href="{{ basis }}{{ trenner }}zufall=1" hx-get="{{ basis }}{{ trenner }}zufall=1" hx-target="#vorschau" hx-push-url="true">{{ T("Zufällig") }}</a>
+</nav>
+
+{% if ansicht %}{% set a = ansicht %}
+<article class="datensatz" aria-labelledby="ds-titel">
+  {% if a.material %}
+    <h2 id="ds-titel">{{ a.titel or a.id }}</h2>
+    <p>{{ a.beschreibung }}</p>
+    {% if a.keywords %}<ul class="schlagworte" aria-label="{{ T('Keywords') }}">{% for k in a.keywords %}<li>{{ k }}</li>{% endfor %}</ul>{% endif %}
+    {% if a.pruefung %}
+      {% if a.pruefung.uebereinstimmung %}
+        <p class="meldung erfolg">{{ T("Inhaltstyp-Prüfung: erkannt „{typ}“ – passt zum Seed", typ=a.pruefung.erkannt_label) }}</p>
+      {% else %}
+        <p class="meldung warnung">{{ T("Inhaltstyp-Prüfung: erkannt „{typ}“ – weicht vom Seed ab", typ=a.pruefung.erkannt_label) }}</p>
+      {% endif %}
+    {% endif %}
+  {% else %}
+    <h2 id="ds-titel">{{ a.id }}</h2>
+    <p class="meldung info">{{ T("Das ist ein Seed: die Vorgaben für ein Material. Erzeugte Materialien zeigt der Umschalter „Erzeugte Materialien“.") }}</p>
+  {% endif %}
+  <div class="spalten {% if not a.material %}eine{% endif %}">
+    {% if a.material %}
+    <section aria-labelledby="h-volltext">
+      <h3 id="h-volltext">{{ T("Volltext") }}</h3>
+      <div class="volltext" tabindex="0" role="region" aria-labelledby="h-volltext">{{ a.volltext|safe }}</div>
+    </section>
+    {% endif %}
+    <section aria-labelledby="h-meta">
+      <h3 id="h-meta">{{ T("Metadaten aus dem Seed") }}</h3>
+      <table class="meta">
+        <thead><tr><th scope="col">{{ T("Feld") }}</th><th scope="col">{{ T("Wert") }}</th></tr></thead>
+        <tbody>{% for k, v in a.meta.items() %}<tr><th scope="row">{{ T(k) }}</th><td class="umbruch">{{ v }}</td></tr>{% endfor %}</tbody>
+      </table>
+      {% if a.thema_text or a.thema_keywords %}
+      <details><summary>{{ T("Thema aus dem Seed") }}</summary><p>{{ a.thema_text }}</p><p class="klein">{{ a.thema_keywords|join(", ") }}</p></details>
+      {% endif %}
+    </section>
+  </div>
+  {% if a.qa %}
+  <section aria-labelledby="h-qa">
+    <h3 id="h-qa">{{ T("Frage-Antwort-Paare") }}</h3>
+    <div class="tabelle-rahmen" tabindex="0" role="region" aria-labelledby="h-qa">
+    <table>
+      {% set spalten = a.qa[0].keys()|list %}
+      <thead><tr>{% for s in spalten %}<th scope="col">{{ s }}</th>{% endfor %}</tr></thead>
+      <tbody>{% for z in a.qa %}<tr>{% for s in spalten %}<td>{{ z.get(s, "") }}</td>{% endfor %}</tr>{% endfor %}</tbody>
+    </table>
+    </div>
+  </section>
+  {% endif %}
+  <details><summary>{{ T("Herkunft je Feld") }}</summary><pre class="json" tabindex="0">{{ a.herkunft }}</pre></details>
+  <details><summary>{{ T("Rohdaten (JSON)") }}</summary><pre class="json" tabindex="0">{{ a.roh }}</pre></details>
+</article>
+{% else %}
+  <p class="meldung warnung">{{ T("Dieser Datensatz lässt sich nicht lesen.") }}</p>
+{% endif %}
+{% endif %}
+{% endif %}

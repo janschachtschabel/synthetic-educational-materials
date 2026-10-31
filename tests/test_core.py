@@ -35,3 +35,24 @@ def test_ausgabe_pfad_festes_praefix(tmp_path):
     for n in ("seeds_a.jsonl", "materialien_a.jsonl", "materialien_a.fehler.jsonl", "alt.jsonl"):
         (tmp_path / n).write_text("{}\n")
     assert [p.name for p in ausgabedateien("materialien", tmp_path)] == ["materialien_a.jsonl"]
+
+
+def test_mapping_folge_laeuft_weiter_wenn_label_doppelpunkt_hat():
+    """Ein Label wie „Keyword-Themen: Bedeutung“ darf die Folge nicht nach dem ersten Schritt beenden."""
+    from sem.bereiche.base import MappingSchritt, fertig
+    from sem.bereiche.hochschule import Hochschule
+
+    gelaufen = []
+
+    def schritt(name):
+        def run(cfg, **_):
+            gelaufen.append(name)
+            return fertig(name)
+        return run
+
+    class Test(Hochschule):
+        def mapping_schritte(self):
+            return [MappingSchritt("a", "Teil: Eins", "", schritt("a")), MappingSchritt("b", "Zwei", "", schritt("b"))]
+
+    prog = Test().mapping_ausfuehren(["a", "b"], None)
+    assert gelaufen == ["a", "b"] and prog.status.startswith("Zwei: fertig")

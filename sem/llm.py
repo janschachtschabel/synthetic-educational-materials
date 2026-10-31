@@ -11,6 +11,7 @@ from __future__ import annotations
 import json
 import os
 import random
+import re
 import sys
 import threading
 import time
@@ -205,6 +206,8 @@ def _is_connection_error(e: Exception) -> bool:
 def _is_fatal(e: Exception) -> bool:
     import openai
 
+    if isinstance(e, openai.RateLimitError):  # Guthaben aufgebraucht: Wiederholen hilft nicht, sonst scheitert der Rest
+        return any(k in str(e) for k in ("insufficient_quota", "credit_balance_exhausted"))
     return isinstance(e, (openai.AuthenticationError, openai.PermissionDeniedError, openai.NotFoundError))
 
 
@@ -270,16 +273,36 @@ def _zeilenende(path: Path):
                 f.write(b"\n")
 
 
+_ID_ZEILE = re.compile(rb'\{"id": "([^"\\]*)"')
+_done_cache: dict[str, tuple[tuple[int, int], frozenset[str]]] = {}
+
+
 def read_done(path: Path) -> set[str]:
-    if not path.exists():
+    """IDs aller vollständigen Zeilen. Unsere Zeilen beginnen mit {"id": "…"; die ID wird ohne JSON-Parsen gelesen
+    (sonst dauert eine 600-MB-Ausgabe ~10 s), Ergebnis je Datei bis zur nächsten Änderung gemerkt."""
+    path = Path(path)
+    try:
+        s = path.stat()
+    except FileNotFoundError:
         return set()
+    key, stempel = str(path.resolve()), (s.st_mtime_ns, s.st_size)
+    if (c := _done_cache.get(key)) and c[0] == stempel:
+        return set(c[1])
     done = set()
-    for line in path.read_text(encoding="utf-8").splitlines():
-        if line.strip():
+    with path.open("rb") as f:
+        for line in f:
+            line = line.rstrip()
+            if not line:
+                continue
+            m = _ID_ZEILE.match(line)
+            if m and line.endswith(b"}"):
+                done.add(m.group(1).decode("utf-8"))
+                continue
             try:
                 done.add(json.loads(line)["id"])
-            except (json.JSONDecodeError, KeyError):
+            except (json.JSONDecodeError, KeyError, TypeError, UnicodeDecodeError):
                 pass  # halbe Zeile nach Absturz
+    _done_cache[key] = (stempel, frozenset(done))
     return done
 
 

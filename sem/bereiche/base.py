@@ -61,6 +61,18 @@ class Bildungsbereich(ABC):
     def prompt_values(self, seed: dict) -> dict:
         """Werte für die Platzhalter der Prompt-Vorlagen aus einem Seed."""
 
+    # Was eine Kombination ist (Oberfläche: Themen und mögliche Kombinationen je Auswahl)
+    kombination_label: str = "Themen"
+
+    def kombinationen(self, themen: list[dict], auswahl: dict[str, list[str]] | None = None) -> int:
+        """Zahl der unterscheidbaren Thema-Varianten, aus denen Seeds gezogen werden; Standard: die Themen."""
+        return len(themen)
+
+    def alle_auswahl(self) -> dict[str, list[str]]:
+        """Auswahl mit allen Werten jedes Filters: die größtmögliche Themenmenge. Belege sind Pflichtangaben
+        (leer = keine verlangt) und bleiben deshalb leer."""
+        return {k: [] if k == "belege" else list(o["werte"]) for k, o in self.auswahl_optionen().items()}
+
     def inhaltstyp_kategorien(self) -> list[dict]:
         """Kategorien für die Prüfung des Inhaltstyps am fertigen Text: [{"id", "name", "uri"}].
         Leer = keine Prüfung."""
@@ -98,10 +110,11 @@ class Bildungsbereich(ABC):
             if stop_event is not None and stop_event.is_set():
                 break
             prog = schritte[k].run(cfg, on_progress=on_progress, stop_event=stop_event, **optionen)
+            ok = prog.status.startswith("fertig")  # vor dem Präfix prüfen: Labels können „: “ enthalten
             prog.status = f"{schritte[k].label}: {prog.status}"
             if on_progress:
                 on_progress(prog)
-            if not prog.status.split(": ", 1)[1].startswith("fertig"):
+            if not ok:
                 break
         return prog
 

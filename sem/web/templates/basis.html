@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="{{ ui }}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block titel %}{% endblock %} · {{ T("Synthetische Bildungsmaterialien") }}</title>
+<link rel="stylesheet" href="/static/app.css">
+<script src="/static/htmx.min.js" defer></script>
+<script src="/static/app.js" defer></script>
+</head>
+<body>
+<a class="springen" href="#inhalt">{{ T("Zum Inhalt springen") }}</a>
+<header class="kopf">
+  <div class="kopf-zeile">
+    <a class="marke" href="/materialien">{{ T("Synthetische Bildungsmaterialien") }}</a>
+    <div id="kopf-laeufe" hx-get="/laeufe/kopf" hx-trigger="load, every 3s" hx-swap="innerHTML"></div>
+    <nav class="sprache" aria-label="{{ T('Sprache') }}">
+      {% for code, name in UI_SPRACHEN.items() %}
+        {% if code == ui %}<span aria-current="true">{{ name }}</span>
+        {% else %}<a href="/sprache/{{ code }}?zurueck={{ quote(pfad) }}" lang="{{ code }}" hreflang="{{ code }}">{{ name }}</a>{% endif %}
+      {% endfor %}
+    </nav>
+  </div>
+  <nav class="reiter" aria-label="{{ T('Bereiche der Anwendung') }}">
+    <ul>
+    {% for ziel, text in [("/seeds", "Seeds"), ("/materialien", T("Materialien")), ("/vorschau", T("Vorschau")),
+                          ("/prompts", "Prompts"), ("/mappings", "Mappings"), ("/methodik", T("Methodik")),
+                          ("/einstellungen", T("Einstellungen"))] %}
+      <li><a href="{{ ziel }}" {% if pfad.startswith(ziel) %}aria-current="page"{% endif %}>{{ text }}</a></li>
+    {% endfor %}
+    </ul>
+  </nav>
+</header>
+<div id="fehlerleiste" class="meldung fehler leiste" role="alert" hidden data-offline="{{ T('Server nicht erreichbar. Läuft python app.py noch?') }}">
+  <span></span> <button type="button" class="zweitrangig">{{ T("Schließen") }}</button>
+</div>
+<main id="inhalt" tabindex="-1">
+{% block inhalt %}{% endblock %}
+</main>
+<div id="ansage" class="nur-vorlesen" aria-live="polite" aria-atomic="true"></div>
+</body>
+</html>

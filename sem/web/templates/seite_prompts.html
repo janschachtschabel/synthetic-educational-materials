@@ -1,0 +1,35 @@
+{% extends "basis.html" %}
+{% block titel %}Prompts{% endblock %}
+{% block inhalt %}
+<h1>{{ T("Prompts bearbeiten") }}</h1>
+<p class="einleitung">{{ T("Die Prompts selbst sind deutsch; die Sprache der erzeugten Inhalte wählt man im Reiter „Materialien“ (Ausgabesprache).") }}</p>
+{% if gespeichert %}<p class="meldung erfolg" role="status">{{ T("gespeichert – gilt für den nächsten Start") }}</p>{% endif %}
+
+<form method="get" action="/prompts" class="formular zeile">
+  <div class="feld">
+    <label for="p-scope">{{ T("Gültig für") }}</label>
+    <select id="p-scope" name="scope">
+      <option value="alle" {% if scope == 'alle' %}selected{% endif %}>{{ T("alle Bereiche") }}</option>
+      {% for k, label in bereiche.items() %}<option value="{{ k }}" {% if scope == k %}selected{% endif %}>{{ T(label) }}</option>{% endfor %}
+    </select>
+  </div>
+  <div class="feld">
+    <label for="p-which">Prompt</label>
+    <select id="p-which" name="which">
+      {% for w in prompts %}<option value="{{ w }}" {% if w == which %}selected{% endif %}>{{ w }}</option>{% endfor %}
+    </select>
+  </div>
+  <div class="feld knopf-unten"><button type="submit">{{ T("Anzeigen") }}</button></div>
+</form>
+
+<form hx-post="/prompts" class="formular">
+  <input type="hidden" name="scope" value="{{ scope }}"><input type="hidden" name="which" value="{{ which }}">
+  <p class="klein">{{ T("Quelle: {quelle} · speichert nach: {ziel}", quelle=quelle, ziel=ziel) }}</p>
+  <div class="feld">
+    <label for="p-text">{{ T("Text") }}</label>
+    <textarea id="p-text" name="text" rows="18" spellcheck="true" aria-describedby="p-hilfe">{{ text }}</textarea>
+    <p id="p-hilfe" class="hilfe">{{ T("Platzhalter: {liste} · Jedes Material speichert den Hash der verwendeten Prompts, Änderungen bleiben so nachvollziehbar.", liste=platzhalter|join(", ") or T("keine")) }}</p>
+  </div>
+  <button type="submit" class="haupt">{{ T("Speichern") }}</button>
+</form>
+{% endblock %}

@@ -25,7 +25,7 @@ Python 3.11 oder neuer. Empfohlen mit [uv](https://docs.astral.sh/uv/), das die 
 
 ```
 uv sync --all-extras
-uv run streamlit run app.py
+uv run python app.py
 ```
 
 Ohne lokale Embeddings und Testwerkzeuge reicht `uv sync` (Extras: `mapping` = sentence-transformers,
@@ -48,21 +48,41 @@ der Oberfläche oder per Parameter setzen.
 ## Oberfläche
 
 ```
-streamlit run app.py
+python app.py            # öffnet http://127.0.0.1:8501 im Browser; --port, --ohne-browser
 ```
 
-Die Oberfläche ist nur auf diesem Rechner erreichbar (`.streamlit/config.toml`: `address = "localhost"`), weil sie
-keine Anmeldung hat und LLM-Läufe mit dem Key aus der Umgebung starten kann. Den Key aus `OPENAI_API_KEY`
+Eine Weboberfläche aus FastAPI und HTMX (`sem/web/`): Der Server liefert fertige HTML-Seiten, HTMX tauscht nur
+die Teile aus, die sich ändern (Statusanzeige, abhängige Formularfelder, Vorschau). HTMX liegt im Repo
+(`sem/web/static/`), es wird nichts aus dem Netz geladen.
+
+Die Oberfläche ist nur auf diesem Rechner erreichbar (Server auf `127.0.0.1`), weil sie keine Anmeldung hat und
+LLM-Läufe mit dem Key aus der Umgebung starten kann. Anfragen mit fremdem Host-Namen und Änderungen von fremden
+Seiten weist sie ab. Den Key aus `OPENAI_API_KEY`
 verwendet sie nur für die Base-URL aus `OPENAI_BASE_URL`; für eine andere Base-URL ist ein Key einzutragen.
 
 Reiter: **Seeds** (Anzahl je Bildungsbereich, Feld für die Gleichverteilung, Auswahl der Themen nach
-Status, Quelle und Belegen, Zufalls-Seed),
-**Materialien** (Start/Fortsetzen mit Fortschrittsanzeige, Ausgabesprache), **Vorschau** (Seeds und fertige Materialien
-durchblättern und durchsuchen: Titel, Beschreibung, Keywords, Volltext, Frage-Antwort-Paare,
-Inhaltstyp-Prüfung, Metadaten und Herkunft), **Prompts** (bearbeiten und speichern),
-**Mappings** (ansehen, herunterladen, neu bauen), **Methodik**.
+Status, Quelle und Belegen, Zufalls-Seed; die Zusammenfassung zeigt je Bereich Themen und mögliche Kombinationen der
+Auswahl gegenüber dem Maximum aller Filterwerte, wie oft eine Kombination im Schnitt vorkommt und was die Filter
+ausschließen),
+**Materialien** (neuen Lauf starten oder unfertigen Lauf fortsetzen, Statusanzeige), **Vorschau** (Seeds und fertige
+Materialien durchblättern und durchsuchen: Titel, Beschreibung, Keywords, Volltext, Frage-Antwort-Paare,
+Inhaltstyp-Prüfung, Metadaten und Herkunft; blättert direkt in der Datei, auch bei mehreren hundert MB),
+**Prompts** (bearbeiten und speichern), **Mappings** (getrennt: Daten ansehen und herunterladen; Neubau für
+Betreiber mit Kennzeichnung, welcher Schritt LLM, WLO-Export, Embeddings oder lokale Daten braucht), **Methodik**,
+**Einstellungen** (LLM-Anbindung, Worker, Reasoning-Aufwand, Flex; gespeichert in
+`output/.oberflaeche.json`, der API-Key nur im Speicher des Servers).
 
-**Menüsprache:** Deutsch oder Englisch, umschaltbar oben in der Seitenleiste („Sprache / Language“);
+**Statusanzeige:** Phase (startet, läuft, hält an, keine Rückmeldung, pausiert, fertig, Fehler), Fortschrittsbalken,
+erfolgreich, fehlgeschlagen, offen, in Arbeit, Tempo, Restzeit, API-Anfragen und Wiederholungen, dazu das Alter des
+Stands. Sie aktualisiert sich jede Sekunde, solange der Lauf lebt; oben in der Kopfzeile steht, welche Läufe gerade
+arbeiten. Schreibt ein lebender Lauf über eine Minute keinen Stand, meldet sie „keine Rückmeldung“.
+
+**Bedienung ohne Maus und mit Screenreader:** Alle Felder sind beschriftet, Gruppen haben eine Überschrift
+(`fieldset`/`legend`), der Fokus ist immer sichtbar, ein Link springt zum Inhalt. Phasenwechsel eines Laufs werden
+angesagt (`aria-live`), die Knöpfe der Statusanzeige behalten den Fokus, während sich die Zahlen ändern. Farben
+haben in hellem und dunklem Modus mindestens den Kontrast 4,5:1, und keine Meldung hängt nur an der Farbe.
+
+**Menüsprache:** Deutsch oder Englisch, umschaltbar oben rechts;
 Voreinstellung über `SEM_UI_SPRACHE=en`. Das betrifft nur die Bedienung; die Sprache der erzeugten Inhalte
 wählt man getrennt davon im Reiter „Materialien“ (Ausgabesprache). Die Übersetzungen stehen in
 `i18n/en.json` (deutscher Text als Schlüssel). Neue Oberflächentexte findet `python scripts/i18n_texte.py`;
@@ -128,14 +148,22 @@ Fertiges ab und schickt die nächste Runde; `--warten` wiederholt das bis zum En
 
 **Abgebrochene Läufe:** Jeder Lauf hält in `output/materialien_<name>.lauf.json` fest, was er erzeugen soll (Seed-Datei,
 Anzahl, Sprache, Modell, Verarbeitung). Hat er sein Ziel nicht erreicht, etwa nach einer Internet-Unterbrechung oder
-mit fehlgeschlagenen Materialien, steht er in `python -m sem laeufe` und im Reiter „Materialien“ unter „Unfertige
-Läufe“: „Fortsetzen“ (`--fortsetzen NAME`) macht mit denselben Einstellungen weiter und überspringt Fertiges, „Neu
-starten“ beginnt unter neuem Namen. Die Sperrdatei eines abgestürzten Laufs wird beim Fortsetzen übernommen.
+mit fehlgeschlagenen Materialien, steht er in `python -m sem laeufe` und im Reiter „Materialien“ unter „Unfertigen
+Lauf fortsetzen“. Dort stehen die Einstellungen des Laufs; Worker und Standard oder Flex wählt man vor dem Start.
+„Fortsetzen“ (`--fortsetzen NAME`) macht mit denselben Einstellungen weiter und überspringt Fertiges, „Neu starten“
+beginnt unter neuem Namen. Die Sperrdatei eines abgestürzten Laufs wird beim Fortsetzen übernommen.
+
+**Läufe aus der Oberfläche** (Seeds, Materialien, Batch-Runden, Mappings) starten als eigener Prozess
+(`python -m sem … --stand`, siehe `sem/prozess.py`): Die Seite bleibt flüssig, und der Lauf geht weiter, wenn sie
+geschlossen oder der Server neu gestartet wird. Arbeitet ein Lauf von der Kommandozeile an einer Ausgabe, zeigt
+die Oberfläche das an und startet keinen zweiten. Die Oberfläche
+liest nur eine kleine Stand-Datei in `output/.prozesse/`; „Anhalten“ legt dort eine Stop-Datei an. Die Ausgabe des
+Prozesses (Fehlermeldungen) steht in `output/.prozesse/<name>.log`.
 
 LLM-Optionen für `materialien` und `mappings`: `--base-url`, `--api-key`, `--model`, `--workers`
 (Standard 20, `LLM_WORKERS`), `--reasoning-effort` (Standard `low`, `LLM_REASONING_EFFORT`; `standard`
-sendet den Parameter nicht), `--retries`. In der Oberfläche stehen Worker und Reasoning-Aufwand in der
-Seitenleiste unter „Geschwindigkeit“. Für `mappings` zusätzlich `--stimmen` (Standard 3) und `--embedding-modell` (Standard
+sendet den Parameter nicht), `--retries`. In der Oberfläche stehen Worker und Reasoning-Aufwand unter
+„Einstellungen“; Worker und Standard, Flex oder Batch wählt man außerdem je Lauf. Für `mappings` zusätzlich `--stimmen` (Standard 3) und `--embedding-modell` (Standard
 `intfloat/multilingual-e5-small`, läuft auf der CPU; wird beim ersten Lauf von Hugging Face geladen).
 
 ## Nur die Mappings nutzen
@@ -161,7 +189,7 @@ Alles unter `data/` ist ohne den Code nutzbar (JSON, JSONL, CSV, UTF-8):
 - `data/mappings/elementar/themen_elementar.jsonl`: 1.033 Kita-Themen (GND-URI, Synonyme, Definition,
   Themenart, Altersgruppe, Bildungsbereich, Herkunft, Status, WLO-Belege); `bildungsbereiche.json`: die
   sieben Bildungsbereiche mit closeMatch auf OEH-Schulfächer
-- `data/mappings/schule/themen_schule.jsonl`: 7.569 Schulthemen: 3.153 aus den WLO-Themenbäumen und 4.416
+- `data/mappings/schule/themen_schule.jsonl`: 9.516 Schulthemen: 3.153 aus den WLO-Themenbäumen und 6.363
   feinere Themen aus WLO-Keywords je Fach (als GND-Sachbegriffe normiert), mit Fachportal, Pfad, Fach,
   Themenart, Schulstufen, Herkunft, Status, WLO-Belegen und GND-Abgleich
 - `data/mappings/erwachsenenbildung/themen_erwachsenenbildung.jsonl`: 1.466 Kursthemen mit Fachgebiet und
@@ -180,7 +208,8 @@ Dateien (sha256, 12 Zeichen; `null` = fehlt): Gleicher Startwert ergibt nur bei 
 ## Aufbau
 
 ```
-app.py                     Oberfläche (Streamlit)
+app.py                     startet die Oberfläche (python app.py)
+sem/web/                   Oberfläche: FastAPI-Server, HTML-Vorlagen, CSS, HTMX
 i18n/                      Übersetzungen der Oberfläche (en.json)
 sem/                       Paket: llm, seeds, generate, prompts, schema, vocabs
 sem/mapping/               bereichsunabhängige Mapping-Bausteine (Embeddings, Abstimmung, Prüfliste)

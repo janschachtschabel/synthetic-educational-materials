@@ -1,0 +1,10 @@
+{% if laeufe %}
+<a class="kopf-lauf" href="{{ '/seeds' if laeufe[0].name == 'seeds' else '/mappings' if laeufe[0].name.startswith('map-') else '/materialien' }}">
+  <span class="punkt" aria-hidden="true"></span>
+  {% if laeufe|length == 1 %}
+    {{ T("{art}: {phase}", art=T(laeufe[0].art), phase=T(laeufe[0].phase_label)) }}{% if laeufe[0].prozent is not none %} · {{ laeufe[0].prozent }} %{% endif %}
+  {% else %}
+    {{ T("{n} Läufe aktiv", n=laeufe|length) }}
+  {% endif %}
+</a>
+{% endif %}

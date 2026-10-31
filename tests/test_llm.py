@@ -226,3 +226,25 @@ def test_anhalten_stellt_keine_neue_anfrage_mehr(tmp_path, monkeypatch):
     assert len(gesendet) == 2 and p.done == 0 and p.failed == 0
     assert p.status.startswith("pausiert")
     assert stand[0][0] == 1  # Fortschritt schon nach der ersten Anfrage gemeldet
+
+
+def test_guthaben_aufgebraucht_pausiert_sofort(tmp_path):
+    out = tmp_path / "out.jsonl"
+
+    def worker(client, t):
+        e = _status_fehler(openai.RateLimitError, 429)
+        e.message = "You have no credits remaining. 'code': 'credit_balance_exhausted'"
+        e.args = (e.message,)
+        raise e
+
+    p = run_tasks(_tasks(10), worker, out, _cfg(workers=1), on_progress=None)
+    assert p.status.startswith("pausiert") and p.failed == 1 and p.retries == 0
+
+
+def test_read_done_ohne_json_parsen_und_nach_aenderung_neu(tmp_path):
+    out = tmp_path / "out.jsonl"
+    out.write_text('{"id": "ä-1", "x": "{\\"id\\": \\"falsch\\"}"}\n{"x": 1, "id": "t2"}\n', encoding="utf-8")
+    assert read_done(out) == {"ä-1", "t2"}
+    with out.open("a", encoding="utf-8") as f:
+        f.write('{"id": "t3"}\n')
+    assert read_done(out) == {"ä-1", "t2", "t3"}

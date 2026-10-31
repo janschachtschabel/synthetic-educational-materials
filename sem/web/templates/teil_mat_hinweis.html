@@ -1,0 +1,3 @@
+{% if neu.fertig %}
+<p class="meldung info">{{ T("{datei} enthält schon {anzahl}. Start setzt fort und überspringt Fertiges. Für einen neuen Lauf einen anderen Namen wählen.", datei=neu.out.name, anzahl=anzahl(neu.fertig, "Material", "Materialien")) }}</p>
+{% endif %}
