@@ -333,14 +333,20 @@ with tab_mat:
         with st.expander(T("Unfertige Läufe ({n})", n=len(unfertig)), expanded=not laeuft_mat):
             st.caption(T("Läufe, die ihr Ziel nicht erreicht haben, z. B. nach einer Internet-Unterbrechung oder mit "
                          "fehlgeschlagenen Materialien. Fortsetzen nutzt die Einstellungen des Laufs (Seed-Datei, "
-                         "Anzahl, Sprache, Modell, Verarbeitung) und überspringt Fertiges; „Neu starten“ beginnt mit "
-                         "denselben Einstellungen unter neuem Namen, die bisherige Datei bleibt."))
+                         "Anzahl, Sprache, Modell) und überspringt Fertiges; „Neu starten“ beginnt mit denselben "
+                         "Einstellungen unter neuem Namen, die bisherige Datei bleibt. Standard oder Flex lässt sich "
+                         "je Lauf wählen, die Worker-Zahl kommt aus der Seitenleiste."))
             for i, L in enumerate(unfertig):
-                c1, c2, c3, c4 = st.columns([5, 2, 2, 2])
+                c1, c5, c2, c3, c4 = st.columns([5, 2, 2, 2, 2])
                 c1.markdown(f"**{L['name']}** · {L['fertig']} / {L['ziel']} · "
                             + T("{n} fehlgeschlagen", n=L["fehlgeschlagen"]) + f" · {L['verarbeitung']} · {L['zuletzt']}")
+                tier = L["verarbeitung"]
+                if tier != "batch":  # Standard oder Flex beim Fortsetzen wählbar
+                    tier = c5.selectbox(T("Verarbeitung"), ["sofort", "flex"], index=int(tier == "flex"),
+                                        key=f"lauf-tier-{i}", label_visibility="collapsed",
+                                        format_func=lambda v: T("Standard") if v == "sofort" else "Flex")
                 lauf_cfg = dataclasses.replace(cfg, model=L["modell"], reasoning_effort=L["reasoning_effort"],
-                                               service_tier="flex" if L["verarbeitung"] == "flex" else None)
+                                               service_tier="flex" if tier == "flex" else None)
                 args = dict(limit=L["limit"], inhaltstyp_pruefen=L["inhaltstyp_pruefen"],
                             ausgabesprache=L["ausgabesprache"])
                 if not Path(L["seeds"]).exists():
