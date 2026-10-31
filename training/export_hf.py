@@ -91,7 +91,10 @@ def flatten(r: dict) -> dict:
     subj_field = SUBJECT_FIELD.get(sector, ("ccm:taxonid", ""))[0]
     thema = r.get("synth:thema") or {}
     topic_uri = thema.get("id") or ""
-    open_topic = topic_uri.startswith(OPEN_TOPIC_PREFIXES)
+    # learning-field topics (ESCO occupation|kmk:…) are kept locally only
+    open_topic = topic_uri.startswith(OPEN_TOPIC_PREFIXES) and "kmk:" not in topic_uri
+    if open_topic and "|" in topic_uri:  # ESCO occupation|skill: the topic is the skill
+        topic_uri = (r.get("synth:kompetenz") or {}).get("uri") or topic_uri.split("|")[0]
     niveau = r.get("synth:niveau") or {}
     check = r.get("synth:inhaltstyp_pruefung") or {}
     return {
@@ -118,8 +121,8 @@ def flatten(r: dict) -> dict:
         "media_form": r.get("synth:medienform"),
         "didactic_function": r.get("synth:didaktische_funktion"),
         "duration_minutes": r.get("synth:bearbeitungsdauer_minuten"),
-        "topic": thema.get("label_de") if open_topic else None,
-        "topic_uri": topic_uri.split("|")[0] if open_topic else None,
+        "topic": (thema.get("label_de") or "").strip() or None if open_topic else None,
+        "topic_uri": topic_uri if open_topic else None,
         "generator_model": (r.get("synth:generierung") or {}).get("modell"),
     }
 
