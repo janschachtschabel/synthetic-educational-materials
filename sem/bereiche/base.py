@@ -110,10 +110,11 @@ class Bildungsbereich(ABC):
             if stop_event is not None and stop_event.is_set():
                 break
             prog = schritte[k].run(cfg, on_progress=on_progress, stop_event=stop_event, **optionen)
+            ok = prog.status.startswith("fertig")  # vor dem Präfix prüfen: Labels können „: “ enthalten
             prog.status = f"{schritte[k].label}: {prog.status}"
             if on_progress:
                 on_progress(prog)
-            if not prog.status.split(": ", 1)[1].startswith("fertig"):
+            if not ok:
                 break
         return prog
 

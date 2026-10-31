@@ -189,7 +189,7 @@ Alles unter `data/` ist ohne den Code nutzbar (JSON, JSONL, CSV, UTF-8):
 - `data/mappings/elementar/themen_elementar.jsonl`: 1.033 Kita-Themen (GND-URI, Synonyme, Definition,
   Themenart, Altersgruppe, Bildungsbereich, Herkunft, Status, WLO-Belege); `bildungsbereiche.json`: die
   sieben Bildungsbereiche mit closeMatch auf OEH-Schulfächer
-- `data/mappings/schule/themen_schule.jsonl`: 7.569 Schulthemen: 3.153 aus den WLO-Themenbäumen und 4.416
+- `data/mappings/schule/themen_schule.jsonl`: 9.533 Schulthemen: 3.153 aus den WLO-Themenbäumen und 6.380
   feinere Themen aus WLO-Keywords je Fach (als GND-Sachbegriffe normiert), mit Fachportal, Pfad, Fach,
   Themenart, Schulstufen, Herkunft, Status, WLO-Belegen und GND-Abgleich
 - `data/mappings/erwachsenenbildung/themen_erwachsenenbildung.jsonl`: 1.466 Kursthemen mit Fachgebiet und

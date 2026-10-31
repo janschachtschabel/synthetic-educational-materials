@@ -61,7 +61,7 @@ GND_QUELLE = {"name": "Gemeinsame Normdatei (GND), Sachbegriffe über lobid-gnd"
               "lizenz": "CC0-1.0"}
 WLO_STUFEN = {"Primarstufe": "primar", "Sekundarstufe I": "sek1", "Sekundarstufe II": "sek2"}
 N_STIMMEN = 3
-KW_MIN_NODES = 5        # Keyword muss in so vielen Schuldatensätzen vorkommen
+KW_MIN_NODES = 3        # Keyword muss in so vielen Schuldatensätzen vorkommen
 KW_FACH_ANTEIL = 0.1    # Fach als Kandidat, wenn es in mindestens 10 % der Datensätze des Keywords steht
 KW_ELTERN_ANTEIL = 0.2
 # Stufen von Fächern ohne eigenes Fachportal im Themenbaum
@@ -494,7 +494,7 @@ def build_kw_stufen(cfg: LLMConfig, limit: int | None = None, on_progress=None, 
                                 stop_event=stop_event)
 
 
-KW_METHODE = ("Schlagwort aus WLO-Schuldatensätzen (mindestens fünf Datensätze), exakt einem GND-Sachbegriff "
+KW_METHODE = ("Schlagwort aus WLO-Schuldatensätzen (mindestens drei Datensätze), exakt einem GND-Sachbegriff "
               "zugeordnet; LLM-Mehrfachabstimmung zu Themenart, Schulfach (aus den Fächern der Datensätze) und "
               "Schulstufen, Gegenprobe über die Bildungsstufen der Datensätze")
 
