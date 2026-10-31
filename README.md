@@ -28,7 +28,7 @@ Python 3.11 or newer. Recommended with [uv](https://docs.astral.sh/uv/), which i
 
 ```
 uv sync --all-extras
-uv run streamlit run app.py
+uv run python app.py
 ```
 
 Without local embeddings and test tools, `uv sync` is enough (extras: `mapping` = sentence-transformers,
@@ -51,21 +51,38 @@ in the user interface or via parameters.
 ## User interface
 
 ```
-streamlit run app.py
+python app.py            # opens http://127.0.0.1:8501 in the browser; --port, --ohne-browser
 ```
 
-The interface is only reachable from this computer (`.streamlit/config.toml`: `address = "localhost"`), because
-it has no login and can start LLM runs with the key from the environment. It uses the key from
+A web interface built with FastAPI and HTMX (`sem/web/`): the server delivers finished HTML pages, and HTMX swaps
+only the parts that change (status display, dependent form fields, preview). HTMX is part of the repository
+(`sem/web/static/`); nothing is loaded from the internet.
+
+The interface is only reachable from this computer (server on `127.0.0.1`), because it has no login and can start
+LLM runs with the key from the environment. It rejects requests with a foreign host name and changes coming from
+other websites. It uses the key from
 `OPENAI_API_KEY` only for the base URL from `OPENAI_BASE_URL`; for a different base URL, enter a key.
 
 Tabs: **Seeds** (number per education sector, field for even distribution, topic selection by
-status, source, and evidence, random seed),
-**Materials** (start/resume with progress indicator, output language), **Preview** (browse and search seeds and completed
-materials: titles, descriptions, keywords, full text, question-answer pairs,
-content type check, metadata, and provenance), **Prompts** (edit and save),
-**Mappings** (view, download, rebuild), **Methodology**. The prompt templates themselves are in German.
+status, source, and evidence, random seed, summary before starting),
+**Materials** (start a new run or resume an unfinished one, status display), **Preview** (browse and search seeds and
+completed materials: titles, descriptions, keywords, full text, question-answer pairs, content type check, metadata,
+and provenance; reads directly from the file, even with several hundred MB), **Prompts** (edit and save),
+**Mappings** (view, download, rebuild), **Methodology**, **Settings** (LLM connection, workers, reasoning effort,
+Flex, embedding model; saved in `output/.oberflaeche.json`, the API key only in the server's memory). The prompt
+templates themselves are in German.
 
-**Interface language:** German or English, switchable at the top of the sidebar (“Sprache / Language”);
+**Status display:** phase (starting, running, stopping, no response, paused, finished, error), progress bar,
+succeeded, failed, open, in progress, speed, time remaining, API requests and retries, plus the age of the status.
+It updates every second while the run is alive; the header shows which runs are currently working. If a live run
+writes no status for over a minute, it reports “no response”.
+
+**Keyboard and screen reader use:** all fields are labelled, groups have a heading (`fieldset`/`legend`), focus is
+always visible, and a link skips to the content. Phase changes of a run are announced (`aria-live`), and the buttons of
+the status display keep their focus while the numbers change. Colours have a contrast of at least 4.5:1 in light and
+dark mode, and no message relies on colour alone.
+
+**Interface language:** German or English, switchable at the top right;
 default can be set with `SEM_UI_SPRACHE=en`. This affects only the interface; the language of generated
 content is selected separately in the “Materials” tab (output language). The translations are in
 `i18n/en.json` (German text as keys). To find new interface text, run `python scripts/i18n_texte.py`;
@@ -135,15 +152,17 @@ fortsetzen” (resume an unfinished run). The run's settings are shown there; wo
 before starting. “Resume” (`--fortsetzen NAME`) continues with the same settings and skips finished materials,
 “Start new” begins under a new name. The lock file of a crashed run is taken over when resuming.
 
-**Runs from the user interface** start as a separate process (`python -m sem … --stand`, see `sem/prozess.py`): the
-page stays responsive, and the run continues if the page is closed or the app is restarted. The interface only reads
+**Runs from the user interface** (seeds, materials, batch rounds, mappings) start as a separate process
+(`python -m sem … --stand`, see `sem/prozess.py`): the page stays responsive, and the run continues if the page is
+closed or the server is restarted. If a run from the command line is working on an output, the interface shows this
+and does not start a second one. The interface only reads
 a small status file in `output/.prozesse/`; “Anhalten” (stop) creates a stop file there. The process output (error
 messages) is in `output/.prozesse/<name>.log`.
 
 LLM options for `materialien` and `mappings`: `--base-url`, `--api-key`, `--model`, `--workers`
 (default 20, `LLM_WORKERS`), `--reasoning-effort` (default `low`, `LLM_REASONING_EFFORT`; `standard`
-does not send the parameter), `--retries`. In the user interface, workers and reasoning effort are in the
-sidebar under “Geschwindigkeit” (“Speed”). For `mappings`, also: `--stimmen` (default 3) and `--embedding-modell` (default
+does not send the parameter), `--retries`. In the user interface, workers and reasoning effort are under
+“Settings”; workers and Standard, Flex or Batch can also be chosen per run. For `mappings`, also: `--stimmen` (default 3) and `--embedding-modell` (default
 `intfloat/multilingual-e5-small`, runs on the CPU; downloaded from Hugging Face on the first run).
 
 ## Using the mappings only
@@ -189,7 +208,8 @@ fingerprint.
 ## Structure
 
 ```
-app.py                     User interface (Streamlit)
+app.py                     starts the user interface (python app.py)
+sem/web/                   User interface: FastAPI server, HTML templates, CSS, HTMX
 i18n/                      User interface translations (en.json)
 sem/                       Package: llm, seeds, generate, prompts, schema, vocabs
 sem/mapping/               Sector-independent mapping components (embeddings, vote, review list)

@@ -3,12 +3,14 @@
     python scripts/i18n_texte.py               # zeigt fehlende Texte (Rückgabewert 1, wenn welche fehlen)
     python scripts/i18n_texte.py --uebersetzen # übersetzt fehlende Texte per LLM (OPENAI_API_KEY)
 
-Quellen: Aufrufe T("…")/t("…") in app.py, Labels und Beschreibungen der Bildungsbereiche (Gleichverteilung,
+Quellen: Aufrufe T("…")/t("…") in sem/web/app.py und den Vorlagen (sem/web/templates), die Phasen der
+Statusanzeige, Labels und Beschreibungen der Bildungsbereiche (Gleichverteilung,
 Filter, Mapping-Schritte), die Feldnamen der Vorschau und die Namen der Ausgabesprachen.
 """
 
 import ast
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -21,13 +23,23 @@ from sem.i18n import I18N_DIR  # noqa: E402
 EXTRA = ["Seed", "Seeds", "Material", "Materialien", "Modellstandard", "alle Bereiche", "keine"]
 
 
+WEB = ROOT / "sem" / "web"
+_T_AUFRUF = re.compile(r"""\bT\(\s*(["'])(.*?)\1\s*[,)]""", re.S)  # T("…") oder T('…') in den Vorlagen
+
+
 def aus_app() -> list[str]:
-    tree = ast.parse((ROOT / "app.py").read_text(encoding="utf-8"))
+    tree = ast.parse((WEB / "app.py").read_text(encoding="utf-8"))
     out = []
     for n in ast.walk(tree):
         if isinstance(n, ast.Call) and getattr(n.func, "id", None) in ("T", "t") and n.args \
                 and isinstance(n.args[0], ast.Constant) and isinstance(n.args[0].value, str):
             out.append(n.args[0].value)
+    from sem.web.app import EFFORTS, GRUPPEN, PHASEN, STATUS_TEXT
+
+    out += [x for ph in PHASEN.values() for x in (ph[0], ph[2])] + [g[1] for g in GRUPPEN]
+    out += list(STATUS_TEXT.values()) + EFFORTS + ["Seeds", "Materialien", "Mappings", "Vokabulare"]
+    for vorlage in sorted((WEB / "templates").glob("*.html")):
+        out += [m.group(2) for m in _T_AUFRUF.finditer(vorlage.read_text(encoding="utf-8"))]
     return out
 
 
@@ -56,7 +68,7 @@ def alle_texte() -> list[str]:
                               if x and x.strip()))
 
 
-SYSTEM = """Translate the German user-interface texts of a Streamlit app for generating synthetic educational materials into concise British-neutral English.
+SYSTEM = """Translate the German user-interface texts of a web app for generating synthetic educational materials into concise British-neutral English.
 - Keep placeholders like {name} exactly, keep file names, field names (e.g. cclom:general_language), prefixes (seeds_, materialien_), code values, URLs and Markdown (**bold**).
 - Keep German proper names of German institutions, curricula and classifications where no established English name exists, adding nothing.
 - Answer only with JSON: {"uebersetzungen": {"<German>": "<English>"}}"""

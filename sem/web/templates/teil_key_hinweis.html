@@ -1,0 +1,5 @@
+{% if key == 'fehlt' %}
+<p class="meldung warnung" role="status">{{ T("Kein API-Key: Weder unter „Einstellungen“ eingetragen noch in OPENAI_API_KEY gesetzt. Läufe mit LLM schlagen so fehl.") }} <a href="/einstellungen">{{ T("Zu den Einstellungen") }}</a></p>
+{% elif key == 'fremde_url' %}
+<p class="meldung warnung" role="status">{{ T("Andere Base-URL als in OPENAI_BASE_URL: Der Key aus OPENAI_API_KEY wird dafür nicht verwendet. Bitte einen Key eintragen.") }} <a href="/einstellungen">{{ T("Zu den Einstellungen") }}</a></p>
+{% endif %}

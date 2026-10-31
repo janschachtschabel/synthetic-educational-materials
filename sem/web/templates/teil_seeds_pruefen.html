@@ -1,0 +1,19 @@
+<div class="zusammenfassung">
+  <h2 class="klein-titel">{{ T("Zusammenfassung") }}</h2>
+  {% if not f.gewaehlt %}
+    <p class="meldung warnung">{{ T("Mindestens einen Bildungsbereich mit einer Anzahl über 0 wählen.") }}</p>
+  {% else %}
+  <ul>
+    {% for k in f.gewaehlt %}
+      <li>{{ T(labels[k]) }}: {{ anzahl(f.counts[k], "Seed", "Seeds") }} · {{ T("{n} Themen ausgewählt", n=zahl(f.themen[k])) }}</li>
+    {% endfor %}
+  </ul>
+  {% if f.leer %}
+    <p class="meldung warnung">{{ T("Keine Themen ausgewählt für: {bereiche}. Filter erweitern.", bereiche=leer_labels) }}</p>
+  {% endif %}
+  <p>{{ T("Wird gespeichert als {datei}.", datei=f.ziel.name) }}</p>
+  {% if vorhanden is not none %}
+    <p class="meldung warnung">{{ T("{datei} gibt es schon ({anzahl}) und wird beim Erzeugen überschrieben.", datei=f.ziel.name, anzahl=anzahl(vorhanden, "Seed", "Seeds")) }}</p>
+  {% endif %}
+  {% endif %}
+</div>

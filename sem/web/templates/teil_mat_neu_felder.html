@@ -1,0 +1,18 @@
+{# Felder, die von der gewählten Seed-Datei abhängen #}
+<div class="feld schmal">
+  <label for="limit">{{ T("Wie viele Seeds verarbeiten?") }}</label>
+  <input type="number" id="limit" name="limit" min="0" max="{{ neu.n_seeds }}" value="0" aria-describedby="limit-hilfe">
+  <p id="limit-hilfe" class="hilfe">{{ T("0 = alle {n}. Es werden die ersten N Seeds der Datei genommen.", n=zahl(neu.n_seeds)) }}</p>
+</div>
+<div class="feld">
+  <label for="name">{{ T("Name der Ausgabedatei") }}</label>
+  <div class="dateiname-eingabe">
+    <span aria-hidden="true">materialien_</span>
+    <input type="text" id="name" name="name" value="{{ neu.name }}" aria-describedby="name-hilfe name-hinweis"
+           hx-get="/materialien/neu-felder" hx-trigger="input changed delay:400ms" hx-target="#name-hinweis"
+           hx-include="#src, this" hx-vals='{"nur_hinweis": "true"}' spellcheck="false" autocomplete="off">
+    <span aria-hidden="true">.jsonl</span>
+  </div>
+  <p id="name-hilfe" class="hilfe">{{ T("Gespeichert als materialien_<Name>.jsonl in output/. Standard: derselbe Name wie die Seed-Datei.") }}</p>
+  <div id="name-hinweis" aria-live="polite">{% include "teil_mat_hinweis.html" %}</div>
+</div>

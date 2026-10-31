@@ -1,0 +1,107 @@
+{% extends "basis.html" %}
+{% block titel %}{{ T("Materialien") }}{% endblock %}
+{% block inhalt %}
+<h1>{{ T("Materialien erzeugen") }}</h1>
+<p class="einleitung">{{ T("Pro Seed: Volltext, dann je ein Aufruf für Titel, Beschreibung, Keywords, Inhaltstyp-Prüfung und Frage-Antwort-Paare.") }}</p>
+
+{% include "teil_key_hinweis.html" %}
+
+<div id="mat-status" tabindex="-1">
+{% if mat %}{% with lauf=mat, name="mat" %}{% include "teil_status.html" %}{% endwith %}{% endif %}
+</div>
+
+<nav class="umschalter" aria-label="{{ T('Aufgabe wählen') }}">
+  <a href="/materialien?aufgabe=neu" {% if aufgabe == 'neu' %}aria-current="page"{% endif %}>{{ T("Neuen Lauf starten") }}</a>
+  <a href="/materialien?aufgabe=fortsetzen" {% if aufgabe == 'fortsetzen' %}aria-current="page"{% endif %}>
+    {{ T("Unfertigen Lauf fortsetzen") }} <span class="zaehler">{{ offen|length }}</span></a>
+</nav>
+
+{% if aufgabe == 'fortsetzen' %}
+<section aria-labelledby="h-offen">
+  <h2 id="h-offen">{{ T("Unfertige Läufe") }}</h2>
+  {% if not offen %}
+    <p class="hinweis">{{ T("Keine unfertigen Läufe: Alle Läufe haben ihr Ziel erreicht.") }}</p>
+  {% else %}
+  <p class="klein">{{ T("Läufe, die ihr Ziel nicht erreicht haben, z. B. nach einer Unterbrechung oder mit fehlgeschlagenen Materialien. Erst einen Lauf wählen: Dann siehst du seine Einstellungen und kannst Worker und Standard oder Flex anpassen, bevor er startet.") }}</p>
+  <ul class="karten">
+  {% for n, L in offen.items() %}
+    <li class="karte {% if auswahl and auswahl.name == n %}gewaehlt{% endif %}">
+      <h3 class="dateiname">{{ n }}</h3>
+      <p>
+        <strong>{{ zahl(L.fertig) }} / {{ zahl(L.ziel) }}</strong> {{ T("fertig") }}
+        · {{ T("{n} offen", n=zahl([L.ziel - L.fertig, 0]|max)) }}
+        {% if L.fehlgeschlagen %}· {{ T("{n} fehlgeschlagen", n=zahl(L.fehlgeschlagen)) }}{% endif %}
+        · {{ L.verarbeitung }} · {{ T("zuletzt {zeit}", zeit=L.zuletzt.replace('T', ' ')) }}
+      </p>
+      {% if L.fremd_pid %}<p class="meldung info">{{ T("Wird gerade von einem anderen Prozess bearbeitet (PID {pid}, z. B. Kommandozeile).", pid=L.fremd_pid) }}</p>{% endif %}
+      <button type="button" hx-get="/materialien/fortsetzen/{{ n }}" hx-target="#fortsetzen-panel"
+              hx-push-url="/materialien?aufgabe=fortsetzen&amp;lauf={{ n|urlencode }}"
+              aria-controls="fortsetzen-panel"
+              hx-on::after-request="if(event.detail.successful){var p=document.getElementById('fortsetzen-panel');p.scrollIntoView({block:'start'});p.focus()}">{{ T("Auswählen und Einstellungen prüfen") }}</button>
+    </li>
+  {% endfor %}
+  </ul>
+  {% endif %}
+  <div id="fortsetzen-panel" tabindex="-1">
+    {% if auswahl %}
+      {% set L = auswahl %}
+      {% include "teil_fortsetzen_lade.html" %}
+    {% endif %}
+  </div>
+</section>
+
+{% else %}
+<section aria-labelledby="h-neu">
+  <h2 id="h-neu">{{ T("Neuen Lauf starten") }}</h2>
+  {% if not seed_dateien %}
+    <p class="hinweis">{{ T("Noch keine Seed-Dateien (seeds_…) in output/. Erst im Reiter „Seeds“ erzeugen.") }}</p>
+  {% else %}
+  <form hx-post="/materialien/start" hx-target="#mat-status" hx-swap="innerHTML" class="formular"
+        hx-on::after-request="if(event.detail.successful){var s=document.getElementById('mat-status');s.scrollIntoView({block:'start'});s.focus()}">
+    <div class="feld">
+      <label for="src">{{ T("Seed-Datei (neueste zuerst)") }}</label>
+      <select id="src" name="src" hx-get="/materialien/neu-felder" hx-target="#neu-felder" hx-trigger="change"
+              hx-include="this" aria-describedby="src-hilfe">
+        {% for p, n in seed_dateien %}<option value="{{ p.name }}">{{ p.name }} – {{ anzahl(n, "Seed", "Seeds") }}</option>{% endfor %}
+      </select>
+      <p id="src-hilfe" class="hilfe">{{ T("Hier stehen nur Dateien, die mit seeds_ beginnen.") }}</p>
+    </div>
+    <div id="neu-felder">{% include "teil_mat_neu_felder.html" %}</div>
+    <div class="feld">
+      <input type="checkbox" id="lrt" name="lrt" value="true" checked aria-describedby="lrt-hilfe">
+      <label for="lrt" class="inline">{{ T("Inhaltstyp am fertigen Material prüfen") }}</label>
+      <p id="lrt-hilfe" class="hilfe">{{ T("Bestimmt den Inhaltstyp ohne Kenntnis des Seeds und protokolliert, ob er passt. Ein Aufruf mehr je Material.") }}</p>
+    </div>
+    <div class="feld">
+      <label for="sprache">{{ T("Ausgabesprache") }}</label>
+      <select id="sprache" name="sprache" aria-describedby="sprache-hilfe">
+        {% for c, n in sprachen.items() %}<option value="{{ c }}">{{ T(n) }}</option>{% endfor %}
+      </select>
+      <p id="sprache-hilfe" class="hilfe">{{ T("Sprache von Volltext, Titel, Beschreibung, Keywords und Fragen. Die Vorgaben bleiben deutsch; bei einer anderen Sprache wird der Hinweis aus der Vorlage „ausgabesprache“ (Reiter „Prompts“) angehängt. Steht in cclom:general_language.") }}</p>
+    </div>
+    <fieldset class="feld">
+      <legend>{{ T("Verarbeitung") }}</legend>
+      {% set std = 'flex' if e.flex else 'sofort' %}
+      {% for wert, text, hilfe in [("sofort", T("Standard"), T("Material für Material, schnellste Antworten, voller Preis.")),
+                                    ("flex", "Flex", T("Halber Preis, langsamere Antworten; Engpässe werden automatisch wiederholt.")),
+                                    ("batch", "Batch", T("Halber Preis, alle Anfragen gesammelt an OpenAI; je Stufe eine Runde bis zu 24 h."))] %}
+        <div class="wahl">
+          <input type="radio" id="v-{{ wert }}" name="verarbeitung" value="{{ wert }}" {% if wert == std %}checked{% endif %} aria-describedby="v-{{ wert }}-h">
+          <label for="v-{{ wert }}" class="inline">{{ text }}</label>
+          <span id="v-{{ wert }}-h" class="hilfe">{{ hilfe }}</span>
+        </div>
+      {% endfor %}
+    </fieldset>
+    <div class="feld schmal">
+      <label for="workers">{{ T("Worker (parallel)") }}</label>
+      <input type="number" id="workers" name="workers" min="1" max="1000" value="{{ e.workers }}" aria-describedby="workers-hilfe">
+      <p id="workers-hilfe" class="hilfe">{{ T("Materialien, die gleichzeitig erzeugt werden. Mehr Worker = schneller, solange das Rate-Limit des Anbieters reicht.") }}</p>
+    </div>
+    <p class="klein">{{ T("Modell {modell}, Reasoning-Aufwand {aufwand} – ändern unter „Einstellungen“.", modell=e.model, aufwand=T(e.reasoning_effort)) }}</p>
+    <button type="submit" class="haupt" {% if laeuft %}disabled aria-disabled="true"{% endif %}>{{ T("Lauf starten") }}</button>
+    {% if laeuft %}<p class="klein">{{ T("Es läuft schon ein Materiallauf. Erst anhalten oder abwarten.") }}</p>{% endif %}
+  </form>
+  {% endif %}
+</section>
+{% endif %}
+{% endblock %}

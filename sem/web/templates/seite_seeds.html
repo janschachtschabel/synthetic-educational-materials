@@ -1,0 +1,95 @@
+{% extends "basis.html" %}
+{% block titel %}Seeds{% endblock %}
+{% block inhalt %}
+<h1>{{ T("Seeds erzeugen") }}</h1>
+<p class="einleitung">{{ T("Ohne LLM. Gleicher Startwert für den Zufall und gleiche Einstellungen ergeben dieselben Seeds.") }}</p>
+
+<div id="seeds-status" tabindex="-1">
+{% if lauf %}{% with name="seeds" %}{% include "teil_status.html" %}{% endwith %}{% endif %}
+</div>
+
+<form id="seeds-form" class="formular" hx-post="/seeds/erzeugen" hx-target="#seeds-status" hx-swap="innerHTML"
+      hx-on::after-request="if(event.detail.successful){var s=document.getElementById('seeds-status');s.scrollIntoView({block:'start'});s.focus()}">
+  <fieldset class="feld">
+    <legend>{{ T("Konfidenz der Zuordnungen (alle Bereiche)") }}</legend>
+    <p class="hilfe">{{ T("Setzt alle Status-Filter der gewählten Bereiche auf diese Werte; je Bereich weiter einzeln änderbar. Standard: gesichert, wahrscheinlich und redaktionell; unsicher erst nach Prüfung.") }}</p>
+    {% for w in status_werte %}
+      <div class="wahl">
+        <input type="checkbox" id="konf-{{ w }}" data-konfidenz-global="{{ w }}" value="{{ w }}" {% if w in standard_konfidenz %}checked{% endif %}>
+        <label for="konf-{{ w }}" class="inline">{{ w }}</label> <span class="hilfe">{{ T(status_text[w]) }}</span>
+      </div>
+    {% endfor %}
+  </fieldset>
+
+  <h2>{{ T("Bildungsbereiche") }}</h2>
+  <p class="hilfe">{{ T("Für jeden gewählten Bereich lassen sich Anzahl, Gleichverteilung, Quellen und Konfidenz einzeln einstellen.") }}</p>
+  {% for b in bereiche %}
+  <section class="bereich" aria-labelledby="h-{{ b.key }}">
+    <div class="bereich-kopf">
+      <input type="checkbox" id="an-{{ b.key }}" name="an-{{ b.key }}" value="1" {% if b.key == erster %}checked{% endif %}
+             aria-controls="fs-{{ b.key }}" data-schaltet="fs-{{ b.key }}">
+      <h3 id="h-{{ b.key }}"><label for="an-{{ b.key }}" class="inline">{{ T(b.label) }}</label></h3>
+    </div>
+    <fieldset id="fs-{{ b.key }}" class="bereich-felder" {% if b.key != erster %}disabled{% endif %}>
+      <legend class="nur-vorlesen">{{ T("Einstellungen für {bereich}", bereich=T(b.label)) }}</legend>
+      <div class="zeile">
+        <div class="feld schmal">
+          <label for="n-{{ b.key }}">{{ T("Anzahl") }}</label>
+          <input type="number" id="n-{{ b.key }}" name="n-{{ b.key }}" min="0" max="1000000" step="1" value="1000">
+        </div>
+        <div class="feld">
+          <label for="bal-{{ b.key }}">{{ T("Gleich verteilen nach") }}</label>
+          <select id="bal-{{ b.key }}" name="bal-{{ b.key }}">
+            {% for o, text in b.balance.items() %}<option value="{{ o }}" {% if o == b.default_balance %}selected{% endif %}>{{ o }} – {{ T(text) }}</option>{% endfor %}
+          </select>
+        </div>
+      </div>
+      {% if b.gruppen %}
+      <details class="filter">
+        <summary>{{ T("Welche Themen einbezogen werden (Quellen, Konfidenz, weitere Merkmale)") }}</summary>
+        {% for g in b.gruppen %}
+          <h4>{{ T(g.titel) }}</h4>
+          {% for f in g.filter %}
+          <fieldset class="feld filtergruppe">
+            <legend>{{ T(f.label) }}</legend>
+            <p class="hilfe">{{ T(f.beschreibung) }}</p>
+            {% for w, text in f.werte.items() %}
+              <div class="wahl">
+                <input type="checkbox" id="f-{{ b.key }}-{{ f.name }}-{{ loop.index }}" name="f-{{ b.key }}-{{ f.name }}" value="{{ w }}"
+                       {% if w in f.standard %}checked{% endif %} {% if g.key == 'konfidenz' %}data-konfidenz="{{ w }}"{% endif %}>
+                <label for="f-{{ b.key }}-{{ f.name }}-{{ loop.index }}" class="inline">{{ w }}</label>
+                <span class="hilfe">{{ T(text) }}</span>
+              </div>
+            {% endfor %}
+          </fieldset>
+          {% endfor %}
+        {% endfor %}
+      </details>
+      {% endif %}
+    </fieldset>
+  </section>
+  {% endfor %}
+
+  <div class="zeile">
+    <div class="feld schmal">
+      <label for="zufall">{{ T("Startwert für den Zufall") }}</label>
+      <input type="number" id="zufall" name="zufall" min="0" max="2147483647" value="42" aria-describedby="zufall-hilfe">
+      <p id="zufall-hilfe" class="hilfe">{{ T("Gleicher Startwert und gleiche Einstellungen ergeben dieselben Seeds.") }}</p>
+    </div>
+    <div class="feld">
+      <label for="seeds-name">{{ T("Dateiname") }}</label>
+      <div class="dateiname-eingabe">
+        <span aria-hidden="true">seeds_</span>
+        <input type="text" id="seeds-name" name="name" value="" aria-describedby="seeds-name-hilfe" spellcheck="false" autocomplete="off">
+        <span aria-hidden="true">.jsonl</span>
+      </div>
+      <p id="seeds-name-hilfe" class="hilfe">{{ T("Leer lassen für den Vorschlag aus Anzahlen und Startwert, z. B. hochschule30000_s42.") }}</p>
+    </div>
+  </div>
+
+  <div id="seeds-pruefen" aria-live="polite" hx-post="/seeds/pruefen" hx-include="#seeds-form" hx-target="this"
+       hx-trigger="load, change from:#seeds-form, input delay:500ms from:#seeds-form"></div>
+
+  <button type="submit" class="haupt">{{ T("Seeds erzeugen") }}</button>
+</form>
+{% endblock %}

@@ -1,0 +1,20 @@
+{# Stand eines Laufs. Der Datenteil holt sich jede Sekunde neu, solange der Prozess lebt; die Knöpfe bleiben stehen
+   (sonst verlöre ein Knopf mit Tastaturfokus jede Sekunde den Fokus). Endet der Lauf, lädt der ganze Block einmal neu. #}
+<section id="status-{{ name }}" class="status-rahmen" aria-labelledby="status-{{ name }}-titel"
+         hx-get="/status/{{ name }}" hx-trigger="lauf-ende-{{ name }} from:body" hx-swap="outerHTML">
+{% if fehler %}<p class="meldung fehler" role="alert">{{ fehler }}</p>{% endif %}
+{% if lauf %}
+  {% include "teil_status_daten.html" %}
+
+  <div class="knoepfe">
+    {% if lauf.laeuft and not lauf.angehalten %}
+      <button type="button" class="zweitrangig" hx-post="/laeufe/{{ name }}/anhalten" hx-target="#status-{{ name }}" hx-swap="outerHTML">{{ T("Anhalten") }}</button>
+    {% elif not lauf.laeuft %}
+      <button type="button" class="zweitrangig" hx-post="/laeufe/{{ name }}/ausblenden" hx-target="#status-{{ name }}" hx-swap="outerHTML">{{ T("Ausblenden") }}</button>
+    {% endif %}
+    <details class="log" id="log-{{ name }}" hx-preserve="true" hx-get="/laeufe/{{ name }}/log" hx-trigger="toggle once" hx-target="find .log-inhalt">
+      <summary>{{ T("Ausgabe des Prozesses") }}</summary><div class="log-inhalt"></div>
+    </details>
+  </div>
+{% endif %}
+</section>

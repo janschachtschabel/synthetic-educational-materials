@@ -116,6 +116,7 @@ def main(argv=None):
                    help="Status aller Zuordnungen in allen Bereichen, z. B. gesichert oder gesichert,wahrscheinlich "
                         "(Standard: gesichert,wahrscheinlich,redaktionell); --auswahl hat Vorrang")
     p.add_argument("--out", type=Path, help="Dateiname; das Präfix seeds_ wird ergänzt")
+    _stand_arg(p)
 
     p = sub.add_parser("auswahl", help="Filter eines Bildungsbereichs mit Standardwerten und Themenzahl")
     p.add_argument("bereich")
@@ -183,6 +184,12 @@ def main(argv=None):
         st = seeds.write(seeds.build(counts, balance, a.seed, auswahl), out,
                          {"anzahl": counts, "gleichverteilung": balance, "zufalls_seed": a.seed, "auswahl": auswahl})
         print(f"{st['anzahl']} Seeds → {out}")
+        if a.stand:  # Oberfläche: Abschlussmeldung samt Ausgabedatei
+            from .llm import Progress
+            from .prozess import StandSchreiber
+
+            StandSchreiber(a.stand).ende(Progress(total=st["anzahl"], done=st["anzahl"], status="fertig"),
+                                         ausgabe=str(out))
         print(json.dumps({k: st[k] for k in ("themen_abgedeckt", "seeds_je_gruppe", "seeds_je_thema", "niveau",
                                              "status", "belege")}, ensure_ascii=False))
         fehlt = [k for k, v in st.get("lokale_daten", {}).items() if v is None]
@@ -243,6 +250,13 @@ def main(argv=None):
             if not a.warten:
                 show(st)
             print(f"→ {out}" + ("" if st["abgeschlossen"] else "  (später erneut aufrufen, um fortzusetzen)"))
+            if a.stand:  # Oberfläche: Stand der Batch-Runde
+                from .llm import Progress
+                from .prozess import StandSchreiber
+
+                p = Progress(total=st["materialien"], done=st["fertig"], failed=st["fehlgeschlagen"],
+                             status="fertig" if st["abgeschlossen"] else "Runde verschickt")
+                StandSchreiber(a.stand).ende(p, batch=status_zeile(st), abgeschlossen=st["abgeschlossen"])
             return
         prog = _mit_stand(a, lambda **kw: generate(a.seeds, out, _cfg(a), **kw), limit=a.limit,
                           inhaltstyp_pruefen=not a.ohne_inhaltstyp_pruefung, ausgabesprache=a.sprache)

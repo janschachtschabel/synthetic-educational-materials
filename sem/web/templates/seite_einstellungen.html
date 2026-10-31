@@ -1,0 +1,72 @@
+{% extends "basis.html" %}
+{% block titel %}{{ T("Einstellungen") }}{% endblock %}
+{% block inhalt %}
+<h1>{{ T("Einstellungen") }}</h1>
+<p class="einleitung">{{ T("Gelten für neue Läufe (Materialien und Mappings). Beim Fortsetzen lassen sich Worker und Standard oder Flex je Lauf wählen. Der API-Key bleibt nur im Speicher des Servers und wird nie in eine Datei geschrieben.") }}</p>
+{% if gespeichert %}<p class="meldung erfolg" role="status">{{ T("Gespeichert.") }}</p>{% endif %}
+
+<form hx-post="/einstellungen" class="formular">
+  <fieldset>
+    <legend>{{ T("LLM-Anbindung") }}</legend>
+    <p class="hilfe">{{ T("OpenAI-kompatibel. Leere Felder: Werte aus OPENAI_BASE_URL, OPENAI_API_KEY, LLM_MODEL.") }}</p>
+    <div class="feld">
+      <label for="e-url">Base-URL</label>
+      <input type="url" id="e-url" name="base_url" value="{{ e.base_url }}" placeholder="https://api.openai.com/v1" spellcheck="false">
+    </div>
+    <div class="feld">
+      <label for="e-model">{{ T("Modell") }}</label>
+      <input type="text" id="e-model" name="model" value="{{ e.model }}" spellcheck="false">
+    </div>
+    <div class="feld">
+      <label for="e-key">API-Key</label>
+      <input type="password" id="e-key" name="api_key" value="" autocomplete="off" aria-describedby="e-key-zustand">
+      <p id="e-key-zustand" class="hilfe">
+        {% if key == 'eingetragen' %}{{ T("Ein Key ist eingetragen (bis zum Neustart des Servers). Leer lassen, um ihn zu behalten.") }}
+        {% elif key == 'umgebung' %}{{ T("Leer: Der Key aus OPENAI_API_KEY wird verwendet.") }}
+        {% elif key == 'fremde_url' %}{{ T("Andere Base-URL als in OPENAI_BASE_URL: Der Key aus OPENAI_API_KEY wird dafür nicht verwendet. Bitte einen Key eintragen.") }}
+        {% else %}{{ T("Kein Key gesetzt: hier eintragen oder OPENAI_API_KEY setzen.") }}{% endif %}
+      </p>
+      {% if key == 'eingetragen' %}
+      <div class="wahl"><input type="checkbox" id="e-key-weg" name="key_loeschen" value="true"><label for="e-key-weg" class="inline">{{ T("Eingetragenen Key entfernen") }}</label></div>
+      {% endif %}
+    </div>
+  </fieldset>
+  <fieldset>
+    <legend>{{ T("Geschwindigkeit") }}</legend>
+    <div class="feld schmal">
+      <label for="e-workers">{{ T("Worker (parallel)") }}</label>
+      <input type="number" id="e-workers" name="workers" min="1" max="1000" value="{{ e.workers }}" aria-describedby="e-workers-h">
+      <p id="e-workers-h" class="hilfe">{{ T("Materialien, die gleichzeitig erzeugt werden. Mehr Worker = schneller, solange das Rate-Limit des Anbieters reicht.") }}</p>
+    </div>
+    <fieldset class="feld">
+      <legend>{{ T("Reasoning-Aufwand") }}</legend>
+      <p class="hilfe">{{ T("Nur für Reasoning-Modelle. low ist Standard: gemessen ein Drittel schneller als der Modellstandard bei gleichen Prüfwerten. „Modellstandard“ sendet den Parameter nicht (für Modelle, die ihn nicht kennen).") }}</p>
+      {% for x in efforts %}
+        <span class="wahl inline-wahl"><input type="radio" id="e-eff-{{ loop.index }}" name="reasoning_effort" value="{{ x }}" {% if x == e.reasoning_effort %}checked{% endif %}>
+        <label for="e-eff-{{ loop.index }}" class="inline">{{ T(x) }}</label></span>
+      {% endfor %}
+    </fieldset>
+    <div class="feld">
+      <input type="checkbox" id="e-flex" name="flex" value="true" {% if e.flex %}checked{% endif %} aria-describedby="e-flex-h">
+      <label for="e-flex" class="inline">{{ T("Flex-Verarbeitung (halber Preis)") }}</label>
+      <p id="e-flex-h" class="hilfe">{{ T("Vorauswahl für neue Läufe. Nur bei OpenAI: halber Preis, dafür langsamere Antworten und bei Engpässen Ablehnungen, die automatisch wiederholt werden.") }}</p>
+    </div>
+    <div class="zeile">
+      <div class="feld schmal"><label for="e-retries">{{ T("Versuche pro Aufgabe") }}</label>
+        <input type="number" id="e-retries" name="retries" min="1" max="20" value="{{ e.retries }}"></div>
+      <div class="feld schmal"><label for="e-ausfall">{{ T("Wartezeit bei API-Ausfall (Minuten)") }}</label>
+        <input type="number" id="e-ausfall" name="ausfall_minuten" min="1" max="240" value="{{ e.ausfall_minuten|int }}" aria-describedby="e-ausfall-h">
+        <p id="e-ausfall-h" class="hilfe">{{ T("Danach pausiert der Lauf und lässt sich später fortsetzen.") }}</p></div>
+    </div>
+  </fieldset>
+  <fieldset>
+    <legend>Embeddings</legend>
+    <div class="feld">
+      <label for="e-emb">{{ T("Embedding-Modell (lokal, CPU)") }}</label>
+      <input type="text" id="e-emb" name="embedding_modell" value="{{ e.embedding_modell }}" spellcheck="false" aria-describedby="e-emb-h">
+      <p id="e-emb-h" class="hilfe">{{ T("z. B. intfloat/multilingual-e5-small oder sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2") }}</p>
+    </div>
+  </fieldset>
+  <button type="submit" class="haupt">{{ T("Speichern") }}</button>
+</form>
+{% endblock %}

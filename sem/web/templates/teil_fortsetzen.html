@@ -1,0 +1,60 @@
+{# Einstellungen eines unfertigen Laufs; gestartet wird erst nach Bestätigung #}
+<section class="bestaetigen" aria-labelledby="h-bestaetigen">
+  <h3 id="h-bestaetigen">{{ T("Lauf fortsetzen: Einstellungen prüfen") }}</h3>
+  <p class="dateiname">{{ L.name }}</p>
+  <dl class="kennzahlen">
+    <div><dt>{{ T("Fertig") }}</dt><dd>{{ zahl(L.fertig) }} / {{ zahl(L.ziel) }}</dd></div>
+    <div><dt>{{ T("Offen") }}</dt><dd>{{ zahl([L.ziel - L.fertig, 0]|max) }}</dd></div>
+    <div><dt>{{ T("davon zuletzt fehlgeschlagen") }}</dt><dd>{{ zahl(L.fehlgeschlagen) }}</dd></div>
+  </dl>
+  <table class="einstellungen-tabelle">
+    <caption class="nur-vorlesen">{{ T("Gespeicherte Einstellungen des Laufs") }}</caption>
+    <tbody>
+      <tr><th scope="row">{{ T("Seed-Datei") }}</th><td class="dateiname">{{ L.seeds.replace('\\', '/').split('/')[-1] }}</td></tr>
+      <tr><th scope="row">{{ T("Modell") }}</th><td>{{ L.modell }}</td></tr>
+      <tr><th scope="row">{{ T("Reasoning-Aufwand") }}</th><td>{{ L.reasoning_effort or T("Modellstandard") }}</td></tr>
+      <tr><th scope="row">{{ T("Ausgabesprache") }}</th><td>{{ L.ausgabesprache }}</td></tr>
+      <tr><th scope="row">{{ T("Inhaltstyp-Prüfung") }}</th><td>{{ T("ja") if L.inhaltstyp_pruefen else T("nein") }}</td></tr>
+      <tr><th scope="row">{{ T("Zuletzt") }}</th><td>{{ L.verarbeitung }}, {{ L.zuletzt.replace('T', ' ') }}</td></tr>
+    </tbody>
+  </table>
+
+  {% if L.fremd_pid %}
+    <p class="meldung info" role="status">{{ T("Wird gerade von einem anderen Prozess bearbeitet (PID {pid}, z. B. Kommandozeile). Fortsetzen geht erst, wenn er beendet ist.", pid=L.fremd_pid) }}</p>
+  {% elif L.gesperrt %}
+    <div class="meldung warnung" role="status">
+      <p>{{ T("Die Ausgabe ist gesperrt, aber kein Prozess arbeitet mehr daran: Ein abgebrochener Lauf hat die Sperre hinterlassen.") }}</p>
+      <button type="button" class="zweitrangig" hx-post="/materialien/sperre/{{ L.name }}" hx-target="#fortsetzen-panel"
+              hx-confirm="{{ T('Sperre wirklich aufheben? Nur, wenn sicher kein anderer Lauf (z. B. auf einem anderen Rechner) auf dieser Datei arbeitet.') }}">{{ T("Sperre aufheben") }}</button>
+    </div>
+  {% endif %}
+
+  {% if L.seeds_fehlt %}<p class="meldung fehler" role="alert">{{ T("Seed-Datei fehlt") }}</p>{% endif %}
+  <form hx-post="/materialien/fortsetzen/{{ L.name }}" hx-target="#mat-status" hx-swap="innerHTML" class="formular"
+        hx-on::after-request="if(event.detail.successful){document.getElementById('mat-status').scrollIntoView({block:'start'});document.getElementById('mat-status').focus()}">
+    {% if L.verarbeitung != 'batch' %}
+    <fieldset class="feld">
+      <legend>{{ T("Verarbeitung") }}</legend>
+      <div class="wahl"><input type="radio" id="f-sofort" name="verarbeitung" value="sofort" {% if L.verarbeitung != 'flex' and not e.flex %}checked{% endif %}>
+        <label for="f-sofort" class="inline">{{ T("Standard") }}</label> <span class="hilfe">{{ T("voller Preis, schnellste Antworten") }}</span></div>
+      <div class="wahl"><input type="radio" id="f-flex" name="verarbeitung" value="flex" {% if L.verarbeitung == 'flex' or e.flex %}checked{% endif %}>
+        <label for="f-flex" class="inline">Flex</label> <span class="hilfe">{{ T("halber Preis, langsamere Antworten") }}</span></div>
+    </fieldset>
+    <div class="feld schmal">
+      <label for="f-workers">{{ T("Worker (parallel)") }}</label>
+      <input type="number" id="f-workers" name="workers" min="1" max="1000" value="{{ e.workers }}">
+    </div>
+    {% else %}
+      <p class="klein">{{ T("Batch-Lauf: „Fortsetzen“ holt fertige Batches ab und schickt die nächste Runde.") }}</p>
+      <input type="hidden" name="workers" value="{{ e.workers }}">
+    {% endif %}
+    {% set gesperrt = laeuft or L.fremd_pid or L.gesperrt or L.seeds_fehlt %}
+    <div class="knoepfe">
+      <button type="submit" name="aktion" value="fortsetzen" class="haupt" {% if gesperrt %}disabled aria-disabled="true"{% endif %}>{{ T("Jetzt fortsetzen") }}</button>
+      <button type="submit" name="aktion" value="neu" class="zweitrangig" {% if gesperrt %}disabled aria-disabled="true"{% endif %}
+              aria-describedby="neu-hilfe">{{ T("Unter neuem Namen neu starten") }}</button>
+    </div>
+    <p id="neu-hilfe" class="hilfe">{{ T("Neu starten beginnt mit denselben Einstellungen als {datei}; die bisherige Datei bleibt.", datei=neu_name) }}</p>
+    {% if laeuft %}<p class="klein">{{ T("Es läuft schon ein Materiallauf. Erst anhalten oder abwarten.") }}</p>{% endif %}
+  </form>
+</section>

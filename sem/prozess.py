@@ -128,7 +128,7 @@ class StandSchreiber:
         self.pfad.parent.mkdir(parents=True, exist_ok=True)
         self._sperre = threading.Lock()
 
-    def __call__(self, p: Progress, ende: bool = False, fehler: str | None = None):
+    def __call__(self, p: Progress, ende: bool = False, fehler: str | None = None, **extra):
         jetzt = time.time()
         if not ende and jetzt - self.zuletzt < self.intervall:
             return
@@ -137,10 +137,12 @@ class StandSchreiber:
             _json_schreiben(self.pfad, {
                 "total": p.total, "done": p.done, "failed": p.failed, "skipped": p.skipped, "retries": p.retries,
                 "aktiv": p.aktiv, "anfragen": p.anfragen, "status": p.status, "zeile": p.line(),
-                "aktualisiert": datetime.now().isoformat(timespec="seconds"), "ende": ende, "fehler": fehler})
+                "pro_minute": round(p.rate * 60, 1), "rest_sekunden": p.eta_seconds, "letzte_meldung": p.last_error,
+                "aktualisiert": datetime.now().isoformat(timespec="seconds"), "ende": ende, "fehler": fehler,
+                **extra})
 
-    def ende(self, p: Progress | None, fehler: str | None = None):
-        self(p or Progress(total=0, status="abgebrochen"), ende=True, fehler=fehler)
+    def ende(self, p: Progress | None, fehler: str | None = None, **extra):
+        self(p or Progress(total=0, status="abgebrochen"), ende=True, fehler=fehler, **extra)
 
 
 def stop_beobachten(stand_pfad: Path, intervall: float = 0.5) -> threading.Event:

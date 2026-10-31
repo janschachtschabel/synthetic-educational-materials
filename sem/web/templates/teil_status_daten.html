@@ -1,0 +1,50 @@
+{# Datenteil der Statusanzeige (siehe teil_status.html) #}
+<div id="status-{{ name }}-daten" class="status ton-{{ lauf.ton }}"
+     data-phase="{{ lauf.phase }}" data-ansage="{{ T(lauf.art) }}: {{ T(lauf.phase_label) }}"
+     {% if lauf.laeuft %}hx-get="/status/{{ name }}/daten" hx-trigger="every 1s" hx-swap="outerHTML"{% endif %}>
+  <div class="status-kopf">
+    <h3 id="status-{{ name }}-titel">{{ T(lauf.art) }}: <span class="phase">{{ T(lauf.phase_label) }}</span></h3>
+    {% if lauf.alter is not none %}
+      <p class="klein">{{ T("Stand von vor {s} s", s=lauf.alter) }}{% if lauf.laeuft %} · {{ T("läuft als eigener Prozess weiter, auch wenn diese Seite geschlossen wird") }}{% endif %}</p>
+    {% endif %}
+  </div>
+  <p class="klein">{{ T(lauf.phase_text, sekunden=lauf.alter or 0) }}</p>
+
+  {% if lauf.total %}
+    <div class="balken-zeile">
+      <progress max="{{ lauf.total }}" value="{{ lauf.bearbeitet }}"
+                aria-label="{{ T('Fortschritt') }}"
+                aria-valuetext="{{ T('{n} von {gesamt} bearbeitet', n=zahl(lauf.bearbeitet), gesamt=zahl(lauf.total)) }}"></progress>
+      <span class="prozent">{{ lauf.prozent }} %</span>
+    </div>
+    <dl class="kennzahlen">
+      <div><dt>{{ T("Erfolgreich") }}</dt><dd>{{ zahl(lauf.done) }}</dd></div>
+      <div><dt>{{ T("Fehlgeschlagen") }}</dt><dd>{{ zahl(lauf.failed) }}</dd></div>
+      <div><dt>{{ T("Offen") }}</dt><dd>{{ zahl(lauf.total - lauf.bearbeitet) }}</dd></div>
+      {% if lauf.skipped %}<div><dt>{{ T("Schon vorher fertig") }}</dt><dd>{{ zahl(lauf.skipped) }}</dd></div>{% endif %}
+      {% if lauf.laeuft %}
+        <div><dt>{{ T("In Arbeit") }}</dt><dd>{{ zahl(lauf.aktiv or 0) }}</dd></div>
+        <div><dt>{{ T("Tempo") }}</dt><dd>{{ T("{n} pro Minute", n=lauf.pro_minute if lauf.pro_minute is not none else "–") }}</dd></div>
+        <div><dt>{{ T("Restzeit") }}</dt><dd>{{ dauer(lauf.rest_sekunden) }}</dd></div>
+      {% endif %}
+      {% if name != 'seeds' %}
+      <div><dt>{{ T("API-Anfragen") }}</dt><dd>{{ zahl(lauf.anfragen or 0) }}</dd></div>
+      <div><dt>{{ T("Wiederholungen") }}</dt><dd>{{ zahl(lauf.retries or 0) }}</dd></div>
+      {% endif %}
+    </dl>
+  {% elif lauf.zeile and not lauf.fehler %}
+    <p>{{ lauf.zeile }}</p>
+  {% endif %}
+
+  {% if lauf.batch %}<p>{{ lauf.batch }}</p>
+    {% if not lauf.abgeschlossen %}<p class="klein">{{ T("Die nächste Runde holt „Fortsetzen“ beim unfertigen Lauf ab, sobald OpenAI die Batches fertig hat (bis zu 24 h).") }}</p>{% endif %}
+  {% endif %}
+  {% if lauf.ausgabe and lauf.phase == 'fertig' and lauf.name == 'seeds' %}
+    <p>{{ T("Gespeichert als {datei}. Weiter im Reiter „Materialien“.", datei=lauf.ausgabe.replace('\\', '/').split('/')[-1]) }}</p>
+  {% endif %}
+  {% if lauf.letzte_meldung and lauf.laeuft %}
+    <p class="klein"><strong>{{ T("Letzte Wiederholung wegen:") }}</strong> <span class="umbruch">{{ lauf.letzte_meldung[:200] }}</span>
+      <br>{{ T("Einzelne Wiederholungen sind normal; der Lauf versucht es automatisch erneut.") }}</p>
+  {% endif %}
+  {% if lauf.fehler %}<p class="meldung fehler" role="alert"><strong>{{ T("Fehler:") }}</strong> <span class="umbruch">{{ lauf.fehler[:500] }}</span></p>{% endif %}
+</div>
