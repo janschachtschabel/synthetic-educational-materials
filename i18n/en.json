@@ -66,6 +66,7 @@
  "Datensätze": "Records",
  "gespeichert – gilt für den nächsten Start": "saved – applies the next time you start",
  "startet …": "starting …",
+ "startet … (liest Seed-Datei und fertige Materialien, bei großen Läufen einige Sekunden)": "starting … (reading the seed file and finished materials, a few seconds for large runs)",
  "aus OPENAI_API_KEY": "from OPENAI_API_KEY",
  "Feld": "Field",
  "Statistik": "Statistics",

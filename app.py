@@ -93,7 +93,7 @@ def job_status(name: str):
     elif p:
         st.info(p.line())
     else:
-        st.info(T("startet …"))
+        st.info(T("startet … (liest Seed-Datei und fertige Materialien, bei großen Läufen einige Sekunden)"))
     if job["error"]:
         st.error(job["error"])
     if not job["done"]:
@@ -145,7 +145,8 @@ with st.sidebar:
 # --- Helfer für Dateien in output/ ------------------------------------------------------------
 @st.cache_data(max_entries=64)
 def _zeilen(path: str, mtime: float) -> int:
-    with open(path, encoding="utf-8") as f:
+    # binär zählen: eine 600-MB-Ausgabe als Text Zeile für Zeile zu prüfen dauert Sekunden, bei jedem Klick
+    with open(path, "rb") as f:
         return sum(1 for l in f if l.strip())
 
 
@@ -461,7 +462,9 @@ with tab_vorschau:
             limit = st.number_input(T("Datensätze laden (von {n}; große Dateien brauchen Zeit)", n=gesamt), 100,
                                     gesamt, 5000, step=1000, key=f"v-limit-{art}",
                                     help=T("Suche und Blättern beziehen sich auf die geladenen Datensätze."))
-        rows = _lade(str(datei), datei.stat().st_mtime, limit)
+        # Sind schon mehr Zeilen da als geladen werden, ändert ein laufender Lauf (hängt hinten an) nichts an den
+        # geladenen: nicht bei jedem Klick neu laden
+        rows = _lade(str(datei), 0 if limit and gesamt > limit else datei.stat().st_mtime, limit)
         c1, c2 = st.columns([2, 1])
         such = c1.text_input(T("Suchen (Thema, Fach, Inhaltstyp, Titel, Keyword, id)"), key="v-such").casefold()
         treffer = [r for r in rows if such in vorschau.suchtext(r)] if such else rows

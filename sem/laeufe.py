@@ -44,9 +44,10 @@ def lauf_stand(out_path: Path) -> dict | None:
     if not p.exists():
         return None
     lauf = json.loads(p.read_text(encoding="utf-8"))
-    fertig = len(read_done(out_path))
+    done = read_done(out_path)
+    fertig = len(done)
     err = out_path.with_suffix(".fehler.jsonl")
-    fehl = len(read_done(err) - read_done(out_path)) if err.exists() else 0
+    fehl = len(read_done(err) - done) if err.exists() else 0
     return {**lauf, "name": out_path.name, "ausgabe": str(out_path), "fertig": fertig, "fehlgeschlagen": fehl,
             "gesperrt": out_path.with_suffix(".lock").exists(), "ziel_erreicht": fertig >= lauf["ziel"]}
 
