@@ -53,7 +53,14 @@ def hochschule():
 
 
 def test_parser():
-    assert parse_titel("„Fotosynthese Lichtreaktion Dunkelreaktion“.\nmehr") == "Fotosynthese Lichtreaktion Dunkelreaktion"
+    assert parse_titel("„Lichtreaktion der Fotosynthese“.\nmehr") == "Lichtreaktion der Fotosynthese"
+    assert parse_titel("α-Helix und β-Faltblatt in Proteinen") == "α-Helix und β-Faltblatt in Proteinen"
+    assert parse_titel("Wie eine Linse ein Bild erzeugt?") == "Wie eine Linse ein Bild erzeugt?"
+    for kaputt in ("Wechselstrom: Effektivwert und Phasenlage", "Wechselstrom – Effektivwert und Phasenlage",
+                   "Bodenschutz und nachhaltige Nutzung решений", "Gebäudeausrüstung im Bestand♀♀",
+                   "Automaten und formale Sprachen bg", "x" * 81):
+        with pytest.raises(ValueError):
+            parse_titel(kaputt)
     assert parse_keywords("- Bruchrechnung\n- Dezimalzahl, Prozentrechnung; bruchrechnung, Kürzen") == \
         ["Bruchrechnung", "Dezimalzahl", "Prozentrechnung", "Kürzen"]
     with pytest.raises(ValueError):

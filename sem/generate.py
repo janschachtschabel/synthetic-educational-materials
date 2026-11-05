@@ -24,6 +24,7 @@ from __future__ import annotations
 import json
 import re
 import time
+import unicodedata
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from datetime import date
@@ -56,10 +57,33 @@ def _einzeilig(text: str) -> str:
     return re.sub(r"\s+", " ", text).strip().strip(_QUOTES).strip()
 
 
+TITEL_MAX = 80  # Prompt verlangt höchstens 60 Zeichen; etwas Spielraum, damit nicht jeder Ausreißer neu angefragt wird
+_TITEL_TRENNER = re.compile(r":|\s[–—-]\s")
+_TITEL_REST = re.compile(r"\s[a-zà-ÿ]{1,2}$")  # abgerissenes Kurzwort am Ende, z. B. „… formale Sprachen bg“
+_TITEL_WORTENDE = {"zu", "an", "um", "ab", "in", "im", "am"}  # echte Wörter, die am Ende stehen dürfen
+
+
+def _fremdes_zeichen(t: str) -> str | None:
+    """Erstes Zeichen außerhalb lateinischer/griechischer Schrift, Ziffern und üblicher Satzzeichen."""
+    for c in t:
+        if c.isspace() or c.isdigit() or c in "-‐‑,.?!&/+'’%()":
+            continue
+        name = unicodedata.name(c, "")
+        if not name.startswith(("LATIN", "GREEK")):
+            return c
+    return None
+
+
 def parse_titel(text: str) -> str:
     t = _einzeilig(_einzeilig(text.strip().splitlines()[0] if text.strip() else "").rstrip("."))
-    if not 10 <= len(t) <= 120:
+    if not 10 <= len(t) <= TITEL_MAX:
         raise ValueError(f"Titel mit {len(t)} Zeichen")
+    if _TITEL_TRENNER.search(t):
+        raise ValueError("Titel mit Doppelpunkt oder Gedankenstrich")
+    if c := _fremdes_zeichen(t):
+        raise ValueError(f"Titel mit fremdem Zeichen {c!r}")
+    if (m := _TITEL_REST.search(t)) and m.group().strip() not in _TITEL_WORTENDE:
+        raise ValueError(f"Titel endet auf {m.group().strip()!r}")
     return t
 
 
