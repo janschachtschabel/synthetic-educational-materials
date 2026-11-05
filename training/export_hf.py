@@ -60,6 +60,7 @@ def schema():
         ("target_group", lst), ("target_group_uri", lst), ("level", pa.string()), ("text_type", pa.string()),
         ("media_form", pa.string()), ("didactic_function", pa.string()), ("duration_minutes", pa.int32()),
         ("topic", pa.string()), ("topic_uri", pa.string()), ("generator_model", pa.string()),
+        ("title_previous", pa.string()),
     ])
 
 
@@ -124,6 +125,8 @@ def flatten(r: dict) -> dict:
         "topic": (thema.get("label_de") or "").strip() or None if open_topic else None,
         "topic_uri": topic_uri if open_topic else None,
         "generator_model": (r.get("synth:generierung") or {}).get("modell"),
+        # set when the title was regenerated afterwards (python -m sem titel-neu): the title it replaced
+        "title_previous": r.get("synth:titel_alt"),
     }
 
 
@@ -160,11 +163,18 @@ def build_card(rows_by_split: dict[str, list[dict]], name: str) -> str:
     match = f"{100 * sum(checked) / len(checked):.1f} %" if checked else "-"
     models = ", ".join(sorted({r["generator_model"] for r in rows if r["generator_model"]})) or "-"
     size = "10K<n<100K" if n < 100_000 else "100K<n<1M"
+    regenerated = [r for r in rows if r.get("title_previous") is not None]
+    replaced = sum(r["title"] != r["title_previous"] for r in regenerated)
+    title_note = ("" if not regenerated else
+                  f" Titles were regenerated on {date.today().isoformat()} with a revised title prompt (readable phrase instead of a keyword "
+                  f"chain; {replaced:,} of {len(regenerated):,} titles changed); the earlier titles are kept in "
+                  f"`title_previous`.")
     text = (HERE / "dataset_card.md").read_text(encoding="utf-8")
     values = {
         "name": name, "size_category": size, "n_total": f"{n:,}", "split_table": "\n".join(table),
         "length_table": "\n".join(lengths), "qa_median": f"{int(statistics.median(qa)) if qa else 0}",
         "qa_total": f"{sum(qa):,}", "content_type_match": match, "models": models, "export_date": date.today().isoformat(),
+        "title_note": title_note,
     }
     for k, v in values.items():
         text = text.replace("{{" + k + "}}", v)

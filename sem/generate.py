@@ -24,6 +24,7 @@ from __future__ import annotations
 import json
 import re
 import time
+import unicodedata
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from datetime import date
@@ -56,11 +57,66 @@ def _einzeilig(text: str) -> str:
     return re.sub(r"\s+", " ", text).strip().strip(_QUOTES).strip()
 
 
+TITEL_MAX = 80  # Prompt verlangt höchstens 60 Zeichen; etwas Spielraum, damit nicht jeder Ausreißer neu angefragt wird
+_TITEL_TRENNER = re.compile(r":|\s[–—-]\s")
+_TITEL_REST = re.compile(r"\s[a-zà-ÿ]{1,2}$")  # abgerissenes Kurzwort am Ende, z. B. „… formale Sprachen bg“
+_TITEL_WORTENDE = {"zu", "an", "um", "ab", "in", "im", "am"}  # echte Wörter, die am Ende stehen dürfen
+
+
+def _fremdes_zeichen(t: str) -> str | None:
+    """Erstes Zeichen außerhalb lateinischer/griechischer Schrift, Ziffern und üblicher Satzzeichen."""
+    for c in t:
+        if c.isspace() or c.isdigit() or c in "-‐‑,.?!&/+'’%()":
+            continue
+        name = unicodedata.name(c, "")
+        if not name.startswith(("LATIN", "GREEK")):
+            return c
+    return None
+
+
 def parse_titel(text: str) -> str:
     t = _einzeilig(_einzeilig(text.strip().splitlines()[0] if text.strip() else "").rstrip("."))
-    if not 10 <= len(t) <= 120:
+    if not 10 <= len(t) <= TITEL_MAX:
         raise ValueError(f"Titel mit {len(t)} Zeichen")
+    if _TITEL_TRENNER.search(t):
+        raise ValueError("Titel mit Doppelpunkt oder Gedankenstrich")
+    if c := _fremdes_zeichen(t):
+        raise ValueError(f"Titel mit fremdem Zeichen {c!r}")
+    if (m := _TITEL_REST.search(t)) and m.group().strip() not in _TITEL_WORTENDE:
+        raise ValueError(f"Titel endet auf {m.group().strip()!r}")
+    if verb := next((w for w in re.findall(r"[^\W\d_]+", t) if w in _TITEL_FUELLVERBEN), None):
+        raise ValueError(f"Titel mit Füllverb {verb!r}")
     return t
+
+
+# Lernziel-Verben, die der Prompt ausschließt (kleingeschrieben = Verb, nicht das Substantiv am Titelanfang)
+_TITEL_FUELLVERBEN = {"verstehen", "entdecken", "kennenlernen", "erkunden", "erfahren", "erarbeiten"}
+# Bezeichnungen für Materialtyp und Stufe, die nicht in den Titel gehören. Sie zählen nur, wenn sie auch in den
+# Metadaten des Materials stehen (dann übernimmt das Modell sie von dort) und nicht zum Thema gehören.
+_FORM_WOERTER = {
+    "arbeitsblatt", "übungsblatt", "fingerspiel", "bewegungsreim", "reim", "lied", "bewegungslied", "quiz", "video",
+    "erklärvideo", "podcast", "podcastfolge", "checkliste", "tafelbild", "skript", "handout", "lernauftrag",
+    "arbeitsauftrag", "rechercheauftrag", "selbsttest", "präsentation", "merksatz", "stundenentwurf",
+    "unterrichtsentwurf", "interview", "anleitung", "kursbeschreibung", "lernspiel", "steckbrief",
+    "kita", "krippe", "kindergarten", "grundschule", "sekundarstufe", "oberstufe", "klasse", "studierende",
+    "bachelor", "master", "auszubildende", "ausbildungsjahr", "berufsschule",
+}
+_FORM_ENDUNGEN = ("reim", "video", "podcast", "blatt")  # auch als Wortende: Kinderreim, Lernvideo, Übungsblatt
+_FORM_FELDER = ("textsorte", "inhaltstyp", "medienform", "bildungsstufe", "niveau", "zielgruppe", "lernort",
+                "sozialform")
+_THEMA_FELDER = ("thema", "thema_keywords", "thema_pfad")
+
+
+def titel_nennt_form(titel: str, values: dict) -> str | None:
+    """Wort des Titels, das Materialtyp oder Stufe aus den Metadaten wiederholt (z. B. „Bewegungsreim zum
+    Motorrad“ bei Textsorte „Lied, Fingerspiel oder Reim“), sonst None."""
+    form = " ".join(str(values.get(k) or "") for k in _FORM_FELDER).casefold()
+    thema = " ".join(str(values.get(k) or "") for k in _THEMA_FELDER).casefold()
+    for wort in re.findall(r"[^\W\d_]+", titel.casefold()):
+        kandidaten = ([wort] if wort in _FORM_WOERTER else []) + [e for e in _FORM_ENDUNGEN if wort.endswith(e)]
+        if any(k in form and k not in thema for k in kandidaten):
+            return wort
+    return None
 
 
 def parse_beschreibung(text: str) -> str:
@@ -211,6 +267,13 @@ class Material:
             return {"uri": k["uri"], "name": k["name"]}
         if feld == "fragen_antworten":
             return parse_paare(json_aus_text(text), self.qa_min)
+        if feld == "titel":
+            t = parse_titel(text)
+            # weiche Prüfung: beim letzten Versuch wird der Titel trotzdem übernommen (das Wort kann zum Inhalt
+            # gehören, etwa „Lied“ in einem Material über Lieder)
+            if (w := titel_nennt_form(t, self.values)) and self.neu.get("titel", 0) < FELD_VERSUCHE - 1:
+                raise ValueError(f"Titel nennt Materialtyp oder Stufe ({w!r})")
+            return t
         return {"titel": parse_titel, "beschreibung": parse_beschreibung, "keywords": parse_keywords}[feld](text)
 
     def ergebnis(self, meta: dict, dauer: float, mit_tokens: bool = True) -> dict:
