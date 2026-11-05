@@ -397,9 +397,14 @@ Up to six LLM calls per seed (OpenAI-compatible API, default model `gpt-6-luna`)
    already generated; empty fields are shown as “-”. The field file (`titel.md`, `beschreibung.md`,
    `keywords.md`) provides the instructions. The LLM does not see the topic, topic description, or
    seed keywords here; the fields are therefore derived from the text, as a model is later expected
-   to learn “text → metadata”. Responses are validated (title 10–120 characters,
+   to learn “text → metadata”. Responses are validated (title 10–80 characters,
    description 250–1,200, at least 4 keywords, at most 8 retained); an unusable field is requested
-   again up to three times, without generating the full text again.
+   again up to three times, without generating the full text again. The title is a readable phrase
+   rather than a chain of keywords; rejected are colons and dashes, characters from other scripts and
+   special characters ({}[]<>#*_|), truncated short words at the end, and learning-goal verbs
+   (verstehen, entdecken, kennenlernen, erkunden, erfahren, erarbeiten). If the title repeats the
+   material type or level from the metadata (e.g. “Fingerspiel”, “in der Kita”), it is requested again
+   and only accepted as is on the last attempt.
 3. **Content-type check** (`inhaltstyp.md`, can be disabled): The LLM determines the material type
    from the completed material without seeing the seed value, and selects from the sector’s content
    types. The result is recorded in `synth:inhaltstyp_pruefung` (expected, detected, match) and serves
@@ -415,6 +420,13 @@ shortens the run time considerably.
 
 The prompts for the title, description, keywords, and content type, as well as the shared system
 prompt, are in German, adapted from WLO metadata enrichment for synthetic materials.
+
+**Regenerating titles afterwards.** `python -m sem titel-neu --materialien output/materialien_….jsonl`
+repeats only the title request for finished materials (as in step 2: full text and fixed metadata,
+title, description and keywords “-”) and writes a new file (`…_titel_neu.jsonl`); the input stays
+unchanged. The previous title is kept in `synth:titel_alt`, model, prompt hash and tokens of the
+regeneration in `synth:generierung.titel_neu`. If no usable title comes back after three attempts, the
+old one stays (`titel_neu.behalten` gives the reason). The command can be resumed like a material run.
 
 Each material retains all seed fields and gets `synth:volltext` and `synth:generierung` (model,
 Base URL, date, hash of the prompts used).

@@ -5,7 +5,7 @@ import pytest
 from sem import schema as S
 from sem.bereiche import get
 from sem.bereiche.base import build_seeds
-from sem.generate import generate_one, parse_inhaltstyp, parse_keywords, parse_titel
+from sem.generate import generate_one, parse_inhaltstyp, parse_keywords, parse_titel, titel_nennt_form
 from sem.prompts import load_prompts
 
 VOLLTEXT = " ".join(["Die Eigenwerte einer symmetrischen Matrix sind reell."] * 40)
@@ -58,7 +58,9 @@ def test_parser():
     assert parse_titel("Wie eine Linse ein Bild erzeugt?") == "Wie eine Linse ein Bild erzeugt?"
     for kaputt in ("Wechselstrom: Effektivwert und Phasenlage", "Wechselstrom – Effektivwert und Phasenlage",
                    "Bodenschutz und nachhaltige Nutzung решений", "Gebäudeausrüstung im Bestand♀♀",
-                   "Automaten und formale Sprachen bg", "x" * 81):
+                   "Automaten und formale Sprachen bg", "x" * 81, "Biologische Vielfalt in Lebensräumen}",
+                   "Vielfalt [Arten] im Garten", "Die #Natur im Garten", "Natur_im Garten", "Natur | Garten",
+                   "Heißluftballon bauen und Funktionsweise kennenlernen", "Biologische Vielfalt entdecken"):
         with pytest.raises(ValueError):
             parse_titel(kaputt)
     assert parse_keywords("- Bruchrechnung\n- Dezimalzahl, Prozentrechnung; bruchrechnung, Kürzen") == \
@@ -113,3 +115,16 @@ def test_auswahl_nach_status_quelle_und_belegen(hochschule):
         p = s[S.F_PROVENANCE][S.F_THEMA]
         assert "wlo" in p["belege"]["erfuellt"] and p["belege"]["wlo"]["quelle"]["uri"] == "https://wirlernenonline.de"
         assert s["synth:seed_parameter"]["auswahl"]["belege"] == ["wlo"]
+
+
+def test_titel_nennt_form():
+    kita = {"textsorte": "neues Lied, Fingerspiel oder Reim zum Thema", "inhaltstyp": "Musik",
+            "zielgruppe": "pädagogische Fachkräfte in der Kita", "thema": "Motorrad"}
+    assert titel_nennt_form("Bewegungsreim zum Motorrad", kita) == "bewegungsreim"
+    assert titel_nennt_form("Freizeit und Hobbys im Fingerspiel", kita) == "fingerspiel"
+    assert titel_nennt_form("Bauen mit LEGO-Steinen in der Kita", kita) == "kita"
+    assert titel_nennt_form("Motorrad und Verkehrsregeln", kita) is None
+    # gehört das Wort zum Thema, ist es kein Hinweis auf den Materialtyp
+    assert titel_nennt_form("Urheberrecht in der Kita", {**kita, "thema": "Urheberrecht in der Kita"}) is None
+    # nur Wörter, die auch in den Metadaten stehen
+    assert titel_nennt_form("Quiz und Rätsel im Mittelalter", {"inhaltstyp": "Arbeitsblatt"}) is None

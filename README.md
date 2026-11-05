@@ -135,6 +135,7 @@ python -m sem materialien --seeds output/seeds_schule5000_s42.jsonl --anbieter a
 python -m sem materialien --seeds output/seeds_schule5000_s42.jsonl --batch --warten   # batch, until everything is done
 python -m sem laeufe                                # runs that did not reach their target
 python -m sem materialien --fortsetzen schule5000_s42   # resume one of them with its settings
+python -m sem titel-neu --materialien output/materialien_schule5000_s42.jsonl   # regenerate titles only (new file)
 ```
 
 **Selecting topics:** each sector offers its own filters for sources/origin, voting status (confidence:

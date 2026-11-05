@@ -579,9 +579,14 @@ Pro Seed bis zu sechs LLM-Aufrufe (OpenAI-kompatible API, Standardmodell `gpt-6-
    erzeugten Felder; noch leere Felder stehen als „-“. Den Auftrag liefert die Felddatei
    (`titel.md`, `beschreibung.md`, `keywords.md`). Thema, Themenbeschreibung und Seed-Keywords sieht
    das LLM hier nicht; die Felder werden also aus dem Text abgeleitet, wie es ein Modell
-   „Text → Metadaten“ später lernen soll. Antworten werden geprüft (Titel 10–120 Zeichen,
+   „Text → Metadaten“ später lernen soll. Antworten werden geprüft (Titel 10–80 Zeichen,
    Beschreibung 250–1.200, mindestens 4 Keywords, höchstens 8 übernommen); ein unbrauchbares Feld
-   wird bis zu dreimal neu angefragt, ohne den Volltext neu zu erzeugen.
+   wird bis zu dreimal neu angefragt, ohne den Volltext neu zu erzeugen. Der Titel ist eine lesbare
+   Wortgruppe statt einer Schlagwortkette; abgelehnt werden Doppelpunkte und Gedankenstriche,
+   fremde Schriftzeichen und Sonderzeichen ({}[]<>#*_|), abgerissene Kurzwörter am Ende und
+   Lernziel-Verben (verstehen, entdecken, kennenlernen, erkunden, erfahren, erarbeiten). Wiederholt der
+   Titel Materialtyp oder Stufe aus den Metadaten (z. B. „Fingerspiel“, „in der Kita“), wird er neu
+   angefragt und erst beim letzten Versuch so übernommen.
 3. **Inhaltstyp-Prüfung** (`inhaltstyp.md`, abschaltbar): Das LLM bestimmt die Materialart aus dem
    fertigen Material, ohne den Seed-Wert zu sehen, und wählt aus den Inhaltstypen des Bereichs. Das
    Ergebnis steht in `synth:inhaltstyp_pruefung` (erwartet, erkannt, Übereinstimmung) und dient als
@@ -597,6 +602,14 @@ aufeinanderfolgende Aufrufe; bei Reasoning-Modellen verkürzt ein geringerer Rea
 
 Die Prompts für Titel, Beschreibung, Keywords und Inhaltstyp sowie der gemeinsame Systemprompt sind
 aus der WLO-Metadatenanreicherung übernommen und an die synthetischen Materialien angepasst.
+
+**Titel nachträglich neu erzeugen.** `python -m sem titel-neu --materialien output/materialien_….jsonl`
+stellt für fertige Materialien nur die Titel-Anfrage erneut (wie in Schritt 2: Volltext und feste
+Metadaten, Titel, Beschreibung und Keywords „-“) und schreibt eine neue Datei
+(`…_titel_neu.jsonl`); die Eingabe bleibt unverändert. Der bisherige Titel steht in `synth:titel_alt`,
+Modell, Prompt-Hash und Tokens der Neuerzeugung in `synth:generierung.titel_neu`. Ist nach drei
+Versuchen kein Titel brauchbar, bleibt der alte (`titel_neu.behalten` nennt den Grund). Der Befehl ist
+fortsetzbar wie ein Materiallauf.
 
 Jedes Material behält alle Seed-Felder und bekommt `synth:volltext` sowie `synth:generierung` (Modell,
 Base-URL, Datum, Hash der verwendeten Prompts).

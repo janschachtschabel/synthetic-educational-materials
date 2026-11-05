@@ -133,6 +133,7 @@ python -m sem materialien --seeds output/seeds_schule5000_s42.jsonl --batch --wa
 python -m sem materialien --seeds output/seeds_schule5000_s42.jsonl --anbieter anthropic --batch   # Claude Haiku, Batch
 python -m sem laeufe                                # Läufe, die ihr Ziel nicht erreicht haben
 python -m sem materialien --fortsetzen schule5000_s42   # einen davon mit seinen Einstellungen fortsetzen
+python -m sem titel-neu --materialien output/materialien_schule5000_s42.jsonl   # nur die Titel neu (neue Datei)
 ```
 
 **Themen auswählen:** Jeder Bereich hat eigene Filter für Quellen bzw. Herkunft, Abstimmungsstatus (Konfidenz:
