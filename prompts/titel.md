@@ -3,7 +3,7 @@ Formuliere einen kurzen, gut lesbaren Titel, der den INHALT des Materials konkre
 - Höchstens zwei Fachbegriffe, verbunden mit Präposition, Artikel, Genitiv oder Verb. Keine Aufzählung von Begriffen (nicht „A B C und D“).
 - Wähle die Form, die zum Inhalt passt:
   - Thema mit Präposition oder Genitiv: „Effektivwert und Phasenlage im Wechselstromkreis“, „Entstehung und Eigenschaften Weißer Zwerge“
-  - Handlung im Infinitiv, vor allem bei praktischen Tätigkeiten: „Druckfarben nach Rezeptur mischen und korrigieren“, „Nachrichten im Alltag verstehen und prüfen“
+  - Handlung im Infinitiv, nur wenn das Material eine konkrete Tätigkeit anleitet oder übt: „Druckfarben nach Rezeptur mischen und korrigieren“, „Gasdruck vor dem Brennschneiden prüfen“
   - Wie-Satz oder Frage, nur gelegentlich: „Wie eine Linse ein Bild erzeugt“
 - Der wichtigste Fachbegriff des Materials muss im Titel stehen (nicht „Formen von Dingen“, sondern „Design von Alltagsgegenständen“).
 - Verben nur, wenn sie die konkrete Tätigkeit benennen. Allgemeine Verben wie „entdecken“, „verstehen“ oder „kennenlernen“ nicht als Füllwort anhängen.
