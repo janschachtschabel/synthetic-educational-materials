@@ -1,7 +1,9 @@
 # Only for training/ (export, mT5 fine-tuning, prediction); not needed for generating seeds and materials.
 # Install PyTorch first to match your GPU/CUDA version: https://pytorch.org/get-started/locally/
+# RTX 50 series (compute capability 12.0) needs a CUDA 12.8 build:
+#   pip install "torch>=2.7" --index-url https://download.pytorch.org/whl/cu128
 torch>=2.3
-transformers>=4.46
+transformers>=4.46   # 5.x is tested too: group_by_length became train_sampling_strategy
 datasets>=3.0
 accelerate>=1.0
 sentencepiece>=0.2

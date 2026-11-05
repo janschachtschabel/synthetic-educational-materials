@@ -226,6 +226,8 @@ sem/bereiche/<bereich>/    ein Modul je Bildungsbereich (Themen, Seeds, Mapping-
 data/vocabs/               aufbereitete Vokabulare
 data/mappings/<bereich>/   Mappings und Konfiguration je Bereich
 prompts/                   editierbare Prompt-Vorlagen
+training/                  Hugging-Face-Export, mT5-Feintraining (Volltext → Titel, Beschreibung, Keywords)
+                           und Wissen dazu in training/TRAININGSWISSEN.md
 output/                    erzeugte Seeds und Materialien (nicht versioniert)
 ```
 

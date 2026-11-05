@@ -9,3 +9,6 @@ __pycache__/
 data/lokal/
 *.egg-info/
 .venv/
+.venv-train/
+runs/
+training/hf_export/

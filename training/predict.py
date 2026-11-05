@@ -2,9 +2,11 @@
 
     python training/predict.py --model runs/mt5-meta/final text.txt
     python training/predict.py --model runs/mt5-meta/final --num-beams 1 text.txt   # faster (greedy)
+    python training/predict.py --model runs/mt5-meta/final --device cuda text.txt    # on the GPU, in bf16
 
 Uses the input mode and length limits stored with the model (metadata_generation.json), so input is prepared the
-same way as in training. Prints the time per field.
+same way as in training: texts longer than that limit are cut, which is also what happens to real web page extracts.
+Prints the input length, whether it was cut, and the time per field.
 """
 
 from __future__ import annotations
@@ -37,14 +39,19 @@ def main(argv: list[str] | None = None) -> int:
     settings = json.loads(settings_file.read_text(encoding="utf-8")) if settings_file.exists() else {}
     tasks = settings.get("tasks", TASKS)
     lengths = settings.get("max_target_lengths", {"title": 48, "description": 256, "keywords": 96})
+    max_source = settings.get("max_source_length", 1024)
     tok = AutoTokenizer.from_pretrained(a.model)
-    model = AutoModelForSeq2SeqLM.from_pretrained(a.model).to(a.device).eval()
+    model = AutoModelForSeq2SeqLM.from_pretrained(a.model)
+    if a.device.startswith("cuda"):
+        model = model.to(torch.bfloat16)  # bf16 as in training; fp16 is unstable with mT5
+    model = model.to(a.device).eval()
 
     source = prepare_input(a.text.read_text(encoding="utf-8"), settings.get("input_mode", "head"))
+    print(f"input: {len(tok(source).input_ids):,} tokens, cut to {max_source:,} "
+          f"({'gekürzt' if len(tok(source).input_ids) > max_source else 'passt ganz'})")
     for task, prefix in tasks.items():
         start = time.perf_counter()
-        enc = tok(prefix + source, max_length=settings.get("max_source_length", 768), truncation=True,
-                  return_tensors="pt").to(a.device)
+        enc = tok(prefix + source, max_length=max_source, truncation=True, return_tensors="pt").to(a.device)
         with torch.no_grad():
             ids = model.generate(**enc, max_new_tokens=lengths.get(task, 128), num_beams=a.num_beams,
                                  no_repeat_ngram_size=3)

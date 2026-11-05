@@ -228,6 +228,8 @@ sem/bereiche/<bereich>/    One module per education sector (topics, seeds, mappi
 data/vocabs/               Prepared vocabularies
 data/mappings/<bereich>/   Mappings and configuration for each sector
 prompts/                   Editable prompt templates
+training/                  Hugging Face export, mT5 fine-tuning (full text → title, description, keywords),
+                           knowledge in training/TRAINING_NOTES.md
 output/                    Generated seeds and materials (not versioned)
 ```
 
