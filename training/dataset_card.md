@@ -53,7 +53,7 @@ are never seen during training.
 | `education_sector` | `school`, `higher_education`, `vocational`, `adult_education`, `early_childhood` |
 | `language` | language of the texts (`de`) |
 | `fulltext` | generated full text in Markdown, about 400–550 words |
-| `title` | title derived from the full text (10–120 characters) |
+| `title` | title derived from the full text |
 | `description` | description derived from the full text (250–1,200 characters) |
 | `keywords` | 4–8 keywords derived from the full text |
 | `qa_pairs` | at least 8 question-answer pairs with `question`, `answer` and `type` (cognitive level after Bloom/Anderson, in German, e.g. `erinnern`, `verstehen`, `anwenden`) |
@@ -67,6 +67,7 @@ are never seen during training.
 | `didactic_function`, `duration_minutes` | optional: didactic function and working time |
 | `topic`, `topic_uri` | topic the material was generated from (GND, OpenEduHub topic trees, ESCO or OpenAlex), empty for topics from sources that are not openly licensed |
 | `generator_model` | language model that generated the texts |
+| `title_previous` | earlier title if the title was regenerated afterwards, otherwise empty |
 
 Controlled values are given as labels together with their URIs, following the OpenEduHub / edu-sharing metadata
 schema used by [WirLernenOnline](https://wirlernenonline.de).
@@ -103,7 +104,7 @@ Content type check agrees with the requested content type in {{content_type_matc
    educational materials. In separate calls it then derived title, description and keywords **only from the full text**
    and the fixed metadata, without seeing the seed's topic or keywords, so that the pairs reflect the task
    "text → metadata". Outputs were validated (length, number of keywords) and requested again if unusable. Finally
-   the content type was detected independently and question-answer pairs were generated from the full text.
+   the content type was detected independently and question-answer pairs were generated from the full text.{{title_note}}
 
 Every record in the original data carries the source and method of each field; this export contains the fields
 useful for training. Export date: {{export_date}}.
