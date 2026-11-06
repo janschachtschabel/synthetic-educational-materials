@@ -27,3 +27,6 @@ Titel, Beschreibung, Schlagworte, Inhaltstyp und der Systemprompt folgen den Pro
 WLO-Metadatenanreicherung (Beispiele und Terminologie-Hinweis für die Hochschule ergänzt).
 
 Ein Bildungsbereich kann eigene Fassungen mitbringen: `prompts/<bereich>/<datei>` hat Vorrang.
+
+Anmerkungen und Verbesserungsvorschläge zu diesen Prompts (Feedback, keine aktiven Vorlagen):
+[`PROMPT_FEEDBACK.md`](PROMPT_FEEDBACK.md).

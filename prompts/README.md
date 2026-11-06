@@ -26,3 +26,6 @@ The topic from the seed is visible only to the full-text prompt; the metadata is
 Title, Description, Keywords, Content type, and the system prompt follow the prompts for WLO metadata enrichment (with examples and a terminology note for higher education added).
 
 An education sector can include its own versions: `prompts/<bereich>/<datei>` takes precedence.
+
+Notes and improvement suggestions for these prompts (feedback, not active templates):
+[`PROMPT_FEEDBACK.md`](PROMPT_FEEDBACK.md).
