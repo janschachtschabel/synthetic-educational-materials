@@ -29,7 +29,7 @@ Splits are separated **by topic** (hash of the topic URI), so test topics never 
 | validation | 2,463 |
 | test | 2,393 |
 
-Characters (median / p95 / max): full text 3,663 / 4,528 / 6,914 · title 67 / 85 / 116 · description 782 / 922 / 1,129 ·
+Characters (median / p95 / max): full text 3,663 / 4,528 / 6,914 · title 67 / 85 / 116 (45 / 61 / 80 since the titles were regenerated on 2026-11-05, see `title_previous`) · description 782 / 922 / 1,129 ·
 keywords 5–8 per material, median 132 characters as text. Fields used: `id`, `fulltext`, `title`, `description`,
 `keywords`. Everything else (`qa_pairs`, subjects, content type, level, …) is not needed for this task.
 
