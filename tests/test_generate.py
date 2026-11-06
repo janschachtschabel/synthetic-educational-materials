@@ -56,6 +56,10 @@ def test_parser():
     assert parse_titel("„Lichtreaktion der Fotosynthese“.\nmehr") == "Lichtreaktion der Fotosynthese"
     assert parse_titel("α-Helix und β-Faltblatt in Proteinen") == "α-Helix und β-Faltblatt in Proteinen"
     assert parse_titel("Wie eine Linse ein Bild erzeugt?") == "Wie eine Linse ein Bild erzeugt?"
+    for fach in ("Untreue nach § 266 StGB", "Wasser bei 100 °C sieden lassen", "Bose–Einstein-Kondensate im Labor",
+                 "Goethes „Faust“ im Unterricht", "Masse und Energie nach E = mc²"):
+        assert parse_titel(fach) == fach
+    assert parse_titel("ABBA und der Erfolg von „Waterloo“") == "ABBA und der Erfolg von „Waterloo“"
     for kaputt in ("Wechselstrom: Effektivwert und Phasenlage", "Wechselstrom – Effektivwert und Phasenlage",
                    "Bodenschutz und nachhaltige Nutzung решений", "Gebäudeausrüstung im Bestand♀♀",
                    "Automaten und formale Sprachen bg", "x" * 81, "Biologische Vielfalt in Lebensräumen}",

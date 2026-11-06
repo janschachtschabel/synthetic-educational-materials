@@ -66,7 +66,9 @@ _TITEL_WORTENDE = {"zu", "an", "um", "ab", "in", "im", "am"}  # echte Wörter, d
 def _fremdes_zeichen(t: str) -> str | None:
     """Erstes Zeichen außerhalb lateinischer/griechischer Schrift, Ziffern und üblicher Satzzeichen."""
     for c in t:
-        if c.isspace() or c.isdigit() or c in "-‐‑,.?!&/+'’%()":
+        # Fachzeichen (§ 266 StGB, 90 °C, Bose–Einstein, „Faust“, E = mc², µm) sind erlaubt; Gedankenstriche
+        # mit Leerzeichen fängt _TITEL_TRENNER vorher ab
+        if c.isspace() or c.isdigit() or c in "-‐‑–,.?!&/+'’%()§°„“‚‘=×·µ":
             continue
         name = unicodedata.name(c, "")
         if not name.startswith(("LATIN", "GREEK")):
@@ -76,6 +78,8 @@ def _fremdes_zeichen(t: str) -> str | None:
 
 def parse_titel(text: str) -> str:
     t = _einzeilig(_einzeilig(text.strip().splitlines()[0] if text.strip() else "").rstrip("."))
+    if t.count("„") > t.count("“"):  # _einzeilig nimmt ein schließendes Zitatzeichen am Ende mit: „Faust“
+        t += "“"
     if not 10 <= len(t) <= TITEL_MAX:
         raise ValueError(f"Titel mit {len(t)} Zeichen")
     if _TITEL_TRENNER.search(t):
