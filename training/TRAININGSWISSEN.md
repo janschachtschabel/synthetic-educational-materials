@@ -30,7 +30,7 @@ Splits sind **nach Thema** getrennt (Hash der Themen-URI), Testthemen kommen im 
 | validation | 2.463 |
 | test | 2.393 |
 
-Zeichen (Median / p95 / max): Volltext 3.663 / 4.528 / 6.914 · Titel 67 / 85 / 116 · Beschreibung 782 / 922 / 1.129 ·
+Zeichen (Median / p95 / max): Volltext 3.663 / 4.528 / 6.914 · Titel 67 / 85 / 116 (45 / 61 / 80, seit die Titel am 05.11.2026 neu erzeugt wurden, siehe `title_previous`) · Beschreibung 782 / 922 / 1.129 ·
 Keywords 5–8 Stück, als Text median 132 Zeichen. Genutzte Felder: `id`, `fulltext`, `title`, `description`,
 `keywords`. Die restlichen Felder (`qa_pairs`, Fächer, Inhaltstyp, Niveau, …) werden für diese Aufgabe nicht gebraucht.
 
