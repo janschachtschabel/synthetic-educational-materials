@@ -16,6 +16,7 @@ import random
 import warnings
 from functools import cache, cached_property
 
+from ... import gnd_ergaenzung
 from ... import schema as S
 from ...paths import MAPPING_DIR, lokal_pfad
 from ...vocabs import load as load_vocab
@@ -183,6 +184,10 @@ class Erwachsenenbildung(Bildungsbereich):
 
     @cached_property
     def _topics(self) -> list[dict]:
+        # Motiv-Ersatz und ergänzte Beschreibungen (data/mappings/gnd_ergaenzungen.jsonl), falls vorhanden
+        return gnd_ergaenzung.anwenden(self._topics_roh(), self.key)
+
+    def _topics_roh(self) -> list[dict]:
         out = lade_themen()
         if not out:
             raise FileNotFoundError(f"Keine Themen in {DIR}. Erst die Mappings bauen: "

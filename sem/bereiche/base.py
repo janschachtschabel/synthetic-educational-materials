@@ -303,6 +303,10 @@ def build_seeds(bereich: Bildungsbereich, n: int, balance: str | None = None, se
         thema = s.get(S.F_THEMA) or {}
         if thema.get("beschreibung_de"):
             thema["beschreibung_de"] = ohne_urls(thema["beschreibung_de"])
+        # aus gnd_ergaenzungen.jsonl: Herkunft einer ergänzten Beschreibung, ersetzter Motiv-Satz
+        for feld in ("beschreibung_quelle", "gnd_motiv"):
+            if thema and topic.get(feld):
+                thema[feld] = topic[feld]
         von, bis = bereich.umfang(s)
         s[S.F_UMFANG] = {"von": von, "bis": bis}
         s[S.F_STIL] = bereich.stil(s["id"])

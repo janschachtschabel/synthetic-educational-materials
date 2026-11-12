@@ -12,6 +12,7 @@ import json
 import random
 from functools import cache, cached_property
 
+from ... import gnd_ergaenzung
 from ... import schema as S
 from ...paths import MAPPING_DIR
 from ...vocabs import load as load_vocab
@@ -152,6 +153,10 @@ class Elementar(Bildungsbereich):
 
     @cached_property
     def _topics(self) -> list[dict]:
+        # Motiv-Ersatz und ergänzte Beschreibungen (data/mappings/gnd_ergaenzungen.jsonl), falls vorhanden
+        return gnd_ergaenzung.anwenden(self._topics_roh(), self.key)
+
+    def _topics_roh(self) -> list[dict]:
         path = DIR / "themen_elementar.jsonl"
         out = load_jsonl(path) if path.exists() else []
         if not out:

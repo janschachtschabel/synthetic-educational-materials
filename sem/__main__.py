@@ -173,6 +173,10 @@ def main(argv=None):
     p.add_argument("--limit", type=int, help="nur die ersten N Materialien")
     _llm_args(p)
 
+    p = sub.add_parser("gnd-ergaenzen", help="GND-Themen aller Bereiche ergänzen: Ersatz für Motiv-Sätze und "
+                                             "Kurzbeschreibungen (GND, Wikidata) → data/mappings/gnd_ergaenzungen.jsonl")
+    p.add_argument("--limit", type=int, help="nur die ersten N Themen (zum Testen)")
+
     sub.add_parser("laeufe", help="Materialläufe, die ihr Ziel nicht erreicht haben (abgebrochen oder mit Fehlern)")
 
     p = sub.add_parser("mappings", help="Mappings eines Bildungsbereichs neu bauen (Schritte siehe --liste)")
@@ -310,6 +314,11 @@ def main(argv=None):
         print(f"{prog.done} neu, {prog.skipped} schon vorhanden, {prog.failed} fehlgeschlagen → {out}")
         if prog.status != "fertig":
             sys.exit(2)
+
+    elif a.cmd == "gnd-ergaenzen":
+        from .gnd_ergaenzung import DATEI, bauen
+
+        print(json.dumps(bauen(limit=a.limit, on_progress=print), ensure_ascii=False), "→", DATEI)
 
     elif a.cmd == "mappings":
         from .bereiche import get
