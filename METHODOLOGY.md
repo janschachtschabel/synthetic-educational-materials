@@ -496,6 +496,7 @@ In the prompt templates (`prompts/`, editable in the user interface), placeholde
 | `rolle`, `sprache` | author role in the full-text prompt, language as a word |
 | `umfang_von`, `umfang_bis` | target length in words (from `synth:umfang_woerter` or the content type) |
 | `einstieg`, `namen` | style settings from `synth:stil`: opening type, names (comma-separated) |
+| `beschreibung_form` | form of the first description sentence (guiding question, technical term as subject, or situation), chosen from the seed id |
 | `titel`, `beschreibung`, `keywords`, `volltext`, `auftrag` | only in `material.md`: fields generated so far (“-” = empty), full text, instructions from the field file |
 | `kategorien`, `beispiel_id` | only in `inhaltstyp.md`: list of content types in “Name → id: text type” format |
 | `floskel`, `erster_satz`, `rest`, `form` | only in `beschreibung_einstieg.md` (plus `titel`; `form` = sentence form, chosen from the material id) |

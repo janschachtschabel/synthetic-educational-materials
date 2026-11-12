@@ -14,14 +14,13 @@ titel-neu.
 
 from __future__ import annotations
 
-import hashlib
 import re
 from datetime import date
 from pathlib import Path
 
 from . import schema as S
 from .generate import (BESCHREIBUNG_MAX, BESCHREIBUNG_MIN, FELD_VERSUCHE, _FORM_WOERTER, _einzeilig,
-                       beschreibung_floskel)
+                       beschreibung_floskel, satzform)
 from .llm import LLMConfig, print_progress, run_tasks
 from .paths import PROMPT_DIR
 from .prompts import load_prompts, prompt_hash, render
@@ -63,18 +62,6 @@ def parse_satz(text: str) -> str:
     if (m := _TYP_ANFANG.match(s)) and m.group(2).casefold() in _FORM_WOERTER | _TYPEN_EXTRA:
         raise ValueError(f"Satz beginnt mit dem Materialtyp {m.group(2)!r}")
     return s
-
-
-# Satzform je Material (aus der id reproduzierbar), damit keine neue Schablone („… werden eingeordnet.“) entsteht
-SATZFORMEN = (
-    "eine Leitfrage, die der Text beantwortet",
-    "den zentralen Fachbegriff als Satzgegenstand mit einem Verb, das eine Aussage aus dem bisherigen Satz trägt",
-    "die Situation, das Problem oder die Aufgabe, um die es geht, als Aussagesatz",
-)
-
-
-def satzform(rec_id: str) -> str:
-    return SATZFORMEN[int(hashlib.sha1(rec_id.encode()).hexdigest(), 16) % len(SATZFORMEN)]
 
 
 def einstieg_ersetzen(client, rec: dict, prompts_by_bereich: dict, vorlage: str, meta: dict) -> dict:

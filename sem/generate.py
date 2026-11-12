@@ -22,6 +22,7 @@ Systemprompts angehängt; die Vorgaben bleiben deutsch, cclom:general_language e
 from __future__ import annotations
 
 import json
+import hashlib
 import re
 import time
 import unicodedata
@@ -145,6 +146,19 @@ _BESCHREIBUNG_FLOSKEL_SATZ = re.compile(
     r"|\bals themen\b|\bzum themenfeld\b|\bsind gemeint\b|\bbilden (?:zwei|die|den) (?:gegenst|themen|\w*aufgabe)",
     re.I)
 _ERSTER_SATZ = re.compile(r"^.+?[.!?](?=\s+[„\"(]?[A-ZÄÖÜ0-9]|\s*$)", re.S)
+
+
+# Satzform des ersten Beschreibungssatzes je Material (aus der id reproduzierbar), damit sich keine
+# Lieblingsform einschleift; genutzt bei der Erzeugung und von beschreibung_einstieg
+SATZFORMEN = (
+    "eine Leitfrage, die der Text beantwortet",
+    "den zentralen Fachbegriff als Satzgegenstand mit einem Verb, das eine Aussage aus dem bisherigen Satz trägt",
+    "die Situation, das Problem oder die Aufgabe, um die es geht, als Aussagesatz",
+)
+
+
+def satzform(rec_id: str) -> str:
+    return SATZFORMEN[int(hashlib.sha1(rec_id.encode()).hexdigest(), 16) % len(SATZFORMEN)]
 
 
 def beschreibung_floskel(text: str) -> str | None:
@@ -275,6 +289,7 @@ class Material:
         stil = seed.get(S.F_STIL) or {}
         self.values.setdefault("einstieg", stil.get("einstieg", ""))
         self.values.setdefault("namen", ", ".join(stil.get("namen", [])))
+        self.values.setdefault("beschreibung_form", satzform(str(seed.get("id", ""))))
         self.hinweis = ""
         if ausgabesprache != "de":
             name = SPRACHEN.get(ausgabesprache, ausgabesprache)
