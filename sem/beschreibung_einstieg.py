@@ -1,3 +1,4 @@
+import hashlib
 """Schablonenhafte Anfänge der Beschreibungen fertiger Materialien ersetzen, ohne den Rest anzufassen.
 
     python -m sem beschreibung-einstieg --materialien output/materialien_….jsonl [--out …] [--limit N]
@@ -64,6 +65,18 @@ def parse_satz(text: str) -> str:
     return s
 
 
+# Satzform je Material (aus der id reproduzierbar), damit keine neue Schablone („… werden eingeordnet.“) entsteht
+SATZFORMEN = (
+    "eine Leitfrage, die der Text beantwortet",
+    "den zentralen Fachbegriff als Satzgegenstand mit einem Verb, das eine Aussage aus dem bisherigen Satz trägt",
+    "die Situation, das Problem oder die Aufgabe, um die es geht, als Aussagesatz",
+)
+
+
+def satzform(rec_id: str) -> str:
+    return SATZFORMEN[int(hashlib.sha1(rec_id.encode()).hexdigest(), 16) % len(SATZFORMEN)]
+
+
 def einstieg_ersetzen(client, rec: dict, prompts_by_bereich: dict, vorlage: str, meta: dict) -> dict:
     """Ein Material mit neuem ersten Satz der Beschreibung; ohne Schablone unverändert."""
     alt = rec.get(F_BESCHREIBUNG_ALT, rec[S.F_DESCRIPTION])  # zweiter Durchlauf: ursprüngliche Fassung bleibt
@@ -74,7 +87,7 @@ def einstieg_ersetzen(client, rec: dict, prompts_by_bereich: dict, vorlage: str,
     p = prompts_by_bereich[rec[S.F_BEREICH]]
     system = render(p["system"], {})
     user = render(vorlage, {"floskel": floskel, "titel": rec.get(S.F_TITLE, ""), "erster_satz": erster,
-                            "rest": rest or "-"})
+                            "rest": rest or "-", "form": satzform(str(rec.get("id", "")))})
     zaehlt = hasattr(client, "zaehler")
     tokens: dict[str, int] = {}
     neu, behalten, satz = 0, None, None
@@ -99,7 +112,8 @@ def einstieg_ersetzen(client, rec: dict, prompts_by_bereich: dict, vorlage: str,
                 break
     out = dict(rec)
     gen = rec.get(S.F_GENERATION) or {}
-    info = {**meta, "prompt_hash": meta["prompt_hash"], "neu_angefragt": neu, "floskel": floskel}
+    info = {**meta, "prompt_hash": meta["prompt_hash"], "neu_angefragt": neu, "floskel": floskel,
+            "form": satzform(str(rec.get("id", "")))}
     if tokens.get("aufrufe"):
         info["tokens"] = tokens
     if behalten:

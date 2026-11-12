@@ -687,7 +687,7 @@ verschachtelt sein.
 | `einstieg`, `namen` | Stilvorgaben aus `synth:stil`: Einstiegsart, Namen (kommagetrennt) |
 | `titel`, `beschreibung`, `keywords`, `volltext`, `auftrag` | nur in `material.md`: bisher erzeugte Felder („-“ = leer), Volltext, Auftrag aus der Felddatei |
 | `kategorien`, `beispiel_id` | nur in `inhaltstyp.md`: Liste „Name → id: Textsorte“ der Inhaltstypen |
-| `floskel`, `erster_satz`, `rest` | nur in `beschreibung_einstieg.md` (dazu `titel`) |
+| `floskel`, `erster_satz`, `rest`, `form` | nur in `beschreibung_einstieg.md` (dazu `titel`; `form` = Satzform, aus der Material-id gewählt) |
 
 ## Bekannte Grenzen
 
