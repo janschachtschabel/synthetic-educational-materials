@@ -35,6 +35,9 @@ KANDIDATEN_PATH = CACHE / "berufsbildung_rlp_kandidaten.json"
 STIMMEN_PATH = CACHE / "berufsbildung_stimmen_rlp.jsonl"
 PLAENE = "berufsbildung/rahmenlehrplaene.jsonl"  # unter data/lokal/, nicht im Repo
 PRUEFLISTE_PATH = DIR / "pruefliste_rahmenlehrplaene.csv"
+# ESCO-Berufe mit KMK-Rahmenlehrplan (anerkannte Ausbildungsberufe mit Berufsschulunterricht): nur Beruf, Plan-ID und
+# Plantitel, keine Lernfelder; liegt im Repo, damit die Kennzeichnung auch ohne die lokale Plan-Datei wirkt
+BERUFE_KMK_PATH = DIR / "berufe_kmk.jsonl"
 KORREKTUREN_PATH = DIR / "korrekturen_rahmenlehrplaene.csv"
 N_KANDIDATEN = 12
 N_STIMMEN = 3
@@ -209,11 +212,26 @@ def zusammenfuehren(cfg: LLMConfig | None = None, stimmen: int = N_STIMMEN, mode
                                                    if c in by_code),
                           "lernfelder": len(p["lernfelder"]), "url": p["url"]})
     _write_jsonl(lokal_pfad(PLAENE), rows)
+    _write_jsonl(BERUFE_KMK_PATH, berufe_kmk(rows))
     pruefung.schreibe_pruefliste(PRUEFLISTE_PATH, pruef, ["korrektur_codes", "kommentar"])
     mit = sum(1 for r in rows if r["berufe"])
     return fertig(f"{len(rows)} Rahmenlehrpläne, {mit} mit ESCO-Beruf, "
                   f"{sum(len(r['lernfelder']) for r in rows if r['berufe'])} Lernfelder nutzbar, "
                   f"{len(pruef)} auf der Prüfliste")
+
+
+def berufe_kmk(plaene: list[dict]) -> list[dict]:
+    """Je ESCO-Beruf die KMK-Rahmenlehrpläne, denen er zugeordnet ist (ID, Titel, Status der Zuordnung)."""
+    out: dict[str, dict] = {}
+    for p in plaene:
+        for b in p["berufe"]:
+            o = out.setdefault(b["uri"], {"uri": b["uri"], "label": b["label"], "rahmenlehrplaene": []})
+            o["rahmenlehrplaene"].append({"id": p["id"], "titel": p["titel"], "status": p["mapping"]["status"]})
+    return sorted(out.values(), key=lambda o: o["uri"])
+
+
+def lade_berufe_kmk() -> dict[str, dict]:
+    return {r["uri"]: r for r in load_jsonl(BERUFE_KMK_PATH)} if BERUFE_KMK_PATH.exists() else {}
 
 
 def lade_plaene() -> list[dict]:

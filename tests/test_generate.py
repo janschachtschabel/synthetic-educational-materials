@@ -8,7 +8,7 @@ from sem.bereiche.base import build_seeds
 from sem.generate import generate_one, parse_inhaltstyp, parse_keywords, parse_titel, titel_nennt_form
 from sem.prompts import load_prompts
 
-VOLLTEXT = " ".join(["Die Eigenwerte einer symmetrischen Matrix sind reell."] * 40)
+VOLLTEXT = " ".join(["Die Eigenwerte einer symmetrischen Matrix sind reell."] * 160)
 
 
 class FakeClient:
@@ -30,7 +30,7 @@ class FakeClient:
         if "zusammenfassende Beschreibung" in user:
             return "Eigenwerte symmetrischer Matrizen sind reell. " * 10
         if "Schlagworte zum Thema" in user:
-            return "Eigenwert, Diagonalisierung, Symmetrische Matrix, Spektralsatz, eigenwert"
+            return "Eigenwert, Diagonalisierung, Symmetrische Matrix, Spektralsatz, Orthogonalbasis, eigenwert"
         if "Materialart ausschließlich" in user:
             assert "Materialart: -" in user  # Seed-Wert wird nicht verraten
             return self.kategorie
@@ -67,10 +67,10 @@ def test_parser():
                    "Heißluftballon bauen und Funktionsweise kennenlernen", "Biologische Vielfalt entdecken"):
         with pytest.raises(ValueError):
             parse_titel(kaputt)
-    assert parse_keywords("- Bruchrechnung\n- Dezimalzahl, Prozentrechnung; bruchrechnung, Kürzen") == \
-        ["Bruchrechnung", "Dezimalzahl", "Prozentrechnung", "Kürzen"]
+    assert parse_keywords("- Bruchrechnung\n- Dezimalzahl, Prozentrechnung; bruchrechnung, Kürzen, Hauptnenner") == \
+        ["Bruchrechnung", "Dezimalzahl", "Prozentrechnung", "Kürzen", "Hauptnenner"]
     with pytest.raises(ValueError):
-        parse_keywords("Mathematik, Zahl")
+        parse_keywords("Bruchrechnung, Dezimalzahl, Prozentrechnung, Kürzen")  # Prompt verlangt mindestens 5
     kat = [{"id": "fallstudie", "name": "Fallstudie", "uri": "u"}]
     assert parse_inhaltstyp(" `fallstudie` ", kat)["uri"] == "u"
     with pytest.raises(ValueError):
@@ -83,7 +83,7 @@ def test_generate_one_einzelaufrufe_und_inhaltstyp_pruefung(hochschule):
     client = FakeClient(kat[seed[S.F_LRT][0]]["id"])
     rec = generate_one(client, seed, {"hochschule": load_prompts("hochschule")}, {"modell": "fake"})
     assert rec[S.F_TITLE] == "Eigenwerte Diagonalisierung symmetrischer Matrizen"
-    assert rec[S.F_KEYWORD] == ["Eigenwert", "Diagonalisierung", "Symmetrische Matrix", "Spektralsatz"]
+    assert rec[S.F_KEYWORD] == ["Eigenwert", "Diagonalisierung", "Symmetrische Matrix", "Spektralsatz", "Orthogonalbasis"]
     assert len(rec[S.F_QA]) == 10 and rec[S.F_LRT_CHECK]["uebereinstimmung"]
     # Volltext, Titel (2x), Beschreibung, Keywords, Inhaltstyp, Fragen
     assert len(client.calls) == 7

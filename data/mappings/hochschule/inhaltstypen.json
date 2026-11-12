@@ -1,5 +1,5 @@
 {
- "beschreibung": "Auswahl textfähiger Inhaltstypen aus dem OEH-Vokabular new_lrt für den Hochschulbereich. textsorte steuert die Generierung, medienform beschreibt die Form des Volltexts. lehrebenen: für welche Themen der Typ gewählt werden darf. faechergruppen: optional auf Fächergruppen (Notation der Hochschulfächersystematik) beschränkt, null = alle.",
+ "beschreibung": "Auswahl textfähiger Inhaltstypen aus dem OEH-Vokabular new_lrt für den Hochschulbereich. textsorte steuert die Generierung, medienform beschreibt die Form des Volltexts. lehrebenen: für welche Themen der Typ gewählt werden darf. faechergruppen: optional auf Fächergruppen (Notation der Hochschulfächersystematik) beschränkt, null = alle. umfang: Wortzahl [von, bis] des Volltexts, passend zur Textsorte.",
  "quelle": {
   "name": "OpenEduHub new_lrt",
   "uri": "http://w3id.org/openeduhub/vocabs/new_lrt/",
@@ -12,6 +12,7 @@
    "label": "Skript, Handout und Handreichung",
    "textsorte": "Vorlesungsskript oder Handout zu einem Thema",
    "medienform": "Text",
+   "umfang": [600, 1000],
    "lehrebenen": [
     "grundlagen",
     "vertiefung"
@@ -21,8 +22,9 @@
   {
    "uri": "http://w3id.org/openeduhub/vocabs/new_lrt/a5897142-bf57-4cd0-bcd9-7d0f1932e87a",
    "label": "Lehrbuch und Grundlagenwerk (auch E-Book)",
-   "textsorte": "Kapitel aus einem Lehrbuch",
+   "textsorte": "Kapitel aus einem Lehrbuch: Lernziele, systematische Darstellung mit Definitionen und Beispielen, Zusammenfassung und Kontrollfragen am Ende",
    "medienform": "Text",
+   "umfang": [700, 1100],
    "lehrebenen": [
     "grundlagen",
     "vertiefung"
@@ -34,6 +36,7 @@
    "label": "Artikel und Einzelpublikation",
    "textsorte": "Fachartikel oder Überblicksbeitrag",
    "medienform": "Text",
+   "umfang": [700, 1100],
    "lehrebenen": [
     "vertiefung",
     "forschung"
@@ -45,6 +48,7 @@
    "label": "Nachschlagewerk und Glossareintrag",
    "textsorte": "Nachschlage- oder Glossarbeitrag mit mehreren Einträgen",
    "medienform": "Text",
+   "umfang": [300, 600],
    "lehrebenen": [
     "grundlagen",
     "vertiefung"
@@ -56,6 +60,7 @@
    "label": "Übungsmaterial",
    "textsorte": "Übungsblatt mit Aufgaben",
    "medienform": "Text",
+   "umfang": [350, 600],
    "lehrebenen": [
     "grundlagen",
     "vertiefung",
@@ -68,6 +73,7 @@
    "label": "Fallstudie",
    "textsorte": "Fallstudie mit Arbeitsaufträgen",
    "medienform": "Text",
+   "umfang": [500, 800],
    "lehrebenen": [
     "vertiefung",
     "forschung"
@@ -85,6 +91,7 @@
    "label": "Präsentation",
    "textsorte": "Foliensatz (Folientexte mit Sprechernotizen)",
    "medienform": "Folien",
+   "umfang": [350, 650],
    "lehrebenen": [
     "grundlagen",
     "vertiefung",
@@ -97,6 +104,7 @@
    "label": "Projekt (Lehr- und Lernmaterial)",
    "textsorte": "Projektbeschreibung für eine studentische Projektarbeit",
    "medienform": "Text",
+   "umfang": [400, 650],
    "lehrebenen": [
     "vertiefung",
     "forschung"
@@ -108,6 +116,7 @@
    "label": "Recherche- und Lernauftrag",
    "textsorte": "Recherche- und Lernauftrag",
    "medienform": "Text",
+   "umfang": [250, 450],
    "lehrebenen": [
     "grundlagen",
     "vertiefung",
@@ -120,6 +129,7 @@
    "label": "Klausur, Klassenarbeit und Test",
    "textsorte": "Klausur mit Aufgabenstellungen",
    "medienform": "Text",
+   "umfang": [350, 650],
    "lehrebenen": [
     "grundlagen",
     "vertiefung"
@@ -131,6 +141,7 @@
    "label": "Lösungs(beispiel) und Erwartungshorizont",
    "textsorte": "Musterlösung oder Erwartungshorizont",
    "medienform": "Text",
+   "umfang": [400, 700],
    "lehrebenen": [
     "grundlagen",
     "vertiefung"
@@ -142,6 +153,7 @@
    "label": "Selbst-Testaufgabe",
    "textsorte": "Selbsttest mit Lösungshinweisen",
    "medienform": "Text",
+   "umfang": [300, 550],
    "lehrebenen": [
     "grundlagen",
     "vertiefung"
@@ -153,6 +165,7 @@
    "label": "Experiment (Lehr- und Lernmaterial)",
    "textsorte": "Versuchs- oder Laboranleitung",
    "medienform": "Text",
+   "umfang": [400, 650],
    "lehrebenen": [
     "grundlagen",
     "vertiefung",
@@ -170,6 +183,7 @@
    "label": "Anleitung",
    "textsorte": "Anleitung zu einer Methode, Software oder einem Verfahren",
    "medienform": "Text",
+   "umfang": [350, 600],
    "lehrebenen": [
     "grundlagen",
     "vertiefung",
@@ -182,6 +196,7 @@
    "label": "Vortrags- und Unterrichtsaufzeichnung",
    "textsorte": "Transkript einer Vorlesungsaufzeichnung",
    "medienform": "Video-Transkript",
+   "umfang": [700, 1100],
    "lehrebenen": [
     "grundlagen",
     "vertiefung",
@@ -194,6 +209,7 @@
    "label": "Erklärvideo und gefilmtes Experiment",
    "textsorte": "Transkript eines Erklärvideos",
    "medienform": "Video-Transkript",
+   "umfang": [400, 650],
    "lehrebenen": [
     "grundlagen",
     "vertiefung"
@@ -205,6 +221,7 @@
    "label": "Radio, Podcastfolge und Interview",
    "textsorte": "Transkript einer Podcastfolge oder eines Fachinterviews",
    "medienform": "Audio-Transkript",
+   "umfang": [600, 1000],
    "lehrebenen": [
     "grundlagen",
     "vertiefung",
@@ -215,8 +232,9 @@
   {
    "uri": "http://w3id.org/openeduhub/vocabs/new_lrt/6abe9218-0f55-46ba-b4c8-af22a63e1bb7",
    "label": "Schülerarbeit und Studienarbeit",
-   "textsorte": "Studentische Seminar- oder Hausarbeit (Auszug)",
+   "textsorte": "Auszug aus einer studentischen Haus- oder Seminararbeit: Einleitung mit Fragestellung und Aufbau der Arbeit, ein ausgearbeiteter Hauptteil-Abschnitt, kurzes Zwischenfazit; erkennbar als Arbeit von Studierenden, ohne konkrete Literaturangaben",
    "medienform": "Text",
+   "umfang": [700, 1000],
    "lehrebenen": [
     "vertiefung",
     "forschung"

@@ -1,7 +1,7 @@
 """Editierbare Prompt-Vorlagen.
 
 Platzhalter: {{name}}. Bedingte Abschnitte: {{#name}}…{{/name}} erscheinen nur, wenn name einen
-Wert hat. Bereichsspezifische Fassungen unter prompts/<bereich>/ haben Vorrang.
+Wert hat; sie dürfen verschachtelt sein. Bereichsspezifische Fassungen unter prompts/<bereich>/ haben Vorrang.
 """
 
 from __future__ import annotations
@@ -23,12 +23,13 @@ _SECTION = re.compile(r"\{\{#(\w+)\}\}(.*?)\{\{/\1\}\}", re.S)
 _VAR = re.compile(r"\{\{(\w+)\}\}")
 
 
-def render(template: str, values: dict) -> str:
-    def section(m):
-        return m.group(2) if values.get(m.group(1)) else ""
+def _sections(template: str, values: dict) -> str:
+    # verschachtelte Abschnitte ({{#a}}…{{#b}}…{{/b}}…{{/a}}) werden innen weiter aufgelöst
+    return _SECTION.sub(lambda m: _sections(m.group(2), values) if values.get(m.group(1)) else "", template)
 
-    text = _SECTION.sub(section, template)
-    return _VAR.sub(lambda m: str(values.get(m.group(1), "")), text)
+
+def render(template: str, values: dict) -> str:
+    return _VAR.sub(lambda m: str(values.get(m.group(1), "")), _sections(template, values))
 
 
 def placeholders(template: str) -> list[str]:

@@ -13,10 +13,11 @@ import random
 import re
 from functools import cached_property
 
+from ... import gnd_ergaenzung
 from ... import schema as S
 from ...paths import MAPPING_DIR
 from ...vocabs import load as load_vocab
-from ..base import Bildungsbereich, MappingSchritt, SeedState
+from ..base import Bildungsbereich, MappingSchritt, SeedState, kurz_id  # noqa: F401 (kurz_id: frühere Importstelle)
 
 DIR = MAPPING_DIR / "hochschule"
 THEMEN_DATEI = "themen_hochschule.jsonl"  # Gesamtset aus OpenAlex- und GND-Themen
@@ -29,14 +30,6 @@ _ADMIN_NOTE = re.compile(r"\s*\((?:nicht |nur |ohne Lehramt|einschl\.).*?\)\s*$"
 def clean_label(label: str) -> str:
     """Label für Prompts: ohne „Studienbereich“-Präfix und Verwaltungszusätze in Klammern."""
     return _ADMIN_NOTE.sub("", _PREFIX.sub("", label)).strip()
-
-
-def kurz_id(label: str) -> str:
-    """Lesbare id für Prompts: „Lösungs(beispiel) und Erwartungshorizont“ → loesungsbeispiel_und_erwartungshorizont."""
-    s = label.casefold()
-    for a, b in (("ä", "ae"), ("ö", "oe"), ("ü", "ue"), ("ß", "ss"), ("(", ""), (")", "")):
-        s = s.replace(a, b)
-    return re.sub(r"[^a-z0-9]+", "_", s).strip("_")
 
 
 def load_jsonl(path):
@@ -52,8 +45,12 @@ class Hochschule(Bildungsbereich):
         "studienbereich": "jeder Destatis-Studienbereich etwa gleich oft",
         "faechergruppe": "jede Destatis-Fächergruppe etwa gleich oft",
         "lehrebene": "Grundlagen, Vertiefung und Forschung etwa gleich oft",
+        "studienfach_wurzel": "Studienfächer im Verhältnis der Wurzel ihrer Themenzahl: große Fächer bekommen mehr, "
+                              "aber nicht proportional mehr (Fach mit 100 Themen etwa dreimal so oft wie eines mit 11)",
     }
-    default_balance = "thema"
+    # Gleichverteilung nach Thema übernahm die Schieflage der OpenAlex-Themen (Medizin und Biomedizin 19 % im
+    # 50k-Datensatz); die Wurzel dämpft sie, ohne kleine Fächer ihre wenigen Themen dauernd wiederholen zu lassen
+    default_balance = "studienfach_wurzel"
     mapping_folgen = {
         "openalex": ["fachprofile", "uebersetzen", "kandidaten", "faecher", "lehrebene", "zusammenfuehren"],
         "wlo": ["wlo", "wlo_belege"],
@@ -106,8 +103,10 @@ class Hochschule(Bildungsbereich):
         return {
             "quellen": {"label": "Themenquellen", "beschreibung": "woher die Themen stammen",
                         "werte": {"openalex": "OpenAlex Topics (Forschungs- und Vertiefungsthemen)",
-                                  "gnd": "GND-Sachschlagwörter aus Lehrbüchern, Hochschulschriften und WLO-Keywords"},
-                        "standard": ["openalex", "gnd"]},
+                                  "gnd": "GND-Sachschlagwörter aus Lehrbüchern, Hochschulschriften und WLO-Keywords",
+                                  "fachprofil": "typische Themen aus dem Kurzprofil jedes Studienfachs (Lehrsicht, "
+                                                "auch für Fächer ohne OpenAlex- und GND-Thema)"},
+                        "standard": ["openalex", "gnd", "fachprofil"]},
             "fach_status": {"label": "Status der Fachzuordnung", "beschreibung": "Abstimmung über das Studienfach",
                             "werte": status, "standard": ["gesichert", "wahrscheinlich", "redaktionell"]},
             "lehrebene_status": {"label": "Status der Lehrebene", "beschreibung": "Grundlagen, Vertiefung, Forschung",
@@ -203,10 +202,53 @@ class Hochschule(Bildungsbereich):
 
     @cached_property
     def _topics(self) -> list[dict]:
+        # Motiv-Ersatz und ergänzte Beschreibungen (data/mappings/gnd_ergaenzungen.jsonl), falls vorhanden
+        return gnd_ergaenzung.anwenden(self._topics_roh(), self.key)
+
+    def _topics_roh(self) -> list[dict]:
         out = load_jsonl(DIR / THEMEN_DATEI) if (DIR / THEMEN_DATEI).exists() else []
         if not out:
             raise FileNotFoundError(
                 f"Keine Themen in {DIR}. Erst die Mappings bauen: python -m sem mappings hochschule")
+        return out + self._fachprofil_topics(out)
+
+    def _fachprofil_topics(self, vorhandene: list[dict]) -> list[dict]:
+        """Typische Themen aus den Kurzprofilen der Studienfächer (studienfach_profile.jsonl) als dritte Quelle.
+
+        OpenAlex-Themen sind Forschungsfelder (Medizin und Biomedizin stellten im 50k-Datensatz 19 % der
+        Fachzuordnungen), 17 Studienfächer hatten gar kein Thema. Die Profile nennen je Fach rund 14 Themen aus Sicht
+        der Lehre; sie kommen hier dazu, soweit das Fach nicht schon ein Thema mit gleichem Namen hat. Fach und
+        Lehrebene stammen aus dem Profil und sind nicht abgestimmt (Status „wahrscheinlich“): Die Profile nennen
+        Kernthemen zuerst, die erste Hälfte gilt als Grundlagen, die zweite als Vertiefung."""
+        path = DIR / "studienfach_profile.jsonl"
+        if not path.exists():
+            return []
+        da = {(f["uri"], t["label_de"].casefold()) for t in vorhandene for f in t["studienfach"]}
+        quelle = {"name": "Kurzprofile der Studienfächer (Projekt, LLM-erstellt)", "lizenz": "CC0-1.0",
+                  "uri": "https://github.com/janschachtschabel/synthetic-educational-materials/blob/main/"
+                         "data/mappings/hochschule/studienfach_profile.jsonl"}
+        out = []
+        for p in load_jsonl(path):
+            if p["id"] not in self.faecher.by_uri:
+                continue
+            bereich = self.faecher.by_uri[p["id"]].get("broader")
+            gruppe = self.faecher.by_uri[bereich].get("broader") if bereich else None
+            themen = p.get("typische_themen") or []
+            for i, label in enumerate(themen, 1):
+                if (p["id"], label.casefold()) in da:
+                    continue
+                out.append({
+                    "id": f"{p['id']}#thema-{i}", "art": "fachprofil", "label_de": label, "label_en": "",
+                    "beschreibung_de": "", "keywords_de": [],
+                    "studienfach": [self.faecher.ref(p["id"])],
+                    "studienbereich": [self.faecher.ref(bereich)] if bereich else [],
+                    "faechergruppe": [self.faecher.ref(gruppe)] if gruppe else [],
+                    # Profile nennen Kernthemen zuerst: erste Hälfte Grundlagen, zweite Vertiefung
+                    "lehrebene": "grundlagen" if i <= (len(themen) + 1) // 2 else "vertiefung", "quelle": quelle,
+                    "mapping": {"methode": "typisches Thema aus dem Kurzprofil des Studienfachs; Fach aus dem Profil, "
+                                           "Lehrebene nach der Position in der Themenliste, nicht abgestimmt",
+                                "modell": (p.get("mapping") or {}).get("modell"), "status": "wahrscheinlich",
+                                "lehrebene": {"status": "wahrscheinlich"}}})
         return out
 
     def balance_key(self, topic: dict, balance: str) -> str:
@@ -214,7 +256,14 @@ class Hochschule(Bildungsbereich):
             return topic["id"]
         if balance == "lehrebene":
             return topic.get("lehrebene") or "unbekannt"
+        if balance == "studienfach_wurzel":
+            return topic["studienfach"][0]["uri"]
         return topic[balance][0]["uri"]
+
+    def gruppen_gewichte(self, balance: str, groups: dict[str, list[dict]]) -> dict[str, float] | None:
+        if balance == "studienfach_wurzel":
+            return {k: len(v) ** 0.5 for k, v in groups.items()}
+        return None
 
     @staticmethod
     def status_des_themas(topic: dict) -> dict:
@@ -306,10 +355,6 @@ class Hochschule(Bildungsbereich):
         return seed
 
     # --- Prompt-Werte ----------------------------------------------------------------------
-
-    def inhaltstyp_kategorien(self) -> list[dict]:
-        return [{"id": kurz_id(t["label"]), "name": t["label"], "uri": t["uri"]}
-                for t in self.inhaltstypen["inhaltstypen"]]
 
     def prompt_values(self, seed: dict) -> dict:
         t = seed[S.F_THEMA]

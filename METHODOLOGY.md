@@ -57,7 +57,11 @@ from the OEH version
 field of study. Each topic is assigned one to three fields of study. Study area and subject group are derived from these.
 
 All topics are in one combined set, `themen_hochschule.jsonl` (9.130 topics: 4.514 from OpenAlex,
-4.616 from GND). Each topic records its provenance (`art`, `quelle`), status, and evidence; the seeds can
+4.616 from GND). On loading, 3.610 **subject-profile topics** are added: the typical topics from
+`studienfach_profile.jsonl` (id `<field-of-study URI>#thema-<n>`, `art` `fachprofil`, status
+`wahrscheinlich`; first half of the list teaching level grundlagen, the rest vertiefung; skipped if the
+field already has a topic with the same name). This gives every one of the 273 fields of study topics,
+12.740 in total. Each topic records its provenance (`art`, `quelle`), status, and evidence; the seeds can
 then be filtered accordingly (see “Topic selection”). The partial results for each source are generated during the build in the cache; the `themen` step combines them and runs last after each selection of steps.
 
 **Topics from OpenAlex** (pipeline `openalex`). Each step can be run and resumed independently
@@ -326,6 +330,20 @@ course instructors.
 for the Hauptschulabschluss, Realschulabschluss, or higher education entrance qualification
 (School-Leaving Qualifications), otherwise beginner and advanced.
 
+## GND supplement
+
+For all sectors, `data/mappings/gnd_ergaenzungen.jsonl` (one line per GND URI) is applied when topics are
+loaded. It survives a rebuild of the mappings and is built with `python -m sem gnd-ergaenzen` (lobid and
+Wikidata, no LLM, network access required):
+
+- **Motif entries.** GND subject headings of the form “Mais <Motiv>” describe image motifs, not the
+  subject. For these, lobid looks up the subject term of the same name (subject heading before geographic
+  name, excluding persons and works). If found, the topic id or GND link is replaced and the old URI is
+  kept in `synth:thema.gnd_motiv`. The topic itself stays.
+- **Short descriptions.** Topics without a description get the GND definition or, if there is none,
+  the German Wikidata description (CC0; Wikipedia texts are not used because of CC BY-SA). The source is
+  stored in `synth:thema.beschreibung_quelle`.
+
 ## Seeds
 
 A seed is a JSON object (one line in JSONL). Field names follow the edu-sharing/OEH schema:
@@ -342,32 +360,35 @@ A seed is a JSON object (one line in JSONL). Field names follow the edu-sharing/
 | `synth:textsorte`, `synth:medienform` | Generation controls | from the content type |
 | `synth:didaktische_funktion` | e.g. introduction, practice, and application | in 60% of seeds, random |
 | `synth:bearbeitungsdauer_minuten` | 15, 30, 45, or 90 | in 50% of seeds, random |
+| `synth:umfang_woerter` | Target length of the full text (`von`, `bis`) | from the content type (`umfang` in `inhaltstypen.json`) |
+| `synth:stil` | Opening type of the full text and names for people in the text | random, reproducible from the seed id |
 | `synth:provenance` | Provenance for each field: source, URI, license, method | automatic |
 | `synth:seed_parameter` | Even-distribution field, group, random seed, topic selection | automatic |
 
 Controlled values are stored as a list of URIs, as in edu-sharing. The label is stored in `<field>_DISPLAYNAME` and is taken unchanged from the vocabulary. Labels are cleaned up for prompts (without the prefix “Studienbereich” and without administrative additions in parentheses).
 
-**Even distribution.** For each education sector, one field is selected (higher education: `thema` by default, as well as `studienfach`, `studienbereich`, `faechergruppe`, and `lehrebene`). Topics are grouped by this field, using the first value in each case. The requested number is distributed evenly across the groups, with the remainder assigned to randomly selected groups. Within a group, topics are placed in random order, each appearing once before any topic is repeated. For `n` ≥ the number of topics, every topic is therefore included when using `thema`. The content type is rotated within each group: the matching type used least often so far is selected each time.
+**Even distribution.** For each education sector, one field is selected (higher education: `studienfach_wurzel` by default, as well as `thema`, `studienfach`, `studienbereich`, `faechergruppe`, and `lehrebene`). Topics are grouped by this field, using the first value in each case. The requested number is distributed evenly across the groups, with the remainder assigned to randomly selected groups. Weighted fields use the largest remainder: `studienfach_wurzel` groups by field of study and weights by the square root of the topic count, so large fields (medicine) get more seeds than small ones, but not in proportion to their topics. Within a group, topics are placed in random order, each appearing once before any topic is repeated. For `n` ≥ the number of topics, every topic is therefore included when using `thema`. The content type is rotated within each group: the matching type used least often so far is selected each time.
 
 **Topic selection.** Which topics are included in the seeds can be selected (CLI `--auswahl`, user interface “welche Themen einbezogen werden” (“which topics are included”); `python -m sem auswahl hochschule` shows the filters and topic count):
 
 | Filter | Values | Default |
 |---|---|---|
-| `quellen` | `openalex`, `gnd` | both |
+| `quellen` | `openalex`, `gnd`, `fachprofil` | all |
 | `fach_status` | `gesichert`, `wahrscheinlich`, `unsicher`, `redaktionell` | excluding `unsicher` |
 | `lehrebene_status` | same as `fach_status` | excluding `unsicher` |
 | `hochschulrelevanz` (GND only) | `gesichert`, `wahrscheinlich`, `unsicher` | excluding `unsicher` |
 | `belege` (at least one) | `lehrbuch` (≥ 1 textbook in the hbz catalog), `hochschulschrift` (≥ 3), `wlo` (WLO keyword with a matching higher-education subject), `handmapping` (subject confirmed through hand mapping or a subject-group bridge) | no requirement |
 
-`unsicher` is excluded by default until the review list has been reviewed; a correction or confirmation makes a topic `redaktionell`, so it is included again. Once the review is complete, all 9.130 topics are included by default.
+`unsicher` is excluded by default until the review list has been reviewed; a correction or confirmation makes a topic `redaktionell`, so it is included again. Once the review is complete, all 12.740 topics are included by default.
 Each seed records in `synth:provenance` → `synth:thema` the status of each assignment and its evidence: catalog counts with query URIs (lobid), WLO records with a reference to WirLernenOnline.de and, where included in the export, links to the Node IDs. Only WLO keywords associated with higher-education subjects are used. The `.stats.json` counts topic sources, statuses, and evidence.
 
-**Vocational education and training seeds.** Instead of `ccm:oeh_taxonid_university`, they include `ccm:oeh_profession_group` (KldB occupational subgroups, OEH URIs), as well as `synth:beruf` (ESCO URI, label, ISCO-08, description, qualification pathway, higher-level KldB categories) and `synth:kompetenz` (ESCO URI, label, description, type, scope, essential/optional, `exactMatch` to OEH `escoSkills`). `synth:thema` is the competency in the context of the occupation. The content type matches the competency type and target group (80% learners, 20% teachers and trainers); the level matches the qualification pathway. Optional: `synth:lernort` (40%; vocational school, training company, inter-company training center, or continuing education venue) and `synth:querschnittsthema` (25%; one of the four standard occupational profile positions). Even distribution: `beruf` (default), `thema`, `kompetenz`, `berufsgruppe`, `berufshauptgruppe`, `berufsbereich`. Learning-field topics carry `synth:lernfeld` (number, title, training year, time allocation, framework curriculum with date and download URL) instead of `synth:kompetenz`; `synth:thema` is the learning field within the occupation, the learning venue is always the vocational school, and the level follows the training year (1st year → basic level, otherwise advanced level). The skill filters do not apply to them.
+**Vocational education and training seeds.** Instead of `ccm:oeh_taxonid_university`, they include `ccm:oeh_profession_group` (KldB occupational subgroups, OEH URIs), as well as `synth:beruf` (ESCO URI, label, ISCO-08, description, qualification pathway, higher-level KldB categories) and `synth:kompetenz` (ESCO URI, label, description, type, scope, essential/optional, `exactMatch` to OEH `escoSkills`). `synth:thema` is the competency in the context of the occupation. The content type matches the competency type and target group (80% learners, 20% teachers and trainers); the level matches the qualification pathway. Optional: `synth:lernort` (40%; vocational school, training company, inter-company training center, or continuing education venue) and `synth:querschnittsthema` (25%; one of the four standard occupational profile positions). If the ESCO occupation has a recognized training occupation with a KMK framework curriculum (`berufe_kmk.jsonl`, 314 occupations, from the mapping of the framework curricula), its title is stored in `synth:beruf.ausbildungsberuf_kmk` and added after the occupation in the prompt. Even distribution: `ausbildungsberuf` (default: half occupations with and half without a KMK framework curriculum, by occupation within each), `beruf`, `thema`, `kompetenz`, `berufsgruppe`, `berufshauptgruppe`, `berufsbereich`. Learning-field topics carry `synth:lernfeld` (number, title, training year, time allocation, framework curriculum with date and download URL) instead of `synth:kompetenz`; `synth:thema` is the learning field within the occupation, the learning venue is always the vocational school, and the level follows the training year (1st year → basic level, otherwise advanced level). The skill filters do not apply to them.
 
 | Filter (vocational education and training) | Values | Default |
 |---|---|---|
 | `quellen` | `esco` (occupation × skill), `lernfeld` (occupation × learning field of the framework curriculum) | both |
 | `qualifizierung` | `ausbildung`, `fortbildung`, `studium`, `anlernen` | Ausbildung and Fortbildung |
+| `ausbildungsberuf` | `kmk` (occupation with KMK framework curriculum), `ohne_kmk` | both |
 | `relation` | `essenziell`, `optional` | essenziell |
 | `kompetenzart` | `wissen`, `faehigkeit` | both |
 | `reichweite` | `berufsspezifisch`, `branchenspezifisch`, `branchenuebergreifend`, `querschnitt` | excluding `querschnitt` |
@@ -389,8 +410,12 @@ The German full-text prompt for vocational education and training (`prompts/beru
 
 Up to six LLM calls per seed (OpenAI-compatible API, default model `gpt-6-luna`):
 
-1. **Full text** from the seed: `volltext_system.md` and `volltext.md`, about one A4 page
-   (400–550 words). Shorter texts are discarded and requested again.
+1. **Full text** from the seed: `volltext_system.md` and `volltext.md`. The length depends on the
+   content type (`umfang` in `inhaltstypen.json`, e.g. Merksatz 60–180, worksheet 300–500, higher
+   education textbook excerpt 700–1,100 words; without a value 400–550, early childhood 350–500). Texts
+   below 60% of the lower bound (at least 60 words) are discarded and requested again. The seed also sets
+   an opening type (case example, question, observation …) and names for people in the text, so that
+   texts do not all start the same way or use the same names.
 2. **Title, description, keywords**, one call each, in that order. All use the same system prompt
    (`system.md`) and the same material template (`material.md`): full text, the seed’s fixed
    metadata (educational level, subject, target audience, language, material type), and the fields
@@ -398,19 +423,21 @@ Up to six LLM calls per seed (OpenAI-compatible API, default model `gpt-6-luna`)
    `keywords.md`) provides the instructions. The LLM does not see the topic, topic description, or
    seed keywords here; the fields are therefore derived from the text, as a model is later expected
    to learn “text → metadata”. Responses are validated (title 10–80 characters,
-   description 250–1,200, at least 4 keywords, at most 8 retained); an unusable field is requested
+   description 300–1,000, at least 5 keywords, at most 8 retained); an unusable field is requested
    again up to three times, without generating the full text again. The title is a readable phrase
    rather than a chain of keywords; rejected are colons and dashes, characters from other scripts and
    special characters ({}[]<>#*_|), truncated short words at the end, and learning-goal verbs
    (verstehen, entdecken, kennenlernen, erkunden, erfahren, erarbeiten). If the title repeats the
    material type or level from the metadata (e.g. “Fingerspiel”, “in der Kita”), it is requested again
-   and only accepted as is on the last attempt.
+   and only accepted as is on the last attempt. The same applies to a description that starts with a
+   stock phrase („Im Mittelpunkt …“, „Das Material …“, „Dieses Arbeitsblatt …“).
 3. **Content-type check** (`inhaltstyp.md`, can be disabled): The LLM determines the material type
    from the completed material without seeing the seed value, and selects from the sector’s content
-   types. The result is recorded in `synth:inhaltstyp_pruefung` (expected, detected, match) and serves
+   types; each category is listed in the prompt with its text-type description. The result is recorded in `synth:inhaltstyp_pruefung` (expected, detected, match) and serves
    as a quality measure; `ccm:oeh_lrt` remains the seed value.
 4. **Question-answer pairs** (`fragen_antworten.md`, JSON): Target 10 pairs with a learning objective
-   level according to Bloom/Anderson, minimum 8. Steps 3 and 4 run simultaneously.
+   level according to Bloom/Anderson, minimum 8. The type is always German (also for other output
+   languages); translated types are mapped back, pairs with an unknown type are dropped. Steps 3 and 4 run simultaneously.
 
 Each material records in `synth:generierung` the duration and which fields had to be requested again
 (`neu_angefragt`). The progress display also counts retries of whole materials (e.g. after a rate
@@ -427,6 +454,14 @@ title, description and keywords “-”) and writes a new file (`…_titel_neu.j
 unchanged. The previous title is kept in `synth:titel_alt`, model, prompt hash and tokens of the
 regeneration in `synth:generierung.titel_neu`. If no usable title comes back after three attempts, the
 old one stays (`titel_neu.behalten` gives the reason). The command can be resumed like a material run.
+
+**Replacing the first sentence of the description.** `python -m sem beschreibung-einstieg --materialien
+output/materialien_….jsonl` finds descriptions whose first sentence contains a stock phrase (at the start like „Im Mittelpunkt …“ or moved to the end like „… steht im Mittelpunkt“, „… wird behandelt“, „… wird betrachtet“) and has only their first
+sentence rewritten (`beschreibung_einstieg.md`: title, old first sentence and rest of the description).
+The new sentence must be a single sentence of at most 25 words and must not contain a stock phrase or start
+with the material type; the rest stays verbatim. The old description is kept in `synth:beschreibung_alt`, model
+and prompt hash in `synth:generierung.beschreibung_einstieg`. Descriptions without a stock phrase are
+copied unchanged. Output `…_einstieg.jsonl`, resumable.
 
 Each material retains all seed fields and gets `synth:volltext` and `synth:generierung` (model,
 Base URL, date, hash of the prompts used).
@@ -446,7 +481,7 @@ education context stays Germany. `cclom:general_language` gets the output langua
 ## Placeholders
 
 In the prompt templates (`prompts/`, editable in the user interface), placeholders use the form
-`{{name}}`. Conditional sections `{{#name}}…{{/name}}` appear only when the value is set.
+`{{name}}`. Conditional sections `{{#name}}…{{/name}}` appear only when the value is set; they may be nested.
 
 | Placeholder | Content |
 |---|---|
@@ -459,8 +494,12 @@ In the prompt templates (`prompts/`, editable in the user interface), placeholde
 | `thema_pfad`, `zielsprache`, `anforderungsbereich`, `foerderschwerpunkt`, `bildungsstandards` | school only (`anforderungsbereich`, `foerderschwerpunkt` optional, `zielsprache` only for foreign languages, `bildungsstandards` only in subjects with educational standards) |
 | `programmbereich`, `einfache_sprache`, `veranstaltungsform` | adult education only (also `zielsprache`) |
 | `rolle`, `sprache` | author role in the full-text prompt, language as a word |
+| `umfang_von`, `umfang_bis` | target length in words (from `synth:umfang_woerter` or the content type) |
+| `einstieg`, `namen` | style settings from `synth:stil`: opening type, names (comma-separated) |
+| `beschreibung_form` | form of the first description sentence (guiding question, technical term as subject, or situation), chosen from the seed id |
 | `titel`, `beschreibung`, `keywords`, `volltext`, `auftrag` | only in `material.md`: fields generated so far (“-” = empty), full text, instructions from the field file |
-| `kategorien`, `beispiel_id` | only in `inhaltstyp.md`: list of content types in “Name → id” format |
+| `kategorien`, `beispiel_id` | only in `inhaltstyp.md`: list of content types in “Name → id: text type” format |
+| `floskel`, `erster_satz`, `rest`, `form` | only in `beschreibung_einstieg.md` (plus `titel`; `form` = sentence form, chosen from the material id) |
 
 ## Known limitations
 
@@ -470,17 +509,18 @@ In the prompt templates (`prompts/`, editable in the user interface), placeholde
 - LLM assignments are non-deterministic. Multiple votes make the variation visible
   (status and confidence), but do not eliminate it. Three votes from the same model can all be
   wrong; embedding similarity and manual mapping serve as independent cross-checks.
-- The teaching levels are unevenly distributed (94 `grundlagen`, 2,810 `vertiefung`, 1,612 `forschung`). Since research
-  topics are excluded in the first–second year of study, this level is less common when distributing
-  evenly by topic (around 22% rather than 33% for 30,000 seeds). GND topics from textbooks help
-  compensate for this.
+- The teaching levels are unevenly distributed (3,465 `grundlagen`, 7,295 `vertiefung`, 1,980 `forschung`,
+  including the subject-profile topics). The teaching level of subject-profile topics is a rule of thumb
+  (order in the LLM list), not a vote.
 - ESCO is European. Many occupations do not correspond one-to-one to a German training occupation,
   and some German translations are awkward. The qualification pathway is an estimate based on
   voting, not an official assignment to recognized training occupations (their directory is not
   openly licensed). Learning fields from the framework curricula exist only as PDFs; the learning-field
   lists come from an automatic conversion and are checked against the learning-field headers, not by
   hand. 12 curricula renewed in 2025/26 are missing until their Markdown versions are available; the
-  mapping to ESCO occupations is a vote, not an official assignment.
+  mapping to ESCO occupations is a vote, not an official assignment. The label “training occupation (KMK)”
+  relies on the mapping of the framework curricula to ESCO occupations and only covers occupations with
+  a framework curriculum.
 - Synthetic texts may contain factual errors. For training purposes, mapping text →
   metadata is more important than subject-matter depth. They have not been reviewed for publication
   as learning materials.

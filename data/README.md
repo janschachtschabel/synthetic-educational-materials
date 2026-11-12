@@ -2,6 +2,10 @@
 
 *English · [Deutsch](README.de.md)*
 
+## `mappings/gnd_ergaenzungen.jsonl`
+
+One line per GND URI from the topics of all sectors: `uri` (GND), `label`, for motif entries `motiv_ersatz` (`uri`, `label`, `typen`), otherwise optionally `beschreibung` with `beschreibung_quelle` (`name`, `uri`, license), `datum`. Applied when topics are loaded and built by `python -m sem gnd-ergaenzen` (see methodology, GND supplement). The `inhaltstypen.json` files of all sectors carry `umfang` (words from–to) for the full text.
+
 ## `vocabs/`
 
 One file `<name>.json` per vocabulary:
@@ -23,7 +27,8 @@ One file `<name>.json` per vocabulary:
 | `kompetenzen.jsonl` | one ESCO skill per line: `uri`, `label`, `alt_labels`, `beschreibung`, `art` (`wissen`, `faehigkeit`), `reichweite` (`berufsspezifisch`, `branchenspezifisch`, `branchenuebergreifend`, `querschnitt`), `isced_f`, `essenziell_fuer`/`optional_fuer` (number of occupations), `oeh_uri` (OEH escoSkills), `belege.wlo` |
 | `pruefliste_berufe.csv` | occupations with a reason for review, empty correction columns |
 | `korrekturen.csv` | editorial corrections (`korrektur_codes` = KldB (Classification of Occupations) codes separated by `|`, `-` = exclude, `korrektur_qualifizierung`, `kommentar`), take precedence over the LLM |
-| `inhaltstypen.json` | content types used from OEH `new_lrt`, with text type, media format, skill types, and target groups |
+| `inhaltstypen.json` | content types used from OEH `new_lrt`, with text type, media format, skill types, target groups, and `umfang` (words from–to) |
+| `berufe_kmk.jsonl` | ESCO occupations with a recognized training occupation: `uri`, `label`, `rahmenlehrplaene` (`id`, `titel`, `status` from `rahmenlehrplaene.jsonl`); written by the learning-field step `zusammenfuehren` |
 | `niveaus.json` | DQR levels with qualification pathway and educational level |
 | `optionale_felder.json` | values and proportions of the optional control fields (learning location, cross-cutting topic …) |
 | `pruefliste_rahmenlehrplaene.csv`, `korrekturen_rahmenlehrplaene.csv` | curricula without a majority for an ESCO occupation or with gaps in the learning-field list; corrections with `korrektur_codes` = ESCO short codes (first eight characters of the UUID) separated by `|`, `-` = exclude |
@@ -99,7 +104,7 @@ repository until October 2026 remain available in the Git history.
 | File | Contents |
 |---|---|
 | `themen_hochschule.jsonl` | complete set: all topics, one topic per line, see below. `art` = `openalex` or `gnd`; GND topics also have `gnd` (GND ID, type, subject group, broader concepts), `belege.katalog`, and `mapping.hochschulrelevanz`; topics with WLO evidence have `belege.wlo`. Intermediate results per source are generated during the build in the cache (`data/cache/hochschule_themen_*.jsonl`) and combined in the `themen` step |
-| `studienfach_profile.jsonl` | short description, typical topics, and distinction for each field of study (LLM) |
+| `studienfach_profile.jsonl` | short description, typical topics, and distinction for each field of study (LLM); the typical topics become topics with `art` = `fachprofil` on loading |
 | `pruefliste_themen.csv` | mappings with a reason for review, empty correction columns |
 | `korrekturen.csv` | editorial review of both review lists (columns `id`, `label_de`, `korrektur_codes` separated by `|`, `-` = exclude, `korrektur_lehrebene`, `kommentar`, `prueflistengrund`), take precedence over the LLM |
 | `pruefliste_gnd.csv` | GND topics requiring review |

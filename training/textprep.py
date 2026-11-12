@@ -24,8 +24,15 @@ _LIST = re.compile(r"^\s*(?:[-*+•]|\d+[.)])\s+")
 _SENTENCE_END = re.compile(r"(?<=[.!?…])\s+(?=[A-ZÄÖÜ0-9„\"(])")
 
 
+# Box-drawing and block characters (ASCII-art diagrams), check boxes, long writing lines
+_BOX = re.compile(r"[\u2500-\u259f\u2610-\u2612\u25a1\u25a0\u25aa\u25ab]+")
+_WRITING_LINE = re.compile(r"_{3,}|\.{6,}")
+
+
 def strip_markdown(line: str) -> str:
     """Removes inline markdown so synthetic markdown looks like extracted plain text."""
+    line = _BOX.sub(" ", line)
+    line = _WRITING_LINE.sub(" … ", line)
     line = re.sub(r"!\[([^\]]*)\]\([^)]*\)", r"\1", line)        # images
     line = re.sub(r"\[([^\]]*)\]\([^)]*\)", r"\1", line)         # links
     line = re.sub(r"(\*\*|__|\*|_|`)(\S.*?\S|\S)\1", r"\2", line)  # bold, italics, code
@@ -49,11 +56,13 @@ def sections(text: str) -> list[tuple[str, list[str]]]:
             flush()
             out.append((strip_markdown(m.group(1)), []))
             continue
-        if re.fullmatch(r"\s*([-*_]\s*){3,}", raw):  # horizontal rule
+        if re.fullmatch(r"\s*([-*_]\s*){3,}", raw) or re.fullmatch(r"\s*`{3,}\w*\s*", raw):  # rule, code fence
             flush()
             continue
         is_item = bool(_LIST.match(raw))
         line = strip_markdown(_LIST.sub("", raw))
+        if re.fullmatch(r"[\s:|…-]*", line):  # table separator rows, empty cells, leftover drawing
+            line = ""
         if is_item:  # list items stay separate lines
             flush()
         if not line:

@@ -1,5 +1,5 @@
 {
- "beschreibung": "Auswahl textfähiger Inhaltstypen aus dem OEH-Vokabular new_lrt für die berufliche Bildung. textsorte steuert die Generierung, medienform beschreibt die Form des Volltexts. kompetenzarten: für welche ESCO-Kompetenzarten der Typ passt (wissen = Kenntnisse, faehigkeit = Fähigkeiten und Kompetenzen). zielgruppen: für welche Zielgruppe (OEH intendedEndUserRole, letztes URI-Segment) der Typ gewählt werden darf.",
+ "beschreibung": "Auswahl textfähiger Inhaltstypen aus dem OEH-Vokabular new_lrt für die berufliche Bildung. textsorte steuert die Generierung, medienform beschreibt die Form des Volltexts. kompetenzarten: für welche ESCO-Kompetenzarten der Typ passt (wissen = Kenntnisse, faehigkeit = Fähigkeiten und Kompetenzen). zielgruppen: für welche Zielgruppe (OEH intendedEndUserRole, letztes URI-Segment) der Typ gewählt werden darf. umfang: Wortzahl [von, bis] des Volltexts, passend zur Textsorte.",
  "quelle": {
   "name": "OpenEduHub new_lrt",
   "uri": "http://w3id.org/openeduhub/vocabs/new_lrt/",
@@ -12,6 +12,7 @@
    "label": "Fallstudie",
    "textsorte": "Lernsituation: eine betriebliche Handlungssituation mit Arbeitsauftrag, gegliedert nach der vollständigen Handlung (informieren, planen, entscheiden, ausführen, kontrollieren, bewerten)",
    "medienform": "Text",
+   "umfang": [450, 750],
    "kompetenzarten": ["faehigkeit"],
    "zielgruppen": ["learner"]
   },
@@ -20,6 +21,7 @@
    "label": "Arbeitsblatt",
    "textsorte": "Arbeitsblatt mit kurzer Einführung und Aufgaben zu einer beruflichen Handlungssituation",
    "medienform": "Text",
+   "umfang": [300, 500],
    "kompetenzarten": ["wissen", "faehigkeit"],
    "zielgruppen": ["learner"]
   },
@@ -28,6 +30,7 @@
    "label": "Anleitung",
    "textsorte": "Schritt-für-Schritt-Arbeitsanleitung für eine berufliche Tätigkeit mit Hinweisen zu Sicherheit und Qualität",
    "medienform": "Text",
+   "umfang": [300, 550],
    "kompetenzarten": ["faehigkeit"],
    "zielgruppen": ["learner"]
   },
@@ -36,6 +39,7 @@
    "label": "Checkliste",
    "textsorte": "Checkliste für einen Arbeitsablauf (Vorbereitung, Durchführung, Kontrolle) mit kurzen Erläuterungen",
    "medienform": "Text",
+   "umfang": [150, 350],
    "kompetenzarten": ["faehigkeit"],
    "zielgruppen": ["learner", "teacher"]
   },
@@ -44,14 +48,16 @@
    "label": "Skript, Handout und Handreichung",
    "textsorte": "Fachtext oder Handout für den Berufsschulunterricht",
    "medienform": "Text",
+   "umfang": [500, 800],
    "kompetenzarten": ["wissen", "faehigkeit"],
    "zielgruppen": ["learner"]
   },
   {
    "uri": "http://w3id.org/openeduhub/vocabs/new_lrt/a5897142-bf57-4cd0-bcd9-7d0f1932e87a",
    "label": "Lehrbuch und Grundlagenwerk (auch E-Book)",
-   "textsorte": "Kapitel aus einem Fachkundebuch für die Ausbildung",
+   "textsorte": "Kapitel aus einem Fachkundebuch für die Ausbildung: Sachtext in Abschnitten mit Fachbegriffen, Beispielen aus dem Betrieb, Merkkasten und Wiederholungsfragen am Ende",
    "medienform": "Text",
+   "umfang": [600, 900],
    "kompetenzarten": ["wissen"],
    "zielgruppen": ["learner"]
   },
@@ -60,6 +66,7 @@
    "label": "Erklärvideo und gefilmtes Experiment",
    "textsorte": "Transkript eines Erklärvideos, in dem eine Fachkraft einen Arbeitsschritt oder Zusammenhang erklärt",
    "medienform": "Video-Transkript",
+   "umfang": [350, 600],
    "kompetenzarten": ["wissen", "faehigkeit"],
    "zielgruppen": ["learner"]
   },
@@ -68,6 +75,7 @@
    "label": "Klausur, Klassenarbeit und Test",
    "textsorte": "Aufgaben zur Vorbereitung auf die Zwischen- oder Abschlussprüfung mit Punkteangaben",
    "medienform": "Text",
+   "umfang": [400, 700],
    "kompetenzarten": ["wissen", "faehigkeit"],
    "zielgruppen": ["learner", "teacher"]
   },
@@ -76,6 +84,7 @@
    "label": "Lösungs(beispiel) und Erwartungshorizont",
    "textsorte": "Musterlösung mit Lösungsweg und Bewertungshinweisen zu einer beruflichen Fachaufgabe",
    "medienform": "Text",
+   "umfang": [350, 650],
    "kompetenzarten": ["wissen", "faehigkeit"],
    "zielgruppen": ["learner", "teacher"]
   },
@@ -84,6 +93,7 @@
    "label": "Übungsmaterial",
    "textsorte": "Übungsaufgaben mit steigender Schwierigkeit aus dem Arbeitsalltag",
    "medienform": "Text",
+   "umfang": [350, 550],
    "kompetenzarten": ["wissen", "faehigkeit"],
    "zielgruppen": ["learner"]
   },
@@ -92,6 +102,7 @@
    "label": "Quiz",
    "textsorte": "Quiz mit Fragen, Antwortoptionen und kurzer Auflösung",
    "medienform": "Text",
+   "umfang": [200, 400],
    "kompetenzarten": ["wissen"],
    "zielgruppen": ["learner"]
   },
@@ -100,6 +111,7 @@
    "label": "Präsentation",
    "textsorte": "Foliensatz für eine Unterweisung oder Unterrichtsstunde (Folientitel und Stichpunkte)",
    "medienform": "Folien",
+   "umfang": [300, 550],
    "kompetenzarten": ["wissen", "faehigkeit"],
    "zielgruppen": ["learner", "teacher"]
   },
@@ -108,6 +120,7 @@
    "label": "Projekt (Lehr- und Lernmaterial)",
    "textsorte": "Projektauftrag für Auszubildende mit Ziel, Arbeitspaketen und Ergebnisdokumentation",
    "medienform": "Text",
+   "umfang": [400, 650],
    "kompetenzarten": ["faehigkeit"],
    "zielgruppen": ["learner"]
   },
@@ -116,6 +129,7 @@
    "label": "Rollenspiel (Lehr- und Lernmaterial)",
    "textsorte": "Rollenspiel zu einer Gesprächssituation im Beruf (Rollenkarten, Ablauf, Auswertungsfragen)",
    "medienform": "Text",
+   "umfang": [350, 600],
    "kompetenzarten": ["faehigkeit"],
    "zielgruppen": ["learner"]
   },
@@ -124,6 +138,7 @@
    "label": "Recherche- und Lernauftrag",
    "textsorte": "Arbeitsauftrag zur Erkundung im Ausbildungsbetrieb oder zur Recherche mit Leitfragen",
    "medienform": "Text",
+   "umfang": [250, 450],
    "kompetenzarten": ["wissen", "faehigkeit"],
    "zielgruppen": ["learner"]
   },
@@ -132,6 +147,7 @@
    "label": "Radio, Podcastfolge und Interview",
    "textsorte": "Transkript einer Podcastfolge, in der eine erfahrene Fachkraft über ihren Arbeitsalltag spricht",
    "medienform": "Audio-Transkript",
+   "umfang": [500, 900],
    "kompetenzarten": ["wissen", "faehigkeit"],
    "zielgruppen": ["learner"]
   },
@@ -140,6 +156,7 @@
    "label": "Unterrichtsbaustein",
    "textsorte": "Unterrichtsbaustein für die Berufsschule mit Lernziel, Ablauf, Sozialform und Materialhinweisen",
    "medienform": "Text",
+   "umfang": [400, 650],
    "kompetenzarten": ["wissen", "faehigkeit"],
    "zielgruppen": ["teacher"]
   },
@@ -148,6 +165,7 @@
    "label": "Stundenentwurf",
    "textsorte": "Unterweisungsentwurf für Ausbildende nach der Vier-Stufen-Methode (vorbereiten, vormachen, nachmachen, üben)",
    "medienform": "Text",
+   "umfang": [400, 650],
    "kompetenzarten": ["faehigkeit"],
    "zielgruppen": ["teacher"]
   }

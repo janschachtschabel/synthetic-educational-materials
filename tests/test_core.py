@@ -56,3 +56,14 @@ def test_mapping_folge_laeuft_weiter_wenn_label_doppelpunkt_hat():
 
     prog = Test().mapping_ausfuehren(["a", "b"], None)
     assert gelaufen == ["a", "b"] and prog.status.startswith("Zwei: fertig")
+
+
+def test_allocate_mit_gewichten():
+    import random as _r
+
+    from sem.bereiche.base import allocate as _alloc
+
+    groups = {"a": [{"id": i} for i in range(100)], "b": [{"id": i} for i in range(4)]}
+    out = _alloc(30, groups, _r.Random(1), {"a": 10.0, "b": 2.0})
+    zaehl = {k: sum(1 for g, _ in out if g == k) for k in groups}
+    assert zaehl == {"a": 25, "b": 5}

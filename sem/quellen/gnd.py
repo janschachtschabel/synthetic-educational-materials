@@ -92,8 +92,42 @@ def suche_exakt(label: str) -> dict | None:
                              "format": "json", "size": 20})
     treffer = [kompakt(m) for m in data.get("member", [])
                if any(_norm(n) == norm for n in [m.get("preferredName", "")] + (m.get("variantName") or []))]
-    treffer.sort(key=lambda r: (not ist_thema(r), _norm(r["label"]) != norm))
+    # Motiv-Normsätze („Amsterdam <Motiv>“) bezeichnen ein Bildmotiv, nicht das Sachthema: nur als letzte Wahl
+    treffer.sort(key=lambda r: (ist_motiv(r["label"]), not ist_thema(r), _norm(r["label"]) != norm))
     return treffer[0] if treffer else None
+
+
+def ist_motiv(label: str | None) -> bool:
+    """GND-Ansetzung für ein Bildmotiv, z. B. „Amsterdam <Motiv>“, „Eiffelturm <Paris, Motiv>“."""
+    return bool(re.search(r"<[^>]*\bMotiv>", label or ""))
+
+
+# Rangfolge der Typen für den Ersatz eines Motiv-Satzes; Personen, Körperschaften und Werke kommen nicht in Frage
+_ERSATZ_RANG = {"SubjectHeadingSensoStricto": 0, "HistoricSingleEventOrEra": 0, "PlaceOrGeographicName": 1,
+                "TerritorialCorporateBodyOrAdministrativeUnit": 1, "NaturalGeographicUnit": 1,
+                "BuildingOrMemorial": 1, "AdministrativeUnit": 1, "WayBorderOrLine": 1, "ExtraterrestrialTerritory": 1,
+                "NomenclatureInBiologyOrChemistry": 2, "CharactersOrMorphemes": 3, "GroupOfPersons": 3}
+
+
+def motiv_ersatz(label: str) -> dict | None:
+    """Regulärer GND-Satz (Sachschlagwort oder Geografikum) mit demselben Namen wie ein Motiv-Satz, z. B.
+    „Amsterdam <Motiv>“ → Geografikum „Amsterdam“, „Mais <Motiv>“ → Sachschlagwort „Mais“. None = keiner."""
+    name = re.sub(r"\s*<[^>]*>", "", label or "").strip()
+    norm = _norm(name)
+    if len(norm) < 2:
+        return None
+    q = name.replace('"', "")
+    data = _get(GND_SEARCH, {"q": f'preferredName:"{q}"', "format": "json", "size": 30})
+    treffer = []
+    for m in data.get("member", []):
+        rec = kompakt(m)
+        if ist_motiv(rec["label"]) or _norm(rec["label"]) != norm:
+            continue
+        rang = min((_ERSATZ_RANG[t] for t in rec["typen"] if t in _ERSATZ_RANG), default=None)
+        if rang is not None:
+            treffer.append((rang, "<" in (rec["label"] or ""), rec))
+    treffer.sort(key=lambda x: (x[0], x[1]))
+    return treffer[0][2] if treffer else None
 
 
 def hole(uris: list[str], batch: int = 50) -> dict[str, dict]:

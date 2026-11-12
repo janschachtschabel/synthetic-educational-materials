@@ -28,7 +28,7 @@ class Antworten:
     def __call__(self, user):
         feld = next((n for n, m in self.marker.items() if m in user), "volltext")
         if feld == "volltext":
-            return " ".join(["Wort"] * 200)
+            return " ".join(["Wort"] * 1000)
         if feld == "titel":
             self.titel_kaputt -= 1
             return "Kurz" if self.titel_kaputt >= 0 else "Ein ausreichend langer Titel zum Thema"
@@ -37,7 +37,7 @@ class Antworten:
         if feld == "keywords":
             return "Eins, Zwei, Drei, Vier, Fünf"
         if feld == "inhaltstyp":
-            return next(z for z in user.splitlines() if z.startswith("- ") and "→" in z).split("→")[1].strip()
+            return next(z for z in user.splitlines() if z.startswith("- ") and "→" in z).split("→")[1].split(":")[0].strip()
         return json.dumps({"paare": [{"frage": f"F{i}?", "antwort": "A.", "typ": "verstehen"} for i in range(10)]})
 
 

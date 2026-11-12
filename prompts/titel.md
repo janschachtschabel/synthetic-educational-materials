@@ -10,7 +10,7 @@ Formuliere einen kurzen, sachlichen Titel, der den INHALT des Materials konkret 
 - Keine Lernziel-Formulierungen und keine allgemeinen Verben wie verstehen, entdecken, erkunden, kennenlernen, erfahren, erarbeiten.
 - Keine Versprechen, die das Material nicht einlöst, keine werblichen oder verspielten Formulierungen, keine allgemeinen Bezeichnungen wie „Einführung“ oder „Teil 2“.
 - Materialtyp (Arbeitsblatt, Fingerspiel, Video, Quiz …) und Zielgruppe oder Stufe (für Studierende, Klasse 7, in der Kita …) gehören NICHT in den Titel; sie stehen in eigenen Feldern. Das Fach nur nennen, wenn es zur Unterscheidung nötig ist.
-- Kein Doppelpunkt, kein Gedankenstrich, keine Klammern, keine Anführungszeichen, kein Punkt am Ende, keine Kommaliste. Bindestrich-Komposita korrekt schreiben („Chandrasekhar-Grenze“).
+- Kein Doppelpunkt, kein Gedankenstrich, kein Punkt am Ende, keine Schlagwortliste mit Kommas (ein Komma in einer natürlichen Aufzählung ist erlaubt). Klammern nur für eine übliche Abkürzung („Magnetresonanztomographie (MRT)“), Anführungszeichen nur für Werktitel, z. B. Goethes „Faust“. Bindestrich-Komposita korrekt schreiben („Chandrasekhar-Grenze“).
 - Sprachregister passend zur Bildungsstufe: in Kita und Grundbildung einfache Alltagswörter („Gemeinsam essen und gesunde Lebensmittel“), an der Hochschule Fachsprache.
 - Weitere Details gehören in Beschreibung und Schlagworte, nicht in den Titel.
 Ausgabe: Nur der Titel, ohne weitere Erklärungen oder Zusätze.

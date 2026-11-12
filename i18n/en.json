@@ -579,5 +579,18 @@
  "Flex gibt es bei Anthropic nicht. Den halben Preis bietet dort die Verarbeitung „Batch“ im Reiter „Materialien“.": "Anthropic has no Flex. Half price is available there with “Batch” processing in the “Materials” tab.",
  "Halber Preis, alle Anfragen gesammelt an Anthropic; je Stufe eine Runde, meist unter einer Stunde, höchstens 24 h.": "Half price, all requests collected and sent to Anthropic; one round per stage, usually under an hour, at most 24 h.",
  "Anbieter {anbieter}, Modell {modell}, Reasoning-Aufwand {aufwand} – ändern unter „Einstellungen“.": "Provider {anbieter}, model {modell}, reasoning effort {aufwand} – change under “Settings”.",
- "Kein API-Key: Weder unter „Einstellungen“ eingetragen noch in {kv}_API_KEY gesetzt. Läufe mit LLM schlagen so fehl.": "No API key: neither entered under “Settings” nor set in {kv}_API_KEY. LLM runs will fail."
+ "Kein API-Key: Weder unter „Einstellungen“ eingetragen noch in {kv}_API_KEY gesetzt. Läufe mit LLM schlagen so fehl.": "No API key: neither entered under “Settings” nor set in {kv}_API_KEY. LLM runs will fail.",
+ "Studienfächer im Verhältnis der Wurzel ihrer Themenzahl: große Fächer bekommen mehr, aber nicht proportional mehr (Fach mit 100 Themen etwa dreimal so oft wie eines mit 11)": "Subjects in proportion to the square root of their number of topics: large subjects get more, but not proportionally more (a subject with 100 topics about three times as often as one with 11)",
+ "typische Themen aus dem Kurzprofil jedes Studienfachs (Lehrsicht, auch für Fächer ohne OpenAlex- und GND-Thema)": "typical topics from the short profile of each subject (teaching perspective, also for subjects without OpenAlex or GND topics)",
+ "Berufe mit KMK-Rahmenlehrplan (anerkannte Ausbildungsberufe) und übrige ESCO-Berufe je zur Hälfte; innerhalb jeder Hälfte jede Beruf-Thema-Kombination etwa gleich oft": "Occupations with a KMK framework curriculum (recognised training occupations) and other ESCO occupations half each; within each half every occupation-topic combination about equally often",
+ "KMK-Rahmenlehrplan": "KMK framework curriculum",
+ "ob der ESCO-Beruf einem anerkannten Ausbildungsberuf mit KMK-Rahmenlehrplan zugeordnet ist (berufe_kmk.jsonl)": "whether the ESCO occupation is mapped to a recognised training occupation with a KMK framework curriculum (berufe_kmk.jsonl)",
+ "Beruf mit KMK-Rahmenlehrplan": "occupation with KMK framework curriculum",
+ "übrige ESCO-Berufe": "other ESCO occupations",
+ "Ausbildungsberuf (KMK)": "Recognised training occupation (KMK)",
+ "GND-Motiv ersetzt": "Replaced GND motif entry",
+ "Themenbeschreibung aus": "Topic description from",
+ "Umfang": "Length",
+ "Einstieg": "Opening",
+ "Namen": "Names"
 }
