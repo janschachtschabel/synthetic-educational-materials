@@ -644,7 +644,7 @@ Versuchen kein Titel brauchbar, bleibt der alte (`titel_neu.behalten` nennt den 
 fortsetzbar wie ein Materiallauf.
 
 **Ersten Satz der Beschreibung ersetzen.** `python -m sem beschreibung-einstieg --materialien
-output/materialien_….jsonl` sucht Beschreibungen, deren erster Satz eine Schablone enthält (am Anfang wie „Im Mittelpunkt …“ oder ans Ende verschoben wie „… steht im Mittelpunkt“, „… wird behandelt“), und lässt nur deren
+output/materialien_….jsonl` sucht Beschreibungen, deren erster Satz eine Schablone enthält (am Anfang wie „Im Mittelpunkt …“ oder ans Ende verschoben wie „… steht im Mittelpunkt“, „… wird behandelt“, „… wird betrachtet“), und lässt nur deren
 ersten Satz neu schreiben (`beschreibung_einstieg.md`: Titel, alter erster Satz und Rest der Beschreibung).
 Der neue Satz muss ein einzelner Satz mit höchstens 25 Wörtern sein und darf keine Schablone enthalten und nicht
 mit dem Materialtyp beginnen; der Rest bleibt wörtlich. Die alte Beschreibung steht in

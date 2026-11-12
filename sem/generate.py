@@ -139,7 +139,7 @@ _BESCHREIBUNG_FLOSKEL_SATZ = re.compile(
     r"\b(?:steh(?:t|en)|rück(?:t|en)) (?:hier )?im (?:mittelpunkt|zentrum|fokus|vordergrund)\b"
     r"|\b(?:ist|sind) (?:das |die )?(?:zentrale[sn]? |eigentliche[sn]? )?(?:thema|themen|gegenstand)\b"
     r"|\bim (?:fokus|zentrum|mittelpunkt) (?:steh|lieg)"
-    r"|\b(?:wird|werden)\b[^.!?]*\b(?:behandelt|thematisiert|vorgestellt|beleuchtet)\b"
+    r"|\b(?:wird|werden)\b[^.!?]*\b(?:behandelt|thematisiert|vorgestellt|beleuchtet|betrachtet|erörtert|diskutiert|aufgegriffen)\b"
     r"|\bgeht es um\b",
     re.I)
 _ERSTER_SATZ = re.compile(r"^.+?[.!?](?=\s+[„\"(]?[A-ZÄÖÜ0-9]|\s*$)", re.S)

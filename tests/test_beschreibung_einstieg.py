@@ -99,7 +99,8 @@ def test_schablone_am_satzende():
     for s in ("Die Abgrenzung ländlicher Räume steht im Mittelpunkt.",
               "Dünnschichtthermoelemente zu entwickeln, ist das zentrale Thema.",
               "Das Betriebsverhalten technischer Anlagen wird anhand von Kreiselpumpen behandelt.",
-              "Bei Ionenkanälen geht es um Signale."):
+              "Bei Ionenkanälen geht es um Signale.",
+              "Das Betriebsverhalten technischer Anlagen wird anhand von Kreiselpumpen betrachtet."):
         assert beschreibung_floskel(s + " Danach folgt der Rest.")
         with pytest.raises(ValueError):
             parse_satz(s)
