@@ -1,4 +1,3 @@
-import hashlib
 """Schablonenhafte Anfänge der Beschreibungen fertiger Materialien ersetzen, ohne den Rest anzufassen.
 
     python -m sem beschreibung-einstieg --materialien output/materialien_….jsonl [--out …] [--limit N]
@@ -15,6 +14,7 @@ titel-neu.
 
 from __future__ import annotations
 
+import hashlib
 import re
 from datetime import date
 from pathlib import Path
