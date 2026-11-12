@@ -140,7 +140,9 @@ _BESCHREIBUNG_FLOSKEL_SATZ = re.compile(
     r"|\b(?:ist|sind) (?:das |die )?(?:zentrale[sn]? |eigentliche[sn]? )?(?:thema|themen|gegenstand)\b"
     r"|\bim (?:fokus|zentrum|mittelpunkt) (?:steh|lieg)"
     r"|\b(?:wird|werden)\b[^.!?]*\b(?:behandelt|thematisiert|vorgestellt|beleuchtet|betrachtet|erörtert|diskutiert|aufgegriffen)\b"
-    r"|\bgeht es um\b",
+    r"|\bgeht es um\b"
+    # Leerformeln statt Aussage („… stehen als Themen nebeneinander“, „… gehören zum Themenfeld“)
+    r"|\bals themen\b|\bzum themenfeld\b|\bsind gemeint\b|\bbilden (?:zwei|die|den) (?:gegenst|themen|\w*aufgabe)",
     re.I)
 _ERSTER_SATZ = re.compile(r"^.+?[.!?](?=\s+[„\"(]?[A-ZÄÖÜ0-9]|\s*$)", re.S)
 
