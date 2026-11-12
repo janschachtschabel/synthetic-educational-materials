@@ -111,6 +111,10 @@ class Bildungsbereich(ABC):
         "mit einer kurzen Begriffsklärung", "mit einem überraschenden Befund oder Widerspruch",
         "mit einer Beobachtung oder einem Versuch", "direkt mit dem ersten inhaltlichen Punkt, ohne Vorrede")
 
+    def gruppen_gewichte(self, balance: str, groups: dict[str, list[dict]]) -> dict[str, float] | None:
+        """Gewichte der Gruppen für die Verteilung der Seeds; None = alle gleich (Standard)."""
+        return None
+
     def umfang(self, seed: dict) -> tuple[int, int]:
         """Wortzahl (von, bis) des Volltexts: aus dem Inhaltstyp des Seeds (inhaltstypen.json, Feld umfang)."""
         uri = (seed.get(S.F_LRT) or [None])[0]
@@ -246,16 +250,25 @@ class SeedState:
         return choice
 
 
-def allocate(n: int, groups: dict[str, list[dict]], rng: random.Random) -> list[tuple[str, dict]]:
-    """Verteilt n Seeds möglichst gleich auf die Gruppen.
+def allocate(n: int, groups: dict[str, list[dict]], rng: random.Random,
+             gewichte: dict[str, float] | None = None) -> list[tuple[str, dict]]:
+    """Verteilt n Seeds möglichst gleich auf die Gruppen, mit gewichte im Verhältnis der Gewichte.
 
     Innerhalb einer Gruppe kommen alle Themen einmal dran (zufällige Reihenfolge), bevor sich
     eines wiederholt. Ist n kleiner als die Zahl der Gruppen, werden n Gruppen zufällig gewählt.
     """
     keys = sorted(groups)
     rng.shuffle(keys)
-    base, rest = divmod(n, len(keys))
-    quota = {k: base + (1 if i < rest else 0) for i, k in enumerate(keys)}
+    if gewichte:
+        # größte Reste: ganzzahlige Anteile, Rest an die Gruppen mit dem größten Nachkommaanteil
+        summe = sum(gewichte[k] for k in keys)
+        roh = {k: n * gewichte[k] / summe for k in keys}
+        quota = {k: int(roh[k]) for k in keys}
+        for k in sorted(keys, key=lambda k: roh[k] - quota[k], reverse=True)[:n - sum(quota.values())]:
+            quota[k] += 1
+    else:
+        base, rest = divmod(n, len(keys))
+        quota = {k: base + (1 if i < rest else 0) for i, k in enumerate(keys)}
     out = []
     for k in keys:
         topics = groups[k]
@@ -296,7 +309,8 @@ def build_seeds(bereich: Bildungsbereich, n: int, balance: str | None = None, se
     prefix = id_prefix or bereich.key
     # Kennung der lokalen Dateien des Bereichs: gleicher Startwert ergibt nur bei gleicher Kennung dieselben Seeds
     lokal = lokale_daten(bereich.key)
-    for i, (group, topic) in enumerate(allocate(n, groups, rng), 1):
+    gewichte = bereich.gruppen_gewichte(balance, groups)
+    for i, (group, topic) in enumerate(allocate(n, groups, rng, gewichte), 1):
         state.group = group
         s = {"id": f"{prefix}-{seed}-{i:06d}"}
         s.update(bereich.make_seed(topic, rng, state))
