@@ -16,7 +16,7 @@ from functools import cached_property
 from ... import schema as S
 from ...paths import MAPPING_DIR
 from ...vocabs import load as load_vocab
-from ..base import Bildungsbereich, MappingSchritt, SeedState
+from ..base import Bildungsbereich, MappingSchritt, SeedState, kurz_id  # noqa: F401 (kurz_id: frühere Importstelle)
 
 DIR = MAPPING_DIR / "hochschule"
 THEMEN_DATEI = "themen_hochschule.jsonl"  # Gesamtset aus OpenAlex- und GND-Themen
@@ -29,14 +29,6 @@ _ADMIN_NOTE = re.compile(r"\s*\((?:nicht |nur |ohne Lehramt|einschl\.).*?\)\s*$"
 def clean_label(label: str) -> str:
     """Label für Prompts: ohne „Studienbereich“-Präfix und Verwaltungszusätze in Klammern."""
     return _ADMIN_NOTE.sub("", _PREFIX.sub("", label)).strip()
-
-
-def kurz_id(label: str) -> str:
-    """Lesbare id für Prompts: „Lösungs(beispiel) und Erwartungshorizont“ → loesungsbeispiel_und_erwartungshorizont."""
-    s = label.casefold()
-    for a, b in (("ä", "ae"), ("ö", "oe"), ("ü", "ue"), ("ß", "ss"), ("(", ""), (")", "")):
-        s = s.replace(a, b)
-    return re.sub(r"[^a-z0-9]+", "_", s).strip("_")
 
 
 def load_jsonl(path):
@@ -306,10 +298,6 @@ class Hochschule(Bildungsbereich):
         return seed
 
     # --- Prompt-Werte ----------------------------------------------------------------------
-
-    def inhaltstyp_kategorien(self) -> list[dict]:
-        return [{"id": kurz_id(t["label"]), "name": t["label"], "uri": t["uri"]}
-                for t in self.inhaltstypen["inhaltstypen"]]
 
     def prompt_values(self, seed: dict) -> dict:
         t = seed[S.F_THEMA]

@@ -20,7 +20,7 @@ from ... import schema as S
 from ...paths import MAPPING_DIR, lokal_pfad
 from ...vocabs import load as load_vocab
 from ..base import Bildungsbereich, MappingSchritt, SeedState
-from ..hochschule import kurz_id, load_jsonl
+from ..hochschule import load_jsonl
 
 DIR = MAPPING_DIR / "erwachsenenbildung"
 CONTEXT_URI = "http://w3id.org/openeduhub/vocabs/educationalContext/erwachsenenbildung"
@@ -291,10 +291,6 @@ class Erwachsenenbildung(Bildungsbereich):
         return seed
 
     # --- Prompt-Werte ----------------------------------------------------------------------
-
-    def inhaltstyp_kategorien(self) -> list[dict]:
-        return [{"id": kurz_id(t["label"]), "name": t["label"], "uri": t["uri"]}
-                for t in self.inhaltstypen["inhaltstypen"]]
 
     def prompt_values(self, seed: dict) -> dict:
         t = seed[S.F_THEMA]

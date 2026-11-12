@@ -23,6 +23,18 @@ from ..llm import Progress
 from ..paths import lokale_daten
 
 
+# Namen für Personen in den Texten (gemischte Herkunft, wie in deutschen Lerngruppen); verhindert, dass das Modell
+# immer dieselben Namen wählt (im 50k-Datensatz hieß das Kind im Elementarbereich in 231 Texten „Mila“)
+VORNAMEN = ["Emma", "Noah", "Hannah", "Elias", "Lea", "Yusuf", "Aylin", "Jonas", "Mia", "Luca", "Amira", "Finn",
+            "Sofia", "Mehmet", "Lina", "Paul", "Zeynep", "Ben", "Ida", "Mateo", "Nele", "Karim", "Maja", "Leon",
+            "Fatma", "Theo", "Clara", "Emil", "Selin", "Anton", "Leni", "Milan", "Ronja", "David", "Elif", "Jakob",
+            "Marie", "Samuel", "Ana", "Felix", "Nora", "Kai", "Lotta", "Oskar", "Jana", "Tim", "Aleksandra", "Malik",
+            "Greta", "Ilias", "Paula", "Arda", "Frieda", "Jonte", "Sara", "Niklas", "Layla", "Moritz", "Zoe", "Can"]
+NACHNAMEN = ["Becker", "Yılmaz", "Nowak", "Schmidt", "Hoffmann", "Kowalski", "Wagner", "Demir", "Fischer",
+             "Popescu", "Krüger", "Haddad", "Weber", "Nguyen", "Lehmann", "Petrović", "Schulz", "Öztürk", "Braun",
+             "Wolf", "Ivanova", "Richter", "Klein", "Hassan", "Neumann", "Kaya", "Zimmermann", "Schröder"]
+
+
 @dataclass
 class MappingSchritt:
     key: str
@@ -31,6 +43,14 @@ class MappingSchritt:
     # run(cfg, on_progress=None, stop_event=None, **optionen) -> Progress; unbekannte Optionen ignorieren
     run: Callable[..., Progress]
     llm: bool = True
+
+
+def kurz_id(label: str) -> str:
+    """Lesbare id für Prompts: „Lösungs(beispiel) und Erwartungshorizont“ → loesungsbeispiel_und_erwartungshorizont."""
+    s = label.casefold()
+    for a, b in (("ä", "ae"), ("ö", "oe"), ("ü", "ue"), ("ß", "ss"), ("(", ""), (")", "")):
+        s = s.replace(a, b)
+    return re.sub(r"[^a-z0-9]+", "_", s).strip("_")
 
 
 def fertig(text: str) -> Progress:
@@ -74,9 +94,38 @@ class Bildungsbereich(ABC):
         return {k: [] if k == "belege" else list(o["werte"]) for k, o in self.auswahl_optionen().items()}
 
     def inhaltstyp_kategorien(self) -> list[dict]:
-        """Kategorien für die Prüfung des Inhaltstyps am fertigen Text: [{"id", "name", "uri"}].
-        Leer = keine Prüfung."""
-        return []
+        """Kategorien für die Prüfung des Inhaltstyps am fertigen Text: [{"id", "name", "uri", "definition"}].
+        Leer = keine Prüfung. Standard: die Inhaltstypen des Bereichs (inhaltstypen.json), Definition = Textsorte,
+        also dieselbe Beschreibung, nach der der Volltext geschrieben wurde. Mehrfach genutzte Typen erscheinen einmal."""
+        out: dict[str, dict] = {}
+        for t in (getattr(self, "inhaltstypen", None) or {}).get("inhaltstypen", []):
+            out.setdefault(t["uri"], {"id": kurz_id(t["label"]), "name": t["label"], "uri": t["uri"],
+                                      "definition": t.get("textsorte", "")})
+        return list(out.values())
+
+    # Wortzahl des Volltexts, wenn der Inhaltstyp keinen eigenen Umfang hat
+    umfang_standard: tuple[int, int] = (400, 550)
+    # Einstiegsarten für den Volltext (eine je Seed, zufällig, aber fest zur Seed-ID)
+    einstiege: tuple[str, ...] = (
+        "mit einem konkreten Fallbeispiel", "mit einer Leitfrage oder einem Problem", "mit einer Alltagssituation",
+        "mit einer kurzen Begriffsklärung", "mit einem überraschenden Befund oder Widerspruch",
+        "mit einer Beobachtung oder einem Versuch", "direkt mit dem ersten inhaltlichen Punkt, ohne Vorrede")
+
+    def umfang(self, seed: dict) -> tuple[int, int]:
+        """Wortzahl (von, bis) des Volltexts: aus dem Inhaltstyp des Seeds (inhaltstypen.json, Feld umfang)."""
+        uri = (seed.get(S.F_LRT) or [None])[0]
+        for t in (getattr(self, "inhaltstypen", None) or {}).get("inhaltstypen", []):
+            if t["uri"] == uri and t.get("umfang"):
+                return int(t["umfang"][0]), int(t["umfang"][1])
+        return self.umfang_standard
+
+    def stil(self, seed_id: str) -> dict:
+        """Stilvorgaben gegen gleichförmige Texte: Einstiegsart und Namen für Personen im Text. Fest zur Seed-ID,
+        damit ein Neuaufbau dieselben Vorgaben ergibt und die übrigen Zufallswerte des Seeds unberührt bleiben."""
+        rng = random.Random(f"stil:{seed_id}")
+        vornamen = rng.sample(VORNAMEN, 2)
+        return {"einstieg": rng.choice(self.einstiege),
+                "namen": [*vornamen, f"{rng.choice(['Frau', 'Herr'])} {rng.choice(NACHNAMEN)}"]}
 
     # benannte Schrittfolgen, z. B. {"openalex": [...], "gnd": [...]}; „alle“ = alle nacheinander
     mapping_folgen: dict[str, list[str]] = {}
@@ -254,6 +303,9 @@ def build_seeds(bereich: Bildungsbereich, n: int, balance: str | None = None, se
         thema = s.get(S.F_THEMA) or {}
         if thema.get("beschreibung_de"):
             thema["beschreibung_de"] = ohne_urls(thema["beschreibung_de"])
+        von, bis = bereich.umfang(s)
+        s[S.F_UMFANG] = {"von": von, "bis": bis}
+        s[S.F_STIL] = bereich.stil(s["id"])
         s["synth:seed_parameter"] = {"gleichverteilung": balance, "gruppe": group, "zufalls_seed": seed,
                                      "auswahl": auswahl, **({"lokale_daten": lokal} if lokal else {})}
         seeds.append(s)

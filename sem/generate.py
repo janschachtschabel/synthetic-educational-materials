@@ -37,7 +37,8 @@ from .prompts import load_prompts, prompt_hash, render
 
 LEER = "-"
 FELD_VERSUCHE = 3
-MIN_WOERTER = 150  # Volltext
+MIN_WOERTER = 60  # Volltext: absolute Untergrenze; die eigentliche Grenze hängt vom Umfang des Inhaltstyps ab
+MIN_ANTEIL_UMFANG = 0.6  # kürzer als 60 % der unteren Umfangsgrenze: neu anfragen
 # Stufen eines Materials; die Felder einer Stufe hängen nicht voneinander ab und laufen gleichzeitig
 STUFEN = [["volltext"], ["titel"], ["beschreibung"], ["keywords"], ["inhaltstyp", "fragen_antworten"]]
 # Ausgabesprachen (ISO 639-1 → Name im Prompt); andere Codes werden unverändert übergeben
@@ -58,7 +59,9 @@ def _einzeilig(text: str) -> str:
 
 
 TITEL_MAX = 80  # Prompt verlangt höchstens 60 Zeichen; etwas Spielraum, damit nicht jeder Ausreißer neu angefragt wird
-_TITEL_TRENNER = re.compile(r":|\s[–—-]\s")
+# Untertitel-Doppelpunkt („Wechselstrom: …“) und Gedankenstrich; der Gender-Doppelpunkt im Wort
+# („Patient:innen“) ist erlaubt
+_TITEL_TRENNER = re.compile(r":(?![a-zäöüß])|\s[–—-]\s")
 _TITEL_REST = re.compile(r"\s[a-zà-ÿ]{1,2}$")  # abgerissenes Kurzwort am Ende, z. B. „… formale Sprachen bg“
 _TITEL_WORTENDE = {"zu", "an", "um", "ab", "in", "im", "am"}  # echte Wörter, die am Ende stehen dürfen
 
@@ -123,14 +126,28 @@ def titel_nennt_form(titel: str, values: dict) -> str | None:
     return None
 
 
+BESCHREIBUNG_MIN, BESCHREIBUNG_MAX = 300, 1000  # Prompt: 450–900 Zeichen; etwas Spielraum gegen unnötige Neuanfragen
+# Schablonenhafte Anfänge, die der Prompt ausschließt (im 50k-Datensatz begannen 37 % mit „Im Mittelpunkt“, 18 %
+# mit „Das Material“)
+_BESCHREIBUNG_FLOSKEL = re.compile(
+    r"^(im mittelpunkt|das material|dieses material|das vorliegende|in diesem|in dieser|hier |dieser |diese |dieses )",
+    re.I)
+
+
+def beschreibung_floskel(text: str) -> str | None:
+    """Schablonenhafter Anfang der Beschreibung (z. B. „Im Mittelpunkt“), sonst None."""
+    m = _BESCHREIBUNG_FLOSKEL.match(text.strip())
+    return m.group().strip() if m else None
+
+
 def parse_beschreibung(text: str) -> str:
     t = _einzeilig(text)
-    if not 250 <= len(t) <= 1200:
+    if not BESCHREIBUNG_MIN <= len(t) <= BESCHREIBUNG_MAX:
         raise ValueError(f"Beschreibung mit {len(t)} Zeichen")
     return t
 
 
-def parse_keywords(text: str, minimum: int = 4, maximum: int = 8) -> list[str]:
+def parse_keywords(text: str, minimum: int = 5, maximum: int = 8) -> list[str]:
     roh = [_einzeilig(k.lstrip("-•*0123456789. ")) for k in re.split(r"[,;\n]", text)]
     out: dict[str, str] = {}
     for k in roh:
@@ -149,10 +166,41 @@ def parse_inhaltstyp(text: str, kategorien: list[dict]) -> dict:
     raise ValueError(f"unbekannte Kategorie {t[:40]!r}")
 
 
+BLOOM_TYPEN = ("erinnern", "verstehen", "anwenden", "analysieren", "bewerten", "erschaffen")
+# übersetzte Typen (bei anderer Ausgabesprache kamen z. B. „appliquer“, „analizar“, „применять“ vor)
+_BLOOM_ALIAS = {
+    "remember": "erinnern", "recall": "erinnern", "se souvenir": "erinnern", "mémoriser": "erinnern",
+    "recordar": "erinnern", "ricordare": "erinnern", "onthouden": "erinnern", "запоминать": "erinnern",
+    "понимать": "verstehen", "understand": "verstehen", "comprendre": "verstehen", "comprender": "verstehen",
+    "comprendere": "verstehen", "begrijpen": "verstehen", "anlamak": "verstehen",
+    "apply": "anwenden", "appliquer": "anwenden", "aplicar": "anwenden", "applicare": "anwenden",
+    "toepassen": "anwenden", "применять": "anwenden", "uygulamak": "anwenden",
+    "analyze": "analysieren", "analyse": "analysieren", "analyser": "analysieren", "analizar": "analysieren",
+    "analizzare": "analysieren", "analyseren": "analysieren", "анализировать": "analysieren",
+    "evaluate": "bewerten", "évaluer": "bewerten", "evaluer": "bewerten", "evaluar": "bewerten",
+    "valutare": "bewerten", "evalueren": "bewerten", "оценивать": "bewerten", "değerlendirmek": "bewerten",
+    "create": "erschaffen", "créer": "erschaffen", "creer": "erschaffen", "crear": "erschaffen",
+    "creare": "erschaffen", "creëren": "erschaffen", "создавать": "erschaffen", "erstellen": "erschaffen",
+}
+
+
+def bloom_typ(typ: str) -> str | None:
+    """Bloom-Stufe als einer der sechs deutschen Werte; unbekannt = None."""
+    t = typ.strip().casefold()
+    return t if t in BLOOM_TYPEN else _BLOOM_ALIAS.get(t)
+
+
 def parse_paare(data: dict | list, minimum: int) -> list[dict]:
+    """Frage-Antwort-Paare; der Typ wird auf die sechs deutschen Bloom-Stufen gebracht, Paare mit unbekanntem Typ
+    fallen weg (zählen also nicht zum Minimum)."""
     paare = data.get("paare", data.get("frage_antwort_paare", [])) if isinstance(data, dict) else data
-    qa = [{k: str(p[k]).strip() for k in ("frage", "antwort", "typ") if p.get(k)}
-          for p in paare if isinstance(p, dict) and p.get("frage") and p.get("antwort")]
+    qa = []
+    for p in paare:
+        if not (isinstance(p, dict) and p.get("frage") and p.get("antwort")):
+            continue
+        typ = bloom_typ(str(p.get("typ") or ""))
+        if typ:
+            qa.append({"frage": str(p["frage"]).strip(), "antwort": str(p["antwort"]).strip(), "typ": typ})
     if len(qa) < minimum:
         raise ValueError(f"{len(qa)} Frage-Antwort-Paare")
     return qa
@@ -171,9 +219,11 @@ def material_user(prompts: dict, values: dict, felder: dict, text: str, auftrag:
     return render(prompts["material"], v)
 
 
-def parse_volltext(text: str) -> str:
+def parse_volltext(text: str, umfang_von: int | None = None) -> str:
+    """Volltext; zu kurz ist er unter MIN_WOERTER oder unter 60 % der unteren Umfangsgrenze des Inhaltstyps."""
     t = text.strip()
-    if len(t.split()) < MIN_WOERTER:
+    minimum = max(MIN_WOERTER, int(MIN_ANTEIL_UMFANG * umfang_von)) if umfang_von else 150
+    if len(t.split()) < minimum:
         raise ValueError(f"Volltext mit {len(t.split())} Wörtern zu kurz")
     return t
 
@@ -201,6 +251,13 @@ class Material:
         self.qa_min = qa_min
         self.ausgabesprache = ausgabesprache
         self.values = self.bereich.prompt_values(seed)
+        # Umfang aus dem Seed (ältere Seeds: aus dem Inhaltstyp), Stilvorgaben nur, wenn der Seed welche hat
+        umfang = seed.get(S.F_UMFANG) or dict(zip(("von", "bis"), self.bereich.umfang(seed)))
+        self.values.setdefault("umfang_von", umfang["von"])
+        self.values.setdefault("umfang_bis", umfang["bis"])
+        stil = seed.get(S.F_STIL) or {}
+        self.values.setdefault("einstieg", stil.get("einstieg", ""))
+        self.values.setdefault("namen", ", ".join(stil.get("namen", [])))
         self.hinweis = ""
         if ausgabesprache != "de":
             name = SPRACHEN.get(ausgabesprache, ausgabesprache)
@@ -241,7 +298,8 @@ class Material:
         text = self.felder["volltext"]
         if feld == "inhaltstyp":
             auftrag = render(p["inhaltstyp"], {
-                "kategorien": "\n".join(f"- {k['name']} → {k['id']}" for k in self.kategorien),
+                "kategorien": "\n".join(f"- {k['name']} → {k['id']}" + (f": {k['definition']}" if k.get("definition") else "")
+                                         for k in self.kategorien),
                 "beispiel_id": self.kategorien[0]["id"]})
             # ohne den Inhaltstyp des Seeds: das Modell bestimmt ihn aus dem fertigen Material
             return Anfrage(feld, system, material_user(p, v, self.felder, text, auftrag, inhaltstyp=False))
@@ -265,7 +323,7 @@ class Material:
 
     def _parse(self, feld: str, text: str):
         if feld == "volltext":
-            return parse_volltext(text)
+            return parse_volltext(text, self.values.get("umfang_von"))
         if feld == "inhaltstyp":
             k = parse_inhaltstyp(text, self.kategorien)
             return {"uri": k["uri"], "name": k["name"]}
@@ -278,7 +336,13 @@ class Material:
             if (w := titel_nennt_form(t, self.values)) and self.neu.get("titel", 0) < FELD_VERSUCHE - 1:
                 raise ValueError(f"Titel nennt Materialtyp oder Stufe ({w!r})")
             return t
-        return {"titel": parse_titel, "beschreibung": parse_beschreibung, "keywords": parse_keywords}[feld](text)
+        if feld == "beschreibung":
+            t = parse_beschreibung(text)
+            # weiche Prüfung wie beim Titel: beim letzten Versuch wird die Beschreibung trotzdem übernommen
+            if (f := beschreibung_floskel(t)) and self.neu.get("beschreibung", 0) < FELD_VERSUCHE - 1:
+                raise ValueError(f"Beschreibung beginnt mit {f!r}")
+            return t
+        return {"titel": parse_titel, "keywords": parse_keywords}[feld](text)
 
     def ergebnis(self, meta: dict, dauer: float, mit_tokens: bool = True) -> dict:
         f, a = self.felder, self.ausgabesprache

@@ -17,7 +17,7 @@ from ... import schema as S
 from ...paths import MAPPING_DIR, lokal_pfad
 from ...vocabs import load as load_vocab
 from ..base import Bildungsbereich, MappingSchritt, SeedState
-from ..hochschule import kurz_id, load_jsonl
+from ..hochschule import load_jsonl
 
 DIR = MAPPING_DIR / "berufsbildung"
 CONTEXT_BASE = "http://w3id.org/openeduhub/vocabs/educationalContext/"
@@ -28,6 +28,9 @@ __all__ = ["Berufsbildung", "DIR", "load_jsonl"]
 
 class Berufsbildung(Bildungsbereich):
     key = "berufsbildung"
+    einstiege = ("mit einem Kundenauftrag", "mit einer Störung oder einem Fehler im Arbeitsablauf",
+                 "mit einer Situation aus dem Ausbildungsbetrieb", "mit einer Vorschrift oder Norm, die zu beachten ist",
+                 "mit einer Frage von Auszubildenden", "direkt mit dem ersten Arbeitsschritt, ohne Vorrede")
     label = "Berufliche Bildung"
     balance_options = {
         "thema": "jede Beruf-Kompetenz-Kombination etwa gleich oft",
@@ -356,10 +359,6 @@ class Berufsbildung(Bildungsbereich):
         return seed
 
     # --- Prompt-Werte ----------------------------------------------------------------------
-
-    def inhaltstyp_kategorien(self) -> list[dict]:
-        return [{"id": kurz_id(t["label"]), "name": t["label"], "uri": t["uri"]}
-                for t in self.inhaltstypen["inhaltstypen"]]
 
     def prompt_values(self, seed: dict) -> dict:
         from .lernfelder import lernfeld_text

@@ -16,7 +16,7 @@ from ... import schema as S
 from ...paths import MAPPING_DIR
 from ...vocabs import load as load_vocab
 from ..base import Bildungsbereich, MappingSchritt, SeedState
-from ..hochschule import kurz_id, load_jsonl
+from ..hochschule import load_jsonl
 
 DIR = MAPPING_DIR / "elementar"
 CONTEXT_URI = "http://w3id.org/openeduhub/vocabs/educationalContext/elementarbereich"
@@ -32,6 +32,10 @@ def bildungsbereiche() -> dict:
 
 class Elementar(Bildungsbereich):
     key = "elementar"
+    umfang_standard = (350, 500)
+    einstiege = ("mit einer Situation aus dem Kita-Alltag", "mit einer Frage, wie Kinder sie stellen",
+                 "mit einem Gegenstand oder Fundstück", "mit einer kurzen Geschichte",
+                 "mit einer Beobachtung in der Natur oder im Gruppenraum", "direkt mit dem Ablauf, ohne Vorrede")
     label = "Elementarbereich"
     balance_options = {
         "thema": "jedes Thema etwa gleich oft",
@@ -230,10 +234,6 @@ class Elementar(Bildungsbereich):
         return seed
 
     # --- Prompt-Werte ----------------------------------------------------------------------
-
-    def inhaltstyp_kategorien(self) -> list[dict]:
-        return [{"id": kurz_id(t["label"]), "name": t["label"], "uri": t["uri"]}
-                for t in self.inhaltstypen["inhaltstypen"]]
 
     def prompt_values(self, seed: dict) -> dict:
         t = seed[S.F_THEMA]
