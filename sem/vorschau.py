@@ -47,6 +47,7 @@ def metadaten(rec: dict) -> dict[str, str]:
     t = rec.get(S.F_THEMA, {})
     p = rec.get(S.F_PROVENANCE, {}).get(S.F_THEMA, {})
     beruf, komp = rec.get(S.F_BERUF) or {}, rec.get(S.F_KOMPETENZ) or {}
+    umfang, stil = rec.get(S.F_UMFANG) or {}, rec.get(S.F_STIL) or {}
     zeilen = {
         "Bildungsstufe": _labels(rec, S.F_CONTEXT),
         "Studienfach": _labels(rec, S.F_TAXON_UNI),
@@ -56,6 +57,7 @@ def metadaten(rec: dict) -> dict[str, str]:
         "Beruf (ESCO)": beruf.get("label", ""),
         "Beruf-URI": beruf.get("uri", ""),
         "Qualifizierungsweg": beruf.get("qualifizierung", ""),
+        "Ausbildungsberuf (KMK)": "; ".join(beruf.get("ausbildungsberuf_kmk") or []),
         "Inhaltstyp": _labels(rec, S.F_LRT),
         "Zielgruppe": _labels(rec, S.F_ROLE),
         "Sprache": ", ".join(rec.get(S.F_LANGUAGE, [])),
@@ -64,9 +66,14 @@ def metadaten(rec: dict) -> dict[str, str]:
         "Themenquelle": p.get("quelle", ""),
         "Kompetenz (ESCO)": " – ".join(x for x in (komp.get("label"), komp.get("relation"), komp.get("art")) if x),
         "Kompetenz-URI": komp.get("uri", ""),
+        "GND-Motiv ersetzt": t.get("gnd_motiv") or "",
+        "Themenbeschreibung aus": (t.get("beschreibung_quelle") or {}).get("name", ""),
         "Lehrebene": t.get("lehrebene") or "",
         "Niveau": (rec.get(S.F_NIVEAU) or {}).get("label", ""),
         "Textsorte": rec.get("synth:textsorte", ""),
+        "Umfang": "{von}–{bis} Wörter".format(**umfang) if umfang else "",
+        "Einstieg": stil.get("einstieg", ""),
+        "Namen": ", ".join(stil.get("namen", [])),
         "Didaktische Funktion": rec.get(S.F_DIDAKTIK, ""),
         "Bearbeitungsdauer": f"{rec[S.F_LEARNING_TIME]} Minuten" if rec.get(S.F_LEARNING_TIME) else "",
         "Lernort": rec.get(S.F_LERNORT, ""),

@@ -586,5 +586,11 @@
  "KMK-Rahmenlehrplan": "KMK framework curriculum",
  "ob der ESCO-Beruf einem anerkannten Ausbildungsberuf mit KMK-Rahmenlehrplan zugeordnet ist (berufe_kmk.jsonl)": "whether the ESCO occupation is mapped to a recognised training occupation with a KMK framework curriculum (berufe_kmk.jsonl)",
  "Beruf mit KMK-Rahmenlehrplan": "occupation with KMK framework curriculum",
- "übrige ESCO-Berufe": "other ESCO occupations"
+ "übrige ESCO-Berufe": "other ESCO occupations",
+ "Ausbildungsberuf (KMK)": "Recognised training occupation (KMK)",
+ "GND-Motiv ersetzt": "Replaced GND motif entry",
+ "Themenbeschreibung aus": "Topic description from",
+ "Umfang": "Length",
+ "Einstieg": "Opening",
+ "Namen": "Names"
 }
