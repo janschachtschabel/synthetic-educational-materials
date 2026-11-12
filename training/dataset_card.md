@@ -68,6 +68,7 @@ are never seen during training.
 | `topic`, `topic_uri` | topic the material was generated from (GND, OpenEduHub topic trees, ESCO or OpenAlex), empty for topics from sources that are not openly licensed |
 | `generator_model` | language model that generated the texts |
 | `title_previous` | earlier title if the title was regenerated afterwards, otherwise empty |
+| `description_previous` | earlier description if its first sentence was rewritten afterwards, otherwise empty |
 
 Controlled values are given as labels together with their URIs, following the OpenEduHub / edu-sharing metadata
 schema used by [WirLernenOnline](https://wirlernenonline.de).

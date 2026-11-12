@@ -60,7 +60,7 @@ def schema():
         ("target_group", lst), ("target_group_uri", lst), ("level", pa.string()), ("text_type", pa.string()),
         ("media_form", pa.string()), ("didactic_function", pa.string()), ("duration_minutes", pa.int32()),
         ("topic", pa.string()), ("topic_uri", pa.string()), ("generator_model", pa.string()),
-        ("title_previous", pa.string()),
+        ("title_previous", pa.string()), ("description_previous", pa.string()),
     ])
 
 
@@ -127,6 +127,8 @@ def flatten(r: dict) -> dict:
         "generator_model": (r.get("synth:generierung") or {}).get("modell"),
         # set when the title was regenerated afterwards (python -m sem titel-neu): the title it replaced
         "title_previous": r.get("synth:titel_alt"),
+        # set when the first sentence of the description was rewritten (python -m sem beschreibung-einstieg)
+        "description_previous": r.get("synth:beschreibung_alt"),
     }
 
 
@@ -166,9 +168,14 @@ def build_card(rows_by_split: dict[str, list[dict]], name: str) -> str:
     regenerated = [r for r in rows if r.get("title_previous") is not None]
     replaced = sum(r["title"] != r["title_previous"] for r in regenerated)
     title_note = ("" if not regenerated else
-                  f" Titles were regenerated on {date.today().isoformat()} with a revised title prompt (readable phrase instead of a keyword "
+                  f" Titles were regenerated afterwards with a revised title prompt (readable phrase instead of a keyword "
                   f"chain; {replaced:,} of {len(regenerated):,} titles changed); the earlier titles are kept in "
                   f"`title_previous`.")
+    rewritten = [r for r in rows if r.get("description_previous") is not None]
+    if rewritten:
+        title_note += (f" In {len(rewritten):,} descriptions whose first sentence was a stock phrase (e.g. „Im Mittelpunkt "
+                       f"steht …“, „Das Material behandelt …“), only that sentence was rewritten afterwards; the rest is "
+                       f"unchanged and the earlier description is kept in `description_previous`.")
     text = (HERE / "dataset_card.md").read_text(encoding="utf-8")
     values = {
         "name": name, "size_category": size, "n_total": f"{n:,}", "split_table": "\n".join(table),
