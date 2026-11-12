@@ -39,8 +39,12 @@ class Berufsbildung(Bildungsbereich):
         "berufsgruppe": "jede KldB-Berufsgruppe (3-Steller) etwa gleich oft",
         "berufshauptgruppe": "jede KldB-Berufshauptgruppe (2-Steller) etwa gleich oft",
         "berufsbereich": "jeder KldB-Berufsbereich (1-Steller) etwa gleich oft",
+        "ausbildungsberuf": "Berufe mit KMK-Rahmenlehrplan (anerkannte Ausbildungsberufe) und übrige ESCO-Berufe je "
+                            "zur Hälfte; innerhalb jeder Hälfte jede Beruf-Thema-Kombination etwa gleich oft",
     }
-    default_balance = "beruf"
+    # ESCO-Berufe ohne deutsche Entsprechung (z. B. „Grillkoch“) sind viel zahlreicher als die rund 300 Berufe mit
+    # KMK-Rahmenlehrplan; die Standardverteilung gibt den anerkannten Ausbildungsberufen deshalb die Hälfte
+    default_balance = "ausbildungsberuf"
     kombination_label = "Beruf × Kompetenz"
     mapping_folgen = {
         "esco": ["esco", "hinweise", "kandidaten", "kldb", "qualifizierung"],
@@ -116,6 +120,12 @@ class Berufsbildung(Bildungsbereich):
                                      "branchenuebergreifend": "in mehreren Branchen",
                                      "querschnitt": "Querschnittskompetenz (z. B. Teamarbeit)"},
                            "standard": ["berufsspezifisch", "branchenspezifisch", "branchenuebergreifend"]},
+            "ausbildungsberuf": {"label": "KMK-Rahmenlehrplan",
+                                 "beschreibung": "ob der ESCO-Beruf einem anerkannten Ausbildungsberuf mit "
+                                                 "KMK-Rahmenlehrplan zugeordnet ist (berufe_kmk.jsonl)",
+                                 "werte": {"kmk": "Beruf mit KMK-Rahmenlehrplan",
+                                           "ohne_kmk": "übrige ESCO-Berufe"},
+                                 "standard": ["kmk", "ohne_kmk"]},
             "kldb_status": {"label": "Status der KldB-Zuordnung", "beschreibung": "Abstimmung über die Berufsgruppe",
                             "werte": status, "standard": ["gesichert", "wahrscheinlich", "redaktionell"]},
             "qualifizierung_status": {"label": "Status des Qualifizierungswegs", "beschreibung": "Abstimmung",
@@ -165,6 +175,8 @@ class Berufsbildung(Bildungsbereich):
             return False
         if m.get("status", "gesichert") not in auswahl["kldb_status"]:
             return False
+        if ("kmk" if b["uri"] in self.berufe_kmk else "ohne_kmk") not in auswahl["ausbildungsberuf"]:
+            return False
         if (m.get("qualifizierung") or {}).get("status", "gesichert") not in auswahl["qualifizierung_status"]:
             return False
         return not auswahl["belege"] or bool(self.belege_des_themas(topic) & set(auswahl["belege"]))
@@ -207,6 +219,12 @@ class Berufsbildung(Bildungsbereich):
         return load_jsonl(path)
 
     @cached_property
+    def berufe_kmk(self) -> dict[str, dict]:
+        from .lernfelder import lade_berufe_kmk
+
+        return lade_berufe_kmk()
+
+    @cached_property
     def kompetenzen(self) -> dict[str, dict]:
         return {k["uri"]: k for k in load_jsonl(DIR / "kompetenzen.jsonl")}
 
@@ -245,6 +263,8 @@ class Berufsbildung(Bildungsbereich):
             return topic["beruf"]["uri"]
         if balance == "kompetenz":
             return topic["kompetenz"]["uri"] if "kompetenz" in topic else topic["id"]
+        if balance == "ausbildungsberuf":
+            return "kmk" if topic["beruf"]["uri"] in self.berufe_kmk else "ohne_kmk"
         return topic["beruf"][balance][0]["uri"]
 
     # --- Seed ---------------------------------------------------------------------------
@@ -299,6 +319,8 @@ class Berufsbildung(Bildungsbereich):
         seed[S.F_BERUF] = {"uri": b["uri"], "label": b["label"], "isco_08": b["isco"],
                            "beschreibung": b["beschreibung"], "qualifizierung": quali,
                            **{e: b[e] for e in KLDB_EBENEN[1:]}}
+        if kmk := self.berufe_kmk.get(b["uri"]):
+            seed[S.F_BERUF]["ausbildungsberuf_kmk"] = [r["titel"] for r in kmk["rahmenlehrplaene"]]
         seed[S.F_PROVENANCE][S.F_BERUF] = S.provenance("ESCO-Berufe", uri=b["uri"], license=esco_lizenz,
                                                        method="Thema aus der Quelle")
         seed[S.F_PROVENANCE][S.F_BERUF]["qualifizierung"] = {
@@ -380,7 +402,9 @@ class Berufsbildung(Bildungsbereich):
             "thema_beschreibung": t.get("beschreibung_de", ""),
             "thema_keywords": ", ".join(t.get("keywords_de", [])),
             "kompetenzart": {"wissen": "Kenntnisse", "faehigkeit": "Fähigkeit"}.get(k.get("art"), ""),
-            "beruf": b["label"],
+            # ESCO-Label; bei Berufen mit KMK-Rahmenlehrplan dazu der deutsche Ausbildungsberuf
+            "beruf": b["label"] + (f" (Ausbildungsberuf: {', '.join(b['ausbildungsberuf_kmk'])})"
+                                   if b.get("ausbildungsberuf_kmk") else ""),
             "beruf_beschreibung": b.get("beschreibung", ""),
             "fach": ", ".join(seed[S.F_PROFESSION + "_DISPLAYNAME"]),
             "bildungsstufe": seed[S.F_CONTEXT + "_DISPLAYNAME"][0],
