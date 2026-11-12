@@ -134,10 +134,25 @@ _BESCHREIBUNG_FLOSKEL = re.compile(
     re.I)
 
 
+# dieselbe Schablone, nur ans Satzende verschoben („… steht im Mittelpunkt“, „… wird behandelt“)
+_BESCHREIBUNG_FLOSKEL_SATZ = re.compile(
+    r"\b(?:steh(?:t|en)|rück(?:t|en)) (?:hier )?im (?:mittelpunkt|zentrum|fokus|vordergrund)\b"
+    r"|\b(?:ist|sind) (?:das |die )?(?:zentrale[sn]? |eigentliche[sn]? )?(?:thema|themen|gegenstand)\b"
+    r"|\bim (?:fokus|zentrum|mittelpunkt) (?:steh|lieg)"
+    r"|\b(?:wird|werden)\b[^.!?]*\b(?:behandelt|thematisiert|vorgestellt|beleuchtet)\b"
+    r"|\bgeht es um\b",
+    re.I)
+_ERSTER_SATZ = re.compile(r"^.+?[.!?](?=\s+[„\"(]?[A-ZÄÖÜ0-9]|\s*$)", re.S)
+
+
 def beschreibung_floskel(text: str) -> str | None:
-    """Schablonenhafter Anfang der Beschreibung (z. B. „Im Mittelpunkt“), sonst None."""
-    m = _BESCHREIBUNG_FLOSKEL.match(text.strip())
-    return m.group().strip() if m else None
+    """Schablone im ersten Satz der Beschreibung: am Anfang („Im Mittelpunkt …“, „Das Material …“) oder als
+    Satzende („… steht im Mittelpunkt“, „… wird behandelt“); sonst None."""
+    t = text.strip()
+    if m := _BESCHREIBUNG_FLOSKEL.match(t):
+        return m.group().strip()
+    erster = (m.group() if (m := _ERSTER_SATZ.match(t)) else t)
+    return m.group().strip() if (m := _BESCHREIBUNG_FLOSKEL_SATZ.search(erster)) else None
 
 
 def parse_beschreibung(text: str) -> str:
@@ -340,7 +355,7 @@ class Material:
             t = parse_beschreibung(text)
             # weiche Prüfung wie beim Titel: beim letzten Versuch wird die Beschreibung trotzdem übernommen
             if (f := beschreibung_floskel(t)) and self.neu.get("beschreibung", 0) < FELD_VERSUCHE - 1:
-                raise ValueError(f"Beschreibung beginnt mit {f!r}")
+                raise ValueError(f"Beschreibung mit Schablone {f!r}")
             return t
         return {"titel": parse_titel, "keywords": parse_keywords}[feld](text)
 

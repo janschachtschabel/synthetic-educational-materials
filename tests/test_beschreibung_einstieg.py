@@ -90,3 +90,18 @@ def test_ganze_datei(tmp_path, monkeypatch):
     recs = {r["id"]: r for r in map(json.loads, out.read_text(encoding="utf-8").splitlines())}
     assert prog.done == 2 and recs["m0"][S.F_DESCRIPTION].startswith("Sammellinsen erzeugen")
     assert recs["m1"][S.F_DESCRIPTION] == "Sammellinsen erzeugen Bilder. " + REST
+
+
+def test_schablone_am_satzende():
+    from sem.generate import beschreibung_floskel
+    from sem.beschreibung_einstieg import parse_satz
+
+    for s in ("Die Abgrenzung ländlicher Räume steht im Mittelpunkt.",
+              "Dünnschichtthermoelemente zu entwickeln, ist das zentrale Thema.",
+              "Das Betriebsverhalten technischer Anlagen wird anhand von Kreiselpumpen behandelt.",
+              "Bei Ionenkanälen geht es um Signale."):
+        assert beschreibung_floskel(s + " Danach folgt der Rest.")
+        with pytest.raises(ValueError):
+            parse_satz(s)
+    ok = "Thermische und chemische Reize werden durch Ionenkanäle in elektrische Signale umgewandelt."
+    assert beschreibung_floskel(ok + " Später wird das behandelt.") is None and parse_satz(ok) == ok

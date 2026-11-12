@@ -58,7 +58,7 @@ def parse_satz(text: str) -> str:
     if len(s.split()) > 25:
         raise ValueError(f"Satz mit {len(s.split())} Wörtern")
     if f := beschreibung_floskel(s):
-        raise ValueError(f"Satz beginnt mit {f!r}")
+        raise ValueError(f"Satz mit Schablone {f!r}")
     if (m := _TYP_ANFANG.match(s)) and m.group(2).casefold() in _FORM_WOERTER | _TYPEN_EXTRA:
         raise ValueError(f"Satz beginnt mit dem Materialtyp {m.group(2)!r}")
     return s

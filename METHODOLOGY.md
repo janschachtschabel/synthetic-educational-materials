@@ -456,10 +456,10 @@ regeneration in `synth:generierung.titel_neu`. If no usable title comes back aft
 old one stays (`titel_neu.behalten` gives the reason). The command can be resumed like a material run.
 
 **Replacing the first sentence of the description.** `python -m sem beschreibung-einstieg --materialien
-output/materialien_….jsonl` finds descriptions that start with a stock phrase and has only their first
+output/materialien_….jsonl` finds descriptions whose first sentence contains a stock phrase (at the start like „Im Mittelpunkt …“ or moved to the end like „… steht im Mittelpunkt“, „… wird behandelt“) and has only their first
 sentence rewritten (`beschreibung_einstieg.md`: title, old first sentence and rest of the description).
-The new sentence must be a single sentence of at most 25 words and must not start with a stock phrase or
-the material type; the rest stays verbatim. The old description is kept in `synth:beschreibung_alt`, model
+The new sentence must be a single sentence of at most 25 words and must not contain a stock phrase or start
+with the material type; the rest stays verbatim. The old description is kept in `synth:beschreibung_alt`, model
 and prompt hash in `synth:generierung.beschreibung_einstieg`. Descriptions without a stock phrase are
 copied unchanged. Output `…_einstieg.jsonl`, resumable.
 
