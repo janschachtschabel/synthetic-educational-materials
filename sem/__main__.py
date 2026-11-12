@@ -10,6 +10,7 @@
     python -m sem laeufe                          (Läufe, die ihr Ziel nicht erreicht haben)
     python -m sem materialien --fortsetzen NAME   (unfertigen Lauf mit seinen Einstellungen fortsetzen)
     python -m sem titel-neu --materialien output/materialien_….jsonl [--out …] [--limit N]   (nur Titel neu)
+    python -m sem beschreibung-einstieg --materialien output/materialien_….jsonl   (nur Schablonen-Anfang neu)
     python -m sem mappings hochschule [alle|openalex|gnd|schritt …] [--limit N] [--stimmen 3] [--wlo export.csv …]
     python -m sem mappings hochschule --liste
 """
@@ -164,6 +165,14 @@ def main(argv=None):
     p.add_argument("--limit", type=int, help="nur die ersten N Materialien")
     _llm_args(p)
 
+    p = sub.add_parser("beschreibung-einstieg",
+                       help="Schablonen-Anfang der Beschreibungen fertiger Materialien („Im Mittelpunkt …“, „Das "
+                            "Material …“) ersetzen: nur der erste Satz neu (neue Datei, fortsetzbar)")
+    p.add_argument("--materialien", type=Path, required=True, help="fertige Materialien (JSONL)")
+    p.add_argument("--out", type=Path, help="Ausgabe (Standard: <eingabe>_einstieg.jsonl daneben)")
+    p.add_argument("--limit", type=int, help="nur die ersten N Materialien")
+    _llm_args(p)
+
     sub.add_parser("laeufe", help="Materialläufe, die ihr Ziel nicht erreicht haben (abgebrochen oder mit Fehlern)")
 
     p = sub.add_parser("mappings", help="Mappings eines Bildungsbereichs neu bauen (Schritte siehe --liste)")
@@ -289,6 +298,15 @@ def main(argv=None):
 
         out = a.out or standard_ausgabe(a.materialien)
         prog = titel_neu(a.materialien, out, _cfg(a), limit=a.limit)
+        print(f"{prog.done} neu, {prog.skipped} schon vorhanden, {prog.failed} fehlgeschlagen → {out}")
+        if prog.status != "fertig":
+            sys.exit(2)
+
+    elif a.cmd == "beschreibung-einstieg":
+        from .beschreibung_einstieg import beschreibung_einstieg, standard_ausgabe
+
+        out = a.out or standard_ausgabe(a.materialien)
+        prog = beschreibung_einstieg(a.materialien, out, _cfg(a), limit=a.limit)
         print(f"{prog.done} neu, {prog.skipped} schon vorhanden, {prog.failed} fehlgeschlagen → {out}")
         if prog.status != "fertig":
             sys.exit(2)
