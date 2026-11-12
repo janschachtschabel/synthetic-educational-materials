@@ -9,14 +9,15 @@ Platzhalter stehen in doppelten geschweiften Klammern, z. B. `{{thema}}`. Welche
 | Datei | Schritt | Ausgabe |
 |---|---|---|
 | `volltext_system.md` | Volltext erzeugen (Rolle, Grundregeln) | – |
-| `volltext.md` | Volltext erzeugen (Vorgaben aus dem Seed, Auftrag) | Fließtext/Markdown, etwa eine A4-Seite |
+| `volltext.md` | Volltext erzeugen (Vorgaben aus dem Seed, Auftrag) | Fließtext/Markdown, Umfang je Inhaltstyp (`{{umfang_von}}`–`{{umfang_bis}}` Wörter) |
 | `system.md` | gemeinsamer Systemprompt für alle Metadatenfelder | – |
 | `material.md` | gemeinsame Vorlage: Volltext, vorhandene Felder, `{{auftrag}}` (Volltext zuerst, damit der Anbieter den gleichbleibenden Anfang zwischenspeichern kann) | – |
 | `titel.md` | Auftrag Titel | eine Zeile |
-| `beschreibung.md` | Auftrag Beschreibung | Text, 400–800 Zeichen |
-| `keywords.md` | Auftrag Schlagworte | kommagetrennte Liste, 5–8 |
-| `inhaltstyp.md` | Auftrag Inhaltstyp-Prüfung (ohne Seed-Wert) | eine id aus `{{kategorien}}` |
+| `beschreibung.md` | Auftrag Beschreibung | Text, 4–6 Sätze, 450–900 Zeichen |
+| `keywords.md` | Auftrag Schlagworte | kommagetrennte Liste, mindestens 5, höchstens 8 übernommen |
+| `inhaltstyp.md` | Auftrag Inhaltstyp-Prüfung (ohne Seed-Wert) | eine id aus `{{kategorien}}` (mit Textsorten-Beschreibung) |
 | `fragen_antworten.md` | Auftrag Frage-Antwort-Paare | JSON `{"paare": [...]}` |
+| `beschreibung_einstieg.md` | nur Befehl `beschreibung-einstieg`: ersten Satz einer fertigen Beschreibung ersetzen | ein Satz |
 | `ausgabesprache.md` | Hinweis an beide Systemprompts, nur wenn beim Erzeugen eine andere Ausgabesprache als Deutsch gewählt ist (App: „Ausgabesprache“, CLI: `--sprache en`) | – |
 
 Die Felder werden nacheinander erzeugt: Titel, Beschreibung, Keywords, Inhaltstyp, Fragen. Jeder Aufruf

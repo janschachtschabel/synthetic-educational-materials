@@ -59,7 +59,10 @@ Studienfach. Jedes Thema bekommt ein bis drei Studienfächer. Studienbereich und
 abgeleitet.
 
 Alle Themen stehen in einem Gesamtset, `themen_hochschule.jsonl` (9.130 Themen: 4.514 aus OpenAlex,
-4.616 aus GND). Jedes Thema trägt seine Herkunft (`art`, `quelle`), Status und Belege; die Seeds lassen
+4.616 aus GND). Beim Laden kommen 3.610 **Fachprofil-Themen** hinzu: die typischen Themen aus
+`studienfach_profile.jsonl` (id `<Studienfach-URI>#thema-<n>`, `art` `fachprofil`, Status
+`wahrscheinlich`; erste Hälfte der Liste Lehrebene grundlagen, Rest vertiefung; übersprungen, wenn das Fach
+ein Thema gleichen Namens schon hat). So hat jedes der 273 Studienfächer Themen, zusammen 12.740. Jedes Thema trägt seine Herkunft (`art`, `quelle`), Status und Belege; die Seeds lassen
 sich danach filtern (siehe „Auswahl der Themen“). Die Teilergebnisse je Quelle entstehen beim Bauen im
 Zwischenspeicher; der Schritt `themen` führt sie zusammen und läuft nach jeder Auswahl von Schritten zuletzt.
 
@@ -453,6 +456,20 @@ Selbstlerneinheit, Präsentation, Quiz, Wortliste und Dialog/Rollenspiel (Sprach
 **Niveaus** je Programmbereich: GER A1–C1 (Sprachen), Alpha-Level 1–2 und 3–4 (Grundbildung), Vorbereitung
 Haupt-, Realschulabschluss bzw. Hochschulreife (Schulabschlüsse), sonst Einsteiger und Fortgeschrittene.
 
+## GND-Ergänzung
+
+Für alle Bereiche gilt beim Laden der Themen `data/mappings/gnd_ergaenzungen.jsonl` (eine Zeile je GND-URI).
+Sie überlebt einen Neubau der Mappings und wird mit `python -m sem gnd-ergaenzen` gebaut (lobid und
+Wikidata, kein LLM, Netzzugang nötig):
+
+- **Motiv-Sätze.** GND-Schlagwörter der Form „Mais <Motiv>“ beschreiben Bildmotive, nicht das Sachthema.
+  Für sie sucht lobid den Sachbegriff gleichen Namens (Sachschlagwort vor Geografikum, ohne Personen und
+  Werke). Gefunden: Thema-id bzw. GND-Verweis werden ersetzt, die alte URI steht in `synth:thema.gnd_motiv`.
+  Das Thema bleibt erhalten.
+- **Kurzbeschreibungen.** Themen ohne Beschreibung bekommen die GND-Definition oder, falls keine da ist,
+  die deutsche Wikidata-Beschreibung (CC0; Wikipedia-Texte werden wegen CC BY-SA nicht übernommen). Die
+  Quelle steht in `synth:thema.beschreibung_quelle`.
+
 ## Seeds
 
 Ein Seed ist ein JSON-Objekt (eine Zeile in JSONL). Feldnamen folgen dem edu-sharing/OEH-Schema:
@@ -469,6 +486,8 @@ Ein Seed ist ein JSON-Objekt (eine Zeile in JSONL). Feldnamen folgen dem edu-sha
 | `synth:textsorte`, `synth:medienform` | Steuerung der Generierung | aus dem Inhaltstyp |
 | `synth:didaktische_funktion` | z. B. Einführung, Übung und Anwendung | in 60 % der Seeds, zufällig |
 | `synth:bearbeitungsdauer_minuten` | 15, 30, 45 oder 90 | in 50 % der Seeds, zufällig |
+| `synth:umfang_woerter` | Zielumfang des Volltexts (`von`, `bis`) | aus dem Inhaltstyp (`umfang` in `inhaltstypen.json`) |
+| `synth:stil` | Einstiegsart des Volltexts und Namen für Personen im Text | zufällig, aus der Seed-id reproduzierbar |
 | `synth:provenance` | Herkunft je Feld: Quelle, URI, Lizenz, Methode | automatisch |
 | `synth:seed_parameter` | Gleichverteilungsfeld, Gruppe, Zufalls-Seed, Themenauswahl | automatisch |
 
@@ -476,10 +495,12 @@ Kontrollierte Werte stehen wie in edu-sharing als Liste von URIs. Das Label steh
 und ist unverändert aus dem Vokabular übernommen. Für Prompts werden Labels bereinigt (ohne Präfix
 „Studienbereich“, ohne Verwaltungszusätze in Klammern).
 
-**Gleichverteilung.** Für jeden Bildungsbereich wählt man ein Feld (Hochschule: `thema` als Standard,
-außerdem `studienfach`, `studienbereich`, `faechergruppe` und `lehrebene`). Die Themen werden nach diesem
+**Gleichverteilung.** Für jeden Bildungsbereich wählt man ein Feld (Hochschule: `studienfach_wurzel` als
+Standard, außerdem `thema`, `studienfach`, `studienbereich`, `faechergruppe` und `lehrebene`). Die Themen werden nach diesem
 Feld gruppiert, maßgeblich ist jeweils der erste Wert. Die gewünschte Anzahl wird gleichmäßig auf die
-Gruppen verteilt, der Rest auf zufällig gewählte Gruppen. Innerhalb einer Gruppe kommen die Themen in
+Gruppen verteilt, der Rest auf zufällig gewählte Gruppen. Gewichtete Felder verteilen nach dem größten
+Rest: `studienfach_wurzel` gruppiert nach Studienfach und gewichtet mit der Wurzel der Themenzahl, so
+bekommen große Fächer (Medizin) mehr Seeds als kleine, aber nicht im Verhältnis ihrer Themen. Innerhalb einer Gruppe kommen die Themen in
 zufälliger Reihenfolge, jedes einmal, bevor sich eines wiederholt. Ab `n` ≥ Anzahl Themen ist bei
 `thema` also jedes Thema dabei. Der Inhaltstyp wird je Gruppe rotiert: Gewählt wird jeweils der bisher
 seltenste passende Typ.
@@ -489,7 +510,7 @@ seltenste passende Typ.
 
 | Filter | Werte | Voreinstellung |
 |---|---|---|
-| `quellen` | `openalex`, `gnd` | beide |
+| `quellen` | `openalex`, `gnd`, `fachprofil` | alle |
 | `fach_status` | `gesichert`, `wahrscheinlich`, `unsicher`, `redaktionell` | ohne `unsicher` |
 | `lehrebene_status` | wie `fach_status` | ohne `unsicher` |
 | `hochschulrelevanz` (nur GND) | `gesichert`, `wahrscheinlich`, `unsicher` | ohne `unsicher` |
@@ -497,7 +518,7 @@ seltenste passende Typ.
 
 `unsicher` bleibt standardmäßig draußen, bis die Prüfliste durchgesehen ist; eine Korrektur oder
 Bestätigung macht ein Thema `redaktionell`, und es ist wieder dabei. Nach der Durchsicht sind mit der
-Voreinstellung alle 9.130 Themen dabei.
+Voreinstellung alle 12.740 Themen dabei.
 Jeder Seed trägt in `synth:provenance` → `synth:thema` den Status je Zuordnung und seine Belege:
 Katalogzahlen mit Abfrage-URI (lobid), WLO-Datensätze mit Verweis auf WirLernenOnline.de und, wo der
 Export sie enthält, Links auf die Node-IDs. Von WLO werden nur Keywords in Verbindung mit
@@ -510,8 +531,11 @@ Reichweite, essenziell/optional, `exactMatch` auf OEH `escoSkills`). `synth:them
 Kontext des Berufs. Inhaltstyp passt zu Kompetenzart und Zielgruppe (80 % Lernende, 20 % Lehrende und
 Ausbildende); das Niveau passt zum Qualifizierungsweg. Optional: `synth:lernort` (40 %; Berufsschule,
 Ausbildungsbetrieb, überbetriebliche Ausbildungsstätte bzw. Fortbildungsorte) und
-`synth:querschnittsthema` (25 %; eine der vier Standardberufsbildpositionen). Gleichverteilung: `beruf`
-(Standard), `thema`, `kompetenz`, `berufsgruppe`, `berufshauptgruppe`, `berufsbereich`.
+`synth:querschnittsthema` (25 %; eine der vier Standardberufsbildpositionen). Hat der ESCO-Beruf einen
+anerkannten Ausbildungsberuf mit KMK-Rahmenlehrplan (`berufe_kmk.jsonl`, 314 Berufe, aus der Zuordnung der
+Rahmenlehrpläne), steht dessen Titel in `synth:beruf.ausbildungsberuf_kmk` und im Prompt hinter dem Beruf.
+Gleichverteilung: `ausbildungsberuf` (Standard: je zur Hälfte Berufe mit und ohne KMK-Rahmenlehrplan,
+darin nach Beruf), `beruf`, `thema`, `kompetenz`, `berufsgruppe`, `berufshauptgruppe`, `berufsbereich`.
 Lernfeld-Themen tragen statt `synth:kompetenz` das Feld `synth:lernfeld` (Nummer, Titel, Ausbildungsjahr,
 Zeitrichtwert, Rahmenlehrplan mit Datum und Download-URL); `synth:thema` ist das Lernfeld im Beruf, der
 Lernort ist immer Berufsschule, das Niveau folgt dem Ausbildungsjahr (1. Jahr → Grundstufe, sonst
@@ -521,6 +545,7 @@ Fachstufe). Die Kompetenzfilter gelten für sie nicht.
 |---|---|---|
 | `quellen` | `esco` (Beruf × Kompetenz), `lernfeld` (Beruf × Lernfeld des Rahmenlehrplans) | beide |
 | `qualifizierung` | `ausbildung`, `fortbildung`, `studium`, `anlernen` | Ausbildung und Fortbildung |
+| `ausbildungsberuf` | `kmk` (Beruf mit KMK-Rahmenlehrplan), `ohne_kmk` | beide |
 | `relation` | `essenziell`, `optional` | essenziell |
 | `kompetenzart` | `wissen`, `faehigkeit` | beide |
 | `reichweite` | `berufsspezifisch`, `branchenspezifisch`, `branchenuebergreifend`, `querschnitt` | ohne `querschnitt` |
@@ -571,8 +596,12 @@ identische Seeds. Neben jeder Seed-Datei liegt eine `.stats.json` mit Parametern
 
 Pro Seed bis zu sechs LLM-Aufrufe (OpenAI-kompatible API, Standardmodell `gpt-6-luna`):
 
-1. **Volltext** aus dem Seed: `volltext_system.md` und `volltext.md`, etwa eine A4-Seite
-   (400–550 Wörter). Kürzere Texte werden verworfen und neu angefragt.
+1. **Volltext** aus dem Seed: `volltext_system.md` und `volltext.md`. Der Umfang hängt vom Inhaltstyp ab
+   (`umfang` in `inhaltstypen.json`, z. B. Merksatz 60–180, Arbeitsblatt 300–500, Lehrbuchauszug
+   Hochschule 700–1.100 Wörter; ohne Angabe 400–550, Elementar 350–500). Texte unter 60 % der
+   Untergrenze (mindestens 60 Wörter) werden verworfen und neu angefragt. Der Seed gibt außerdem eine
+   Einstiegsart (Fallbeispiel, Frage, Beobachtung …) und Namen für Personen im Text vor, damit nicht
+   alle Texte gleich anfangen und dieselben Namen tragen.
 2. **Titel, Beschreibung, Keywords**, je ein Aufruf in dieser Reihenfolge. Alle nutzen denselben
    Systemprompt (`system.md`) und dieselbe Materialvorlage (`material.md`): Volltext, die festen
    Metadaten des Seeds (Bildungsstufe, Fach, Zielgruppe, Sprache, Materialart) und die schon
@@ -580,19 +609,22 @@ Pro Seed bis zu sechs LLM-Aufrufe (OpenAI-kompatible API, Standardmodell `gpt-6-
    (`titel.md`, `beschreibung.md`, `keywords.md`). Thema, Themenbeschreibung und Seed-Keywords sieht
    das LLM hier nicht; die Felder werden also aus dem Text abgeleitet, wie es ein Modell
    „Text → Metadaten“ später lernen soll. Antworten werden geprüft (Titel 10–80 Zeichen,
-   Beschreibung 250–1.200, mindestens 4 Keywords, höchstens 8 übernommen); ein unbrauchbares Feld
+   Beschreibung 300–1.000, mindestens 5 Keywords, höchstens 8 übernommen); ein unbrauchbares Feld
    wird bis zu dreimal neu angefragt, ohne den Volltext neu zu erzeugen. Der Titel ist eine lesbare
    Wortgruppe statt einer Schlagwortkette; abgelehnt werden Doppelpunkte und Gedankenstriche,
    fremde Schriftzeichen und Sonderzeichen ({}[]<>#*_|), abgerissene Kurzwörter am Ende und
    Lernziel-Verben (verstehen, entdecken, kennenlernen, erkunden, erfahren, erarbeiten). Wiederholt der
    Titel Materialtyp oder Stufe aus den Metadaten (z. B. „Fingerspiel“, „in der Kita“), wird er neu
-   angefragt und erst beim letzten Versuch so übernommen.
+   angefragt und erst beim letzten Versuch so übernommen. Ebenso eine Beschreibung, die mit einer
+   Schablone beginnt („Im Mittelpunkt …“, „Das Material …“, „Dieses Arbeitsblatt …“).
 3. **Inhaltstyp-Prüfung** (`inhaltstyp.md`, abschaltbar): Das LLM bestimmt die Materialart aus dem
-   fertigen Material, ohne den Seed-Wert zu sehen, und wählt aus den Inhaltstypen des Bereichs. Das
+   fertigen Material, ohne den Seed-Wert zu sehen, und wählt aus den Inhaltstypen des Bereichs; jede Kategorie steht mit
+   ihrer Textsorten-Beschreibung im Prompt. Das
    Ergebnis steht in `synth:inhaltstyp_pruefung` (erwartet, erkannt, Übereinstimmung) und dient als
    Qualitätsmaß; `ccm:oeh_lrt` bleibt der Seed-Wert.
 4. **Frage-Antwort-Paare** (`fragen_antworten.md`, JSON): Ziel 10 Paare mit Lernzielstufe nach
-   Bloom/Anderson, mindestens 8. Schritt 3 und 4 laufen gleichzeitig.
+   Bloom/Anderson, mindestens 8. Der Typ ist immer deutsch (auch bei anderer Ausgabesprache);
+   übersetzte Typen werden zurückgeführt, Paare mit unbekanntem Typ verworfen. Schritt 3 und 4 laufen gleichzeitig.
 
 Jedes Material vermerkt in `synth:generierung` die Dauer und welche Felder neu angefragt werden mussten
 (`neu_angefragt`). Die Fortschrittsanzeige zählt außerdem Wiederholungen ganzer Materialien
@@ -610,6 +642,14 @@ Metadaten, Titel, Beschreibung und Keywords „-“) und schreibt eine neue Date
 Modell, Prompt-Hash und Tokens der Neuerzeugung in `synth:generierung.titel_neu`. Ist nach drei
 Versuchen kein Titel brauchbar, bleibt der alte (`titel_neu.behalten` nennt den Grund). Der Befehl ist
 fortsetzbar wie ein Materiallauf.
+
+**Ersten Satz der Beschreibung ersetzen.** `python -m sem beschreibung-einstieg --materialien
+output/materialien_….jsonl` sucht Beschreibungen, die mit einer Schablone beginnen, und lässt nur deren
+ersten Satz neu schreiben (`beschreibung_einstieg.md`: Titel, alter erster Satz und Rest der Beschreibung).
+Der neue Satz muss ein einzelner Satz mit höchstens 25 Wörtern sein und darf weder mit einer Schablone noch
+mit dem Materialtyp beginnen; der Rest bleibt wörtlich. Die alte Beschreibung steht in
+`synth:beschreibung_alt`, Modell und Prompt-Hash in `synth:generierung.beschreibung_einstieg`.
+Beschreibungen ohne Schablone werden unverändert übernommen. Ausgabe `…_einstieg.jsonl`, fortsetzbar.
 
 Jedes Material behält alle Seed-Felder und bekommt `synth:volltext` sowie `synth:generierung` (Modell,
 Base-URL, Datum, Hash der verwendeten Prompts).
@@ -629,7 +669,8 @@ Bildungskontext bleibt Deutschland. `cclom:general_language` erhält die Ausgabe
 ## Platzhalter
 
 In den Prompt-Vorlagen (`prompts/`, in der Oberfläche editierbar) stehen Platzhalter als `{{name}}`.
-Bedingte Abschnitte `{{#name}}…{{/name}}` erscheinen nur, wenn der Wert gesetzt ist.
+Bedingte Abschnitte `{{#name}}…{{/name}}` erscheinen nur, wenn der Wert gesetzt ist; sie dürfen
+verschachtelt sein.
 
 | Platzhalter | Inhalt |
 |---|---|
@@ -642,8 +683,11 @@ Bedingte Abschnitte `{{#name}}…{{/name}}` erscheinen nur, wenn der Wert gesetz
 | `thema_pfad`, `zielsprache`, `anforderungsbereich`, `foerderschwerpunkt`, `bildungsstandards` | nur Schule (`anforderungsbereich`, `foerderschwerpunkt` optional, `zielsprache` nur Fremdsprachen, `bildungsstandards` nur in Fächern mit Bildungsstandards) |
 | `programmbereich`, `einfache_sprache`, `veranstaltungsform` | nur Erwachsenenbildung (auch `zielsprache`) |
 | `rolle`, `sprache` | Autorenrolle im Volltext-Prompt, Sprache als Wort |
+| `umfang_von`, `umfang_bis` | Zielumfang in Wörtern (aus `synth:umfang_woerter` bzw. dem Inhaltstyp) |
+| `einstieg`, `namen` | Stilvorgaben aus `synth:stil`: Einstiegsart, Namen (kommagetrennt) |
 | `titel`, `beschreibung`, `keywords`, `volltext`, `auftrag` | nur in `material.md`: bisher erzeugte Felder („-“ = leer), Volltext, Auftrag aus der Felddatei |
-| `kategorien`, `beispiel_id` | nur in `inhaltstyp.md`: Liste „Name → id“ der Inhaltstypen |
+| `kategorien`, `beispiel_id` | nur in `inhaltstyp.md`: Liste „Name → id: Textsorte“ der Inhaltstypen |
+| `floskel`, `erster_satz`, `rest` | nur in `beschreibung_einstieg.md` (dazu `titel`) |
 
 ## Bekannte Grenzen
 
@@ -653,13 +697,14 @@ Bedingte Abschnitte `{{#name}}…{{/name}}` erscheinen nur, wenn der Wert gesetz
 - LLM-Zuordnungen sind nicht deterministisch. Die Mehrfachabstimmung macht die Schwankung sichtbar
   (Status und Konfidenz), beseitigt sie aber nicht. Drei Stimmen desselben Modells können sich
   gemeinsam irren; Embedding-Ähnlichkeit und Handmapping dienen als unabhängige Gegenprobe.
-- Die Lehrebene ist ungleich verteilt (94 grundlagen, 2.810 vertiefung, 1.612 forschung). Weil Forschungs-
-  themen im 1.–2. Studienjahr ausgeschlossen sind, ist dieses Niveau bei Gleichverteilung nach Thema
-  seltener (bei 30.000 Seeds rund 22 % statt 33 %). Die GND-Themen aus Lehrbüchern gleichen das aus.
+- Die Lehrebene ist ungleich verteilt (3.465 grundlagen, 7.295 vertiefung, 1.980 forschung, mit den
+  Fachprofil-Themen). Die Lehrebene der Fachprofil-Themen ist eine Faustregel (Reihenfolge in der
+  LLM-Liste), keine Abstimmung.
 - ESCO ist europäisch. Viele Berufe entsprechen keinem deutschen Ausbildungsberuf eins zu eins, manche
   deutsche Übersetzungen sind holprig. Der Qualifizierungsweg ist eine Einschätzung per Abstimmung,
   keine amtliche Zuordnung zu den anerkannten Ausbildungsberufen (deren Verzeichnis ist nicht offen
-  lizenziert). Lernfelder der Rahmenlehrpläne gibt es nur als PDF; die Lernfeldlisten stammen aus einer
+  lizenziert). Die Kennzeichnung „Ausbildungsberuf (KMK)“ beruht auf der Zuordnung der Rahmenlehrpläne
+  zu ESCO-Berufen und deckt nur Berufe mit Rahmenlehrplan ab. Lernfelder der Rahmenlehrpläne gibt es nur als PDF; die Lernfeldlisten stammen aus einer
   automatischen Umwandlung und sind gegen die Kopfzeilen der Lernfelder geprüft, nicht von Hand. 12 im
   Jahr 2025/26 erneuerte Pläne fehlen, bis ihre Markdown-Fassungen vorliegen; die Zuordnung zum
   ESCO-Beruf ist eine Abstimmung, keine amtliche Zuordnung.

@@ -2,6 +2,10 @@
 
 *[English](README.md) · Deutsch*
 
+## `mappings/gnd_ergaenzungen.jsonl`
+
+Eine Zeile je GND-URI aus den Themen aller Bereiche: `uri` (GND), `label`, bei Motiv-Sätzen `motiv_ersatz` (`uri`, `label`, `typen`), sonst ggf. `beschreibung` mit `beschreibung_quelle` (`name`, `uri`, Lizenz), `datum`. Wird beim Laden der Themen angewendet und von `python -m sem gnd-ergaenzen` gebaut (siehe Methodik, GND-Ergänzung). Die `inhaltstypen.json` aller Bereiche tragen `umfang` (Wörter von–bis) für den Volltext.
+
 ## `vocabs/`
 
 Je Vokabular eine Datei `<name>.json`:
@@ -23,7 +27,8 @@ stehen zusätzlich `definition` und `note` (KldB: Kurzbeschreibung und typische 
 | `kompetenzen.jsonl` | eine ESCO-Kompetenz je Zeile: `uri`, `label`, `alt_labels`, `beschreibung`, `art` (`wissen`, `faehigkeit`), `reichweite` (`berufsspezifisch`, `branchenspezifisch`, `branchenuebergreifend`, `querschnitt`), `isced_f`, `essenziell_fuer`/`optional_fuer` (Zahl der Berufe), `oeh_uri` (OEH escoSkills), `belege.wlo` |
 | `pruefliste_berufe.csv` | Berufe mit Grund für eine Durchsicht, leere Korrekturspalten |
 | `korrekturen.csv` | redaktionelle Korrekturen (`korrektur_codes` = KldB-Kennziffern mit `|`, `-` = ausschließen, `korrektur_qualifizierung`, `kommentar`), Vorrang vor dem LLM |
-| `inhaltstypen.json` | genutzte Inhaltstypen aus OEH `new_lrt` mit Textsorte, Medienform, Kompetenzarten, Zielgruppen |
+| `inhaltstypen.json` | genutzte Inhaltstypen aus OEH `new_lrt` mit Textsorte, Medienform, Kompetenzarten, Zielgruppen, `umfang` (Wörter von–bis) |
+| `berufe_kmk.jsonl` | ESCO-Berufe mit anerkanntem Ausbildungsberuf: `uri`, `label`, `rahmenlehrplaene` (`id`, `titel`, `status` aus `rahmenlehrplaene.jsonl`); schreibt der Schritt `zusammenfuehren` der Lernfelder |
 | `niveaus.json` | DQR-Niveaus mit Qualifizierungsweg und Bildungsstufe |
 | `optionale_felder.json` | Werte und Anteile der optionalen Steuerfelder (Lernort, Querschnittsthema …) |
 | `pruefliste_rahmenlehrplaene.csv`, `korrekturen_rahmenlehrplaene.csv` | Pläne ohne Mehrheit für einen ESCO-Beruf oder mit lückenhafter Lernfeldliste; Korrekturen mit `korrektur_codes` = ESCO-Kürzel (erste acht Zeichen der UUID) mit `|`, `-` = ausschließen |
@@ -100,7 +105,7 @@ lagen, sind über die Git-Historie abrufbar.
 | Datei | Inhalt |
 |---|---|
 | `themen_hochschule.jsonl` | Gesamtset: alle Themen, ein Thema je Zeile, siehe unten. `art` = `openalex` oder `gnd`; GND-Themen haben zusätzlich `gnd` (GND-ID, Typ, Sachgruppe, Oberbegriffe), `belege.katalog` und `mapping.hochschulrelevanz`; Themen mit WLO-Beleg `belege.wlo`. Die Teilergebnisse je Quelle entstehen beim Bauen im Zwischenspeicher (`data/cache/hochschule_themen_*.jsonl`) und werden im Schritt `themen` zusammengeführt |
-| `studienfach_profile.jsonl` | je Studienfach Kurzbeschreibung, typische Themen, Abgrenzung (LLM) |
+| `studienfach_profile.jsonl` | je Studienfach Kurzbeschreibung, typische Themen, Abgrenzung (LLM); die typischen Themen werden beim Laden zu Themen mit `art` = `fachprofil` |
 | `pruefliste_themen.csv` | Zuordnungen mit Grund für eine Durchsicht, leere Korrekturspalten |
 | `korrekturen.csv` | redaktionelle Durchsicht beider Prüflisten (Spalten `id`, `label_de`, `korrektur_codes` mit `|`, `-` = ausschließen, `korrektur_lehrebene`, `kommentar`, `prueflistengrund`), Vorrang vor dem LLM |
 | `pruefliste_gnd.csv` | GND-Themen, die eine Durchsicht brauchen |

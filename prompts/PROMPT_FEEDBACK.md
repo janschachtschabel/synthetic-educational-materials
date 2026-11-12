@@ -11,6 +11,12 @@ Datensatzgenerierung eingehen**. Sie ist Feedback, keine aktive Vorlage: Die Dat
 `prompts/` bleiben unverändert. Änderungen an Prompts wirken sich erst auf neu erzeugte Daten aus;
 Titel-, Beschreibungs- und Keyword-Änderungen erfordern anschließend ein neues Training.
 
+> **Umsetzung (12. November 2026):** Die Vorschläge sind weitgehend in die aktiven Prompts und Prüfungen
+> übernommen: Gender-Doppelpunkt im Titel erlaubt, Bloom-Typ wird geprüft und vereinheitlicht, Layout-Fragen
+> ausgeschlossen, Inhaltstyp-Kategorien mit Textsorten-Beschreibung, Beschreibung ohne Schablonen-Anfang
+> (bei Bedarf neu angefragt), mindestens 5 Keywords, Umfang je Inhaltstyp, Einstieg und Namen aus dem Seed,
+> keine Kästchen- und Rahmengrafiken im Volltext. Der Abschnitt unten beschreibt den Stand vor der Änderung.
+
 ## Kurzfassung
 
 | Priorität | Prompt | Wichtigster Befund |
