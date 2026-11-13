@@ -47,23 +47,30 @@ OPEN_TOPIC_PREFIXES = (
 )
 
 
+# Export columns and their types (str, list of str, bool, int, qa); schema() turns them into a pyarrow schema
+COLUMNS = [
+    ("id", "str"), ("education_sector", "str"), ("language", "str"), ("title", "str"), ("description", "str"),
+    ("keywords", "list"), ("fulltext", "str"), ("qa_pairs", "qa"),
+    ("educational_context", "list"), ("educational_context_uri", "list"), ("subject", "list"),
+    ("subject_uri", "list"), ("content_type", "list"), ("content_type_uri", "list"),
+    ("content_type_check_match", "bool"), ("target_group", "list"), ("target_group_uri", "list"), ("level", "str"),
+    ("level_uri", "str"), ("discipline", "list"), ("discipline_uri", "list"), ("curriculum", "list"),
+    ("curriculum_uri", "list"), ("occupation", "str"), ("occupation_uri", "str"), ("text_type", "str"),
+    ("media_form", "str"), ("didactic_function", "str"), ("duration_minutes", "int"), ("topic", "str"),
+    ("topic_uri", "str"), ("cognitive_level", "str"), ("social_form", "str"), ("special_needs", "str"),
+    ("teaching_level", "str"), ("early_childhood_area", "list"), ("programme_area", "list"), ("event_format", "str"),
+    ("plain_language", "bool"), ("competence", "str"), ("competence_uri", "str"), ("learning_venue", "str"),
+    ("cross_cutting_topic", "str"), ("generator_model", "str"), ("title_previous", "str"),
+    ("description_previous", "str"),
+]
+
+
 def schema():
     import pyarrow as pa
 
-    lst = pa.list_(pa.string())
-    return pa.schema([
-        ("id", pa.string()), ("education_sector", pa.string()), ("language", pa.string()),
-        ("title", pa.string()), ("description", pa.string()), ("keywords", lst), ("fulltext", pa.string()),
-        ("qa_pairs", pa.list_(pa.struct([("question", pa.string()), ("answer", pa.string()), ("type", pa.string())]))),
-        ("educational_context", lst), ("educational_context_uri", lst), ("subject", lst), ("subject_uri", lst),
-        ("content_type", lst), ("content_type_uri", lst), ("content_type_check_match", pa.bool_()),
-        ("target_group", lst), ("target_group_uri", lst), ("level", pa.string()), ("level_uri", pa.string()),
-        ("discipline", lst), ("discipline_uri", lst), ("curriculum", lst), ("curriculum_uri", lst),
-        ("occupation", pa.string()), ("occupation_uri", pa.string()), ("text_type", pa.string()),
-        ("media_form", pa.string()), ("didactic_function", pa.string()), ("duration_minutes", pa.int32()),
-        ("topic", pa.string()), ("topic_uri", pa.string()), ("generator_model", pa.string()),
-        ("title_previous", pa.string()), ("description_previous", pa.string()),
-    ])
+    types = {"str": pa.string(), "list": pa.list_(pa.string()), "bool": pa.bool_(), "int": pa.int32(),
+             "qa": pa.list_(pa.struct([("question", pa.string()), ("answer", pa.string()), ("type", pa.string())]))}
+    return pa.schema([(name, types[t]) for name, t in COLUMNS])
 
 
 def _uris(r: dict, field: str) -> list[str]:
@@ -89,6 +96,34 @@ def split_of(key: str, val: int, test: int) -> str:
     return "test" if h < test else "validation" if h < test + val else "train"
 
 
+# Seed fields and where they go in the export. Every field a seed can carry must be listed in one of the two maps
+# (tests/test_export_hf.py checks this against generated seeds), so that no classifying metadata gets lost unnoticed.
+EXPORTED_SEED_FIELDS = {
+    "id": "id", "synth:bildungsbereich": "education_sector", "cclom:general_language": "language",
+    "ccm:educationalcontext": "educational_context(_uri)", "ccm:oeh_taxonid_university": "subject(_uri)",
+    "ccm:oeh_profession_group": "subject(_uri)", "synth:fachgebiet_vhs": "subject(_uri)",
+    "ccm:taxonid": "discipline(_uri), school/early childhood also subject(_uri)",
+    "ccm:curriculum": "curriculum(_uri)", "ccm:oeh_lrt": "content_type(_uri)",
+    "ccm:educationalintendedenduserrole": "target_group(_uri)", "synth:niveau": "level, level_uri",
+    "synth:thema": "topic, topic_uri, teaching_level", "synth:beruf": "occupation(_uri)",
+    "synth:kompetenz": "competence(_uri)", "synth:textsorte": "text_type", "synth:medienform": "media_form",
+    "synth:didaktische_funktion": "didactic_function", "synth:bearbeitungsdauer_minuten": "duration_minutes",
+    "synth:anforderungsbereich": "cognitive_level", "synth:sozialform": "social_form",
+    "synth:foerderschwerpunkt": "special_needs", "synth:bildungsbereich_elementar": "early_childhood_area",
+    "synth:programmbereich_vhs": "programme_area", "synth:veranstaltungsform": "event_format",
+    "synth:sprachniveau": "plain_language", "synth:lernort": "learning_venue",
+    "synth:querschnittsthema": "cross_cutting_topic",
+}
+NOT_EXPORTED_SEED_FIELDS = {
+    "synth:provenance": "generation details, documented in METHODOLOGY.md",
+    "synth:seed_parameter": "generation details",
+    "synth:umfang_woerter": "generation control (target length), not a property of the material",
+    "synth:stil": "generation control (opening, names), not a property of the material",
+    "synth:bildungsstandards": "KMK educational standards outline, kept locally only (not openly licensed)",
+    "synth:lernfeld": "KMK framework curricula, kept locally only (not openly licensed)",
+}
+
+
 def flatten(r: dict) -> dict:
     sector = r["synth:bildungsbereich"]
     subj_field = SUBJECT_FIELD.get(sector, ("ccm:taxonid", ""))[0]
@@ -96,9 +131,11 @@ def flatten(r: dict) -> dict:
     topic_uri = thema.get("id") or ""
     # learning-field topics (ESCO occupation|kmk:…) are kept locally only
     open_topic = topic_uri.startswith(OPEN_TOPIC_PREFIXES) and "kmk:" not in topic_uri
+    profile_topic = "#thema-" in topic_uri  # topic from the project's own subject profiles (CC0): label only
     if open_topic and "|" in topic_uri:  # ESCO occupation|skill: the topic is the skill
         topic_uri = (r.get("synth:kompetenz") or {}).get("uri") or topic_uri.split("|")[0]
     niveau = r.get("synth:niveau") or {}
+    komp = r.get("synth:kompetenz") or {}
     check = r.get("synth:inhaltstyp_pruefung") or {}
     return {
         "id": r["id"],
@@ -134,8 +171,20 @@ def flatten(r: dict) -> dict:
         "media_form": r.get("synth:medienform"),
         "didactic_function": r.get("synth:didaktische_funktion"),
         "duration_minutes": r.get("synth:bearbeitungsdauer_minuten"),
-        "topic": (thema.get("label_de") or "").strip() or None if open_topic else None,
+        "topic": (thema.get("label_de") or "").strip() or None if open_topic or profile_topic else None,
         "topic_uri": topic_uri if open_topic else None,
+        "cognitive_level": r.get("synth:anforderungsbereich"),
+        "social_form": r.get("synth:sozialform"),
+        "special_needs": r.get("synth:foerderschwerpunkt"),
+        "teaching_level": thema.get("lehrebene"),
+        "early_childhood_area": _labels(r, "synth:bildungsbereich_elementar"),
+        "programme_area": _labels(r, "synth:programmbereich_vhs"),
+        "event_format": r.get("synth:veranstaltungsform"),
+        "plain_language": r.get("synth:sprachniveau") == "einfache Sprache",
+        "competence": komp.get("label"),
+        "competence_uri": komp.get("uri"),
+        "learning_venue": r.get("synth:lernort"),
+        "cross_cutting_topic": r.get("synth:querschnittsthema"),
         "generator_model": (r.get("synth:generierung") or {}).get("modell"),
         # set when the title was regenerated afterwards (python -m sem titel-neu): the title it replaced
         "title_previous": r.get("synth:titel_alt"),

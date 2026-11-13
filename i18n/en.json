@@ -592,5 +592,16 @@
  "Themenbeschreibung aus": "Topic description from",
  "Umfang": "Length",
  "Einstieg": "Opening",
- "Namen": "Names"
+ "Namen": "Names",
+ "Fach (OEH)": "Subject (OEH)",
+ "Themenbaum (WLO)": "Topic tree (WLO)",
+ "Programmbereich (VHS)": "Programme area (VHS)",
+ "Fachgebiet (VHS)": "Subject area (VHS)",
+ "Niveau-URI": "Level URI",
+ "Anforderungsbereich": "Cognitive level (KMK)",
+ "Förderschwerpunkt": "Special educational needs",
+ "Bildungsstandards": "Educational standards",
+ "Lernfeld": "Learning field",
+ "Veranstaltungsform": "Event format",
+ "Sprachniveau": "Language level"
 }

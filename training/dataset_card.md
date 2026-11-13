@@ -66,9 +66,17 @@ are never seen during training.
 | `discipline`, `_uri` | subject (OpenEduHub vocabulary `discipline`) in school, early childhood, vocational and adult education; vocational always includes „Berufliche Bildung“ |
 | `curriculum`, `_uri` | school only: topics in the WirLernenOnline topic trees (OpenEduHub `oehTopics`) |
 | `occupation`, `occupation_uri` | vocational only: ESCO occupation |
+| `competence`, `competence_uri` | vocational only: ESCO skill the material is about (empty for learning-field topics) |
+| `cognitive_level`, `special_needs` | school only, optional: KMK requirement level (Anforderungsbereich I–III) and special educational need |
+| `social_form` | school and early childhood, optional: social form (e.g. pair work, circle time) |
+| `teaching_level` | higher education only: teaching level of the topic (`grundlagen`, `vertiefung`, `forschung`) |
+| `early_childhood_area` | early childhood only: education areas of the German early-childhood education plans |
+| `programme_area` | adult education only: programme area of the Volkshochschul-Statistik |
+| `event_format`, `plain_language` | adult education only: event format (optional) and whether the text is in plain language |
+| `learning_venue`, `cross_cutting_topic` | vocational only, optional: learning venue and standard cross-cutting occupational topic |
 | `text_type`, `media_form` | text type and media form the full text was written as (e.g. text, slides, video or audio transcript) |
 | `didactic_function`, `duration_minutes` | optional: didactic function and working time |
-| `topic`, `topic_uri` | topic the material was generated from (GND, OpenEduHub topic trees, ESCO or OpenAlex), empty for topics from sources that are not openly licensed |
+| `topic`, `topic_uri` | topic the material was generated from (GND, OpenEduHub topic trees, ESCO or OpenAlex; in higher education also typical topics from the project's own subject profiles, label only), empty for topics from sources that are not openly licensed |
 | `generator_model` | language model that generated the texts |
 | `title_previous` | earlier title if the title was regenerated afterwards, otherwise empty |
 | `description_previous` | earlier description if its first sentence was rewritten afterwards, otherwise empty |
