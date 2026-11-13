@@ -1,7 +1,8 @@
 """Bildungsbereich Hochschule.
 
 Themen: ein Gesamtset (themen_hochschule.jsonl) aus OpenAlex Topics (Forschungs- und
-Vertiefungsthemen) und GND-Sachschlagwörtern aus Lehrbüchern, Hochschulschriften und WLO-Keywords;
+Vertiefungsthemen), GND-Sachschlagwörtern aus Lehrbüchern, Hochschulschriften und WLO-Keywords und
+thematischen Klassen der Regensburger Verbundklassifikation (RVK, Tiefe 2 bis 5);
 Herkunft, Status und Belege je Thema sind über auswahl_optionen filterbar. Fächer: Destatis-Systematik,
 ausgelesen aus der OpenEduHub-Hochschulfächersystematik. Inhaltstypen: Auswahl aus OEH new_lrt.
 """
@@ -56,6 +57,7 @@ class Hochschule(Bildungsbereich):
         "wlo": ["wlo", "wlo_belege"],
         "gnd": ["gnd_sachgruppen", "bruecke", "gnd_pool", "gnd_relevanz", "gnd_kandidaten", "gnd_faecher",
                 "gnd_lehrebene", "gnd_zusammenfuehren"],
+        "rvk": ["rvk_klassen", "rvk_kandidaten", "rvk_faecher", "rvk_labels", "rvk_lehrebene", "rvk_zusammenfuehren"],
         "korrekturen": ["korrekturen"],
     }
     mapping_abschluss = ["themen"]
@@ -63,6 +65,7 @@ class Hochschule(Bildungsbereich):
     def mapping_schritte(self) -> list[MappingSchritt]:
         from . import build as b
         from . import gnd_themen as g
+        from . import rvk_themen as r
 
         S_ = MappingSchritt
         return [
@@ -92,6 +95,18 @@ class Hochschule(Bildungsbereich):
             S_("gnd_lehrebene", "GND-Lehrebene", "drei Stimmen je Begriff", g.build_gnd_lehrebene),
             S_("gnd_zusammenfuehren", "GND zusammenführen", "GND-Teilergebnis, Prüfliste, Ausschlüsse",
                g.build_gnd_zusammenfuehren, llm=False),
+            S_("rvk_klassen", "RVK-Klassen", "thematische Klassen der Tiefe 2 bis 5 aus dem lokalen RVK-Gesamtabzug "
+               "(--rvk)", r.build_rvk_klassen, llm=False),
+            S_("rvk_kandidaten", "RVK-Kandidaten", "ähnlichste Studienfächer je RVK-Klasse der Tiefe 2 und 3",
+               r.build_rvk_kandidaten, llm=False),
+            S_("rvk_faecher", "RVK-Fächer", "drei Stimmen je RVK-Klasse der Tiefe 2 und 3; tiefere Klassen erben",
+               r.build_rvk_faecher),
+            S_("rvk_labels", "RVK-Themennamen", "eigenständiger Name für Benennungen, die nur im Pfad verständlich "
+               "sind", r.build_rvk_labels),
+            S_("rvk_lehrebene", "RVK-Lehrebene", "drei Stimmen je RVK-Thema, auch „kein Lehrthema“",
+               r.build_rvk_lehrebene),
+            S_("rvk_zusammenfuehren", "RVK zusammenführen", "Fach erben, Abgleich mit vorhandenen Themen, Prüfliste",
+               r.build_rvk_zusammenfuehren, llm=False),
         ]
 
     # --- Auswahl der Themen ------------------------------------------------------------------
@@ -105,8 +120,15 @@ class Hochschule(Bildungsbereich):
                         "werte": {"openalex": "OpenAlex Topics (Forschungs- und Vertiefungsthemen)",
                                   "gnd": "GND-Sachschlagwörter aus Lehrbüchern, Hochschulschriften und WLO-Keywords",
                                   "fachprofil": "typische Themen aus dem Kurzprofil jedes Studienfachs (Lehrsicht, "
-                                                "auch für Fächer ohne OpenAlex- und GND-Thema)"},
-                        "standard": ["openalex", "gnd", "fachprofil"]},
+                                                "auch für Fächer ohne OpenAlex- und GND-Thema)",
+                                  "rvk": "thematische Klassen der Regensburger Verbundklassifikation (Bibliotheks"
+                                         "systematik, Tiefe 2 bis 5)"},
+                        "standard": ["openalex", "gnd", "fachprofil", "rvk"]},
+            "rvk_tiefe": {"label": "Tiefe der RVK-Klassen (nur RVK)",
+                          "beschreibung": "Ebene in der RVK-Hierarchie: 2 = Hauptgruppe (z. B. QP), 3 = Bereich "
+                                          "(QP 300 - QP 399), 4 und 5 = Unterklassen",
+                          "werte": {"2": "Tiefe 2", "3": "Tiefe 3", "4": "Tiefe 4", "5": "Tiefe 5"},
+                          "standard": ["2", "3", "4"]},
             "fach_status": {"label": "Status der Fachzuordnung", "beschreibung": "Abstimmung über das Studienfach",
                             "werte": status, "standard": ["gesichert", "wahrscheinlich", "redaktionell"]},
             "lehrebene_status": {"label": "Status der Lehrebene", "beschreibung": "Grundlagen, Vertiefung, Forschung",
@@ -123,8 +145,10 @@ class Hochschule(Bildungsbereich):
                        "werte": {"lehrbuch": "Lehrbuch mit diesem Schlagwort im hbz-Katalog",
                                  "hochschulschrift": "mindestens 3 Hochschulschriften im hbz-Katalog",
                                  "wlo": "WLO-Keyword in Verbindung mit einem passenden Hochschulfach",
-                                 "handmapping": "Fach durch Handmapping (OpenAlex-Teilgebiet) bzw. "
-                                                "GND-Sachgruppen-Brücke bestätigt"},
+                                 "handmapping": "Fach durch Handmapping (OpenAlex-Teilgebiet, RVK-Fachsystematik) "
+                                                "bzw. GND-Sachgruppen-Brücke bestätigt",
+                                 "rvk": "Thema durch eine RVK-Klasse belegt (gleiche GND-ID oder gleicher Name im "
+                                        "selben Fach)"},
                        "standard": []},
         }
 
@@ -148,11 +172,15 @@ class Hochschule(Bildungsbereich):
                 out.add("wlo")
         if (topic.get("mapping") or {}).get("handmapping_bestaetigt"):
             out.add("handmapping")
+        if b.get("rvk"):
+            out.add("rvk")
         return out
 
     def passt(self, topic: dict, auswahl: dict[str, list[str]]) -> bool:
         m = topic.get("mapping") or {}
         if topic.get("art", "openalex") not in auswahl["quellen"]:
+            return False
+        if topic.get("art") == "rvk" and str(topic["rvk"]["tiefe"]) not in auswahl["rvk_tiefe"]:
             return False
         if m.get("status", "gesichert") not in auswahl["fach_status"]:
             return False
@@ -164,13 +192,17 @@ class Hochschule(Bildungsbereich):
         return not auswahl["belege"] or bool(self.belege_des_themas(topic) & set(auswahl["belege"]))
 
     def mapping_statistik(self) -> dict:
-        from . import build, gnd_themen
+        from . import build, gnd_themen, rvk_themen
 
         out = {}
         for art, teil in (("openalex", build.THEMEN_PATH), ("gnd", gnd_themen.THEMEN_GND)):
             rows = build.teil_laden(teil, art)
             if rows:
                 out[art] = build.statistik(rows)
+        if build.THEMEN_HOCHSCHULE.exists():
+            alle = load_jsonl(build.THEMEN_HOCHSCHULE) + rvk_themen.repo_themen()
+            if any(r.get("art") == "rvk" for r in alle):
+                out["rvk"] = rvk_themen.statistik(alle)
         return out
 
     @cached_property
@@ -206,10 +238,16 @@ class Hochschule(Bildungsbereich):
         return gnd_ergaenzung.anwenden(self._topics_roh(), self.key)
 
     def _topics_roh(self) -> list[dict]:
+        from .rvk_themen import repo_themen
+
         out = load_jsonl(DIR / THEMEN_DATEI) if (DIR / THEMEN_DATEI).exists() else []
+        out += [dict(t) for t in repo_themen()]  # RVK-Teil des Gesamtsets (themen_hochschule_rvk.jsonl)
         if not out:
             raise FileNotFoundError(
                 f"Keine Themen in {DIR}. Erst die Mappings bauen: python -m sem mappings hochschule")
+        for t in out:  # RVK-Themen: Beschreibung aus dem Pfad (steht nicht in der Datei, um sie klein zu halten)
+            if t.get("art") == "rvk" and not t.get("beschreibung_de"):
+                t["beschreibung_de"] = "Teilgebiet von: " + " > ".join(t["rvk"]["pfad"])
         return out + self._fachprofil_topics(out)
 
     def _fachprofil_topics(self, vorhandene: list[dict]) -> list[dict]:
@@ -290,6 +328,8 @@ class Hochschule(Bildungsbereich):
                           "nodes": [NODE_URI.format(n) for n in w.get("nodes", [])[:10]]}
             if "fach_passt" in w:
                 out["wlo"]["fach_passt"] = w["fach_passt"]
+        if b.get("rvk"):
+            out["rvk"] = [{k: x[k] for k in ("notation", "label", "uri")} for x in b["rvk"][:5]]
         return out
 
     # --- Seed ---------------------------------------------------------------------------
@@ -335,12 +375,17 @@ class Hochschule(Bildungsbereich):
         seed[S.F_THEMA] = {k: topic[k] for k in ("id", "label_de", "label_en", "beschreibung_de", "keywords_de")
                            if topic.get(k)}
         seed[S.F_THEMA]["lehrebene"] = ebene
+        if topic.get("rvk"):  # RVK-Thema: Notation und Pfad für Nachvollziehbarkeit und Prompt-Kontext
+            seed[S.F_THEMA]["rvk"] = {k: topic["rvk"][k] for k in ("notation", "pfad", "stand")}
+            seed[S.F_THEMA]["label_rvk"] = topic["label_rvk"]
         seed[S.F_THEMA]["studienbereich"] = topic["studienbereich"]
         seed[S.F_THEMA]["faechergruppe"] = topic["faechergruppe"]
         q = topic["quelle"]
         seed[S.F_PROVENANCE][S.F_THEMA] = S.provenance(q["name"], uri=q["uri"], license=q["lizenz"], method=topic.get(
             "mapping", {}).get("methode", "Thema aus der Quelle"))
         seed[S.F_PROVENANCE][S.F_THEMA].update(status=self.status_des_themas(topic), belege=self.belege_kompakt(topic))
+        if q.get("stand"):  # RVK: Quartalsstand des Abzugs
+            seed[S.F_PROVENANCE][S.F_THEMA]["stand"] = q["stand"]
 
         seed[S.F_NIVEAU] = {k: niveau[k] for k in ("id", "label", "dqr", "exactMatch")}
         seed[S.F_PROVENANCE][S.F_NIVEAU] = S.provenance(

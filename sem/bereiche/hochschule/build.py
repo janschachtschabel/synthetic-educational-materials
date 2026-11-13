@@ -79,19 +79,35 @@ def teil_laden(path: Path, art: str) -> list[dict]:
 
 
 def build_themen(cfg: LLMConfig | None = None, **_):
-    """Führt die Teilergebnisse (OpenAlex, GND) zum Gesamtset themen_hochschule.jsonl zusammen.
-    Herkunft bleibt je Thema erhalten (art, quelle, mapping, belege) und ist filterbar."""
+    """Führt die Teilergebnisse (OpenAlex, GND, RVK) zum Gesamtset themen_hochschule.jsonl zusammen.
+    Herkunft bleibt je Thema erhalten (art, quelle, mapping, belege) und ist filterbar. RVK-Klassen, die ein
+    vorhandenes Thema belegen (gleiche GND-ID oder gleicher Name im selben Fach), stehen dort unter belege.rvk."""
     from . import gnd_themen as G
+    from . import rvk_themen as RV
 
-    teile = {"openalex": teil_laden(THEMEN_PATH, "openalex"), "gnd": teil_laden(G.THEMEN_GND, "gnd")}
+    teile = {"openalex": teil_laden(THEMEN_PATH, "openalex"), "gnd": teil_laden(G.THEMEN_GND, "gnd"),
+             "rvk": RV.teil()}
+    # RVK-Belege: aus dem Zwischenspeicher; ohne ihn (frischer Klon) bleiben die vorhandenen Belege stehen
+    rvk_belege = RV.lade_belege() if RV.BELEGE_RVK.exists() else None
     rows, ids = [], set()
     for art, teil in teile.items():
         for r in teil:
             if r["id"] not in ids:
                 ids.add(r["id"])
-                rows.append({**r, "art": r.get("art") or art})
-    rows.sort(key=lambda r: (r["studienfach"][0]["notation"], r["art"], r["label_de"]))
-    _write_jsonl(THEMEN_HOCHSCHULE, rows)
+                r = {**r, "art": r.get("art") or art}
+                if rvk_belege is not None:
+                    b = dict(r.get("belege") or {})
+                    b.pop("rvk", None)
+                    if rvk_belege.get(r["id"]):
+                        b["rvk"] = rvk_belege[r["id"]][:10]
+                    r["belege"] = b
+                    if not b:
+                        r.pop("belege")
+                rows.append(r)
+    rows.sort(key=lambda r: (r["studienfach"][0]["notation"], r["art"], r["label_de"], r["id"]))
+    # RVK-Themen stehen kompakt in einer eigenen Datei (Größe), gehören aber zum Gesamtset
+    _write_jsonl(THEMEN_HOCHSCHULE, [r for r in rows if r["art"] != "rvk"])
+    RV.schreibe_repo([r for r in rows if r["art"] == "rvk"])
     return fertig(f"{len(rows)} Themen in {THEMEN_HOCHSCHULE.name} "
                   f"({', '.join(f'{a}: {len(t)}' for a, t in teile.items())})")
 
@@ -457,13 +473,15 @@ def korrekturen(cfg: LLMConfig | None = None, **_):
     import csv
 
     from . import gnd_themen as G
+    from . import rvk_themen as RV
 
     voc = load_vocab("hochschulfaechersystematik")
     by_not = faecher_by_not(voc)
     korr = pruefung.lade_korrekturen(KORREKTUREN_PATH)
     n = {"korrigiert": 0, "ausgeschlossen": 0}
-    for themen, art, pruef in ((THEMEN_PATH, "openalex", PRUEFLISTE_PATH), (G.THEMEN_GND, "gnd", G.PRUEF_GND)):
-        teil = teil_laden(themen, art)
+    for themen, art, pruef in ((THEMEN_PATH, "openalex", PRUEFLISTE_PATH), (G.THEMEN_GND, "gnd", G.PRUEF_GND),
+                               (RV.THEMEN_RVK, "rvk", RV.PRUEF_RVK)):
+        teil = RV.teil() if art == "rvk" else teil_laden(themen, art)
         if not teil:
             continue
         rows = []

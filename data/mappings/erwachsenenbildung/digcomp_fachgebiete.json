@@ -1,0 +1,33 @@
+{
+ "beschreibung": "Handmapping DigComp 3.0 → Volkshochschul-Statistik (Fachgebiete) und DigComp-Niveau → Niveau der Erwachsenenbildung. Je Kompetenz ein bis zwei Fachgebiete, das erste ist das Hauptfachgebiet. Grundsatz: Bedienung und Anwendung digitaler Werkzeuge gehört zu 5.01 IT-/Mediengrundlagen (dort führt die VHS-Statistik digitale Grundbildung); wo der Inhalt einer Kompetenz ein eigenes Fachgebiet hat (Recht, Gesundheit, Umwelt, Politik, Medienkompetenz), steht dieses zuerst.",
+ "quelle": {"name": "Projekt (Handmapping)", "lizenz": "CC0-1.0"},
+ "kompetenzen": {
+  "1.1": {"fachgebiete": ["5.01"], "begruendung": "Suchen und Filtern mit Suchmaschinen und KI-Werkzeugen: digitale Grundbildung"},
+  "1.2": {"fachgebiete": ["1.11", "5.01"], "begruendung": "Quellen- und Informationsbewertung, Desinformation: Medienkompetenz im Fachgebiet Kommunikation/Medien"},
+  "1.3": {"fachgebiete": ["5.01"], "begruendung": "Speichern, Ordnen, Auswerten von Daten mit Anwendungen"},
+  "2.1": {"fachgebiete": ["5.01", "1.11"], "begruendung": "Kommunikation über digitale Dienste und mit KI-Systemen"},
+  "2.2": {"fachgebiete": ["5.01"], "begruendung": "Teilen von Inhalten über Plattformen"},
+  "2.3": {"fachgebiete": ["1.02", "5.01"], "begruendung": "Bürgerschaftliche Teilhabe und digitale Verwaltungsdienste: Politik/bürgerschaftliches Engagement"},
+  "2.4": {"fachgebiete": ["5.01", "5.07"], "begruendung": "Zusammenarbeit mit digitalen Werkzeugen, auch im Arbeitskontext (Organisation)"},
+  "2.5": {"fachgebiete": ["1.11"], "begruendung": "Verhalten und Umgangsformen in digitalen Umgebungen, Rechte und Pflichten: Kommunikation/Medien"},
+  "2.6": {"fachgebiete": ["1.11", "5.01"], "begruendung": "Digitale Identität und Reputation: Medienkompetenz"},
+  "3.1": {"fachgebiete": ["5.01", "2.11"], "begruendung": "Inhalte erstellen und bearbeiten; Medienpraxis bei Foto, Film, Audio"},
+  "3.2": {"fachgebiete": ["5.01"], "begruendung": "Inhalte verändern und zusammenführen"},
+  "3.3": {"fachgebiete": ["1.03", "1.11"], "begruendung": "Urheberrecht und Lizenzen: Recht"},
+  "3.4": {"fachgebiete": ["5.03"], "begruendung": "Programmieren und informatisches Denken: technische IT-Anwendungen"},
+  "4.1": {"fachgebiete": ["5.01"], "begruendung": "Geräte schützen: IT-Sicherheit für Anwenderinnen und Anwender"},
+  "4.2": {"fachgebiete": ["5.01", "1.03"], "begruendung": "Datenschutz und Privatsphäre: Anwendung und Recht"},
+  "4.3": {"fachgebiete": ["3.06", "1.11"], "begruendung": "Wohlbefinden, psychische Gesundheit, schädliche Inhalte: Gesundheit und Psyche"},
+  "4.4": {"fachgebiete": ["1.04"], "begruendung": "Umweltwirkungen digitaler Technologien: Umweltbildung/Bildung für nachhaltige Entwicklung"},
+  "5.1": {"fachgebiete": ["5.01"], "begruendung": "Technische Probleme lösen"},
+  "5.2": {"fachgebiete": ["5.01"], "begruendung": "Bedarfe erkennen, Werkzeuge und Barrierefreiheit anpassen"},
+  "5.3": {"fachgebiete": ["5.01", "5.07"], "begruendung": "Kreative Lösungen und Prozessverbesserungen mit digitalen Technologien"},
+  "5.4": {"fachgebiete": ["5.01", "1.06"], "begruendung": "Eigene Kompetenzlücken erkennen und schließen: Lernen und Persönlichkeitsentwicklung"}
+ },
+ "niveaus": {
+  "Basic": {"eb_niveau": "einsteiger", "dqr": 3, "berufsbildung": "ausbildung_grundstufe", "begruendung": "einfache Aufgaben mit Anleitung"},
+  "Intermediate": {"eb_niveau": "fortgeschrittene", "dqr": 4, "berufsbildung": "ausbildung_fachstufe", "begruendung": "Routineaufgaben selbstständig"},
+  "Advanced": {"eb_niveau": "fortgeschrittene", "dqr": 5, "berufsbildung": "fortbildung_berufsspezialist", "begruendung": "unterschiedliche Aufgaben, andere anleiten"},
+  "Highly advanced": {"eb_niveau": "fortgeschrittene", "dqr": 6, "berufsbildung": "fortbildung_bachelor_professional", "begruendung": "komplexe Probleme, im Fachgebiet beitragen und anleiten"}
+ }
+}

@@ -5,6 +5,7 @@ Themen: GND-Sachbegriffe aus LLM-Themenlisten je Fachgebiet, per Mehrfachabstimm
 Kursleitende eingestuft und ein bis zwei Fachgebieten zugeordnet. Fremdsprachen-Kursthemen gelten für alle Sprachen
 (Ziel „4.fs“); die konkrete Sprache wird beim Seed gezogen. Niveau je Programmbereich (GER, Alpha-Level, Abschluss).
 Die berufliche Aufstiegsfortbildung (Meister, Fachwirt) gehört zur Berufsbildung.
+Weitere Themenquelle: Lernergebnisse aus DigComp 3.0 (CC BY 4.0, eigene Übersetzung, siehe digcomp.py).
 Themen aus urheberrechtlich geschützten Gliederungen (Rahmencurriculum Integrationskurse, Grundbildung) stehen
 nur lokal in data/lokal/erwachsenenbildung/themen_lokal.jsonl und kommen dazu, wenn die Datei existiert.
 """
@@ -53,9 +54,14 @@ def sortiert(rows: list[dict]) -> list[dict]:
 
 
 def lade_themen() -> list[dict]:
-    """Themen aus dem Repo plus die lokalen Themen (Warnung, wenn sie fehlen)."""
+    """Themen aus dem Repo (Mapping-Ergebnis und DigComp-Lernergebnisse) plus die lokalen Themen (Warnung, wenn sie
+    fehlen)."""
+    from . import digcomp
+
     path, lokal = DIR / "themen_erwachsenenbildung.jsonl", lokal_pfad(THEMEN_LOKAL)
     out = load_jsonl(path) if path.exists() else []
+    if out:
+        out += digcomp.themen(systematik())
     if lokal.exists():
         out += load_jsonl(lokal)
     elif out:
@@ -74,11 +80,13 @@ class Erwachsenenbildung(Bildungsbereich):
         "art": "Kursthemen und Themen für Kursleitende etwa gleich oft",
     }
     default_balance = "programmbereich"
-    mapping_folgen = {"themen": ["kandidaten_llm", "gnd", "wlo", "kandidaten", "eignung", "fachgebiete"]}
+    mapping_folgen = {"themen": ["kandidaten_llm", "gnd", "wlo", "kandidaten", "eignung", "fachgebiete"],
+                      "digcomp": ["digcomp", "digcomp_glossar", "digcomp_uebersetzen"]}
     mapping_abschluss = ["zusammenfuehren"]
 
     def mapping_schritte(self) -> list[MappingSchritt]:
         from . import build as b
+        from . import digcomp as d
 
         S_ = MappingSchritt
         return [
@@ -95,12 +103,30 @@ class Erwachsenenbildung(Bildungsbereich):
                b.build_fachgebiete),
             S_("zusammenfuehren", "Zusammenführen", "themen_erwachsenenbildung.jsonl, Prüfliste, Korrekturen "
                "(läuft zuletzt)", b.zusammenfuehren, llm=False),
+            S_("digcomp", "DigComp laden", "DigComp-3.0-Data-Supplement lesen, Errata anwenden (--digcomp)",
+               d.build_digcomp, llm=False),
+            S_("digcomp_glossar", "DigComp-Glossar", "deutsche Fachbegriffe für das Glossar (Vorgabe der Übersetzung)",
+               d.build_digcomp_glossar),
+            S_("digcomp_uebersetzen", "DigComp übersetzen", "Bereiche, Kompetenzen und Lernergebnisse ins Deutsche "
+               "(eigene, nicht amtliche Übersetzung)", d.build_digcomp_uebersetzen),
         ]
 
     def mapping_statistik(self) -> dict:
         from . import build
 
-        return build.statistik() if (DIR / "themen_erwachsenenbildung.jsonl").exists() else {}
+        from collections import Counter
+
+        from . import digcomp
+
+        out = build.statistik() if (DIR / "themen_erwachsenenbildung.jsonl").exists() else {}
+        dc = digcomp.themen(systematik())
+        if dc:
+            out["digcomp"] = {"lernergebnisse": len(dc),
+                              "niveau": dict(Counter(t["digcomp"]["niveau"] for t in dc)),
+                              "art": dict(Counter(t["digcomp"]["art"] for t in dc)),
+                              "ki": dict(Counter(t["digcomp"]["ki"] for t in dc)),
+                              "fachgebiet": dict(Counter(t["fachgebiet"][0]["label"] for t in dc))}
+        return out
 
     # --- Auswahl der Themen ------------------------------------------------------------------
 
@@ -120,8 +146,10 @@ class Erwachsenenbildung(Bildungsbereich):
                                   "schulthemen": "Unterrichtsthemen der Schule in Deutsch, Mathematik, Englisch "
                                                  "(Schulabschlüsse)",
                                   "grundbildung": "Gliederung der lea.-Alpha-Levels und DVV-Rahmencurricula Lesen, "
-                                                  "Schreiben, Rechnen (Grundbildung)"},
-                        "standard": ["gnd", "rahmencurriculum", "schulthemen", "grundbildung"]},
+                                                  "Schreiben, Rechnen (Grundbildung)",
+                                  "digcomp": "Lernergebnisse des europäischen Kompetenzrahmens DigComp 3.0 (digitale "
+                                             "Kompetenzen, eigene Übersetzung)"},
+                        "standard": ["gnd", "rahmencurriculum", "schulthemen", "grundbildung", "digcomp"]},
             "art": {"label": "Themenart", "beschreibung": "Abstimmung",
                     "werte": {"kursthema": "Kursthema für Teilnehmende",
                               "kursleitungsthema": "Thema für Kursleitende"},
@@ -238,6 +266,12 @@ class Erwachsenenbildung(Bildungsbereich):
         typ = typ_by_uri[state.pick_least_used(f"typ:{state.group}:{rolle}", list(typ_by_uri), rng)]
         niveaus = [n for n in self.niveaus["niveaus"] if pb in n["programmbereiche"]
                    and (not n.get("fachgebiete") or haupt in n["fachgebiete"])]
+        dc = topic.get("digcomp")
+        if dc:  # DigComp: Niveau aus dem DigComp-Niveau (Handmapping), nicht gezogen
+            from .digcomp import fachgebiete as dc_hand
+
+            ziel = dc_hand()["niveaus"][dc["niveau"]]["eb_niveau"]
+            niveaus = [n for n in self.niveaus["niveaus"] if n["id"] == ziel]
         niveau = rng.choice(niveaus) if niveaus else None
 
         seed: dict = {S.F_BEREICH: self.key}
@@ -281,8 +315,17 @@ class Erwachsenenbildung(Bildungsbereich):
             belege={"erfuellt": sorted(self.belege_des_themas(topic))})
         if niveau:
             seed[S.F_NIVEAU] = {k: niveau[k] for k in ("id", "label", "exactMatch") if k in niveau}
-            seed[S.F_PROVENANCE][S.F_NIVEAU] = S.provenance(self.niveaus["quelle"]["name"],
-                                                            method="passend zu Programmbereich und Fachgebiet, gleichverteilt")
+            seed[S.F_PROVENANCE][S.F_NIVEAU] = S.provenance(
+                self.niveaus["quelle"]["name"], method="aus dem DigComp-Niveau (digcomp_fachgebiete.json)" if dc
+                else "passend zu Programmbereich und Fachgebiet, gleichverteilt")
+        if dc:
+            from . import digcomp as dmod
+
+            seed.update(dmod.metadaten(dc))
+            seed[S.F_PROVENANCE][dmod.F_KOMPETENZ] = S.provenance(
+                tq["name"], uri=tq["uri"], license=tq["lizenz"],
+                method=f"Lernergebnis {dc['id']} (veröffentlicht als {dc['id_original']}); eigene, nicht amtliche "
+                       "Übersetzung")
         seed[S.F_MEDIENFORM] = typ["medienform"]
         seed["synth:textsorte"] = typ["textsorte"]
         es = opt["einfache_sprache"]

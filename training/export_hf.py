@@ -44,6 +44,8 @@ OPEN_TOPIC_PREFIXES = (
     "http://w3id.org/openeduhub/vocabs/oeh-topics/",
     "http://data.europa.eu/esco/",
     "https://openalex.org/",
+    "http://rvk.uni-regensburg.de/nt/",  # Regensburger Verbundklassifikation (CC0)
+    "https://publications.jrc.ec.europa.eu/repository/handle/JRC144121#",  # DigComp 3.0 learning outcomes (CC BY 4.0)
 )
 
 
@@ -61,7 +63,9 @@ COLUMNS = [
     ("teaching_level", "str"), ("early_childhood_area", "list"), ("programme_area", "list"), ("event_format", "str"),
     ("plain_language", "bool"), ("competence", "str"), ("competence_uri", "str"), ("learning_venue", "str"),
     ("cross_cutting_topic", "str"), ("generator_model", "str"), ("title_previous", "str"),
-    ("description_previous", "str"),
+    ("description_previous", "str"), ("rvk_notation", "str"), ("digcomp_area", "str"), ("digcomp_competence", "str"),
+    ("digcomp_competence_id", "str"), ("digcomp_level", "str"), ("digcomp_knowledge_type", "str"),
+    ("digcomp_ai", "str"),
 ]
 
 
@@ -113,6 +117,8 @@ EXPORTED_SEED_FIELDS = {
     "synth:programmbereich_vhs": "programme_area", "synth:veranstaltungsform": "event_format",
     "synth:sprachniveau": "plain_language", "synth:lernort": "learning_venue",
     "synth:querschnittsthema": "cross_cutting_topic",
+    "synth:digcomp_bereich": "digcomp_area", "synth:digcomp_kompetenz": "digcomp_competence(_id)",
+    "synth:digcomp_niveau": "digcomp_level", "synth:digcomp_art": "digcomp_knowledge_type", "synth:digcomp_ki": "digcomp_ai",
 }
 NOT_EXPORTED_SEED_FIELDS = {
     "synth:provenance": "generation details, documented in METHODOLOGY.md",
@@ -190,6 +196,19 @@ def flatten(r: dict) -> dict:
         "title_previous": r.get("synth:titel_alt"),
         # set when the first sentence of the description was rewritten (python -m sem beschreibung-einstieg)
         "description_previous": r.get("synth:beschreibung_alt"),
+        # RVK class of the topic (higher education, topic source RVK)
+        "rvk_notation": (thema.get("rvk") or {}).get("notation"),
+        # DigComp 3.0 (adult education, optionally vocational): area, competence, level (Basic … Highly advanced),
+        # knowledge/skill/attitude and AI relation (explicit, implicit, none); German labels are the project's own
+        # translation
+        "digcomp_area": (r.get("synth:digcomp_bereich") or {}).get("label"),
+        "digcomp_competence": (r.get("synth:digcomp_kompetenz") or {}).get("label"),
+        "digcomp_competence_id": (r.get("synth:digcomp_kompetenz") or {}).get("id"),
+        "digcomp_level": r.get("synth:digcomp_niveau"),
+        "digcomp_knowledge_type": {"Wissen": "knowledge", "Fähigkeit": "skill", "Haltung": "attitude"}.get(
+            r.get("synth:digcomp_art"), r.get("synth:digcomp_art")),
+        "digcomp_ai": {"explizit": "explicit", "implizit": "implicit", "ohne": "none"}.get(
+            r.get("synth:digcomp_ki"), r.get("synth:digcomp_ki")),
     }
 
 

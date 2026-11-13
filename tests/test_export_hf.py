@@ -38,7 +38,11 @@ def test_export_hat_alle_spalten_und_kontrollierte_werte():
             row = E.flatten(_material(s))
             assert set(row) == namen
             assert row["educational_context_uri"] and row["content_type_uri"] and row["target_group_uri"]
-            assert row["subject_uri"] and row["topic"]
+            # Themen aus nur lokal gehaltenen Quellen (Lernfelder, Rahmencurricula; nur mit data/lokal/) gehen
+            # bewusst ohne Themenlabel in den Export
+            tid = s["synth:thema"]["id"]
+            offen = tid.startswith(E.OPEN_TOPIC_PREFIXES) and "kmk:" not in tid or "#thema-" in tid
+            assert row["subject_uri"] and (row["topic"] or not offen)
             assert len(row["subject"]) == len(row["subject_uri"])
             if key != "hochschule":
                 assert row["discipline_uri"] and len(row["discipline"]) == len(row["discipline_uri"])

@@ -29,6 +29,8 @@ open vocabularies and taxonomies ──► Mappings (topics with subject assignm
 | [OpenEduHub vocabularies](https://github.com/openeduhub/oeh-metadata-vocabs) (`educationalContext`, `new_lrt`, `intendedEndUserRole`, `hochschulfaechersystematik`) | Educational level, content type, target group, higher education subjects | CC0 1.0 |
 | Destatis-Systematik der Fächergruppen, Studienbereiche und Studienfächer (Destatis classification of subject groups, study areas, and subjects) | Origin of the higher education subject classification; extracted from the OpenEduHub vocabulary `hochschulfaechersystematik`, not directly from Destatis | “Quelle: Statistisches Bundesamt (Destatis)”, included in the vocabulary (`quellenangabe`) and in the provenance of every seed |
 | [OpenAlex Topics](https://github.com/ourresearch/openalex-topic-classification) (4,516 topics with descriptions and keywords) | Higher education topics (specialization/research) | CC0 1.0 |
+| [Regensburger Verbundklassifikation (RVK)](https://rvk.uni-regensburg.de), MarcXML full export (quarter 2026_3, 783,444 classes in 34 subject schemes) | fourth topic source for higher education: thematic classes of levels 2 to 5 with path and GND subject headings from the register | CC0 1.0; the export is kept local only (`data/lokal/rvk/`), the repository holds the selection `rvk_klassen.jsonl` |
+| [DigComp 3.0](https://publications.jrc.ec.europa.eu/repository/handle/JRC144121): European Digital Competence Framework, Fifth Edition (Cosgrove, Cachia 2025, JRC144121, [data supplement](https://jeodpp.jrc.ec.europa.eu/ftp/public/JRC-OpenData/DIGCOMP/DIGCOMP3.0/) of 24 Nov 2025) | topics for adult education (default) and vocational education (optional): 5 areas, 21 competences, 522 learning outcomes after the [errata](https://joint-research-centre.ec.europa.eu/scientific-activities/key-competences-lifelong-learning/digital-competence-framework-digcomp/digcomp-30-resources/digcomp-30-errata_en) of 27 Jan 2026 | © European Union, 2025, CC BY 4.0; own, unofficial translation, shortened; the European Commission is not responsible for this version; attribution in the provenance of every seed |
 | [Gemeinsame Normdatei (GND)](https://lobid.org/gnd) via lobid-gnd, [GND-Sachgruppen](https://d-nb.info/standards/vocab/gnd/gnd-sc.html) | GND higher education topics (label, synonyms, broader terms, subject group); normalization of topics from WLO keywords in early childhood, school and adult education | CC0 1.0 |
 | [hbz-Verbundkatalog](https://lobid.org/resources) via lobid-resources | Candidates and evidence: frequency of a keyword in textbooks and higher education publications | CC0 1.0 |
 | [WirLernenOnline](https://wirlernenonline.de) (editorial team export) | Keywords only, in connection with subjects and educational levels (higher education, school, early childhood), plus topic-tree assignment and educational levels of the records, as candidates and evidence; no titles, descriptions, or content | Keywords only as frequencies or matched against GND/OpenAlex |
@@ -130,6 +132,53 @@ keywords, higher education subjects, and, if available, the node ID are read. Hi
 (`data/cache`). Only keywords that exactly match a GND subject heading (GND topics) or a label or keyword of at most three OpenAlex topics are added to the repository (`wlo_belege`), each as evidence with the number of datasets, most frequent subjects, and, where available, links to the nodes. For OpenAlex topics, an additional check determines whether a WLO subject is in the same study area as the approved field
 (`belege.wlo.fach_passt`: finest matching level `studienfach`, `studienbereich`, `faechergruppe`, or `nein`; WLO subjects often only specify a broad level), providing an independent cross-check of the subject assignment.
 
+**RVK topics** (sequence `rvk`, option `--rvk <export>`). The Regensburger Verbundklassifikation is the
+shelf classification of about 140 academic libraries; its classes reflect what is taught and published at
+universities. The basis is the MarcXML full export (quarter 2026_3); the level of a class follows from its
+hierarchy path (field 153 `$e`/`$h`), not from the notation: level 1 = subject scheme (e.g. Q), 2 = main group (QP),
+3 = range (QP 300 - QP 399), 4 and 5 below.
+
+1. *Selection* (`rvk_klassen`, no LLM, `sem/quellen/rvk.py`). Of 783,444 classes, 31,300 thematic
+   classes of levels 2 to 5 remain (level 2: 412, 3: 3,275, 4: 11,301, 5: 16,312). Excluded, in this order: classes
+   below a key class (“A. Formalschlüssel”, “B. Sachschlüssel”, “Epochenschlüssel” …; the RVK multiplies these keys
+   out, in medicine about 1,345 times the same subdivision), person and work classes (parents such as “Einzelne
+   Autoren”, “Autoren A”, register field 700 or 730, “Surname, First name” below a person parent, lower-case
+   appendages such as “zum Gesamtwerk”), collective and letter classes (“Orte T”), instances below containers such
+   as “Einzelne Orte der Oberpfalz”, geographic classes (label is a geographic name from the 751 register) and
+   everything below one (the same outline repeated per country), period classes (“19. Jahrhundert”) and pure form
+   labels (“Zeitschriften”, “Allgemeines, Gesamtdarstellungen”, “Festschriften”; form only if the whole label
+   consists of form words, so “Allgemeines Verwaltungsrecht” stays). Entirely excluded are the form groups of
+   A Allgemeines (AA–AF, AH, AV, AW, AX, AZ: bibliographies, encyclopaedias, dictionaries, collections,
+   parliamentary and academy series) and RC–RZ regional geography (115,000 classes: general geography repeated per
+   country and landscape; RB stays). Counts per type are in `rvk_auswahl.json`. The RVK is very unevenly
+   detailed: economics (Q), computer science (SQ–SU), psychology and sociology have only a few hundred to about a
+   thousand classes.
+2. *Topic name* (`rvk_labels`). Many labels only make sense within their path (“Theorie” below “Makroökonomie”,
+   “Literaturgeschichte” below every single literature). Labels consisting only of general words, lower-case ones
+   and those shared by at least four topics get a self-contained name from label and path via LLM
+   (5,688 topics); `label_rvk` keeps the original, `mapping.label_umformuliert` marks the change.
+3. *Subject* (`rvk_kandidaten`, `rvk_faecher`). Votes are only taken on levels 2 and 3 (3,921 classes,
+   including the parents of topics even if they are no topic themselves): candidates via embeddings plus the
+   subjects of the manual mapping `rvk_studienbereich.csv` (subject scheme or level-2 class → study area), then
+   three votes with reasoning. Classes of levels 4 and 5 inherit the subject of the nearest voted parent
+   (`mapping.fach_geerbt_von`), which saves about 85 % of the votes. Without a voted parent, the first subject in
+   the study area of the manual mapping is used (status `unsicher`, review list).
+4. *Teaching level* (`rvk_lehrebene`). Three votes per topic with the criteria of the other higher-education topics,
+   plus the target “not a teaching topic” for form, collective or administrative classes, single places,
+   institutions or persons missed by the heuristic. Majority “not a teaching topic” → excluded
+   (`rvk_ausgeschlossen.csv`, 4,359 classes).
+5. *Matching* (`rvk_zusammenfuehren`). An RVK class whose GND subject heading (register field 750) is the ID of an
+   existing GND topic, or whose normalised name equals that of an existing topic, in the same study subject,
+   becomes evidence on the existing topic (`belege.rvk`, filter `belege=rvk`) instead of a new topic: 5,016
+   classes on 1,955 topics.
+
+Result: 21,925 new RVK topics (level 2: 309, 3: 2,061, 4: 7,692, 5: 11,863); subject 20,279 certain, 1,460 probable, 186 uncertain; teaching level
+15,641 certain, 6,064 probable, 220 uncertain (basics 1,260, advanced 15,370, research 5,295); 397 on the review list `pruefliste_rvk.csv`. Study subjects without an OpenAlex, GND or RVK topic (subject-profile topics not counted):
+before 28, after 10. Filters: `quellen=rvk` (on by default) and `rvk_tiefe` (2 to 5,
+2 to 4 by default; level 5 via the filter). Cost of the LLM steps: about US$ 8.10 (gpt-6-luna).
+
+The RVK topics belong to the complete set but are stored compactly in `themen_hochschule_rvk.jsonl` (subject as a notation; study area, subject group, source and method details are added by the code on loading), because the full lines would have pushed the complete set beyond GitHub's file size limit. With the default balancing (`studienfach_wurzel`) levels 2 to 4 give the RVK a good third of the higher-education seeds (with level 5 it would be about half); level 5 is the finest and noisiest level and is therefore only available via the filter (Jan's decision, 13 Nov 2026).
+
 **Content types** (`inhaltstypen.json`): editorial selection of text-capable types from OEH `new_lrt`. For each type, the generated text form, the media format of the full text (text, slides, video or audio transcript), the teaching levels it suits, and optionally the subject groups it applies to are specified
 (e.g. an experimental procedure only for natural sciences, engineering, agricultural sciences, and health sciences).
 
@@ -173,6 +222,14 @@ Learning-field titles that are only conversion leftovers (specialisation codes l
 **Editorial review.** All 72 curricula on the review list (69 in the first run, 3 of the renewed curricula; 68 without a majority, 4 only with gaps in the learning-field list) were reviewed; the votes had often chosen no candidate at all because the embedding candidates were off. Results in `korrekturen_rahmenlehrplaene.csv` with comments: 67 curricula with an ESCO occupation, searched beyond the candidates (e.g. professional driver → truck and bus driver, Chemikant → chemical plant control room operator, employment services → employment agent, office management clerk → office clerk, secretary, glass process mechanic → glass former, glass annealer); where ESCO has no occupation of its own, the closest one (screed layer → terrazzo setter, brewer and maltster → master brewer, master maltster, florist → specialised seller of flowers and plants). 5 excluded: wood and building protection (two curricula), roller shutter and sun protection mechatronics technician and gilder without an ESCO equivalent, media and information services because the learning-field titles are unreadable.
 
 **Result:** 272 curricula with 3,787 learning fields and an ESCO occupation (177 `gesichert`, 28 `wahrscheinlich`, 67 `redaktionell`); the review list is empty. With the default settings, 4,619 learning-field topics (ESCO occupation × learning field) are included in the seeds.
+
+**DigComp in vocational education** (source `digcomp`, off by default). Digital competence as a cross-occupational
+topic: the topic is a DigComp learning outcome, the occupation is drawn per seed to match the DigComp level
+(roughly by DQR: Basic → apprenticeship year 1, DQR 3; Intermediate → years 2/3, DQR 4; Advanced → professional
+specialist, DQR 5; Highly advanced → Bachelor Professional, DQR 6). Apprenticeship levels only use recognised
+occupations with a KMK framework curriculum, further-training levels occupations whose qualification path is
+further training; the occupation rotates per level. Occupation and skill filters do not apply to these topics; when
+balancing by occupation or occupational group they form a group of their own, “digcomp”.
 
 ## Mappings: Early Childhood Education
 
@@ -321,6 +378,25 @@ When new candidates are added, only they are voted on; existing votes stay uncha
 Culture–Creative Activities 308, Health 108, Languages 146, Working Life–IT–Organization 146,
 School-Leaving Qualifications 505, Basic Education 372: literacy 222, arithmetic 120, everyday skills 22,
 vocational orientation 8). The 19 review cases were resolved editorially.
+
+**DigComp 3.0** (source `digcomp`, on by default; sequence `digcomp`, option `--digcomp <data supplement>`). The
+European framework for digital competence describes learning outcomes in 5 areas and 21 competences on four
+levels (Basic, Intermediate, Advanced, Highly advanced), each as knowledge, skill or attitude and with a relation to
+AI (explicit, implicit, none). The basis is the JRC's machine-readable data supplement (JSON-LD); its counts match
+the PDF (523 learning outcomes; the only difference, 50 instead of 49 AI-explicit competence statements, is an
+erratum confirmed by the JRC). The errata of 27 Jan 2026 are applied: LO2.5.09 duplicates LO2.5.07 and is dropped,
+LO2.5.10 to LO2.5.21 move up, six learning outcomes get the corrected wording (`id_original`, `text_original`).
+522 learning outcomes remain (Basic 151, Intermediate 169, Advanced 119, Highly advanced
+83).
+
+There is no official German version (DigComp 3.0 AT is an Austrian adaptation without an open licence). The
+translation is done by LLM (`digcomp_glossar`, `digcomp_uebersetzen`): first the 126 JRC glossary terms
+(`glossar.json`), then areas, competences and learning outcomes with this glossary as a binding vocabulary; every
+line carries the note “own, unofficial translation”. A topic is one learning outcome; the subject area of the adult
+education centre statistics comes per competence from a manual mapping (`digcomp_fachgebiete.json`), the level from
+the DigComp level (Basic → beginners, otherwise advanced). Seeds carry `synth:digcomp_bereich`,
+`synth:digcomp_kompetenz` (ID and label), `synth:digcomp_niveau`, `synth:digcomp_art` (knowledge/skill/attitude) and
+`synth:digcomp_ki`. Cost of the translation: US$ 0.02.
 
 **Content types** (14 from OEH `new_lrt`): course description, handout, exercise sheet, instructions, checklist,
 self-study unit, presentation, quiz, vocabulary list and dialogue/role-play (Languages, Basic Education),
@@ -502,6 +578,9 @@ In the prompt templates (`prompts/`, editable in the user interface), placeholde
 | `floskel`, `erster_satz`, `rest`, `form` | only in `beschreibung_einstieg.md` (plus `titel`; `form` = sentence form, chosen from the material id) |
 
 ## Known limitations
+
+- RVK: the selection of thematic classes is a heuristic over labels and register entries; some form, place or person classes remain, the vote “not a teaching topic” catches part of them. The RVK is unevenly detailed (medicine, philologies and history very fine, economics, computer science, psychology and sociology coarse). Subjects of levels 4 and 5 are inherited, not voted individually.
+- DigComp: the German version is an own, unofficial LLM translation with a glossary; it has not been reviewed editorially.
 
 - OpenAlex topics come from research literature. Medicine, biology, and engineering are strongly
   represented, while philology, art, and music are weakly represented. The GND topics and even

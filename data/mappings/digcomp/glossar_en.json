@@ -1,0 +1,506 @@
+[
+ {
+  "en": "Accessibility",
+  "erklaerung_en": "Extent to which products, systems, services, environments and facilities can be used by people from a population with the widest range of user needs, characteristics and capabilities to achieve identified goals in identified contexts of use (which includes direct use or use supported by assistive technologies)."
+ },
+ {
+  "en": "AI system",
+  "erklaerung_en": "A machine-based system designed to operate with varying levels of autonomy, that may exhibit adaptiveness after deployment and that, for explicit or implicit objectives, infers from the input it receives how to generate output, such as predictions, content, recommendations or decisions that can influence physical or virtual environments. "
+ },
+ {
+  "en": "Algorithm",
+  "erklaerung_en": "A formula or set of rules (or procedure, processes, or instructions) for solving a problem or for performing a task. Common examples include decision trees, clustering algorithms, classification algorithms, or regression algorithms."
+ },
+ {
+  "en": "Anonymisation",
+  "erklaerung_en": "In the General Data Protection Regulation (GDPR, 2018), anonymisation refers to the processing of data with the aim of irreversibly preventing the identification of an individual person."
+ },
+ {
+  "en": "Antivirus software",
+  "erklaerung_en": "A computer program designed to prevent, detect and remove malware. Also referred to as anti-malware."
+ },
+ {
+  "en": "Application/App",
+  "erklaerung_en": "A computer program or software application, especially one designed to run on a mobile device such as a smartphone, tablet, or watch."
+ },
+ {
+  "en": "Assistive technologies",
+  "erklaerung_en": "An umbrella term for assistive products and their related systems and services. In DigComp, assistive technologies refer to those used in digital environments. Examples include but are not limited to screen readers, adaptive keyboards, alternative input devices, reading assistants, augmented and alternative communication tools, and electronic magnifiers. "
+ },
+ {
+  "en": "Baiting",
+  "erklaerung_en": "See Social engineering"
+ },
+ {
+  "en": "Bias",
+  "erklaerung_en": "A systematic deviation from a true state. There are different forms of bias, such as the subjective bias of individuals, data and algorithm bias, developer bias and institutionalised biases that are ingrained in the underlying societal context."
+ },
+ {
+  "en": "Big data",
+  "erklaerung_en": "Massive and complex data sets that traditional data management tools cannot handle. Big data can be characterised by large volume, high variety (frequently in unstructured or semi-structured formats), high velocity in generation and processing time, and varying degrees of quality and reliability."
+ },
+ {
+  "en": "Chatbot",
+  "erklaerung_en": "A computer program designed to simulate conversation with a human, usually over the internet, especially one used to provide information or assistance to the user as part of an automated service."
+ },
+ {
+  "en": "Circular economy model",
+  "erklaerung_en": "A system where products and materials are shared, leased, reused, repaired, refurbished and recycled instead of being thrown away."
+ },
+ {
+  "en": "Clickbait",
+  "erklaerung_en": "A text or a thumbnail link that is designed to attract attention and to entice users to click on that link and view, read, stream or listen to the linked piece of online content. The content is typically deceptive, sensationalised, or otherwise misleading. Also referred to as linkbait."
+ },
+ {
+  "en": "Cloud services",
+  "erklaerung_en": "Infrastructure, platforms, or software that are hosted by third-party providers and made available to users through the internet. All infrastructure, platforms, software, or technologies that users access through the internet without requiring additional software downloads can be considered cloud computing services."
+ },
+ {
+  "en": "Competence statement",
+  "erklaerung_en": "In DigComp 3.0, competence statements are short, concrete and technology-neutral descriptions of the kinds of capabilities that individuals at Basic, Intermediate, Advanced and Highly advanced levels could be expected to know or apply, for each of the 21 competences. These are shown in Section 3 of the DigComp 3.0 framework. Competence statements are based on the DigComp 3.0 learning outcomes in Annex 2 of the DigComp 3.0 framework and contain all of the key content in the learning outcomes."
+ },
+ {
+  "en": "Complex (task)",
+  "erklaerung_en": "In DigComp 3.0, the term 'complex' is used in reference to proficiency levels and learning outcomes. In these contexts, a complex task is one which is not well-defined and consists of many different and inter-connected parts, and hence is intricate and not easy to understand or complete. Complexity of a task is often described on the basis of task characteristics - however, the experience and characteristics of an individual undertaking a task is also relevant."
+ },
+ {
+  "en": "Computable and non-computable problems",
+  "erklaerung_en": "The distinction between computable and non-computable problems relates to computability, i.e. the ability to determine if a specific problem can be solved by a computer, considering factors such as resources, machines, and solvability within practical limits. If a problem can be solved by a computer, it is computable. If it cannot, it is non-computable. "
+ },
+ {
+  "en": "Computational thinking",
+  "erklaerung_en": "Computational thinking in DigComp 3.0 is consistent with the definition of the International Computer and Information Literacy Study (ICILS): an individual’s ability to recognise aspects of real-world problems which are appropriate for computational formulation and to evaluate and develop algorithmic solutions to those problems so that the solutions could be operationalised with a computer. In DigComp 3.0, computational thinking is considered a transversal competence, i.e. it relates to and facilitates many of the other DigComp competences such as problem solving, information and data, and content creation."
+ },
+ {
+  "en": "Computer program",
+  "erklaerung_en": "A sequence or set of instructions in a programming language for a computer to execute. "
+ },
+ {
+  "en": "Constructive alignment",
+  "erklaerung_en": "An interactive system in which teaching and learning activities and assessment tasks are both aligned to intended learning outcomes and reinforce each other.."
+ },
+ {
+  "en": "Copyright",
+  "erklaerung_en": "A type of intellectual property that protects original works of authorship as soon as an author fixes the work in a tangible form of expression."
+ },
+ {
+  "en": "Creative Commons (licences)",
+  "erklaerung_en": "A standardised way to grant permission to use creative work under copyright law. Depending on what the creative work is and how it is to be shared, the creator, whether an individual or an organisation, can choose from among six kinds of Creative Commons licences."
+ },
+ {
+  "en": "Cyber threat",
+  "erklaerung_en": "Any malicious activity aimed at compromising the integrity, confidentiality or availability of digital systems, networks or data. "
+ },
+ {
+  "en": "Cyberattack",
+  "erklaerung_en": "An unauthorised action against computer infrastructure that compromises the confidentiality, integrity, or availability of its content."
+ },
+ {
+  "en": "Cyberbullying",
+  "erklaerung_en": "Currently (2025), the most widely-cited definition of cyberbullying is an aggressive, intentional act carried out by a group or individual, using electronic forms of contact, repeatedly and over time against a victim who cannot easily defend him or herself."
+ },
+ {
+  "en": "Cybercrime",
+  "erklaerung_en": "The use of digital technologies to perpetrate or facilitate a crime. Cybercrime can be categorised as cyber-dependent (one which may only be committed using digital technologies), or cyber-enabled (one which is facilitated by digital technologies). "
+ },
+ {
+  "en": "Cybersecurity",
+  "erklaerung_en": "Actions, processes and tools designed to protect a person, organisation, or country and their digital devices against crime or attacks carried out using the internet."
+ },
+ {
+  "en": "Data",
+  "erklaerung_en": "Any digital representation of acts, facts or information and any compilation of such acts, facts or information, including in the form of sound, visual or audiovisual recording."
+ },
+ {
+  "en": "Data analysis",
+  "erklaerung_en": "The systematic process of collecting, cleaning, transforming and interpreting data to discover useful information, identify patterns and support decision-making."
+ },
+ {
+  "en": "Data backup",
+  "erklaerung_en": "The process of duplicating data and storing it in a separate location to ensure availability in the event of data loss due to corruption or disaster."
+ },
+ {
+  "en": "Data centre",
+  "erklaerung_en": "A physical room, building or facility that houses digital technological infrastructure for building, running and delivering applications and services. It also stores and manages the data associated with those applications and services. A data centre usually includes backup components and infrastructure for power supply, data communication connections, environmental controls (e.g., air conditioning, fire suppression), and various security devices."
+ },
+ {
+  "en": "Data collection tool",
+  "erklaerung_en": "Digital technologies that are designed to perform data collection – the gathering and measurement of information on targeted variables within an established system."
+ },
+ {
+  "en": "Data processing",
+  "erklaerung_en": "The collection and manipulation of digital data to produce meaningful information."
+ },
+ {
+  "en": "Data protection",
+  "erklaerung_en": "Refers to both the security and privacy of an individual’s personal information (such as name, data of birth, home address, email address or phone number) and personal property (such as emails, files, and accounts owned or managed by the individual). Data protection can also refer to data management and storage practices that protect data from loss, theft, or corruption."
+ },
+ {
+  "en": "Data removal rights",
+  "erklaerung_en": "In the General Data Protection Regulation (GDPR, 2018), data removal rights are referred to as 'right to erasure' or 'right to be forgotten'. These rights allow individuals to ask for their data to be deleted, and the entity holding that data has an obligation to do so, with some exceptions (i.e. if the data is needed to exercise the right of freedom of expression; there is a legal obligation to keep that data; or if it is in the public interest). "
+ },
+ {
+  "en": "Data restoration",
+  "erklaerung_en": "A process of retrieving deleted, inaccessible, lost, corrupted, damaged, or overwritten data from secondary storage, removable media or files, when the data stored in them cannot be accessed in a usual way. Also referred to as data recovery."
+ },
+ {
+  "en": "De-bunking",
+  "erklaerung_en": "The process of exposing inaccuracies, false information or myths in various theories, beliefs, or claims. It involves analysing evidence critically, disproving misconceptions, and revealing the truth or factual information about a certain topic or subject."
+ },
+ {
+  "en": "Deceptive patterns",
+  "erklaerung_en": "Unfair practices deployed through the structure, design or functionalities of digital interfaces or system architecture that can influence individuals to make decisions they would not have taken otherwise. Also (and formerly) referred to as dark patterns."
+ },
+ {
+  "en": "Deep-fake",
+  "erklaerung_en": "Generated or manipulated image, audio or video content that resembles existing persons, objects, places, entities or events and would falsely appear to a person to be authentic or truthful."
+ },
+ {
+  "en": "Design thinking",
+  "erklaerung_en": "An approach to problem-solving and innovation focused on human-centered design, involving four phases (clarify, ideate, develop, and implement)."
+ },
+ {
+  "en": "Digital assistance tool",
+  "erklaerung_en": "Digital technology that assists or supports an individual with the implementation of a task. In DigComp 3.0, digital assistance tools refer to functionalities embedded within software; platforms or services (such as automatic translation of online content, meeting note-taking functionality, voice-to-text and text-to-voice functionality); software or services that perform an assistive function (such as machine translation of text documents); and digital assistants (virtual assistants) (which answer users questions and perform simple tasks). Many of these rely on features of AI systems for some or most of their functions."
+ },
+ {
+  "en": "Digital citizenship",
+  "erklaerung_en": "the capacity to participate actively, continuously and responsibly in communities online and offline, through competent and positive engagement with digital technologies."
+ },
+ {
+  "en": "Digital collaboration tool",
+  "erklaerung_en": "Digital technologies that are designed to help people working on a common task to attain their goals. Such tools include collaborative communication, document collaboration, project management, workflow, and knowledge management."
+ },
+ {
+  "en": "Digital communication",
+  "erklaerung_en": "Communication using digital technologies. Various modes of communication exist, e.g. synchronous communication (real time communication) and asynchronous ones (not concurrent communication) and can be in one-to-one, one-to-many, or many-to-many modes."
+ },
+ {
+  "en": "Digital communication tool",
+  "erklaerung_en": "Digital technologies that are designed to facilitate digital communication. They include instant messaging, video conferencing, email, communication functions in social media and digital collaboration tools, and communication functions in digital platforms and services such as in e-learning and online customer support."
+ },
+ {
+  "en": "Digital content",
+  "erklaerung_en": "A wide range of information and data (which can include, for example, computer programs, apps, games, music, videos or texts) that can be created, stored, processed, shared and accessed using digital devices. It includes digital blueprints that can result in physical creations of digitally-represented objects, such as 3D printing outputs."
+ },
+ {
+  "en": "Digital content creation tool",
+  "erklaerung_en": "Digital technologies that are designed to enable the creation, editing and integration of digital content. These include text, image, video and audio processing and editing software, 3D modelling software, AI systems, particularly generative AI, and content creation online such as in social media, podcasts and websites."
+ },
+ {
+  "en": "Digital device",
+  "erklaerung_en": "A unit of equipment that contains a computer or microcontroller. Common digital devices include laptop computers, desktop computers, smartphones, tablets, smartwatches and smart TVs."
+ },
+ {
+  "en": "Digital environment",
+  "erklaerung_en": "A context, or a 'place', that is enabled by technology and digital devices, often transmitted over the internet, or other digital means, e.g. mobile phone network. Records and evidence of an individual’s interaction with a digital environment constitute their digital footprint. In DigComp 3.0, the term digital environment is used as a backdrop for digital actions without naming a specific technology or tool."
+ },
+ {
+  "en": "Digital exclusion",
+  "erklaerung_en": "Marginalisation of an individual – or of a group – deprived of full access and capacity to use information and communications technologies (ICT), which hinders their participation in the economic, social, and political life of the society. Four main factors lead to digital exclusion: limited access to digital technologies, both physical and financial; lack of motivation, including understanding the benefits of digital technologies; limited digital competence; and lack of confidence or trust, including regarding online security."
+ },
+ {
+  "en": "Digital footprint",
+  "erklaerung_en": "The history of a person's usage of digital devices, which includes, among others, web pages downloaded, websites logged into, text, chat and social media messages sent, links clicked and social media pages liked. This information is widely used to target ads to consumers. Also referred to as a digital fingerprint."
+ },
+ {
+  "en": "Digital identity",
+  "erklaerung_en": "In DigComp 3.0, digital identity refers to the collection of digital information about an individual, covering aspects such as personal details, online account information, username and password credentrials, behavioural and biometric data. Digital identity has several functions, such as access to services, privacy protection, and identity theft protection. Digital identity is verified through a variety of means, such as username and password, biometric verification, digital certificates, and government-issued IDs. Examples of digital identities include social media profile, email address, online banking account data, health records and educational portal credentials. Digital identity is multifaceted and evolving and can overlap with physical identity in its referents to physical realities such as home address or fingerprint data in biometric identification."
+ },
+ {
+  "en": "Digital inclusion",
+  "erklaerung_en": "Process that aims to ensure that an individual – or a group – can access and use information and communication technologies (ICT) to participate fully in economic, social and cultural life. Digital inclusion depends on four main factors: access to digital technologies, both physical and financial; motivation, including understanding the benefits of digital technologies; digital competence; and confidence or trust, including regarding online security."
+ },
+ {
+  "en": "Digital interaction",
+  "erklaerung_en": "Any type of online activity that happens between people, between a person and a platform, or between platforms. In DigComp 3.0, digital interactions include those between humans and AI systems."
+ },
+ {
+  "en": "Digital legislation",
+  "erklaerung_en": "Since 2018, several pieces of EU digital legislation have been published. Section 1.2 of the DigComp 3.0 framework includes a description of some of the key digital legislation and regulations that could be relevant to consider in the context of DigComp 3.0. "
+ },
+ {
+  "en": "Digital participation",
+  "erklaerung_en": "The active involvement of individuals in society through the use of digital technologies."
+ },
+ {
+  "en": "Digital platforms and services",
+  "erklaerung_en": "Software-based online infrastructures that are designed to facilitate user interactions and transactions. Digital platforms and services can serve a range of functions including government and public services, search engines, banking, buying and selling of products and services, online collaborative communities and social media."
+ },
+ {
+  "en": "Digital reputation",
+  "erklaerung_en": "The perception or opinion that others form about a person, organisation or brand based on their online presence and behavior. In DigComp 3.0, digital reputation focuses on perception that others form about a person (rather than an organisation or brand). Digital reputation is shaped by the content individuals share, interactions they engage in, and what others post about them across digital platforms and services. A positive digital reputation can build trust and credibility, while a negative one can have a negative impact on personal relationships, job prospects, or other opportunities."
+ },
+ {
+  "en": "Digital search tool",
+  "erklaerung_en": "A range of digital technologies that are designed to or include functionalities that facilitate the search and retrieval of information. Digital search tools can include but are not limited to search engines (both traditional and AI-driven), searchable databases (such as a library catalogues or academic databases), search functions within platforms and services (such as for searching for and filtering flights, train tickets, accommodation or other products and services), digital geographic information system platforms (which facilitate geo-location and route planning), and large language models. "
+ },
+ {
+  "en": "Digital services",
+  "erklaerung_en": "See Digital platforms and services."
+ },
+ {
+  "en": "Digital stress",
+  "erklaerung_en": "The psychological strain resulting from an overexposure to digital environments and systems, often characterised by cognitive overload, burnout, reduced life satisfaction, and emotional disengagement."
+ },
+ {
+  "en": "Digital technologies",
+  "erklaerung_en": "Devices such as personal computers and tablets, tools such as robots, cameras, calculators and digital toys, systems such as software and apps, augmented and virtual reality, and less tangible forms of technology such as the internet."
+ },
+ {
+  "en": "Digital tool",
+  "erklaerung_en": "A digital technology that is used for a given purpose or for carrying out a particular function."
+ },
+ {
+  "en": "Disinformation",
+  "erklaerung_en": "False or misleading information intentionally created and disseminated to deceive people, including for economic gain or to cause political or public harm."
+ },
+ {
+  "en": "E-commerce",
+  "erklaerung_en": "The buying and selling of goods and services over the internet. A variety of business models are used in e-commerce (e.g., business-to-consumer, business-to-business, consumer-to-consumer)."
+ },
+ {
+  "en": "Emoji",
+  "erklaerung_en": "A graphical symbol or image that frequently accompanies text, especially in digital messages and communications. Emoji function to indicate emotional state or clarify tone or intent. They exist in various genres, including facial expressions, activity, food and drink, celebrations, flags, objects, symbols, places, weather, animals, and nature. Specific emoji may take on particular meanings among sub-groups of individuals, and there is cultural variation in the use and interpretation of emoji. Also (and formerly) referred to as emoticon."
+ },
+ {
+  "en": "Ethical (usage of digital technologies)",
+  "erklaerung_en": "Usage of digital technologies that aligns with values of respect for human dignity, freedom, democracy, equality, the rule of law and respect for human rights, including the rights of persons belonging to minorities. Ethical usage also entails consideration of the natural environment and of other living beings that are part of the human ecosystem, as well as a sustainable approach enabling the flourishing of future generations to come."
+ },
+ {
+  "en": "European Qualifications Framework (EQF)",
+  "erklaerung_en": "An eight-level learning outcomes-based framework for all types of qualifications. It serves as a translation tool between different national qualifications frameworks. It helps improve transparency, comparability and portability of people’s qualifications and makes it possible to compare qualifications from different countries and institutions. It was established in 2008 and revised in 2017."
+ },
+ {
+  "en": "External storage",
+  "erklaerung_en": "Data storage space outside a digital device's own internal hardware. External storage may refer to removable media, portable storage devices, network-attached storage or cloud storage."
+ },
+ {
+  "en": "Filter bubble",
+  "erklaerung_en": "An echo chamber (a bounded, enclosed media space that has the potential to both magnify the messages delivered within it and insulate them from rebuttal) primarily produced by ranking algorithms on digital platforms such as search engines and social media which personalises information without any active choice on the part of an individual."
+ },
+ {
+  "en": "Gamification",
+  "erklaerung_en": "The application of features from gaming in non-game contexts. The goal is to increase user engagement, motivation, competition and participation through the use of game mechanics such as points, badges, leaderboards and rewards."
+ },
+ {
+  "en": "Generative AI",
+  "erklaerung_en": "A subset of AI that uses specialised machine learning models designed to produce a wide and general variety of outputs, capable of a range of tasks and applications, such as generating text, image or audio."
+ },
+ {
+  "en": "High-risk AI system",
+  "erklaerung_en": "One which is likely to negatively affect health, safety or fundamental rights. High risk, in the AI Act, is placed between unacceptable risk, and hence forbidden, and limited risk, which has some requirements of transparency. "
+ },
+ {
+  "en": "Human-AI collaboration",
+  "erklaerung_en": "Process of one or more humans working with an AI system or systems to achieve a human-defined goal, based on the rationale that humans and AI systems have complementary strengths."
+ },
+ {
+  "en": "Human-centric",
+  "erklaerung_en": "An approach to developing and using digital technologies which strives to ensure that human values are central, by ensuring respect for fundamental rights, including those set out in the Treaties of the European Union and Charter of Fundamental Rights of the European Union, all of which are united by reference to a common foundation rooted in respect for human dignity, in which the human being enjoy a unique and inalienable moral status. Human-centric also entails consideration of the natural environment and of other living beings that are part of the human ecosystem, as well as a sustainable approach enabling the flourishing of future generations to come."
+ },
+ {
+  "en": "Identity theft",
+  "erklaerung_en": "The act of stealing another person's personal identifying information, such as their name, bank or credit card details, electronic signatures or passwords without their permission to commit fraud or other crimes. The person whose identity has been stolen may suffer adverse consequences, especially if they are falsely held responsible for the perpetrator's actions."
+ },
+ {
+  "en": "Intellectual property",
+  "erklaerung_en": "Someone’s idea, invention, creation, etc., that can be protected by law from being copied by someone else."
+ },
+ {
+  "en": "JSON",
+  "erklaerung_en": "JavaScript Object Notation, a widely-used, lightweight data-interchange format."
+ },
+ {
+  "en": "Learning outcomes",
+  "erklaerung_en": "Statements of what an individual knows, understands and is able to do on completion of a learning process, which are defined in terms of knowledge, skills and attitudes. DigComp 3.0 includes intended learning outcomes, i.e. what an individual is expected to know, understand or is able to do – rather than achieved learning outcomes – the demonstration of what an individual knows, understands or is able to do. Section 2.5 of the DigComp 3.0 framework provides more detail."
+ },
+ {
+  "en": "Licence",
+  "erklaerung_en": "Grants permission to use a particular software, application, content or service. A licence in digital contexts can take several forms: It may be a serial number to be entered during the installation process, an activation code used to unlock an online service, an electronic file associated with a user account, or a licence key. The main purpose of a licence is to establish the legal rights and restrictions regarding the use of the software, application, content or service. Digital licences may also offer benefits such as easy access to updates and upgrades and facilitating the management of licenses on multiple devices. "
+ },
+ {
+  "en": "Linked open data",
+  "erklaerung_en": "Freely accessible and re-usable data that is in a format that can be interlinked with other data. "
+ },
+ {
+  "en": "Machine learning",
+  "erklaerung_en": "A field of artificial intelligence concerned with the development and study of statistical algorithms that can learn from data and generalise to unseen data, and thus perform tasks without explicit instructions. Advances in deep learning, a sub-discipline of machine learning, have allowed neural networks, a class of statistical algorithms, to surpass many previous machine-learning approaches. Machine learning has many applications, including natural language processing, computer vision, speech recognition, email filtering, agricultural management systems, and diagnostic medicine."
+ },
+ {
+  "en": "Malware",
+  "erklaerung_en": "Malicious software designed to infiltrate systems, cause damage, disrupt services and/or steal data."
+ },
+ {
+  "en": "Misinformation",
+  "erklaerung_en": "False information regardless of intent to deceive or mislead people."
+ },
+ {
+  "en": "Multi-factor authentication",
+  "erklaerung_en": "A digital authentication method in which a user is granted access to a website or application only after successfully presenting two or more distinct types of evidence (or factors) to an authentication mechanism. The purpose of multi-factor authentication is to protect personal data—which may include personal identification or financial assets—from being accessed by an unauthorised third party that may have been able to discover, for example, a single password. Authentication can be made on the basis of something physical the user possesses (e.g. a bank card, a phone), knows (e.g. a PIN), or has as part of their physical identity (biometric identification)."
+ },
+ {
+  "en": "National Qualifications Framework (NQF)",
+  "erklaerung_en": "Instrument for developing, classifying and issuing qualifications in a country according to a set of criteria for specified levels of learning achieved, which integrates and coordinates national qualifications subsystems and improves transparency, access, progression and quality of qualifications."
+ },
+ {
+  "en": "Nudging",
+  "erklaerung_en": "A term from the behavioural sciences which refers to any attempt at influencing people’s judgment, choice or behaviour by making use of knowledge about cognitive boundaries, biases, routines, and habits in individual and social decision-making."
+ },
+ {
+  "en": "Online platform",
+  "erklaerung_en": "See Digital platforms and services."
+ },
+ {
+  "en": "Online service",
+  "erklaerung_en": "See Digital platforms and services."
+ },
+ {
+  "en": "Open data",
+  "erklaerung_en": "Data that are openly accessible, exploitable, editable and shareable by anyone for any purpose. Open data are generally licensed under an open license (one which grants permission to access, re-use and redistribute a work with few or no restrictions)."
+ },
+ {
+  "en": "Open educational resources (OER)",
+  "erklaerung_en": "Digital materials offered freely and openly for teaching, learning and research. Open educational resources include learning content, software tools to develop, use and distribute content, and implementation resources such as open licences."
+ },
+ {
+  "en": "Operating system",
+  "erklaerung_en": "A digital device's system software that manages computer hardware and software resources to provide common services for computer programs."
+ },
+ {
+  "en": "Peripheral device",
+  "erklaerung_en": "Any hardware device that is not part of a computer device's central processing unit or motherboard. It does not contribute to the primary function of a computer system but rather helps users access and use additional functionalities given by that device's association with the computer. Peripheral devices cover a wide range, including input devices (e.g. keyboard, mouse, microphone), output devices (e.g. screen, headphones, speaker), peripheral storage devices (e.g. external hard drive), internal peripheral devices (e.g. memory card, graphics card) and external devices (e.g. webcam)."
+ },
+ {
+  "en": "Personal data",
+  "erklaerung_en": "The data relating to a physical person who with this data can be identified directly or indirectly."
+ },
+ {
+  "en": "Personalisation",
+  "erklaerung_en": "Digital services that are tailored to individual users’ interests and preferences, especially through the application of algorithms to the users' online behaviours."
+ },
+ {
+  "en": "Phishing",
+  "erklaerung_en": "See Social engineering"
+ },
+ {
+  "en": "Piracy",
+  "erklaerung_en": "A form of copyright infringement which involves downloading and digitally distributing copyrighted works, such as music, films or software, without permission. Despite improvements in digital technologies to protect against piracy and the increase in digital entertainment content platforms, piracy rates have been increasing, possibly due to a combination of cost and the fact that many individuals do not perceive piracy to be an ethical issue. Also referred to as online piracy, digital piracy or software piracy."
+ },
+ {
+  "en": "Plagiarism",
+  "erklaerung_en": "Using someone else’s ideas or work and pretending that it is one’s own. The wide diffusion of AI systems, particularly generative AI, has added a layer of complexity to the ethics of plagiarism as well as an increase in plagiarism detection tools, which vary in their effectiveness."
+ },
+ {
+  "en": "Platform economy",
+  "erklaerung_en": "Digital matching companies that use online platforms to connect service providers with consumers, facilitating peer-to-peer transactions and enabling value-creating interactions within a network. These platforms serve as technological infrastructures for exchanging goods and services among various groups of producers and consumers."
+ },
+ {
+  "en": "Pre-bunking",
+  "erklaerung_en": "A set of strategies that individuals can employ to build pre-emptive resilience to misinformation, by addressing misinformation sources at a higher level than their specific misinformation claims. "
+ },
+ {
+  "en": "Privacy",
+  "erklaerung_en": "In the context of legislation such as the General Data Protection Regulation (GDPR, 2018), data privacy refers to the empowerment of users to make their own decisions about who can process their data, and for what purpose."
+ },
+ {
+  "en": "Privacy tool",
+  "erklaerung_en": "A digital technology that protects the privacy of the user, typically working together with internet usage to control or limit the amount of user information that is shared to third parties. There are two main types of privacy tools. The first type is protecting a user's Internet privacy from the World Wide Web. There are software products that will mask or hide a user's IP address from the outside world to protect the user from identity theft. The second type of protection is hiding or deleting a user's internet traces that are on their device as a result of using the internet. "
+ },
+ {
+  "en": "Problem solving",
+  "erklaerung_en": "Engaging in cognitive and metacognitive processes individually or with others to achieve a task where the method of solution is not immediately obvious. It includes identifying and defining the problem, searching for information, and testing and applying one or more potential solutions, and is done at least partially in a digital environment."
+ },
+ {
+  "en": "Proficiency level",
+  "erklaerung_en": "In DigComp 3.0, proficiency levels describe the level of acquisition of an individual of a digital competence, according to cognitive challenge, task complexity and level of autonomy. DigComp 3.0 distinguishes between four proficiency levels (Basic, Intermediate, Advanced and Highly Advanced). For existing DigComp users, the relationship between the DigComp 3.0 proficiency levels and previous versions of DigComp is shown in Annex 1 of the DigComp 3.0 framework."
+ },
+ {
+  "en": "Pseudonymisation",
+  "erklaerung_en": "In the General Data Protection Regulation (GDPR, 2018), pseudonymisation refers to the processing of personal data in such a manner that the data can no longer be attributed to a specific data subject without the use of additional information, provided that such additional information is kept separately and is subject to technical and organisational measures to ensure that the personal data are not attributed to an identified or identifiable natural person."
+ },
+ {
+  "en": "Responsible use (of digital technologies)",
+  "erklaerung_en": "The conscious, ethical, and effective use of digital technologies to maximise their benefits and minimise their risks."
+ },
+ {
+  "en": "Reality-virtuality (RV) continuum",
+  "erklaerung_en": "Originally proposed in the 1990s for visual displays, the reality-virtuality (RV) continuum has a purely real environment at one end, consisting solely of real objects, and at the other end, a purely virtual environment, consisting solely of virtual objects. Any environment which consists of blending real and virtual objects is termed Mixed Reality (MR). Mixed reality environments where the real world is augmented with virtual content are called augmented reality (AR), while those where most of the content is virtual but there is some awareness or inclusion of real world objects are called augmented virtuality (AV). The concept was updated in 2021 to cover sensory input in addition to visual. "
+ },
+ {
+  "en": "Right to disconnect",
+  "erklaerung_en": "Refers to a worker’s right to be able to disengage from work and refrain from engaging in work-related digital communication, such as emails or other messages, during non-work hours. This concept has developed as a result of advances in communication technologies and their impact on people’s daily lives. While there is currently no comprehensive EU-wide framework defining this right, the European Parliament passed a resolution in 2021 calling for a Directive to support this right."
+ },
+ {
+  "en": "Robot",
+  "erklaerung_en": "A machine—especially one programmable by a computer—capable of carrying out a complex series of actions automatically. Robots can operate with varying degrees of autonomy."
+ },
+ {
+  "en": "Robotics",
+  "erklaerung_en": "The interdisciplinary study and practice of the design, construction, operation, and use of robots, involving aspects of computer science and engineering disciplines (such as mechanical, electrical, electronic and materials)."
+ },
+ {
+  "en": "Simple (task)",
+  "erklaerung_en": "In DigComp 3.0, the term 'simple' is used in reference to proficiency levels competence statements and learning outcomes. A simple task is one which is well-defined and which consists of few parts, and hence is easy to understand and complete, and is at the opposite end of a continuum which has ‘complex’ at the other end. Note that task simplicity cannot necessarily be completely described on the basis of task characteristics - the experience and perspective of an individual undertaking a task is also relevant."
+ },
+ {
+  "en": "Social engineering",
+  "erklaerung_en": "The act of manipulating or deceiving individuals, especially using psychological persuasion, to gain access to systems containing data, documents, and information that the social engineer should not have access to obtain. Two common approaches are (i) phishing, which uses deceptive emails, websites, or messages to trick users into revealing sensitive information or installing malware; and (ii) baiting, which uses attractive advertisements or offers to entice the user into clicking on a link which contains malware or which seeks sensitive or personal data from the user. Social engineering techniques in digital environments are considered an increasingly pervasive and sophisticated threat to cybersecurity, particularly due to the application of AI technologies (e.g. voice cloning, personalising content, automated profiling). Consequences to individuals include identity theft and reputational damage."
+ },
+ {
+  "en": "Social innovation",
+  "erklaerung_en": "The process of developing and deploying effective solutions to challenging and often systemic social and environmental issues in support of social progress."
+ },
+ {
+  "en": "Social media",
+  "erklaerung_en": "A range of digital technologies that facilitate the creation, sharing and aggregation of content (such as ideas, interests, and other forms of expression) amongst virtual communities and networks. Their common features include online platforms which enable users to create and share content and participate in social networking; user-generated content; service-specific profiles; and the connection of individual user profiles to other individuals or groups."
+ },
+ {
+  "en": "Social media influencer",
+  "erklaerung_en": "Online content creators who post content on social media or video-sharing platforms through which they impact society, public opinion and the personal views of their audience, often showcased through their authenticity-based relationship with their audience. Influencers often have a commercial intent and engage with commercial actors through different business models for monetisation purposes."
+ },
+ {
+  "en": "Software",
+  "erklaerung_en": "Computer programs that instruct the execution of a computer. Software can be categorised into operating systems (which manage hardware resources and provide services for applications) and application software (which performs specific tasks for users). Software development covers several phases (design, programming, testing, release and maintenance). "
+ },
+ {
+  "en": "Specialised (purpose, task)",
+  "erklaerung_en": "In DigComp 3.0, particularly in reference to proficiency levels, competence statements and learning outcomes, references are made to specialised purposes and tasks. Here, specialised means related to a particular discipline, field or area. "
+ },
+ {
+  "en": "Task",
+  "erklaerung_en": "In DigComp 3.0, particularly in reference to proficiency levels, competence statements and learning outcomes, a task is a specific activity which involves the use of digital technologies that contributes to a goal, in any context – everyday life, work, or learning. Tasks can vary in size, duration and complexity and may be carried out individually or in collaboration with others."
+ },
+ {
+  "en": "Trustworthy AI",
+  "erklaerung_en": "Trustworthy AI has three components: (1) it should be lawful, ensuring compliance with all applicable laws and regulations (2) it should be ethical, demonstrating respect for, and ensure adherence to, ethical principles and values and (3) it should be robust, both from a technical and social perspective, since, even with good intentions, AI systems can cause unintentional harm. Trustworthy AI concerns not only the trustworthiness of the AI system but also comprises the trustworthiness of all processes and actors that are part of the AI system’s life cycle."
+ },
+ {
+  "en": "United Nations (UN) Global Digital Compact (GDC)",
+  "erklaerung_en": "The first comprehensive framework for global digital governance agreed by UN Member States in 2024 which aims to foster an inclusive, open, safe and secure digital space that respects, protects and promotes human rights. The UN Office for Digital and Emerging Technologies, set up in January 2025, supports follow-up and implementation of the GDC."
+ },
+ {
+  "en": "Universal Meaningful Connectivity (UMC)",
+  "erklaerung_en": "The possibility for everyone to enjoy a safe, enriching, productive and affordable online experience, consisting of six interdependent dimensions: quality of the connection, availability for use, affordability, devices, skills and security. "
+ },
+ {
+  "en": "‘Unplugged’ activities",
+  "erklaerung_en": "Activities that don’t involve screens or electronic devices. They can range from hobbies and exercise to social engagements that require no digital input. In DigComp 3.0, unplugged activities refer primarily to teaching and learning activities which do not require any digital input."
+ },
+ {
+  "en": "User experience (UX) and Customer experience (CX)",
+  "erklaerung_en": "UX is how a user interacts with and experiences a product, system or service. It includes a person's perceptions of utility, ease of use, and efficiency. CX refers to the cognitive, affective, sensory, and behavioral responses of a customer during all stages of the consumption process including pre-purchase, consumption, and post-purchase. In DigComp 3.0, CX and UX relate specifically to digital contexts."
+ },
+ {
+  "en": "Virtual assistant",
+  "erklaerung_en": "Digital technology that can perform a range of tasks or services for a user based on user input such as commands or questions, including verbal ones. Such technologies often incorporate chatbot capabilities to streamline task execution. The interaction may be via text, graphical interface, or voice, as some virtual assistants are able to interpret human speech and respond via synthesised voices. In many cases, users use verbal commands to access information online, control home devices and media playback, and manage other basic tasks such as email, to-do lists, and calendars. Companies in various industries often incorporate some kind of virtual assistant technology into their customer service or support."
+ },
+ {
+  "en": "Virtual reality, realities (VR)",
+  "erklaerung_en": "Typically refers to three-dimensional, immersive, fully computer-generated environments to which users access, e.g., through virtual reality headsets. Different concepts such as augmented reality (AR) and mixed reality (MR) are used to refer to various grades along the reality-virtuality continuum. It has been proposed that the term 'extended reality' (XR) covers all of these digital technologies."
+ },
+ {
+  "en": "Wellbeing (in digital environments)",
+  "erklaerung_en": "A state of physical, mental and social wellness in relation to an individual's usage of and presence in digital environments. The physical aspect refers to a range of characteristics, such as sleep and rest, balance of physical and sedentary activity, posture and musculoskeletal health and eyesight. The mental aspect also refers to a range of characteristics such as presence or absence of depression, anxiety, low self-esteem or problematic usage of digital technologies affecting mental wellbeing. The social wellbeing aspect refers to a sense of involvement with individuals and communities (e.g. access to and use of social capital; social trust; social connectedness)."
+ }
+]

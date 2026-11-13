@@ -77,9 +77,20 @@ Die Themen (Beruf × Kompetenz) entstehen beim Laden aus beiden Dateien und werd
 |---|---|
 | `fachgebiete_discipline.json` | Handmapping VHS-Fachgebiet → OEH-Fach (`ccm:taxonid`, closeMatch); `ersatz`: „Weiterbildung“ |
 | `programmbereiche.json` | 7 Programmbereiche und 85 Fachgebiete der Volkshochschul-Statistik (`notation`, `label`, `uri`, `uebergreifend` für die Sammelpositionen x.00) |
+| `digcomp_fachgebiete.json` | Handmapping DigComp-Kompetenz → ein bis zwei VHS-Fachgebiete (mit Begründung) und DigComp-Niveau → Niveau der Erwachsenenbildung (`eb_niveau`) und der Berufsbildung (`berufsbildung`, grob nach DQR) |
 | `themen_erwachsenenbildung.jsonl` | ein Thema je Zeile: `id` (GND-URI oder oehTopics-URI), `label_de`, `art` (`kursthema`, `kursleitungsthema`), `herkunft` (`gnd`, `schulthemen`; `rahmencurriculum` und `grundbildung` nur lokal, siehe `lokal/`), `fachgebiet` und `programmbereich` [{`notation`, `uri`, `label`}] (Fremdsprachen als `4.fs`), `quelle`, `belege.wlo`, `mapping` |
 | `pruefliste_themen.csv`, `korrekturen.csv` | Durchsicht (`korrektur_codes` = Fachgebiete, optional `kursthema`/`kursleitungsthema`, `-` = ausschließen) |
 | `inhaltstypen.json`, `niveaus.json`, `optionale_felder.json` | Inhaltstypen mit Themenart, Zielgruppen und Programmbereichen; Niveaus je Programmbereich (GER, Alpha-Level, Abschlüsse); optionale Felder und Zielsprachen je Fachgebiet |
+
+## `mappings/digcomp/`
+
+DigComp 3.0 (European Digital Competence Framework, Fifth Edition), © European Union, 2025, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), JRC144121, https://data.europa.eu/doi/10.2760/0001149. Grundlage ist das Data Supplement des JRC vom 24.11.2025. Errata vom 27.01.2026 sind angewendet, die Texte sind ins Deutsche übersetzt (eigene, nicht amtliche Übersetzung) und für Seeds gekürzt. Die Europäische Kommission ist für diese Fassung nicht verantwortlich.
+
+| Datei | Inhalt |
+|---|---|
+| `digcomp30.jsonl` | eine Zeile je Bereich (5), Kompetenz (21) und Lernergebnis (522): `typ` (`bereich`, `kompetenz`, `lernergebnis`), `id` (nach Errata), Englisch wörtlich (`label_en`, `beschreibung_en` bzw. `text_en`), Deutsch (`label_de`, `beschreibung_de` bzw. `text_de`), `uebersetzung_de` (Hinweis, Methode, Modell). Lernergebnisse zusätzlich: `id_original` (veröffentlichte ID), `kompetenz`, `bereich`, `niveau` (`Basic`, `Intermediate`, `Advanced`, `Highly advanced`), `art` (`Knowledge`, `Skill`, `Attitude`), `ki` (`AI-Explicit`, `AI-Implicit`, `AI not Implicit or Explicit`), bei Korrekturen `text_original` und `erratum` |
+| `glossar_en.json` | die 126 Glossarbegriffe des JRC mit englischer Erklärung |
+| `glossar.json` | deutsche Fachbegriffe zu den Glossarbegriffen, Vorgabe für die Übersetzung (LLM) |
 
 ## `lokal/` (nicht im Repo)
 
@@ -101,12 +112,21 @@ lagen, sind über die Git-Historie abrufbar.
 | `erwachsenenbildung/grundbildung_themen.json` | Grundbildungs-Themen aus lea.-Alpha-Levels und DVV-Rahmencurricula: `quellen`, `themen` (`code`, `quelle`, `bereich`, `pfad`, `label`, `fachgebiet`, `niveau`) | Schritt `zusammenfuehren` baut keine Grundbildungs-Themen (Warnung) |
 | `erwachsenenbildung/sprachkurs_themen.json` | Gliederung des Rahmencurriculums für Integrationskurse: Handlungsfelder und Lernzielbereiche (`code`, `handlungsfeld`, `titel`, `label`, `fachgebiete`), `quelle` | Schritt `zusammenfuehren` baut keine Sprachkurs-Themen (Warnung) |
 | `erwachsenenbildung/themen_lokal.jsonl` | die Themen der Erwachsenenbildung mit Herkunft `rahmencurriculum` (117) und `grundbildung` (334), gleiche Felder wie `themen_erwachsenenbildung.jsonl`; schreibt der Schritt `zusammenfuehren`, solange eine der beiden Gliederungen vorhanden ist | Erwachsenenbildung nur mit den 1.466 Themen aus dem Repo |
+| `rvk/rvko_marcxml_<Jahr>_<Quartal>.xml.gz` | RVK-Gesamtabzug (MarcXML, CC0 1.0), z. B. `rvko_marcxml_2026_3.xml.gz` (30 MB, entpackt 1,4 GB). Download: [RVK-Download](https://rvk.uni-regensburg.de/regensburger-verbundklassifikation-online/rvk-download) → „aktueller MarcXML-Abzug“ (Gesamtabzug, nicht „nur Update“). Liegt nur lokal, weil groß; abgeleitet wird `mappings/hochschule/rvk_klassen.jsonl` | Schritt `rvk_klassen` wird übersprungen; alle übrigen RVK-Schritte arbeiten mit der vorhandenen `rvk_klassen.jsonl` |
+| `digcomp/*.jsonld` | DigComp 3.0 Data Supplement (CC BY 4.0), `DigComp 3.0 Data Supplement 24 Nov 2025.jsonld` aus https://jeodpp.jrc.ec.europa.eu/ftp/public/JRC-OpenData/DIGCOMP/DIGCOMP3.0/ | Schritt `digcomp` wird übersprungen; die Übersetzung arbeitet mit der vorhandenen `digcomp30.jsonl` |
+
+Reproduktion aus den Rohdateien (die LLM-Schritte fragen nur, was im Zwischenspeicher noch fehlt):
+
+```bash
+python -m sem mappings hochschule rvk --rvk data/lokal/rvk/rvko_marcxml_2026_3.xml.gz
+python -m sem mappings erwachsenenbildung digcomp --digcomp "data/lokal/digcomp/DigComp 3.0 Data Supplement 24 Nov 2025.jsonld"
+```
 
 ## `mappings/hochschule/`
 
 | Datei | Inhalt |
 |---|---|
-| `themen_hochschule.jsonl` | Gesamtset: alle Themen, ein Thema je Zeile, siehe unten. `art` = `openalex` oder `gnd`; GND-Themen haben zusätzlich `gnd` (GND-ID, Typ, Sachgruppe, Oberbegriffe), `belege.katalog` und `mapping.hochschulrelevanz`; Themen mit WLO-Beleg `belege.wlo`. Die Teilergebnisse je Quelle entstehen beim Bauen im Zwischenspeicher (`data/cache/hochschule_themen_*.jsonl`) und werden im Schritt `themen` zusammengeführt |
+| `themen_hochschule.jsonl` | Gesamtset: alle Themen, ein Thema je Zeile, siehe unten. `art` = `openalex` oder `gnd` (RVK-Themen stehen in `themen_hochschule_rvk.jsonl`); vorhandene Themen, die eine RVK-Klasse belegt, haben `belege.rvk` (Notation, Benennung, Pfad, URI); GND-Themen haben zusätzlich `gnd` (GND-ID, Typ, Sachgruppe, Oberbegriffe), `belege.katalog` und `mapping.hochschulrelevanz`; Themen mit WLO-Beleg `belege.wlo`. Die Teilergebnisse je Quelle entstehen beim Bauen im Zwischenspeicher (`data/cache/hochschule_themen_*.jsonl`) und werden im Schritt `themen` zusammengeführt |
 | `studienfach_profile.jsonl` | je Studienfach Kurzbeschreibung, typische Themen, Abgrenzung (LLM); die typischen Themen werden beim Laden zu Themen mit `art` = `fachprofil` |
 | `pruefliste_themen.csv` | Zuordnungen mit Grund für eine Durchsicht, leere Korrekturspalten |
 | `korrekturen.csv` | redaktionelle Durchsicht beider Prüflisten (Spalten `id`, `label_de`, `korrektur_codes` mit `|`, `-` = ausschließen, `korrektur_lehrebene`, `kommentar`, `prueflistengrund`), Vorrang vor dem LLM |
@@ -114,6 +134,12 @@ lagen, sind über die Git-Historie abrufbar.
 | `gnd_ausgeschlossen.csv` | GND-Begriffe, die nicht als Hochschul-Lehrinhalt eingestuft wurden (mit Bereich und Stimmen) |
 | `studienfach_gnd_sachgruppe.jsonl` | Brücke Studienfach → GND-Sachgruppen mit Stimmen |
 | `openalex_teilgebiet_studienbereich.csv` | Handmapping OpenAlex-Teilgebiet → Studienbereich(e) |
+| `themen_hochschule_rvk.jsonl` | RVK-Teil des Gesamtsets (21.925 Themen), kompakt: `id` (RVK-URI `http://rvk.uni-regensburg.de/nt/…`), `label_de` (ggf. umformuliert), `label_rvk`, `keywords_de`, `studienfach` (Destatis-Notationen), `lehrebene`, `rvk` (`notation`, `tiefe`, `pfad`, `stand`), `gnd` ([GND-ID, Sachschlagwort]), `mapping` (Status, Stimmen, `fach_geerbt_von`, `label_umformuliert`; Methodenangaben in `rvk_auswahl.json`). Studienbereich, Fächergruppe und Quelle ergänzt der Code beim Laden |
+| `rvk_klassen.jsonl` | Auswahl aus der Regensburger Verbundklassifikation (CC0 1.0, Quartalsstand in `rvk_auswahl.json`): thematische Klassen der Tiefe 2 bis 5 (`thema` = true) und ihre Oberklassen (`thema` = false), je Zeile `notation`, `label`, `tiefe`, `ober` (Notation der Oberklasse; Pfade setzt der Code zusammen), `gnd` ([GND-ID, Sachschlagwort] aus Registerfeld 750), `register` |
+| `rvk_auswahl.json` | Quelldatei, Quartal, Datum, Zahl der Klassen je Typ (thematisch, Schlüssel, Person, Form …) und je Tiefe, ausgeschlossene Klassen mit Grund |
+| `rvk_studienbereich.csv` | Handmapping RVK-Fachsystematik bzw. Tiefe-2-Klasse → Studienbereich(e) (Destatis-Notationen), `sicher` = ja/nein |
+| `pruefliste_rvk.csv` | RVK-Themen mit Grund für eine Durchsicht (Korrekturen in `korrekturen.csv`, ID = RVK-URI) |
+| `rvk_ausgeschlossen.csv` | RVK-Klassen, die die Abstimmung als „kein Lehrthema“ einstufte (mit Stimmen und Begründung) |
 | `inhaltstypen.json` | genutzte Inhaltstypen aus OEH `new_lrt` mit Textsorte, Medienform, Lehrebenen |
 | `niveaus.json` | Niveaustufen innerhalb der Hochschule |
 | `optionale_felder.json` | Werte und Anteile der optionalen Steuerfelder |

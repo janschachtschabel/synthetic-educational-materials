@@ -65,7 +65,7 @@
             {% if s.llm %}<span class="marke-llm">LLM</span>{% endif %}
             {% if s.wlo %}<span class="marke-eingabe">WLO</span>{% endif %}
             {% if s.emb %}<span class="marke-eingabe">Embeddings</span>{% endif %}
-            {% if s.lokal %}<span class="marke-eingabe">{{ T("lokal") }}</span>{% endif %}
+            {% if s.lokal or s.datei %}<span class="marke-eingabe">{{ T("lokal") }}</span>{% endif %}
             {% if s.abschluss %}<span class="marke-eingabe">{{ T("zuletzt") }}</span>{% endif %}
             <span id="ms-{{ b.key }}-{{ s.key }}-h" class="hilfe">{{ T(s.beschreibung) }}</span>
           </div>
@@ -84,6 +84,11 @@
       <div class="feld"><label for="mw-{{ b.key }}">{{ T("WLO-Exporte (CSV-Pfade, durch Komma getrennt; bleiben lokal)") }}</label>
         <input type="text" id="mw-{{ b.key }}" name="wlo" spellcheck="false" aria-describedby="mw-{{ b.key }}-h">
         <p id="mw-{{ b.key }}-h" class="hilfe">{{ T("Nur für Schritte mit „WLO“. Gelesen werden nur Keywords, Fächer, Stufen und Themenbaum-Zuordnungen, keine Inhalte.") }}</p></div>
+      {% endif %}
+      {% if b.datei %}
+      <div class="feld"><label for="md-{{ b.key }}">{{ T("RVK-Gesamtabzug (Pfad zur .xml.gz-Datei; bleibt lokal)") if b.datei == "rvk" else T("DigComp-3.0-Data-Supplement (Pfad zur .jsonld-Datei; bleibt lokal)") }}</label>
+        <input type="text" id="md-{{ b.key }}" name="quelldatei" spellcheck="false" aria-describedby="md-{{ b.key }}-h">
+        <p id="md-{{ b.key }}-h" class="hilfe">{{ T("Leer = neueste Datei unter data/lokal/rvk/ bzw. data/lokal/digcomp/. Download siehe data/README.md.") }}</p></div>
       {% endif %}
       {% if b.emb %}
       <div class="feld"><label for="me-{{ b.key }}">{{ T("Embedding-Modell (lokal, CPU)") }}</label>

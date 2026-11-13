@@ -101,6 +101,8 @@ python -m sem mappings hochschule               # alle Schritte (LLM + lokale Em
 python -m sem mappings hochschule zusammenfuehren   # nur neu auswerten, z. B. nach Korrekturen
 python -m sem mappings hochschule wlo --wlo export.csv   # WLO-Keywords als Belege (Export bleibt lokal)
 python -m sem mappings hochschule gnd           # Themen aus GND und hbz-Katalog
+python -m sem mappings hochschule rvk --rvk data/lokal/rvk/rvko_marcxml_2026_3.xml.gz   # Themen aus der RVK (Abzug bleibt lokal)
+python -m sem seeds --anzahl hochschule=5000 --auswahl hochschule.quellen=rvk hochschule.rvk_tiefe=2,3,4 --seed 42   # nur RVK-Themen bis Tiefe 4
 python -m sem auswahl berufsbildung             # Filter Berufsbildung (Qualifizierungsweg, Kompetenzart …)
 python -m sem seeds --anzahl berufsbildung=10000 --gleichverteilung berufsbildung=beruf --seed 42
 python -m sem mappings berufsbildung --wlo export.csv   # ESCO laden, KldB und Qualifizierung abstimmen, WLO-Belege
@@ -111,6 +113,8 @@ python -m sem seeds --anzahl schule=5000 --auswahl schule.herkunft=themenbaum --
 python -m sem mappings schule keywords --wlo export.csv   # Schulthemen aus WLO-Keywords (danach kw_gnd … kw_stufen)
 python -m sem auswahl erwachsenenbildung        # Filter Erwachsenenbildung (Programmbereiche, Quellen, Status)
 python -m sem seeds --anzahl erwachsenenbildung=2000 --auswahl erwachsenenbildung.quellen=gnd,schulthemen --seed 42
+python -m sem mappings erwachsenenbildung digcomp --digcomp data/lokal/digcomp/DATEI.jsonld   # DigComp 3.0 laden, Errata, Übersetzung
+python -m sem seeds --anzahl berufsbildung=1000 --auswahl berufsbildung.quellen=esco,lernfeld,digcomp --seed 42   # DigComp auch in der Berufsbildung
 python -m sem seeds --anzahl elementar=1000 schule=3000 berufsbildung=3000 hochschule=3000 erwachsenenbildung=1000 --seed 42
 python -m sem materialien --seeds output/seeds_schule5000_s42.jsonl --sprache en   # Materialien auf Englisch
 python -m sem materialien --seeds output/seeds_schule5000_s42.jsonl --flex         # halber Preis, langsamer
@@ -169,6 +173,8 @@ sendet den Parameter nicht), `--retries`. In der Oberfläche stehen Worker und R
 Alles unter `data/` ist ohne den Code nutzbar (JSON, JSONL, CSV, UTF-8):
 
 - `data/vocabs/*.json`: OEH-Vokabulare flach aufbereitet (URI, Notation, Label, Oberbegriff, Ebene)
+- `data/mappings/hochschule/themen_hochschule_rvk.jsonl`: 21.925 Hochschulthemen aus der RVK (kompakt, gehört zum
+  Gesamtset); `data/mappings/digcomp/digcomp30.jsonl`: DigComp 3.0 englisch und deutsch (522 Lernergebnisse)
 - `data/mappings/hochschule/themen_hochschule.jsonl`: alle Hochschulthemen in einer Datei (9.130:
   OpenAlex-Themen und GND-Lehrthemen) mit Destatis-Studienfach, -bereich und -fächergruppe, deutschen
   Labels, Keywords, Lehrebene sowie Herkunft (`art`, `quelle`), Status, Konfidenz und Belegen der

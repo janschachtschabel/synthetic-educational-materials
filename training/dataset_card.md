@@ -76,10 +76,13 @@ are never seen during training.
 | `learning_venue`, `cross_cutting_topic` | vocational only, optional: learning venue and standard cross-cutting occupational topic |
 | `text_type`, `media_form` | text type and media form the full text was written as (e.g. text, slides, video or audio transcript) |
 | `didactic_function`, `duration_minutes` | optional: didactic function and working time |
-| `topic`, `topic_uri` | topic the material was generated from (GND, OpenEduHub topic trees, ESCO or OpenAlex; in higher education also typical topics from the project's own subject profiles, label only), empty for topics from sources that are not openly licensed |
+| `topic`, `topic_uri` | topic the material was generated from (GND, OpenEduHub topic trees, ESCO, OpenAlex, RVK or DigComp 3.0 learning outcomes; in higher education also typical topics from the project's own subject profiles, label only), empty for topics from sources that are not openly licensed |
 | `generator_model` | language model that generated the texts |
 | `title_previous` | earlier title if the title was regenerated afterwards, otherwise empty |
 | `description_previous` | earlier description if its first sentence was rewritten afterwards, otherwise empty |
+| `rvk_notation` | higher education only: class of the Regensburger Verbundklassifikation (RVK) the topic comes from, empty for other topic sources |
+| `digcomp_area`, `digcomp_competence`, `digcomp_competence_id` | adult (and optionally vocational) education only: DigComp 3.0 competence area and competence of the topic (German labels: own, unofficial translation) |
+| `digcomp_level`, `digcomp_knowledge_type`, `digcomp_ai` | DigComp 3.0 proficiency level (Basic … Highly advanced), knowledge/skill/attitude, relation to AI (explicit, implicit, none) |
 
 Controlled values are given as labels together with their URIs, following the OpenEduHub / edu-sharing metadata
 schema used by [WirLernenOnline](https://wirlernenonline.de).
@@ -98,12 +101,13 @@ Content type check agrees with the requested content type in {{content_type_matc
    - *School:* topic trees of the WirLernenOnline subject portals (OpenEduHub `oehTopics`) and further topics from
      keywords of WirLernenOnline records, matched to GND subject headings; school levels primary, lower and upper
      secondary.
-   - *Higher education:* OpenAlex topics and GND subject headings frequently used for textbooks and theses in the hbz
-     union catalogue, assigned to the Destatis subject classification.
+   - *Higher education:* OpenAlex topics, GND subject headings frequently used for textbooks and theses in the hbz
+     union catalogue, and thematic classes of the Regensburger Verbundklassifikation (RVK, levels 2–5), assigned to
+     the Destatis subject classification.
    - *Vocational education and training:* combinations of ESCO occupations and their skills, occupational groups after
      KldB 2010, learning fields of vocational school framework curricula.
-   - *Adult education:* GND course topics and basic education topics, organised by the subject areas of the
-     German adult education centre statistics (DIE).
+   - *Adult education:* GND course topics, basic education topics and the learning outcomes of DigComp 3.0 (digital
+     competence), organised by the subject areas of the German adult education centre statistics (DIE).
    - *Early childhood education:* GND topics for day-care centres, assigned to the seven educational areas of the
      joint framework of the German Länder.
 
@@ -146,6 +150,10 @@ The generated texts are released under CC BY 4.0. Metadata and topics come from:
   (Quelle: Statistisches Bundesamt (Destatis)) and KldB 2010 (Quelle: Statistik der Bundesagentur für Arbeit)
 - Gemeinsame Normdatei (GND) via lobid-gnd, hbz union catalogue via lobid-resources (CC0 1.0)
 - OpenAlex topics (CC0 1.0)
+- Regensburger Verbundklassifikation (RVK), Universitätsbibliothek Regensburg, MarcXML export (CC0 1.0)
+- DigComp 3.0: European Digital Competence Framework, © European Union, 2025, CC BY 4.0, JRC144121,
+  https://data.europa.eu/doi/10.2760/0001149; errata of 27 January 2026 applied, translated into German (own,
+  unofficial translation) and shortened. The European Commission is not responsible for this adapted version.
 - ESCO classification (Quelle: ESCO, Europäische Kommission; reuse under Commission Decision 2011/833/EU)
 - Volkshochschul-Statistik, DIE: Echarti, Huntemann, Lux, Reichart (2022), DOI 10.3278/70681 (CC BY 4.0)
 - WirLernenOnline: only keywords in combination with subjects and educational levels were used, as topic candidates

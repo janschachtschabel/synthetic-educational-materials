@@ -10,7 +10,7 @@ question-answer pairs. Structure and field names follow the OpenEduHub/edu-shari
 ```
 open vocabularies ──► topics per subject ──► seeds ──► full text ──► title, description, keywords, Q&A
 (OEH, Destatis, ESCO,    (mappings, once)    (no LLM)   (LLM)        (LLM, derived from the full text only)
- GND, OpenAlex, KMK …)
+ GND, OpenAlex, RVK, DigComp, KMK …)
 ```
 
 Five education sectors are separate modules: **school**, **higher education**, **vocational education and training**,

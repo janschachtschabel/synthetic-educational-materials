@@ -3,7 +3,8 @@
 Themen: Kombinationen aus ESCO-Beruf und einer Kompetenz, die an diesem Beruf hängt (essenziell, optional
 wählbar), und Lernfelder der KMK-Rahmenlehrpläne im zugeordneten ESCO-Beruf (Themenquelle „lernfeld“). Berufe und Kompetenzen tragen die ESCO-Original-URIs; Kompetenzen zusätzlich den Abgleich mit dem
 OEH-Vokabular escoSkills. Berufsfeld: KldB 2010 (Fassung 2020) aus dem OEH-Vokabular kldb, wie es WLO im
-Feld ccm:oeh_profession_group nutzt. Qualifizierungsweg (Ausbildung, Fortbildung, Studium, Anlernen) und
+Feld ccm:oeh_profession_group nutzt. Optional (Standard aus): Lernergebnisse aus DigComp 3.0 als berufsübergreifende
+digitale Kompetenz; der Beruf wird beim Seed passend zum DigComp-Niveau gezogen. Qualifizierungsweg (Ausbildung, Fortbildung, Studium, Anlernen) und
 KldB-Zuordnung je Beruf per Mehrfachabstimmung, filterbar über auswahl_optionen.
 """
 
@@ -99,7 +100,9 @@ class Berufsbildung(Bildungsbereich):
             "quellen": {"label": "Themenquellen",
                         "beschreibung": "woraus die Themen stammen",
                         "werte": {"esco": "ESCO-Beruf × Kompetenz des Berufs",
-                                  "lernfeld": "ESCO-Beruf × Lernfeld des KMK-Rahmenlehrplans"},
+                                  "lernfeld": "ESCO-Beruf × Lernfeld des KMK-Rahmenlehrplans",
+                                  "digcomp": "Lernergebnis aus DigComp 3.0 (digitale Kompetenz, berufsübergreifend); "
+                                             "Beruf passend zum Niveau beim Seed gezogen"},
                         "standard": ["esco", "lernfeld"]},
             "qualifizierung": {"label": "Qualifizierungsweg des Berufs",
                                "beschreibung": "wie der Beruf in Deutschland üblicherweise erlernt wird (Abstimmung)",
@@ -153,6 +156,8 @@ class Berufsbildung(Bildungsbereich):
         return any(k[:3] in eigene for k in w.get("kldb", {}) if len(k) >= 3)
 
     def belege_des_themas(self, topic: dict) -> set[str]:
+        if topic.get("quelle") == "digcomp":
+            return set()
         out = set()
         b, k = topic["beruf"], topic.get("kompetenz")
         if k and self.wlo_fach_passt(k, b):
@@ -164,6 +169,8 @@ class Berufsbildung(Bildungsbereich):
         return out
 
     def passt(self, topic: dict, auswahl: dict[str, list[str]]) -> bool:
+        if topic.get("quelle") == "digcomp":  # Beruf erst beim Seed; Berufs- und Kompetenzfilter gelten nicht
+            return "digcomp" in auswahl["quellen"] and not auswahl["belege"]
         b, k = topic["beruf"], topic.get("kompetenz")
         m = b.get("mapping") or {}
         if topic.get("quelle", "esco") not in auswahl["quellen"] or b.get("qualifizierung") not in auswahl["qualifizierung"]:
@@ -242,7 +249,26 @@ class Berufsbildung(Bildungsbereich):
                     if k:
                         out.append({"id": f"{b['uri']}|{uri.rsplit('/', 1)[-1]}", "beruf": b, "kompetenz": k,
                                     "relation": relation})
-        return out + self._lernfeld_topics()
+        return out + self._lernfeld_topics() + self._digcomp_topics()
+
+    def _digcomp_topics(self) -> list[dict]:
+        from ...quellen import digcomp as D
+        from ..erwachsenenbildung.digcomp import lo_info
+
+        return [{"id": D.uri(lo["id"]), "quelle": "digcomp", "digcomp": lo_info(lo)} for lo in D.lernergebnisse()]
+
+    def _digcomp_beruf(self, dc: dict, rng: random.Random, state: SeedState) -> tuple[dict, dict]:
+        """Beruf und Niveau für ein DigComp-Lernergebnis: Niveau aus dem DigComp-Niveau (Handmapping, grob nach DQR),
+        Beruf mit passendem Qualifizierungsweg, bei Ausbildung nur anerkannte Ausbildungsberufe (KMK-Rahmenlehrplan);
+        je Niveau rotierend (seltenster Beruf zuerst)."""
+        from ..erwachsenenbildung.digcomp import fachgebiete as dc_hand
+
+        ziel = dc_hand()["niveaus"][dc["niveau"]]["berufsbildung"]
+        niveau = next(n for n in self.niveaus["niveaus"] if n["id"] == ziel)
+        pool = [b for b in self.berufe if b.get("qualifizierung") in niveau["qualifizierung"]
+                and (b.get("qualifizierung") != "ausbildung" or b["uri"] in self.berufe_kmk)] or self.berufe
+        by = {b["uri"]: b for b in pool}
+        return by[state.pick_least_used(f"digcomp_beruf:{ziel}", sorted(by), rng)], niveau
 
     def _lernfeld_topics(self) -> list[dict]:
         from .lernfelder import lade_plaene
@@ -260,6 +286,8 @@ class Berufsbildung(Bildungsbereich):
     def balance_key(self, topic: dict, balance: str) -> str:
         if balance == "thema":
             return topic["id"]
+        if topic.get("quelle") == "digcomp":  # Beruf steht erst im Seed fest: eigene Gruppe
+            return topic["id"] if balance == "kompetenz" else "digcomp"
         if balance == "beruf":
             return topic["beruf"]["uri"]
         if balance == "kompetenz":
@@ -276,7 +304,12 @@ class Berufsbildung(Bildungsbereich):
         return "fortbildung" if quali in ("fortbildung", "studium") else "ausbildung"
 
     def make_seed(self, topic: dict, rng: random.Random, state: SeedState) -> dict:
-        b, k = topic["beruf"], topic.get("kompetenz") or {}
+        dc = topic.get("digcomp")
+        if dc:
+            b, niveau_dc = self._digcomp_beruf(dc, rng, state)
+        else:
+            b, niveau_dc = topic["beruf"], None
+        k = topic.get("kompetenz") or {}
         lf = topic.get("lernfeld")
         opt = self.optionen
         quali = b.get("qualifizierung") or "ausbildung"
@@ -293,7 +326,7 @@ class Berufsbildung(Bildungsbereich):
         if lf:  # Lernfelder gehören zur Ausbildung; das Ausbildungsjahr bestimmt die Stufe
             niveaus = [n for n in self.niveaus["niveaus"]
                        if n["id"] == ("ausbildung_grundstufe" if lf.get("jahr") == 1 else "ausbildung_fachstufe")]
-        niveau = rng.choice(niveaus)
+        niveau = niveau_dc or rng.choice(niveaus)
 
         seed: dict = {S.F_BEREICH: self.key}
         ctx_uri = CONTEXT_BASE + niveau["kontext"]
@@ -344,6 +377,20 @@ class Berufsbildung(Bildungsbereich):
                 q["name"], uri=p["url"], license=q["lizenz"],
                 method="Lernfeld des Rahmenlehrplans im zugeordneten ESCO-Beruf")
             status["rahmenlehrplan"] = p["mapping"]["status"]
+        elif dc:
+            from ...quellen import digcomp as D
+            from ..erwachsenenbildung import digcomp as dmod
+
+            seed.update(dmod.metadaten(dc))
+            seed[S.F_THEMA] = {"id": topic["id"], "label_de": dc["text_de"],
+                               "beschreibung_de": f"Digitale Kompetenz {dc['kompetenz']} {dc['kompetenz_label']}: "
+                                                  f"{dc['kompetenz_beschreibung']}",
+                               "keywords_de": [dc["kompetenz_label"], dc["bereich_label"]]}
+            seed[S.F_PROVENANCE][S.F_THEMA] = S.provenance(
+                D.QUELLE["name"], uri=D.QUELLE["uri"], license=D.QUELLE["lizenz"],
+                method=f"Lernergebnis {dc['id']} (veröffentlicht als {dc['id_original']}); eigene, nicht amtliche "
+                       "Übersetzung; Beruf passend zum DigComp-Niveau gezogen")
+            seed[S.F_PROVENANCE][S.F_THEMA]["quellenangabe"] = D.QUELLE["quellenangabe"]
         else:
             seed[S.F_KOMPETENZ] = {x: k[x] for x in ("uri", "label", "beschreibung", "art", "reichweite") if k.get(x)}
             seed[S.F_KOMPETENZ]["relation"] = topic["relation"]
@@ -366,6 +413,7 @@ class Berufsbildung(Bildungsbereich):
         seed[S.F_PROVENANCE][S.F_NIVEAU] = S.provenance(
             self.niveaus["quelle"]["name"],
             method="aus dem Ausbildungsjahr des Lernfelds (1. Jahr → Grundstufe, sonst Fachstufe)" if lf
+            else "aus dem DigComp-Niveau (digcomp_fachgebiete.json)" if dc
             else "passend zum Qualifizierungsweg, gleichverteilt")
         seed[S.F_MEDIENFORM] = typ["medienform"]
         seed["synth:textsorte"] = typ["textsorte"]
@@ -403,7 +451,8 @@ class Berufsbildung(Bildungsbereich):
             "thema": t["label_de"],
             "thema_beschreibung": t.get("beschreibung_de", ""),
             "thema_keywords": ", ".join(t.get("keywords_de", [])),
-            "kompetenzart": {"wissen": "Kenntnisse", "faehigkeit": "Fähigkeit"}.get(k.get("art"), ""),
+            "kompetenzart": {"wissen": "Kenntnisse", "faehigkeit": "Fähigkeit"}.get(k.get("art"), "")
+            or seed.get("synth:digcomp_art", ""),
             # ESCO-Label; bei Berufen mit KMK-Rahmenlehrplan dazu der deutsche Ausbildungsberuf
             "beruf": b["label"] + (f" (Ausbildungsberuf: {', '.join(b['ausbildungsberuf_kmk'])})"
                                    if b.get("ausbildungsberuf_kmk") else ""),
