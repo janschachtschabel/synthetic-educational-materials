@@ -62,7 +62,10 @@ are never seen during training.
 | `content_type`, `_uri` | content type (OpenEduHub vocabulary `new_lrt`), e.g. worksheet, explanatory video transcript, case study |
 | `content_type_check_match` | whether an independent check of the finished material detected the same content type |
 | `target_group`, `_uri` | intended end user role (OpenEduHub vocabulary `intendedEndUserRole`) |
-| `level` | level, e.g. school year group, Bachelor/Master, DQR level |
+| `level`, `level_uri` | level, e.g. school year group, Bachelor/Master, DQR level; URI from KIM `educationalLevel` or OpenEduHub `dqrCompetenceLevels`, empty where the level has no vocabulary value |
+| `discipline`, `_uri` | subject (OpenEduHub vocabulary `discipline`) in school, early childhood, vocational and adult education; vocational always includes „Berufliche Bildung“ |
+| `curriculum`, `_uri` | school only: topics in the WirLernenOnline topic trees (OpenEduHub `oehTopics`) |
+| `occupation`, `occupation_uri` | vocational only: ESCO occupation |
 | `text_type`, `media_form` | text type and media form the full text was written as (e.g. text, slides, video or audio transcript) |
 | `didactic_function`, `duration_minutes` | optional: didactic function and working time |
 | `topic`, `topic_uri` | topic the material was generated from (GND, OpenEduHub topic trees, ESCO or OpenAlex), empty for topics from sources that are not openly licensed |

@@ -1,0 +1,107 @@
+{
+ "beschreibung": "Handmapping des Projekts: KldB-2010-Berufshauptgruppe (zweistellig) → OEH-Fach (discipline, closeMatch). Jedes Material der Berufsbildung bekommt zusätzlich „Berufliche Bildung“ (Feld immer). Hauptgruppen ohne passendes Fach fehlen hier.",
+ "ziel": {
+  "name": "OpenEduHub discipline",
+  "uri": "http://w3id.org/openeduhub/vocabs/discipline/",
+  "lizenz": "CC0-1.0"
+ },
+ "immer": [
+  "http://w3id.org/openeduhub/vocabs/discipline/040"
+ ],
+ "closeMatch": {
+  "11": [
+   "http://w3id.org/openeduhub/vocabs/discipline/04001"
+  ],
+  "12": [
+   "http://w3id.org/openeduhub/vocabs/discipline/04001"
+  ],
+  "22": [
+   "http://w3id.org/openeduhub/vocabs/discipline/04009"
+  ],
+  "24": [
+   "http://w3id.org/openeduhub/vocabs/discipline/04011"
+  ],
+  "25": [
+   "http://w3id.org/openeduhub/vocabs/discipline/04011"
+  ],
+  "26": [
+   "http://w3id.org/openeduhub/vocabs/discipline/oeh04010",
+   "http://w3id.org/openeduhub/vocabs/discipline/04005"
+  ],
+  "27": [
+   "http://w3id.org/openeduhub/vocabs/discipline/04003"
+  ],
+  "28": [
+   "http://w3id.org/openeduhub/vocabs/discipline/04012"
+  ],
+  "29": [
+   "http://w3id.org/openeduhub/vocabs/discipline/04006"
+  ],
+  "31": [
+   "http://w3id.org/openeduhub/vocabs/discipline/04002"
+  ],
+  "32": [
+   "http://w3id.org/openeduhub/vocabs/discipline/04002"
+  ],
+  "33": [
+   "http://w3id.org/openeduhub/vocabs/discipline/04007"
+  ],
+  "34": [
+   "http://w3id.org/openeduhub/vocabs/discipline/04011"
+  ],
+  "41": [
+   "http://w3id.org/openeduhub/vocabs/discipline/04003"
+  ],
+  "42": [
+   "http://w3id.org/openeduhub/vocabs/discipline/640"
+  ],
+  "43": [
+   "http://w3id.org/openeduhub/vocabs/discipline/320"
+  ],
+  "51": [
+   "http://w3id.org/openeduhub/vocabs/discipline/04013"
+  ],
+  "61": [
+   "http://w3id.org/openeduhub/vocabs/discipline/04013"
+  ],
+  "62": [
+   "http://w3id.org/openeduhub/vocabs/discipline/04013"
+  ],
+  "63": [
+   "http://w3id.org/openeduhub/vocabs/discipline/04006"
+  ],
+  "71": [
+   "http://w3id.org/openeduhub/vocabs/discipline/04013"
+  ],
+  "72": [
+   "http://w3id.org/openeduhub/vocabs/discipline/04013"
+  ],
+  "73": [
+   "http://w3id.org/openeduhub/vocabs/discipline/04013"
+  ],
+  "81": [
+   "http://w3id.org/openeduhub/vocabs/discipline/260"
+  ],
+  "82": [
+   "http://w3id.org/openeduhub/vocabs/discipline/04010",
+   "http://w3id.org/openeduhub/vocabs/discipline/260"
+  ],
+  "83": [
+   "http://w3id.org/openeduhub/vocabs/discipline/44007",
+   "http://w3id.org/openeduhub/vocabs/discipline/50001"
+  ],
+  "84": [
+   "http://w3id.org/openeduhub/vocabs/discipline/440"
+  ],
+  "92": [
+   "http://w3id.org/openeduhub/vocabs/discipline/04013",
+   "http://w3id.org/openeduhub/vocabs/discipline/900"
+  ],
+  "93": [
+   "http://w3id.org/openeduhub/vocabs/discipline/060"
+  ],
+  "94": [
+   "http://w3id.org/openeduhub/vocabs/discipline/12002"
+  ]
+ }
+}

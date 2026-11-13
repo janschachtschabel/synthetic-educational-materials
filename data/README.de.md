@@ -28,6 +28,7 @@ stehen zusätzlich `definition` und `note` (KldB: Kurzbeschreibung und typische 
 | `pruefliste_berufe.csv` | Berufe mit Grund für eine Durchsicht, leere Korrekturspalten |
 | `korrekturen.csv` | redaktionelle Korrekturen (`korrektur_codes` = KldB-Kennziffern mit `|`, `-` = ausschließen, `korrektur_qualifizierung`, `kommentar`), Vorrang vor dem LLM |
 | `inhaltstypen.json` | genutzte Inhaltstypen aus OEH `new_lrt` mit Textsorte, Medienform, Kompetenzarten, Zielgruppen, `umfang` (Wörter von–bis) |
+| `kldb_discipline.json` | Handmapping KldB-Berufshauptgruppe → OEH-Fach (`ccm:taxonid`, closeMatch); `immer`: „Berufliche Bildung“ |
 | `berufe_kmk.jsonl` | ESCO-Berufe mit anerkanntem Ausbildungsberuf: `uri`, `label`, `rahmenlehrplaene` (`id`, `titel`, `status` aus `rahmenlehrplaene.jsonl`); schreibt der Schritt `zusammenfuehren` der Lernfelder |
 | `niveaus.json` | DQR-Niveaus mit Qualifizierungsweg und Bildungsstufe |
 | `optionale_felder.json` | Werte und Anteile der optionalen Steuerfelder (Lernort, Querschnittsthema …) |
@@ -74,6 +75,7 @@ Die Themen (Beruf × Kompetenz) entstehen beim Laden aus beiden Dateien und werd
 
 | Datei | Inhalt |
 |---|---|
+| `fachgebiete_discipline.json` | Handmapping VHS-Fachgebiet → OEH-Fach (`ccm:taxonid`, closeMatch); `ersatz`: „Weiterbildung“ |
 | `programmbereiche.json` | 7 Programmbereiche und 85 Fachgebiete der Volkshochschul-Statistik (`notation`, `label`, `uri`, `uebergreifend` für die Sammelpositionen x.00) |
 | `themen_erwachsenenbildung.jsonl` | ein Thema je Zeile: `id` (GND-URI oder oehTopics-URI), `label_de`, `art` (`kursthema`, `kursleitungsthema`), `herkunft` (`gnd`, `schulthemen`; `rahmencurriculum` und `grundbildung` nur lokal, siehe `lokal/`), `fachgebiet` und `programmbereich` [{`notation`, `uri`, `label`}] (Fremdsprachen als `4.fs`), `quelle`, `belege.wlo`, `mapping` |
 | `pruefliste_themen.csv`, `korrekturen.csv` | Durchsicht (`korrektur_codes` = Fachgebiete, optional `kursthema`/`kursleitungsthema`, `-` = ausschließen) |

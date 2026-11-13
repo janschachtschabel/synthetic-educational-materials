@@ -120,6 +120,7 @@ python -m sem laeufe                                # Läufe, die ihr Ziel nicht
 python -m sem materialien --fortsetzen schule5000_s42   # einen davon mit seinen Einstellungen fortsetzen
 python -m sem titel-neu --materialien output/materialien_schule5000_s42.jsonl   # nur die Titel neu (neue Datei)
 python -m sem beschreibung-einstieg --materialien output/materialien_schule5000_s42.jsonl   # Schablonen-Anfang der Beschreibung ersetzen
+python -m sem faecher-ergaenzen --materialien output/materialien_schule5000_s42.jsonl   # OEH-Fach in Berufs- und EB-Materialien nachtragen (ohne LLM)
 python -m sem gnd-ergaenzen                         # GND-Motive ersetzen, Themenbeschreibungen aus GND/Wikidata (Netz)
 ```
 

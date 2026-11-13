@@ -16,7 +16,7 @@ import random
 import warnings
 from functools import cache, cached_property
 
-from ... import gnd_ergaenzung
+from ... import faecher, gnd_ergaenzung
 from ... import schema as S
 from ...paths import MAPPING_DIR, lokal_pfad
 from ...vocabs import load as load_vocab
@@ -250,6 +250,7 @@ class Erwachsenenbildung(Bildungsbereich):
         if q.get("quellenangabe"):
             prov["quellenangabe"] = q["quellenangabe"]
         S.set_controlled(seed, F_FACHGEBIET, fachgebiete, prov)
+        faecher.setzen(seed)  # ccm:taxonid: Fach des VHS-Fachgebiets, sonst „Weiterbildung“
         pbr = next(p for p in s["programmbereiche"] if p["notation"] == pb)
         S.set_controlled(seed, F_PROGRAMMBEREICH, [{"uri": pbr["uri"], "label": pbr["label"]}],
                          S.provenance(q["name"], uri=q["uri"], license=q["lizenz"], method="aus dem Fachgebiet"))

@@ -525,7 +525,8 @@ Export sie enthält, Links auf die Node-IDs. Von WLO werden nur Keywords in Verb
 Hochschulfächern genutzt. Die `.stats.json` zählt Themenquellen, Status und Belege.
 
 **Seeds Berufsbildung.** Statt `ccm:oeh_taxonid_university` tragen sie `ccm:oeh_profession_group`
-(KldB-Berufsuntergruppen, OEH-URIs), dazu `synth:beruf` (ESCO-URI, Label, ISCO-08, Beschreibung,
+(KldB-Berufsuntergruppen, OEH-URIs) und `ccm:taxonid` (OEH-Fach: immer „Berufliche Bildung“, dazu das Fach der
+KldB-Berufshauptgruppe laut Handmapping `kldb_discipline.json`, z. B. 43 → Informatik), dazu `synth:beruf` (ESCO-URI, Label, ISCO-08, Beschreibung,
 Qualifizierungsweg, KldB-Oberebenen) und `synth:kompetenz` (ESCO-URI, Label, Beschreibung, Art,
 Reichweite, essenziell/optional, `exactMatch` auf OEH `escoSkills`). `synth:thema` ist die Kompetenz im
 Kontext des Berufs. Inhaltstyp passt zu Kompetenzart und Zielgruppe (80 % Lernende, 20 % Lehrende und
@@ -580,7 +581,8 @@ Typ und Pfad). Gleichverteilung: `thema` (Standard), `portal`
 `stufen`, `art`, `stufen_status`, `art_status`, `belege` (`wlo`, `wlo_stufe`, `gnd`). Eigener
 Volltext-Prompt (`prompts/schule/volltext.md`) mit Themenpfad, Jahrgang, Operatoren und Zielsprache.
 
-**Seeds Erwachsenenbildung.** Bildungsstufe fest Erwachsenenbildung; `synth:fachgebiet_vhs` und
+**Seeds Erwachsenenbildung.** Bildungsstufe fest Erwachsenenbildung; `ccm:taxonid` (OEH-Fach des VHS-Fachgebiets laut
+Handmapping `fachgebiete_discipline.json`, ohne passendes Fach „Weiterbildung“); `synth:fachgebiet_vhs` und
 `synth:programmbereich_vhs` (Volkshochschul-Statistik). Zielgruppe: Kursthemen 80 % Teilnehmende, 20 %
 Kursleitende; Themen für Kursleitende nur Kursleitende. In der Grundbildung immer, sonst in 5 % der Seeds
 `synth:sprachniveau` = einfache Sprache. Optional: Einsatz (50 %), Dauer (40 %), Veranstaltungsform (40 %;

@@ -13,6 +13,7 @@ import json
 import random
 from functools import cached_property
 
+from ... import faecher
 from ... import schema as S
 from ...paths import MAPPING_DIR, lokal_pfad
 from ...vocabs import load as load_vocab
@@ -307,6 +308,7 @@ class Berufsbildung(Bildungsbereich):
         if vk.get("quellenangabe"):
             prov["quellenangabe"] = vk["quellenangabe"]
         S.set_controlled(seed, S.F_PROFESSION, b["berufsuntergruppe"], prov)
+        faecher.setzen(seed)  # ccm:taxonid: „Berufliche Bildung“ + Fach der Berufshauptgruppe
         lrt_src = self.inhaltstypen["quelle"]
         S.set_controlled(seed, S.F_LRT, [{"uri": typ["uri"], "label": typ["label"]}], S.provenance(
             lrt_src["name"], uri=lrt_src["uri"], license=lrt_src["lizenz"],
