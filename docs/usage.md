@@ -119,6 +119,7 @@ python -m sem laeufe                                # runs that did not reach th
 python -m sem materialien --fortsetzen schule5000_s42   # resume one of them with its settings
 python -m sem titel-neu --materialien output/materialien_schule5000_s42.jsonl   # regenerate titles only (new file)
 python -m sem beschreibung-einstieg --materialien output/materialien_schule5000_s42.jsonl   # replace stock-phrase description openings
+python -m sem faecher-ergaenzen --materialien output/materialien_schule5000_s42.jsonl   # add the OEH subject to vocational and adult education materials (no LLM)
 python -m sem gnd-ergaenzen                         # replace GND motif entries, topic descriptions from GND/Wikidata (network)
 ```
 

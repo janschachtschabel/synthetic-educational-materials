@@ -57,7 +57,9 @@ def schema():
         ("qa_pairs", pa.list_(pa.struct([("question", pa.string()), ("answer", pa.string()), ("type", pa.string())]))),
         ("educational_context", lst), ("educational_context_uri", lst), ("subject", lst), ("subject_uri", lst),
         ("content_type", lst), ("content_type_uri", lst), ("content_type_check_match", pa.bool_()),
-        ("target_group", lst), ("target_group_uri", lst), ("level", pa.string()), ("text_type", pa.string()),
+        ("target_group", lst), ("target_group_uri", lst), ("level", pa.string()), ("level_uri", pa.string()),
+        ("discipline", lst), ("discipline_uri", lst), ("curriculum", lst), ("curriculum_uri", lst),
+        ("occupation", pa.string()), ("occupation_uri", pa.string()), ("text_type", pa.string()),
         ("media_form", pa.string()), ("didactic_function", pa.string()), ("duration_minutes", pa.int32()),
         ("topic", pa.string()), ("topic_uri", pa.string()), ("generator_model", pa.string()),
         ("title_previous", pa.string()), ("description_previous", pa.string()),
@@ -118,6 +120,16 @@ def flatten(r: dict) -> dict:
         "target_group": _labels(r, "ccm:educationalintendedenduserrole"),
         "target_group_uri": _uris(r, "ccm:educationalintendedenduserrole"),
         "level": niveau.get("label"),
+        # KIM educationalLevel or OEH dqrCompetenceLevels; empty where the level has no vocabulary value
+        "level_uri": niveau.get("exactMatch"),
+        # OEH discipline (ccm:taxonid) in every sector that has it; higher education uses `subject` instead
+        "discipline": _labels(r, "ccm:taxonid"),
+        "discipline_uri": _uris(r, "ccm:taxonid"),
+        # WirLernenOnline topic tree (school only, ccm:curriculum)
+        "curriculum": _labels(r, "ccm:curriculum"),
+        "curriculum_uri": _uris(r, "ccm:curriculum"),
+        "occupation": (r.get("synth:beruf") or {}).get("label"),
+        "occupation_uri": (r.get("synth:beruf") or {}).get("uri"),
         "text_type": r.get("synth:textsorte"),
         "media_form": r.get("synth:medienform"),
         "didactic_function": r.get("synth:didaktische_funktion"),

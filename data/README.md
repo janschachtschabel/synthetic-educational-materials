@@ -28,6 +28,7 @@ One file `<name>.json` per vocabulary:
 | `pruefliste_berufe.csv` | occupations with a reason for review, empty correction columns |
 | `korrekturen.csv` | editorial corrections (`korrektur_codes` = KldB (Classification of Occupations) codes separated by `|`, `-` = exclude, `korrektur_qualifizierung`, `kommentar`), take precedence over the LLM |
 | `inhaltstypen.json` | content types used from OEH `new_lrt`, with text type, media format, skill types, target groups, and `umfang` (words from–to) |
+| `kldb_discipline.json` | hand mapping KldB occupational main group → OEH subject (`ccm:taxonid`, closeMatch); `immer`: "Berufliche Bildung" |
 | `berufe_kmk.jsonl` | ESCO occupations with a recognized training occupation: `uri`, `label`, `rahmenlehrplaene` (`id`, `titel`, `status` from `rahmenlehrplaene.jsonl`); written by the learning-field step `zusammenfuehren` |
 | `niveaus.json` | DQR levels with qualification pathway and educational level |
 | `optionale_felder.json` | values and proportions of the optional control fields (learning location, cross-cutting topic …) |
@@ -74,6 +75,7 @@ Topics (occupation × skill) are generated when loading from both files and are 
 
 | File | Contents |
 |---|---|
+| `fachgebiete_discipline.json` | hand mapping VHS subject area → OEH subject (`ccm:taxonid`, closeMatch); `ersatz`: "Weiterbildung" |
 | `programmbereiche.json` | 7 programme areas and 85 subject areas from the Volkshochschul-Statistik (Adult Education Center Statistics) (`notation`, `label`, `uri`, `uebergreifend` for the collective entries x.00) |
 | `themen_erwachsenenbildung.jsonl` | one topic per line: `id` (GND URI or oehTopics URI), `label_de`, `art` (`kursthema`, `kursleitungsthema`), `herkunft` (`gnd`, `schulthemen`; `rahmencurriculum` and `grundbildung` local only, see `lokal/`), `fachgebiet` and `programmbereich` [{`notation`, `uri`, `label`}] (foreign languages as `4.fs`), `quelle`, `belege.wlo`, `mapping` |
 | `pruefliste_themen.csv`, `korrekturen.csv` | review (`korrektur_codes` = subject areas, optionally `kursthema`/`kursleitungsthema`, `-` = exclude) |

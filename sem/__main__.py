@@ -11,6 +11,7 @@
     python -m sem materialien --fortsetzen NAME   (unfertigen Lauf mit seinen Einstellungen fortsetzen)
     python -m sem titel-neu --materialien output/materialien_….jsonl [--out …] [--limit N]   (nur Titel neu)
     python -m sem beschreibung-einstieg --materialien output/materialien_….jsonl   (nur Schablonen-Anfang neu)
+    python -m sem faecher-ergaenzen --materialien output/materialien_….jsonl   (OEH-Fach für Berufs- und EB nachtragen)
     python -m sem mappings hochschule [alle|openalex|gnd|schritt …] [--limit N] [--stimmen 3] [--wlo export.csv …]
     python -m sem mappings hochschule --liste
 """
@@ -173,6 +174,12 @@ def main(argv=None):
     p.add_argument("--limit", type=int, help="nur die ersten N Materialien")
     _llm_args(p)
 
+    p = sub.add_parser("faecher-ergaenzen",
+                       help="OEH-Fach (ccm:taxonid) in fertigen Materialien der Berufs- und Erwachsenenbildung "
+                            "nachtragen (Handmapping, ohne LLM, neue Datei)")
+    p.add_argument("--materialien", type=Path, required=True, help="fertige Materialien (JSONL)")
+    p.add_argument("--out", type=Path, help="Ausgabe (Standard: <eingabe>_faecher.jsonl daneben)")
+
     p = sub.add_parser("gnd-ergaenzen", help="GND-Themen aller Bereiche ergänzen: Ersatz für Motiv-Sätze und "
                                              "Kurzbeschreibungen (GND, Wikidata) → data/mappings/gnd_ergaenzungen.jsonl")
     p.add_argument("--limit", type=int, help="nur die ersten N Themen (zum Testen)")
@@ -314,6 +321,12 @@ def main(argv=None):
         print(f"{prog.done} neu, {prog.skipped} schon vorhanden, {prog.failed} fehlgeschlagen → {out}")
         if prog.status != "fertig":
             sys.exit(2)
+
+    elif a.cmd == "faecher-ergaenzen":
+        from .faecher import ergaenzen, standard_ausgabe
+
+        out = a.out or standard_ausgabe(a.materialien)
+        print(json.dumps(ergaenzen(a.materialien, out), ensure_ascii=False), "→", out)
 
     elif a.cmd == "gnd-ergaenzen":
         from .gnd_ergaenzung import DATEI, bauen
