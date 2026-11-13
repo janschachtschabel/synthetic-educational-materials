@@ -12,7 +12,8 @@
     python -m sem titel-neu --materialien output/materialien_….jsonl [--out …] [--limit N]   (nur Titel neu)
     python -m sem beschreibung-einstieg --materialien output/materialien_….jsonl   (nur Schablonen-Anfang neu)
     python -m sem faecher-ergaenzen --materialien output/materialien_….jsonl   (OEH-Fach für Berufs- und EB nachtragen)
-    python -m sem mappings hochschule [alle|openalex|gnd|schritt …] [--limit N] [--stimmen 3] [--wlo export.csv …]
+    python -m sem mappings hochschule [alle|openalex|gnd|rvk|schritt …] [--limit N] [--stimmen 3] [--wlo export.csv …]
+                                     [--rvk data/lokal/rvk/rvko_marcxml_2026_3.xml.gz]
     python -m sem mappings hochschule --liste
 """
 
@@ -197,6 +198,10 @@ def main(argv=None):
     p.add_argument("--wlo", nargs="+", metavar="CSV", help="WLO-Exporte für Keyword-Fach-Belege (bleiben lokal)")
     p.add_argument("--rlp", metavar="ORDNER", help="Markdown-Fassungen der KMK-Rahmenlehrpläne (Berufsbildung, "
                                                   "Schritt lernfelder; Standard RLP_MARKDOWN_DIR)")
+    p.add_argument("--rvk", metavar="DATEI", help="RVK-Gesamtabzug MarcXML (.xml.gz; Hochschule, Schritt rvk_klassen; "
+                                                 "Standard: neueste Datei unter data/lokal/rvk/)")
+    p.add_argument("--digcomp", metavar="DATEI", help="DigComp 3.0 Data Supplement (.jsonld; Erwachsenenbildung, "
+                                                     "Schritt digcomp; Standard: data/lokal/digcomp/)")
     _stand_arg(p)
     _llm_args(p)
 
@@ -353,7 +358,8 @@ def main(argv=None):
             raise SystemExit(f"Unbekannte Schritte {unbekannt}. Möglich: {', '.join(schritte)}, "
                              f"{', '.join(b.mapping_folgen)}, alle")
         prog = _mit_stand(a, lambda **kw: b.mapping_ausfuehren(keys, _cfg(a), **kw), limit=a.limit, stimmen=a.stimmen,
-                          embedding_modell=a.embedding_modell, wlo_dateien=a.wlo, rlp_ordner=a.rlp)
+                          embedding_modell=a.embedding_modell, wlo_dateien=a.wlo, rlp_ordner=a.rlp,
+                          rvk_datei=a.rvk, digcomp_datei=a.digcomp)
         print("\n" + prog.line())
         if "fertig" not in prog.status:
             sys.exit(2)
