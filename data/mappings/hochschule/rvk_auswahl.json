@@ -1,0 +1,53 @@
+{
+ "quelle": "rvko_marcxml_2026_3.xml.gz",
+ "quartal": "2026_3",
+ "lizenz": "CC0-1.0",
+ "download": "https://rvk.uni-regensburg.de/regensburger-verbundklassifikation-online/rvk-download",
+ "datum": "2026-11-13",
+ "max_tiefe": 5,
+ "statistik": {
+  "klassen": 783444,
+  "typen": {
+   "ausgeschlossen": 168802,
+   "person": 143583,
+   "schluessel": 128431,
+   "thematisch": 92424,
+   "geografie": 77198,
+   "unter_geografie": 76654,
+   "form": 42600,
+   "werk": 24112,
+   "instanz": 11856,
+   "zeit": 11588,
+   "sammel": 6196
+  },
+  "thematisch_je_tiefe": {
+   "2": 412,
+   "3": 3275,
+   "4": 11301,
+   "5": 16312
+  }
+ },
+ "ausgeschlossen": {
+  "AA": "Bibliografien der Bibliografien, Bibliothekskataloge (Formgruppe)",
+  "AB": "Verzeichnisse amtlicher Druckschriften und Hochschulschriften (Formgruppe)",
+  "AC": "Bibliografien besonderer Literaturgattungen (Formgruppe)",
+  "AD": "Personal-, Landes- und topografische Bibliografien (Formgruppe)",
+  "AE": "Enzyklopädien, allgemeine Nachschlagewerke (Formgruppe)",
+  "AF": "Biografische Lexika (Formgruppe)",
+  "AH": "Wörterbücher (Formgruppe, nach Sprachen gegliedert)",
+  "AV": "Sammelwerke aus verschiedenen Gebieten, Serien (Formgruppe)",
+  "AW": "Parlamentsschriften (Formgruppe)",
+  "AX": "Akademieserien, Periodika wissenschaftlicher Gesellschaften (Formgruppe)",
+  "AZ 10000": "Allgemeine und fachübergreifende Zeitschriften (Formgruppe)",
+  "RC - RZ": "Regionale Geografie: dieselbe Gliederung der allgemeinen Geografie, je Land und Landschaft wiederholt (115.000 Klassen); die allgemeine Geografie (RB) bleibt"
+ },
+ "oberklassen_nur_fach": 234,
+ "mapping": {
+  "methode": "RVK-Klasse; Fach: Embedding, Handmapping und LLM-Mehrfachabstimmung auf Tiefe 2/3, tiefere Klassen erben; Lehrebene: LLM-Mehrfachabstimmung",
+  "modell": "gpt-6-luna",
+  "embedding_modell": "intfloat/multilingual-e5-small",
+  "stimmen": 3,
+  "datum": "2026-11-13",
+  "prompt_hash": "bf0adb28a2db"
+ }
+}
