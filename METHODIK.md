@@ -30,6 +30,8 @@ offene Vokabulare und Taxonomien ──► Mappings (Themen mit Fachzuordnung) �
 | [OpenEduHub-Vokabulare](https://github.com/openeduhub/oeh-metadata-vocabs) (`educationalContext`, `new_lrt`, `intendedEndUserRole`, `hochschulfaechersystematik`) | Bildungsstufe, Inhaltstyp, Zielgruppe, Hochschulfächer | CC0 1.0 |
 | Destatis-Systematik der Fächergruppen, Studienbereiche und Studienfächer | Ursprung der Hochschulfächersystematik; ausgelesen aus dem OpenEduHub-Vokabular `hochschulfaechersystematik`, nicht direkt bei Destatis | „Quelle: Statistisches Bundesamt (Destatis)“, steht im Vokabular (`quellenangabe`) und in der Herkunft jedes Seeds |
 | [OpenAlex Topics](https://github.com/ourresearch/openalex-topic-classification) (4.516 Themen mit Beschreibung und Keywords) | Themen Hochschule (Vertiefung/Forschung) | CC0 1.0 |
+| [Regensburger Verbundklassifikation (RVK)](https://rvk.uni-regensburg.de), MarcXML-Gesamtabzug (Quartal 2026_3, 783.444 Klassen in 34 Fachsystematiken) | vierte Themenquelle Hochschule: thematische Klassen der Tiefe 2 bis 5 mit Pfad und GND-Sachschlagwörtern aus dem Register | CC0 1.0; der Abzug liegt nur lokal (`data/lokal/rvk/`), im Repo steht die Auswahl `rvk_klassen.jsonl` |
+| [DigComp 3.0](https://publications.jrc.ec.europa.eu/repository/handle/JRC144121): European Digital Competence Framework, Fifth Edition (Cosgrove, Cachia 2025, JRC144121, [Data Supplement](https://jeodpp.jrc.ec.europa.eu/ftp/public/JRC-OpenData/DIGCOMP/DIGCOMP3.0/) vom 24.11.2025) | Themen Erwachsenenbildung (Standard) und Berufsbildung (optional): 5 Bereiche, 21 Kompetenzen, 522 Lernergebnisse nach den [Errata](https://joint-research-centre.ec.europa.eu/scientific-activities/key-competences-lifelong-learning/digital-competence-framework-digcomp/digcomp-30-resources/digcomp-30-errata_en) vom 27.01.2026 | © European Union, 2025, CC BY 4.0; eigene, nicht amtliche Übersetzung, gekürzt; die Europäische Kommission ist für diese Fassung nicht verantwortlich; Quellenangabe in der Herkunft jedes Seeds |
 | [Gemeinsame Normdatei (GND)](https://lobid.org/gnd) über lobid-gnd, [GND-Sachgruppen](https://d-nb.info/standards/vocab/gnd/gnd-sc.html) | GND-Themen Hochschule (Label, Synonyme, Oberbegriffe, Sachgruppe); Normierung der Themen aus WLO-Keywords in Elementarbereich, Schule und Erwachsenenbildung | CC0 1.0 |
 | [hbz-Verbundkatalog](https://lobid.org/resources) über lobid-resources | Kandidaten und Belege: Häufigkeit eines Schlagworts in Lehrbüchern und Hochschulschriften | CC0 1.0 |
 | [WirLernenOnline](https://wirlernenonline.de) (Export der Redaktion) | nur Keywords in Verbindung mit Fächern und Bildungsstufen (Hochschule, Schule, Elementarbereich), Themenbaum-Zuordnung und Bildungsstufen der Datensätze, als Kandidaten und Belege; keine Titel, Beschreibungen oder Inhalte | Keywords nur als Häufigkeiten bzw. Abgleich auf GND/OpenAlex |
@@ -153,6 +155,60 @@ Zahl der Datensätze, häufigsten Fächern und, wo vorhanden, Links auf die Node
 zusätzlich geprüft, ob ein WLO-Fach im selben Studienbereich liegt wie das abgestimmte Fach
 (`belege.wlo.fach_passt`: feinste übereinstimmende Ebene `studienfach`, `studienbereich`, `faechergruppe` oder `nein`; WLO-Fächer stehen oft nur auf grober Ebene), eine unabhängige Gegenprobe der Fachzuordnung.
 
+**RVK-Themen** (Folge `rvk`, Option `--rvk <Abzug>`). Die Regensburger Verbundklassifikation ist die
+Aufstellungssystematik von rund 140 wissenschaftlichen Bibliotheken; ihre Klassen bilden ab, wozu an Hochschulen
+gelehrt und publiziert wird. Grundlage ist der MarcXML-Gesamtabzug (Quartal 2026_3); die Tiefe einer Klasse
+ergibt sich aus ihrem Hierarchiepfad (Feld 153 `$e`/`$h`), nicht aus der Notation: Ebene 1 = Fachsystematik (z. B.
+Q), 2 = Hauptgruppe (QP), 3 = Bereich (QP 300 - QP 399), 4 und 5 darunter.
+
+1. *Auswahl* (`rvk_klassen`, ohne LLM, `sem/quellen/rvk.py`). Von 783.444 Klassen bleiben 31.300
+   thematische Klassen der Tiefe 2 bis 5 (Tiefe 2: 412, 3: 3.275, 4: 11.301, 5: 16.312). Ausgeschlossen werden, in
+   dieser Reihenfolge: Klassen unter einer Schlüssel-Oberklasse („A. Formalschlüssel“, „B. Sachschlüssel“,
+   „Epochenschlüssel“ …; die RVK multipliziert diese Schlüssel aus, in der Medizin rund 1.345-mal dieselbe
+   Unterteilung), Personen- und Werkklassen (Oberklassen wie „Einzelne Autoren“, „Autoren A“, Registerfeld 700 oder
+   730, „Nachname, Vorname“ unter einer Personen-Oberklasse, kleingeschriebene Anhängsel wie „zum Gesamtwerk“),
+   Sammel- und Buchstabenklassen („Orte T“, „Gattungen und Formen B“), Instanzen unter Containern wie „Einzelne Orte
+   der Oberpfalz“ oder „Kataloge einzelner Museen“, Geografika (Benennung ist ein Geografikum aus den
+   751-Registerbegriffen) und alles unter einem Geografikum (dieselbe Gliederung je Land wiederholt), Zeitklassen
+   („19. Jahrhundert“) sowie reine Form- und Sammellabels („Zeitschriften“, „Allgemeines, Gesamtdarstellungen“,
+   „Festschriften“, „Einzelne Probleme“; Form gilt nur, wenn die ganze Benennung aus Formwörtern besteht, damit
+   „Allgemeines Verwaltungsrecht“ bleibt). Ganz ausgeschlossen sind die Formgruppen von A Allgemeines (AA–AF, AH,
+   AV, AW, AX, AZ: Bibliografien, Enzyklopädien, Wörterbücher, Sammelwerke, Parlaments- und Akademieschriften) und
+   RC–RZ Regionale Geografie (115.000 Klassen: die allgemeine Geografie, je Land und Landschaft wiederholt; RB
+   bleibt). Erhalten bleiben aus A die Fachgebiete Wissenschaftskunde, Museologie, Hochschulwesen, Schrift- und
+   Handschriftenkunde, Buch- und Bibliothekswesen, Medien- und Kommunikationswissenschaft sowie Natur- und
+   Umweltschutz. Zahlen je Typ in `rvk_auswahl.json`. Die RVK ist sehr ungleich gegliedert: Wirtschaft (Q),
+   Informatik (SQ–SU), Psychologie und Soziologie haben nur wenige Hundert bis gut tausend Klassen.
+2. *Themenname* (`rvk_labels`). Viele Benennungen sind nur im Pfad verständlich („Theorie“ unter
+   „Makroökonomie“, „Literaturgeschichte“ unter jeder Einzelliteratur). Benennungen aus nur allgemeinen Wörtern,
+   kleingeschriebene und solche, die bei mindestens vier Themen gleich lauten, bekommen per LLM einen
+   eigenständigen Namen aus Benennung und Pfad (5.688 Themen, z. B. „Geschichte“ unter
+   „Akademien der Wissenschaften“ → „Geschichte der Akademien der Wissenschaften“); `label_rvk` behält die
+   Originalbenennung, `mapping.label_umformuliert` kennzeichnet die Änderung.
+3. *Fach* (`rvk_kandidaten`, `rvk_faecher`). Abgestimmt wird nur auf Tiefe 2 und 3 (3.921 Klassen,
+   darunter die Oberklassen der Themen, auch wenn sie selbst kein Thema sind, z. B. „Allgemeines“): Kandidaten
+   per Embedding (Benennung, Pfad, Schlagwörter) plus die Fächer des Handmappings `rvk_studienbereich.csv`
+   (Fachsystematik bzw. Tiefe-2-Klasse → Studienbereich, unsichere Zeilen markiert), dann drei Stimmen mit
+   Begründung. Klassen der Tiefe 4 und 5 erben das Fach der nächsten abgestimmten Oberklasse
+   (`mapping.fach_geerbt_von`); RVK-Klassen liegen fast immer im Fach ihrer Oberklasse, und so entfallen rund 85 %
+   der Abstimmungen. Ohne abgestimmte Oberklasse gilt das erste Fach im Studienbereich des Handmappings (Status
+   `unsicher`, Prüfliste).
+4. *Lehrebene* (`rvk_lehrebene`). Drei Stimmen je Thema nach den Kriterien der übrigen Hochschulthemen, mit
+   zusätzlichem Ziel „kein Lehrthema“ für Form-, Sammel- oder Verwaltungsklassen, einzelne Orte, Institutionen
+   oder Personen, die die Heuristik übersehen hat. Mehrheit „kein Lehrthema“ → ausgeschlossen
+   (`rvk_ausgeschlossen.csv`, 4.359 Klassen).
+5. *Abgleich* (`rvk_zusammenfuehren`). Eine RVK-Klasse, deren GND-Sachschlagwort (Registerfeld 750) die ID eines
+   vorhandenen GND-Themas ist oder deren Name normiert dem eines vorhandenen Themas entspricht, jeweils im selben
+   Studienfach, wird kein neues Thema, sondern Beleg am vorhandenen Thema (`belege.rvk`, Filter `belege=rvk`):
+   5.016 Klassen an 1.955 Themen. Personen und Geografika aus dem Register werden nicht zu Themen.
+
+Ergebnis: 21.925 neue RVK-Themen (Tiefe 2: 309, 3: 2.061, 4: 7.692, 5: 11.863); Fach 20.279 gesichert, 1.460 wahrscheinlich, 186 unsicher; Lehrebene
+15.641 gesichert, 6.064 wahrscheinlich, 220 unsicher (Grundlagen 1.260, Vertiefung 15.370, Forschung 5.295); 397 auf der Prüfliste `pruefliste_rvk.csv`. Studienfächer ohne OpenAlex-, GND- oder RVK-Thema (Fachprofil-Themen nicht gezählt):
+vorher 28, nachher 10. Filter: `quellen=rvk` (Standard an) und `rvk_tiefe` (2 bis 5,
+Standard alle). Kosten der LLM-Schritte: rund 8,10 US-$ (gpt-6-luna).
+
+Die RVK-Themen gehören zum Gesamtset, stehen aber kompakt in `themen_hochschule_rvk.jsonl` (Fach als Notation; Studienbereich, Fächergruppe, Quelle und Methodenangaben setzt der Code beim Laden ein), weil die vollständigen Zeilen das Gesamtset über die Dateigrößengrenze von GitHub gebracht hätten. Mit der Standardverteilung (`studienfach_wurzel`) stammt rund die Hälfte der Hochschul-Seeds aus der RVK; wer das nicht will, schränkt `quellen` oder `rvk_tiefe` ein.
+
 **Inhaltstypen** (`inhaltstypen.json`): redaktionelle Auswahl textfähiger Typen aus OEH `new_lrt`. Je Typ
 ist festgelegt, welche Textsorte erzeugt wird, welche Medienform der Volltext hat (Text, Folien, Video-
 oder Audio-Transkript), für welche Lehrebenen er passt und optional für welche Fächergruppen
@@ -275,6 +331,14 @@ Informationsdienste wegen unlesbarer Lernfeldtitel.
 **Ergebnis:** 272 Pläne mit 3.787 Lernfeldern und ESCO-Beruf (gesichert 177, wahrscheinlich 28,
 redaktionell 67); die Prüfliste ist leer. Mit der Voreinstellung gehen 4.619 Lernfeld-Themen (ESCO-Beruf ×
 Lernfeld) in die Seeds ein.
+
+**DigComp in der Berufsbildung** (Quelle `digcomp`, Standard aus). Digitale Kompetenz als berufsübergreifendes
+Thema: Thema ist ein DigComp-Lernergebnis, der Beruf wird beim Seed gezogen, passend zum DigComp-Niveau
+(grob nach DQR: Basic → Ausbildung 1. Jahr, DQR 3; Intermediate → Ausbildung 2./3. Jahr, DQR 4; Advanced →
+Berufsspezialist, DQR 5; Highly advanced → Bachelor Professional, DQR 6). Für Ausbildungsniveaus kommen nur
+anerkannte Ausbildungsberufe mit KMK-Rahmenlehrplan in Frage, für Fortbildungsniveaus Berufe mit Qualifizierungsweg
+Fortbildung; je Niveau rotiert der Beruf. Berufs- und Kompetenzfilter gelten für diese Themen nicht; bei
+Gleichverteilung nach Beruf oder Berufsgruppe bilden sie eine eigene Gruppe „digcomp“.
 
 ## Mappings Elementarbereich
 
@@ -449,6 +513,27 @@ Kommen neue Kandidaten hinzu, werden nur sie abgestimmt; vorhandene Stimmen blei
 Kultur–Gestalten 308, Gesundheit 108, Sprachen 146, Arbeitsleben–IT–Organisation 146, Schulabschlüsse 505,
 Grundbildung 372: Alphabetisierung 222, Rechnen 120, Alltagskompetenzen 22, berufliche Orientierung 8).
 Die 19 Prüffälle sind redaktionell entschieden.
+
+**DigComp 3.0** (Quelle `digcomp`, Standard an; Folge `digcomp`, Option `--digcomp <Data Supplement>`). Der
+europäische Referenzrahmen für digitale Kompetenz beschreibt in 5 Bereichen und 21 Kompetenzen Lernergebnisse auf
+vier Niveaus (Basic, Intermediate, Advanced, Highly advanced), jeweils als Wissen, Fähigkeit oder Haltung und mit
+KI-Bezug (explizit, implizit, ohne). Grundlage ist das maschinenlesbare Data Supplement des JRC (JSON-LD); die
+Zahlen stimmen mit dem PDF überein (523 Lernergebnisse; der einzige Unterschied, 50 statt 49 KI-explizite
+Competence Statements, ist ein vom JRC bestätigtes Erratum). Die Errata vom 27.01.2026 sind angewendet: LO2.5.09
+doppelt LO2.5.07 und entfällt, LO2.5.10 bis LO2.5.21 rücken auf, sechs Lernergebnisse bekommen den korrigierten
+Wortlaut (`id_original`, `text_original`). Es bleiben 522 Lernergebnisse
+(Basic 151, Intermediate 169, Advanced 119, Highly advanced 83).
+
+Eine amtliche deutsche Fassung gibt es nicht (DigComp 3.0 AT ist eine österreichische Adaption ohne offene
+Lizenz). Übersetzt wird per LLM (`digcomp_glossar`, `digcomp_uebersetzen`): erst die 126 Glossarbegriffe des JRC
+(`glossar.json`), dann Bereiche, Kompetenzen und Lernergebnisse mit diesem Glossar als Vorgabe; jede Zeile trägt
+den Hinweis „eigene, nicht amtliche Übersetzung“. Thema ist ein Lernergebnis; das Fachgebiet der
+Volkshochschul-Statistik kommt je Kompetenz aus einem Handmapping (`digcomp_fachgebiete.json`, z. B. 1.2
+Informationen bewerten → 1.11 Kommunikation/Medien, 3.3 Urheberrecht und Lizenzen → 1.03 Ökonomie/Recht/Finanzen,
+3.4 Programmieren → 5.03, 4.3 Wohlbefinden → 3.06 Gesundheit und Psyche, 4.4 Umweltwirkungen → 1.04, sonst meist
+5.01 IT-/Mediengrundlagen), das Niveau aus dem DigComp-Niveau (Basic → Einsteiger, sonst Fortgeschrittene). Seeds
+tragen `synth:digcomp_bereich`, `synth:digcomp_kompetenz` (ID und Label), `synth:digcomp_niveau`,
+`synth:digcomp_art` (Wissen/Fähigkeit/Haltung) und `synth:digcomp_ki`. Kosten der Übersetzung: 0,02 US-$.
 
 **Inhaltstypen** (14 aus OEH `new_lrt`): Kursbeschreibung, Handout, Übungsblatt, Anleitung, Checkliste,
 Selbstlerneinheit, Präsentation, Quiz, Wortliste und Dialog/Rollenspiel (Sprachen, Grundbildung),
@@ -693,6 +778,9 @@ verschachtelt sein.
 | `floskel`, `erster_satz`, `rest`, `form` | nur in `beschreibung_einstieg.md` (dazu `titel`; `form` = Satzform, aus der Material-id gewählt) |
 
 ## Bekannte Grenzen
+
+- RVK: Die Auswahl thematischer Klassen ist eine Heuristik über Benennungen und Register; einzelne Form-, Orts- oder Personenklassen bleiben übrig, die Abstimmung „kein Lehrthema“ fängt einen Teil davon ab. Die RVK ist ungleich tief gegliedert (Medizin, Philologien und Geschichte sehr fein, Wirtschaft, Informatik, Psychologie und Soziologie grob). Fächer der Tiefe 4 und 5 sind geerbt, nicht einzeln abgestimmt.
+- DigComp: Die deutsche Fassung ist eine eigene, nicht amtliche LLM-Übersetzung mit Glossar; sie ist nicht redaktionell geprüft.
 
 - OpenAlex-Themen stammen aus der Forschungsliteratur. Medizin, Biologie und Ingenieurwesen sind dort
   stark, Philologien, Kunst und Musik schwach vertreten. Die GND-Themen und die Gleichverteilung

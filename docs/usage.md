@@ -100,6 +100,8 @@ python -m sem mappings hochschule               # All steps (LLM + local embeddi
 python -m sem mappings hochschule zusammenfuehren   # Re-evaluate only, e.g. after corrections
 python -m sem mappings hochschule wlo --wlo export.csv   # WLO keywords as evidence (export stays local)
 python -m sem mappings hochschule gnd           # Topics from GND and the hbz catalog
+python -m sem mappings hochschule rvk --rvk data/lokal/rvk/rvko_marcxml_2026_3.xml.gz   # topics from the RVK (export stays local)
+python -m sem seeds --anzahl hochschule=5000 --auswahl hochschule.quellen=rvk hochschule.rvk_tiefe=2,3,4 --seed 42   # RVK topics down to level 4 only
 python -m sem auswahl berufsbildung             # Vocational education and training filters (qualification pathway, skill type …)
 python -m sem seeds --anzahl berufsbildung=10000 --gleichverteilung berufsbildung=beruf --seed 42
 python -m sem mappings berufsbildung --wlo export.csv   # Load ESCO, vote on KldB and qualification, WLO evidence
@@ -110,6 +112,8 @@ python -m sem seeds --anzahl schule=5000 --auswahl schule.herkunft=themenbaum --
 python -m sem mappings schule keywords --wlo export.csv   # school topics from WLO keywords (then kw_gnd … kw_stufen)
 python -m sem auswahl erwachsenenbildung        # Adult education filters (program areas, sources, status)
 python -m sem seeds --anzahl erwachsenenbildung=2000 --auswahl erwachsenenbildung.quellen=gnd,schulthemen --seed 42
+python -m sem mappings erwachsenenbildung digcomp --digcomp data/lokal/digcomp/FILE.jsonld   # load DigComp 3.0, errata, translation
+python -m sem seeds --anzahl berufsbildung=1000 --auswahl berufsbildung.quellen=esco,lernfeld,digcomp --seed 42   # DigComp in vocational training too
 python -m sem seeds --anzahl elementar=1000 schule=3000 berufsbildung=3000 hochschule=3000 erwachsenenbildung=1000 --seed 42
 python -m sem materialien --seeds output/seeds_schule5000_s42.jsonl --sprache en   # materials in English
 python -m sem materialien --seeds output/seeds_schule5000_s42.jsonl --flex         # half price, slower
@@ -167,6 +171,9 @@ does not send the parameter), `--retries`. In the user interface, workers and re
 Everything under `data/` can be used without the code (JSON, JSONL, CSV, UTF-8):
 
 - `data/vocabs/*.json`: OEH vocabularies prepared as flat files (URI, notation, label, broader term, level)
+- `data/mappings/hochschule/themen_hochschule_rvk.jsonl`: 21,925 higher education topics from the RVK (compact,
+  part of the complete set); `data/mappings/digcomp/digcomp30.jsonl`: DigComp 3.0 in English and German
+  (522 learning outcomes)
 - `data/mappings/hochschule/themen_hochschule.jsonl`: all higher education topics in one file (9,130:
   OpenAlex topics and GND teaching topics) with Destatis study subject, subject area and subject group, German
   labels, keywords, teaching level, and mapping provenance (`art`, `quelle`), status, confidence, and evidence;

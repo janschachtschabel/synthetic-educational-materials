@@ -10,7 +10,7 @@ Frage-Antwort-Paare. Struktur und Feldnamen folgen dem OpenEduHub/edu-sharing-Me
 ```
 offene Vokabulare ──► Themen je Fach ──► Seeds ──► Volltext ──► Titel, Beschreibung, Keywords, Fragen
 (OEH, Destatis, ESCO,  (Mappings, einmal)  (ohne LLM)  (LLM)      (LLM, nur aus dem Volltext abgeleitet)
- GND, OpenAlex, KMK …)
+ GND, OpenAlex, RVK, DigComp, KMK …)
 ```
 
 Fünf Bildungsbereiche sind eigene Module: **Schule**, **Hochschule**, **Berufliche Bildung**, **Elementarbereich**
