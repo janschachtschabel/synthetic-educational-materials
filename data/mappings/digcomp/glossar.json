@@ -1,0 +1,511 @@
+{
+ "hinweis": "eigene, nicht amtliche Übersetzung",
+ "modell": "gpt-6-luna",
+ "datum": "2026-11-13",
+ "begriffe": [
+  {
+   "en": "Accessibility",
+   "de": "Barrierefreiheit"
+  },
+  {
+   "en": "AI system",
+   "de": "KI-System"
+  },
+  {
+   "en": "Algorithm",
+   "de": "Algorithmus"
+  },
+  {
+   "en": "Anonymisation",
+   "de": "Anonymisierung"
+  },
+  {
+   "en": "Antivirus software",
+   "de": "Antivirensoftware"
+  },
+  {
+   "en": "Application/App",
+   "de": "Anwendung/App"
+  },
+  {
+   "en": "Assistive technologies",
+   "de": "Assistive Technologien"
+  },
+  {
+   "en": "Baiting",
+   "de": "Baiting (Ködern)"
+  },
+  {
+   "en": "Bias",
+   "de": "Bias"
+  },
+  {
+   "en": "Big data",
+   "de": "Big Data"
+  },
+  {
+   "en": "Chatbot",
+   "de": "Chatbot"
+  },
+  {
+   "en": "Circular economy model",
+   "de": "Kreislaufwirtschaftsmodell"
+  },
+  {
+   "en": "Clickbait",
+   "de": "Clickbait"
+  },
+  {
+   "en": "Cloud services",
+   "de": "Cloud-Dienste"
+  },
+  {
+   "en": "Competence statement",
+   "de": "Kompetenzbeschreibung"
+  },
+  {
+   "en": "Complex (task)",
+   "de": "komplexe (Aufgabe)"
+  },
+  {
+   "en": "Computable and non-computable problems",
+   "de": "berechenbare und nicht berechenbare Probleme"
+  },
+  {
+   "en": "Computational thinking",
+   "de": "informatisches Denken"
+  },
+  {
+   "en": "Computer program",
+   "de": "Computerprogramm"
+  },
+  {
+   "en": "Constructive alignment",
+   "de": "Constructive Alignment (konstruktive Abstimmung)"
+  },
+  {
+   "en": "Copyright",
+   "de": "Urheberrecht"
+  },
+  {
+   "en": "Creative Commons (licences)",
+   "de": "Creative-Commons-Lizenzen"
+  },
+  {
+   "en": "Cyber threat",
+   "de": "Cyberbedrohung"
+  },
+  {
+   "en": "Cyberattack",
+   "de": "Cyberangriff"
+  },
+  {
+   "en": "Cyberbullying",
+   "de": "Cybermobbing"
+  },
+  {
+   "en": "Cybercrime",
+   "de": "Cyberkriminalität"
+  },
+  {
+   "en": "Cybersecurity",
+   "de": "Cybersicherheit"
+  },
+  {
+   "en": "Data",
+   "de": "Daten"
+  },
+  {
+   "en": "Data analysis",
+   "de": "Datenanalyse"
+  },
+  {
+   "en": "Data backup",
+   "de": "Datensicherung"
+  },
+  {
+   "en": "Data centre",
+   "de": "Rechenzentrum"
+  },
+  {
+   "en": "Data collection tool",
+   "de": "Datenerhebungstool"
+  },
+  {
+   "en": "Data processing",
+   "de": "Datenverarbeitung"
+  },
+  {
+   "en": "Data protection",
+   "de": "Datenschutz"
+  },
+  {
+   "en": "Data removal rights",
+   "de": "Recht auf Löschung (Recht auf Vergessenwerden)"
+  },
+  {
+   "en": "Data restoration",
+   "de": "Datenwiederherstellung"
+  },
+  {
+   "en": "De-bunking",
+   "de": "Widerlegung von Falschinformationen"
+  },
+  {
+   "en": "Deceptive patterns",
+   "de": "täuschende Gestaltungsmuster"
+  },
+  {
+   "en": "Deep-fake",
+   "de": "Deepfake"
+  },
+  {
+   "en": "Design thinking",
+   "de": "Design Thinking"
+  },
+  {
+   "en": "Digital assistance tool",
+   "de": "digitales Assistenztool"
+  },
+  {
+   "en": "Digital citizenship",
+   "de": "digitale Mündigkeit"
+  },
+  {
+   "en": "Digital collaboration tool",
+   "de": "digitales Kollaborationstool"
+  },
+  {
+   "en": "Digital communication",
+   "de": "digitale Kommunikation"
+  },
+  {
+   "en": "Digital communication tool",
+   "de": "digitales Kommunikationstool"
+  },
+  {
+   "en": "Digital content",
+   "de": "digitale Inhalte"
+  },
+  {
+   "en": "Digital content creation tool",
+   "de": "Tool zur Erstellung digitaler Inhalte"
+  },
+  {
+   "en": "Digital device",
+   "de": "digitales Gerät"
+  },
+  {
+   "en": "Digital environment",
+   "de": "digitale Umgebung"
+  },
+  {
+   "en": "Digital exclusion",
+   "de": "digitale Ausgrenzung"
+  },
+  {
+   "en": "Digital footprint",
+   "de": "digitaler Fußabdruck"
+  },
+  {
+   "en": "Digital identity",
+   "de": "digitale Identität"
+  },
+  {
+   "en": "Digital inclusion",
+   "de": "digitale Inklusion"
+  },
+  {
+   "en": "Digital interaction",
+   "de": "digitale Interaktion"
+  },
+  {
+   "en": "Digital legislation",
+   "de": "digitale Rechtsvorschriften"
+  },
+  {
+   "en": "Digital participation",
+   "de": "digitale Teilhabe"
+  },
+  {
+   "en": "Digital platforms and services",
+   "de": "digitale Plattformen und Dienste"
+  },
+  {
+   "en": "Digital reputation",
+   "de": "digitale Reputation"
+  },
+  {
+   "en": "Digital search tool",
+   "de": "digitales Suchtool"
+  },
+  {
+   "en": "Digital services",
+   "de": "digitale Dienste"
+  },
+  {
+   "en": "Digital stress",
+   "de": "digitaler Stress"
+  },
+  {
+   "en": "Digital technologies",
+   "de": "digitale Technologien"
+  },
+  {
+   "en": "Digital tool",
+   "de": "digitales Tool"
+  },
+  {
+   "en": "Disinformation",
+   "de": "Desinformation"
+  },
+  {
+   "en": "E-commerce",
+   "de": "E-Commerce"
+  },
+  {
+   "en": "Emoji",
+   "de": "Emoji"
+  },
+  {
+   "en": "Ethical (usage of digital technologies)",
+   "de": "ethisch (Nutzung digitaler Technologien)"
+  },
+  {
+   "en": "European Qualifications Framework (EQF)",
+   "de": "Europäischer Qualifikationsrahmen (EQR)"
+  },
+  {
+   "en": "External storage",
+   "de": "externer Speicher"
+  },
+  {
+   "en": "Filter bubble",
+   "de": "Filterblase"
+  },
+  {
+   "en": "Gamification",
+   "de": "Gamification"
+  },
+  {
+   "en": "Generative AI",
+   "de": "generative KI"
+  },
+  {
+   "en": "High-risk AI system",
+   "de": "Hochrisiko-KI-System"
+  },
+  {
+   "en": "Human-AI collaboration",
+   "de": "Zusammenarbeit zwischen Mensch und KI"
+  },
+  {
+   "en": "Human-centric",
+   "de": "menschenzentriert"
+  },
+  {
+   "en": "Identity theft",
+   "de": "Identitätsdiebstahl"
+  },
+  {
+   "en": "Intellectual property",
+   "de": "geistiges Eigentum"
+  },
+  {
+   "en": "JSON",
+   "de": "JSON"
+  },
+  {
+   "en": "Learning outcomes",
+   "de": "Lernergebnisse"
+  },
+  {
+   "en": "Licence",
+   "de": "Lizenz"
+  },
+  {
+   "en": "Linked open data",
+   "de": "Linked Open Data"
+  },
+  {
+   "en": "Machine learning",
+   "de": "maschinelles Lernen"
+  },
+  {
+   "en": "Malware",
+   "de": "Schadsoftware"
+  },
+  {
+   "en": "Misinformation",
+   "de": "Falschinformation"
+  },
+  {
+   "en": "Multi-factor authentication",
+   "de": "Mehr-Faktor-Authentifizierung"
+  },
+  {
+   "en": "National Qualifications Framework (NQF)",
+   "de": "Nationaler Qualifikationsrahmen (NQR)"
+  },
+  {
+   "en": "Nudging",
+   "de": "Nudging"
+  },
+  {
+   "en": "Online platform",
+   "de": "Online-Plattform"
+  },
+  {
+   "en": "Online service",
+   "de": "Online-Dienst"
+  },
+  {
+   "en": "Open data",
+   "de": "offene Daten"
+  },
+  {
+   "en": "Open educational resources (OER)",
+   "de": "offene Bildungsressourcen (OER)"
+  },
+  {
+   "en": "Operating system",
+   "de": "Betriebssystem"
+  },
+  {
+   "en": "Peripheral device",
+   "de": "Peripheriegerät"
+  },
+  {
+   "en": "Personal data",
+   "de": "personenbezogene Daten"
+  },
+  {
+   "en": "Personalisation",
+   "de": "Personalisierung"
+  },
+  {
+   "en": "Phishing",
+   "de": "Phishing"
+  },
+  {
+   "en": "Piracy",
+   "de": "digitale Piraterie"
+  },
+  {
+   "en": "Plagiarism",
+   "de": "Plagiat"
+  },
+  {
+   "en": "Platform economy",
+   "de": "Plattformökonomie"
+  },
+  {
+   "en": "Pre-bunking",
+   "de": "Prebunking"
+  },
+  {
+   "en": "Privacy",
+   "de": "Datenschutz"
+  },
+  {
+   "en": "Privacy tool",
+   "de": "Datenschutzwerkzeug"
+  },
+  {
+   "en": "Problem solving",
+   "de": "Problemlösen"
+  },
+  {
+   "en": "Proficiency level",
+   "de": "Kompetenzstufe"
+  },
+  {
+   "en": "Pseudonymisation",
+   "de": "Pseudonymisierung"
+  },
+  {
+   "en": "Responsible use (of digital technologies)",
+   "de": "verantwortungsvolle Nutzung (digitaler Technologien)"
+  },
+  {
+   "en": "Reality-virtuality (RV) continuum",
+   "de": "Realität-Virtualität-Kontinuum (RV-Kontinuum)"
+  },
+  {
+   "en": "Right to disconnect",
+   "de": "Recht auf Nichterreichbarkeit"
+  },
+  {
+   "en": "Robot",
+   "de": "Roboter"
+  },
+  {
+   "en": "Robotics",
+   "de": "Robotik"
+  },
+  {
+   "en": "Simple (task)",
+   "de": "einfache (Aufgabe)"
+  },
+  {
+   "en": "Social engineering",
+   "de": "Social Engineering"
+  },
+  {
+   "en": "Social innovation",
+   "de": "soziale Innovation"
+  },
+  {
+   "en": "Social media",
+   "de": "soziale Medien"
+  },
+  {
+   "en": "Social media influencer",
+   "de": "Social-Media-Influencer"
+  },
+  {
+   "en": "Software",
+   "de": "Software"
+  },
+  {
+   "en": "Specialised (purpose, task)",
+   "de": "spezialisierte (Zwecke, Aufgaben)"
+  },
+  {
+   "en": "Task",
+   "de": "Aufgabe"
+  },
+  {
+   "en": "Trustworthy AI",
+   "de": "vertrauenswürdige KI"
+  },
+  {
+   "en": "United Nations (UN) Global Digital Compact (GDC)",
+   "de": "Globaler Digitalpakt der Vereinten Nationen (GDC)"
+  },
+  {
+   "en": "Universal Meaningful Connectivity (UMC)",
+   "de": "universelle, sinnvolle Konnektivität (UMC)"
+  },
+  {
+   "en": "‘Unplugged’ activities",
+   "de": "analoge Aktivitäten"
+  },
+  {
+   "en": "User experience (UX) and Customer experience (CX)",
+   "de": "Nutzererfahrung (UX) und Kundenerfahrung (CX)"
+  },
+  {
+   "en": "Virtual assistant",
+   "de": "virtueller Assistent"
+  },
+  {
+   "en": "Virtual reality, realities (VR)",
+   "de": "virtuelle Realität (VR)"
+  },
+  {
+   "en": "Wellbeing (in digital environments)",
+   "de": "Wohlbefinden (in digitalen Umgebungen)"
+  }
+ ]
+}
