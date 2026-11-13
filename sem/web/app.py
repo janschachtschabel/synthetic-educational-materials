@@ -711,7 +711,8 @@ def mappings_seite(request: Request):
         if rest:
             folgen.append(("weitere", rest))
         bereiche.append({"key": k, "label": b.label, "folgen": folgen, "lauf": lauf_ansicht(f"map-{k}"),
-                         "wlo": any(x["wlo"] for x in schritte), "emb": any(x["emb"] for x in schritte)})
+                         "wlo": any(x["wlo"] for x in schritte), "emb": any(x["emb"] for x in schritte),
+                         "datei": next((x["datei"] for x in schritte if x["datei"]), None)})
     e = einstellungen()
     return seite(request, "seite_mappings.html", gruppen=gruppen, bereiche=bereiche, e=e, key=key_zustand(e))
 
@@ -727,7 +728,9 @@ def schritt_info(b, x) -> dict:
         code = ""
     return {"key": x.key, "label": x.label, "beschreibung": x.beschreibung, "llm": x.llm,
             "wlo": "--wlo" in x.beschreibung or "wlo_dateien" in code, "emb": "embed" in code.lower(),
-            "lokal": "rlp_ordner" in code, "abschluss": x.key in b.mapping_abschluss}
+            "lokal": "rlp_ordner" in code, "abschluss": x.key in b.mapping_abschluss,
+            # Rohdatei, die der Schritt liest (RVK-Gesamtabzug, DigComp-Data-Supplement): eigenes Eingabefeld
+            "datei": "rvk" if "rvk_datei" in code else "digcomp" if "digcomp_datei" in code else None}
 
 
 @app.get("/mappings/datei", response_class=HTMLResponse)
@@ -770,8 +773,12 @@ async def mappings_start(request: Request, key: str):
         wlo = [x.strip() for x in str(form.get("wlo") or "").split(",") if x.strip()]
         e = einstellungen()
         emb = str(form.get("embedding_modell") or "").strip() or e.embedding_modell
+        datei = str(form.get("quelldatei") or "").strip()
+        art = next((i["datei"] for i in (schritt_info(b, x) for x in b.mapping_schritte() if x.key in wahl)
+                    if i["datei"]), None)
         argv = ["mappings", key, *wahl, "--stimmen", str(stimmen), "--embedding-modell", emb] \
-            + (["--limit", str(lim)] if lim else []) + (["--wlo", *wlo] if wlo else [])
+            + (["--limit", str(lim)] if lim else []) + (["--wlo", *wlo] if wlo else []) \
+            + ([f"--{art}", datei] if datei and art else [])
         starten(job, argv, llm_cfg(e))
     return seite(request, "teil_status.html", lauf=lauf_ansicht(job), name=job, fehler=fehler)
 
