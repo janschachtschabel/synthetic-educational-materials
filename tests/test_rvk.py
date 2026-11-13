@@ -126,11 +126,12 @@ def test_hochschule_filter_quelle_und_tiefe():
     b = get("hochschule")
     opt = b.auswahl_optionen()
     assert "rvk" in opt["quellen"]["werte"] and "rvk" in opt["quellen"]["standard"]
-    assert opt["rvk_tiefe"]["standard"] == ["2", "3", "4", "5"]
+    assert opt["rvk_tiefe"]["standard"] == ["2", "3", "4"]
     t = {"id": "x", "art": "rvk", "rvk": {"tiefe": 5}, "mapping": {"status": "gesichert",
                                                                    "lehrebene": {"status": "gesichert"}}}
-    auswahl = b.auswahl_pruefen({})
-    assert b.passt(t, auswahl)
+    assert not b.passt(t, b.auswahl_pruefen({}))  # Tiefe 5 ist standardmäßig aus, nur per Filter
+    alle = {"rvk_tiefe": ["2", "3", "4", "5"]}
+    assert b.passt(t, b.auswahl_pruefen(alle))
     assert not b.passt(t, b.auswahl_pruefen({"rvk_tiefe": ["2", "3"]}))
-    assert not b.passt(t, b.auswahl_pruefen({"quellen": ["openalex", "gnd"]}))
+    assert not b.passt(t, b.auswahl_pruefen({**alle, "quellen": ["openalex", "gnd"]}))
     assert b.belege_des_themas({"belege": {"rvk": [{"notation": "QC 10"}]}, "studienfach": []}) == {"rvk"}

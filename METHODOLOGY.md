@@ -174,10 +174,10 @@ hierarchy path (field 153 `$e`/`$h`), not from the notation: level 1 = subject s
 
 Result: 21,925 new RVK topics (level 2: 309, 3: 2,061, 4: 7,692, 5: 11,863); subject 20,279 certain, 1,460 probable, 186 uncertain; teaching level
 15,641 certain, 6,064 probable, 220 uncertain (basics 1,260, advanced 15,370, research 5,295); 397 on the review list `pruefliste_rvk.csv`. Study subjects without an OpenAlex, GND or RVK topic (subject-profile topics not counted):
-before 28, after 10. Filters: `quellen=rvk` (on by default) and `rvk_tiefe` (2 to 5, all by
-default). Cost of the LLM steps: about US$ 8.10 (gpt-6-luna).
+before 28, after 10. Filters: `quellen=rvk` (on by default) and `rvk_tiefe` (2 to 5,
+2 to 4 by default; level 5 via the filter). Cost of the LLM steps: about US$ 8.10 (gpt-6-luna).
 
-The RVK topics belong to the complete set but are stored compactly in `themen_hochschule_rvk.jsonl` (subject as a notation; study area, subject group, source and method details are added by the code on loading), because the full lines would have pushed the complete set beyond GitHub's file size limit. With the default balancing (`studienfach_wurzel`) about half of the higher-education seeds come from the RVK; restrict `quellen` or `rvk_tiefe` if that is not wanted.
+The RVK topics belong to the complete set but are stored compactly in `themen_hochschule_rvk.jsonl` (subject as a notation; study area, subject group, source and method details are added by the code on loading), because the full lines would have pushed the complete set beyond GitHub's file size limit. With the default balancing (`studienfach_wurzel`) levels 2 to 4 give the RVK a good third of the higher-education seeds (with level 5 it would be about half); level 5 is the finest and noisiest level and is therefore only available via the filter (Jan's decision, 13 Nov 2026).
 
 **Content types** (`inhaltstypen.json`): editorial selection of text-capable types from OEH `new_lrt`. For each type, the generated text form, the media format of the full text (text, slides, video or audio transcript), the teaching levels it suits, and optionally the subject groups it applies to are specified
 (e.g. an experimental procedure only for natural sciences, engineering, agricultural sciences, and health sciences).

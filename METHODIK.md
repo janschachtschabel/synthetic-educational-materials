@@ -205,9 +205,9 @@ Q), 2 = Hauptgruppe (QP), 3 = Bereich (QP 300 - QP 399), 4 und 5 darunter.
 Ergebnis: 21.925 neue RVK-Themen (Tiefe 2: 309, 3: 2.061, 4: 7.692, 5: 11.863); Fach 20.279 gesichert, 1.460 wahrscheinlich, 186 unsicher; Lehrebene
 15.641 gesichert, 6.064 wahrscheinlich, 220 unsicher (Grundlagen 1.260, Vertiefung 15.370, Forschung 5.295); 397 auf der Prüfliste `pruefliste_rvk.csv`. Studienfächer ohne OpenAlex-, GND- oder RVK-Thema (Fachprofil-Themen nicht gezählt):
 vorher 28, nachher 10. Filter: `quellen=rvk` (Standard an) und `rvk_tiefe` (2 bis 5,
-Standard alle). Kosten der LLM-Schritte: rund 8,10 US-$ (gpt-6-luna).
+Standard 2 bis 4; Tiefe 5 per Filter). Kosten der LLM-Schritte: rund 8,10 US-$ (gpt-6-luna).
 
-Die RVK-Themen gehören zum Gesamtset, stehen aber kompakt in `themen_hochschule_rvk.jsonl` (Fach als Notation; Studienbereich, Fächergruppe, Quelle und Methodenangaben setzt der Code beim Laden ein), weil die vollständigen Zeilen das Gesamtset über die Dateigrößengrenze von GitHub gebracht hätten. Mit der Standardverteilung (`studienfach_wurzel`) stammt rund die Hälfte der Hochschul-Seeds aus der RVK; wer das nicht will, schränkt `quellen` oder `rvk_tiefe` ein.
+Die RVK-Themen gehören zum Gesamtset, stehen aber kompakt in `themen_hochschule_rvk.jsonl` (Fach als Notation; Studienbereich, Fächergruppe, Quelle und Methodenangaben setzt der Code beim Laden ein), weil die vollständigen Zeilen das Gesamtset über die Dateigrößengrenze von GitHub gebracht hätten. Mit der Standardverteilung (`studienfach_wurzel`) stammt mit Tiefe 2 bis 4 gut ein Drittel der Hochschul-Seeds aus der RVK (mit Tiefe 5 wäre es rund die Hälfte); Tiefe 5 ist die feinste und am stärksten verrauschte Ebene und deshalb nur per Filter wählbar (Entscheidung Jan, 13.11.2026).
 
 **Inhaltstypen** (`inhaltstypen.json`): redaktionelle Auswahl textfähiger Typen aus OEH `new_lrt`. Je Typ
 ist festgelegt, welche Textsorte erzeugt wird, welche Medienform der Volltext hat (Text, Folien, Video-

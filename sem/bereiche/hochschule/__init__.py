@@ -128,7 +128,7 @@ class Hochschule(Bildungsbereich):
                           "beschreibung": "Ebene in der RVK-Hierarchie: 2 = Hauptgruppe (z. B. QP), 3 = Bereich "
                                           "(QP 300 - QP 399), 4 und 5 = Unterklassen",
                           "werte": {"2": "Tiefe 2", "3": "Tiefe 3", "4": "Tiefe 4", "5": "Tiefe 5"},
-                          "standard": ["2", "3", "4", "5"]},
+                          "standard": ["2", "3", "4"]},
             "fach_status": {"label": "Status der Fachzuordnung", "beschreibung": "Abstimmung über das Studienfach",
                             "werte": status, "standard": ["gesichert", "wahrscheinlich", "redaktionell"]},
             "lehrebene_status": {"label": "Status der Lehrebene", "beschreibung": "Grundlagen, Vertiefung, Forschung",
