@@ -200,7 +200,7 @@ class Hochschule(Bildungsbereich):
             if rows:
                 out[art] = build.statistik(rows)
         if build.THEMEN_HOCHSCHULE.exists():
-            alle = load_jsonl(build.THEMEN_HOCHSCHULE)
+            alle = load_jsonl(build.THEMEN_HOCHSCHULE) + rvk_themen.repo_themen()
             if any(r.get("art") == "rvk" for r in alle):
                 out["rvk"] = rvk_themen.statistik(alle)
         return out
@@ -238,10 +238,16 @@ class Hochschule(Bildungsbereich):
         return gnd_ergaenzung.anwenden(self._topics_roh(), self.key)
 
     def _topics_roh(self) -> list[dict]:
+        from .rvk_themen import repo_themen
+
         out = load_jsonl(DIR / THEMEN_DATEI) if (DIR / THEMEN_DATEI).exists() else []
+        out += [dict(t) for t in repo_themen()]  # RVK-Teil des Gesamtsets (themen_hochschule_rvk.jsonl)
         if not out:
             raise FileNotFoundError(
                 f"Keine Themen in {DIR}. Erst die Mappings bauen: python -m sem mappings hochschule")
+        for t in out:  # RVK-Themen: Beschreibung aus dem Pfad (steht nicht in der Datei, um sie klein zu halten)
+            if t.get("art") == "rvk" and not t.get("beschreibung_de"):
+                t["beschreibung_de"] = "Teilgebiet von: " + " > ".join(t["rvk"]["pfad"])
         return out + self._fachprofil_topics(out)
 
     def _fachprofil_topics(self, vorhandene: list[dict]) -> list[dict]:

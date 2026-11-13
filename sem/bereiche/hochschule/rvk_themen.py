@@ -48,7 +48,11 @@ KANDIDATEN_RVK = CACHE / "hochschule_rvk_kandidaten.json"
 STIMMEN_RVK_FAECHER = CACHE / "hochschule_stimmen_rvk_faecher.jsonl"
 STIMMEN_RVK_LEHREBENE = CACHE / "hochschule_stimmen_rvk_lehrebene.jsonl"
 LABELS_RVK = CACHE / "hochschule_rvk_labels.jsonl"
-THEMEN_RVK = CACHE / "hochschule_themen_rvk.jsonl"  # Teilergebnis; Gesamtset: B.THEMEN_HOCHSCHULE
+THEMEN_RVK = CACHE / "hochschule_themen_rvk.jsonl"  # Teilergebnis (vollständige Zeilen, Zwischenspeicher)
+# RVK-Teil des Gesamtsets im Repo, kompakt: Fach nur als Notation, Studienbereich, Fächergruppe, Quelle und
+# Methodenangaben setzt repo_themen() beim Laden wieder ein (die vollständigen Zeilen wären über 40 MB)
+THEMEN_RVK_REPO = DIR / "themen_hochschule_rvk.jsonl"
+META_KEYS = ("methode", "modell", "embedding_modell", "stimmen", "datum", "prompt_hash")
 BELEGE_RVK = CACHE / "hochschule_rvk_belege.json"   # vorhandenes Thema → RVK-Klassen, die es belegen
 MAX_FACH_TIEFE = 3
 MEHRDEUTIG_AB = 4  # so viele Themen mit derselben Benennung: Name wird aus dem Pfad umformuliert
@@ -68,7 +72,6 @@ def quelle(row: dict | None = None) -> dict:
     q = {"name": R.QUELLE_NAME, "uri": R.DOWNLOAD, "lizenz": R.LIZENZ, "stand": info().get("quartal", "")}
     if row:
         q["uri"] = row["uri"]
-        q["url"] = row["url"]
     return q
 
 
@@ -220,7 +223,7 @@ Antworte ausschließlich mit JSON: {"ergebnisse": [{"id": "...", "label_de": "..
 def lade_labels() -> dict[str, str]:
     """Notation → umformulierter Themenname (Zwischenspeicher; ohne ihn aus dem fertigen Teilergebnis)."""
     out = {}
-    for r in B.teil_laden(THEMEN_RVK, "rvk"):
+    for r in teil():
         if r.get("label_de") and r["label_de"] != r.get("label_rvk"):
             out[r["rvk"]["notation"]] = r["label_de"]
     if LABELS_RVK.exists():
@@ -279,9 +282,8 @@ def build_rvk_lehrebene(cfg: LLMConfig, limit: int | None = None, on_progress=No
 
 # --- 5. Zusammenführen --------------------------------------------------------------------------------
 
-METHODE = ("RVK-Klasse (thematisch, Tiefe 2–5); Fach per Embedding-Kandidaten, Handmapping Fachsystematik → "
-           "Studienbereich und LLM-Mehrfachabstimmung auf Tiefe 2 und 3, tiefere Klassen erben das Fach der nächsten "
-           "abgestimmten Oberklasse; Lehrebene per LLM-Mehrfachabstimmung")
+METHODE = ("RVK-Klasse; Fach: Embedding, Handmapping und LLM-Mehrfachabstimmung auf Tiefe 2/3, "
+           "tiefere Klassen erben; Lehrebene: LLM-Mehrfachabstimmung")
 _NORM = re.compile(r"[^0-9a-zäöüß]+")
 
 
@@ -389,9 +391,12 @@ def build_rvk_zusammenfuehren(cfg: LLMConfig | None = None, stimmen: int = B.N_S
         gruende = []
         if e:
             codes = list(e["codes"])
+            # Abstimmungsdetails nur an der abgestimmten Klasse; erbende Klassen verweisen auf sie (Dateigröße)
+            eigen = herkunft == k["notation"]
             mapping = {**meta, "status": e["status"], "konfidenz": e["konfidenz"],
-                       "handmapping_bestaetigt": e["handmapping_bestaetigt"], "faecher": e["faecher"],
-                       "verworfen": e["verworfen"]}
+                       "handmapping_bestaetigt": e["handmapping_bestaetigt"],
+                       "faecher": [{**f, "begruendungen": f.get("begruendungen", [])[:1]} for f in e["faecher"]]
+                       if eigen else [], "verworfen": e["verworfen"] if eigen else {}}
             if herkunft != k["notation"]:
                 mapping["fach_geerbt_von"] = herkunft
             if e.get("ersatz"):
@@ -421,8 +426,9 @@ def build_rvk_zusammenfuehren(cfg: LLMConfig | None = None, stimmen: int = B.N_S
             continue
         if le["ebene"] == "kein_lehrthema":
             le["ebene"] = "vertiefung"
-        mapping["lehrebene"] = {x: le[x] for x in ("status", "konfidenz", "stimmen", "begruendungen", "methode")
-                                if x in le}
+        mapping["lehrebene"] = {x: le[x] for x in ("status", "konfidenz", "stimmen", "methode") if x in le}
+        if le.get("begruendungen"):
+            mapping["lehrebene"]["begruendungen"] = le["begruendungen"][:1]
         if le["status"] == "unsicher" and le.get("stimmen"):
             gruende.append("keine Mehrheit für die Lehrebene")
         label_de = labels.get(k["notation"], k["label_rvk"])
@@ -453,12 +459,9 @@ def build_rvk_zusammenfuehren(cfg: LLMConfig | None = None, stimmen: int = B.N_S
             continue
         row = {
             "id": uri, "art": "rvk", "label_de": label_de, "label_rvk": k["label_rvk"], "label_en": "",
-            "beschreibung_de": f"Teilgebiet von: {' > '.join(k['pfad'])}",
             "keywords_de": list(dict.fromkeys([g["label"] for g in k.get("gnd", [])] + k.get("register", [])))[:10],
             **B._derive(voc, fach_uris), "lehrebene": le["ebene"],
-            "rvk": {"notation": k["notation"], "tiefe": k["tiefe"], "pfad": k["pfad"],
-                    "pfad_notationen": k["pfad_notationen"], "fachsystematik": k["fachsystematik"], "url": k["url"],
-                    "stand": stand},
+            "rvk": {"notation": k["notation"], "tiefe": k["tiefe"], "pfad": k["pfad"], "stand": stand},
             "gnd": [{"id": g["id"], "uri": "https://d-nb.info/gnd/" + g["id"], "label": g["label"]}
                     for g in k.get("gnd", [])],
             "quelle": quelle(k), "mapping": mapping,
@@ -471,11 +474,61 @@ def build_rvk_zusammenfuehren(cfg: LLMConfig | None = None, stimmen: int = B.N_S
     rows.sort(key=lambda r: (r["studienfach"][0]["notation"], r["rvk"]["notation"]))
     B._write_jsonl(THEMEN_RVK, rows)
     BELEGE_RVK.write_text(json.dumps(belege, ensure_ascii=False), encoding="utf-8")
+    i = info()
+    if i:
+        AUSWAHL_INFO.write_text(json.dumps({**i, "mapping": meta}, ensure_ascii=False, indent=1), encoding="utf-8")
     pruefung.schreibe_pruefliste(PRUEF_RVK, pruef)
     pruefung.schreibe_pruefliste(AUSGESCHLOSSEN_RVK, aus)
     return fertig(f"{n['neu']} neue RVK-Themen, {n['verknuepft']} Klassen als Beleg an "
                   f"{len(belege)} vorhandene Themen, {n['kein_lehrthema']} kein Lehrthema, "
                   f"{len(pruef)} auf der Prüfliste")
+
+
+def kompakt(r: dict) -> dict:
+    """Zeile für themen_hochschule_rvk.jsonl (siehe THEMEN_RVK_REPO)."""
+    m = {k: v for k, v in r["mapping"].items() if k not in META_KEYS}
+    if m.get("label_umformuliert"):
+        m["label_umformuliert"] = True
+    out = {"id": r["id"], "label_de": r["label_de"], "label_rvk": r["label_rvk"],
+           "studienfach": [f["notation"] for f in r["studienfach"]], "lehrebene": r["lehrebene"], "rvk": r["rvk"]}
+    if r.get("keywords_de"):
+        out["keywords_de"] = r["keywords_de"]
+    if r.get("gnd"):
+        out["gnd"] = [[g["id"], g["label"]] for g in r["gnd"]]
+    out["mapping"] = m
+    return out
+
+
+def schreibe_repo(rows: list[dict]):
+    B._write_jsonl(THEMEN_RVK_REPO, [kompakt(r) for r in rows])
+    repo_themen.cache_clear()
+
+
+@lru_cache(maxsize=1)
+def repo_themen() -> list[dict]:
+    """RVK-Themen aus themen_hochschule_rvk.jsonl, zu vollständigen Themen ergänzt."""
+    if not THEMEN_RVK_REPO.exists():
+        return []
+    voc = load_vocab("hochschulfaechersystematik")
+    by_not = B.faecher_by_not(voc)
+    meta = info().get("mapping", {})
+    out = []
+    for z in load_jsonl(THEMEN_RVK_REPO):
+        m = {**meta, **z["mapping"]}
+        if m.get("label_umformuliert") is True:
+            m["label_umformuliert"] = "eigenständiger Themenname per LLM (Benennung nur im Pfad verständlich)"
+        out.append({"id": z["id"], "art": "rvk", "label_de": z["label_de"], "label_rvk": z["label_rvk"],
+                    "label_en": "", "keywords_de": z.get("keywords_de", []),
+                    **B._derive(voc, [by_not[n] for n in z["studienfach"] if n in by_not]),
+                    "lehrebene": z["lehrebene"], "rvk": z["rvk"],
+                    "gnd": [{"id": g[0], "uri": "https://d-nb.info/gnd/" + g[0], "label": g[1]} for g in z.get("gnd", [])],
+                    "quelle": {**quelle(), "uri": z["id"], "stand": z["rvk"].get("stand", "")}, "mapping": m})
+    return out
+
+
+def teil() -> list[dict]:
+    """RVK-Teilergebnis: aus dem Zwischenspeicher, sonst (frischer Klon) aus dem Repo."""
+    return load_jsonl(THEMEN_RVK) if THEMEN_RVK.exists() else [dict(t) for t in repo_themen()]
 
 
 def lade_belege() -> dict[str, list[dict]]:

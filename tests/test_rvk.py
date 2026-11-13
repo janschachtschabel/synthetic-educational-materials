@@ -70,7 +70,7 @@ def rvk_dateien(tmp_path, monkeypatch):
     voc = load("hochschulfaechersystematik")
     fach = next(c for c in voc.concepts if c["level"] == 2)
     for name in ("KLASSEN", "AUSWAHL_INFO", "PRUEF_RVK", "AUSGESCHLOSSEN_RVK", "KANDIDATEN_RVK", "STIMMEN_RVK_FAECHER",
-                 "STIMMEN_RVK_LEHREBENE", "LABELS_RVK", "THEMEN_RVK", "BELEGE_RVK"):
+                 "STIMMEN_RVK_LEHREBENE", "LABELS_RVK", "THEMEN_RVK", "BELEGE_RVK", "THEMEN_RVK_REPO"):
         monkeypatch.setattr(RT, name, tmp_path / getattr(RT, name).name)
     monkeypatch.setattr(RT.B, "KORREKTUREN_PATH", tmp_path / "korrekturen.csv")
     zeilen = [
@@ -92,8 +92,10 @@ def rvk_dateien(tmp_path, monkeypatch):
     vorhanden = {"id": "https://d-nb.info/gnd/4032134-4", "label_de": "Konjunktur",
                  "studienfach": [voc.ref(fach["uri"])]}
     monkeypatch.setattr(RT, "_vorhandene", lambda: [vorhanden])
+    RT.repo_themen.cache_clear()
     yield fach
     RT.lade_klassen.cache_clear()
+    RT.repo_themen.cache_clear()
 
 
 def test_pfade_werden_zusammengesetzt(rvk_dateien):

@@ -86,7 +86,7 @@ def build_themen(cfg: LLMConfig | None = None, **_):
     from . import rvk_themen as RV
 
     teile = {"openalex": teil_laden(THEMEN_PATH, "openalex"), "gnd": teil_laden(G.THEMEN_GND, "gnd"),
-             "rvk": teil_laden(RV.THEMEN_RVK, "rvk")}
+             "rvk": RV.teil()}
     # RVK-Belege: aus dem Zwischenspeicher; ohne ihn (frischer Klon) bleiben die vorhandenen Belege stehen
     rvk_belege = RV.lade_belege() if RV.BELEGE_RVK.exists() else None
     rows, ids = [], set()
@@ -105,7 +105,9 @@ def build_themen(cfg: LLMConfig | None = None, **_):
                         r.pop("belege")
                 rows.append(r)
     rows.sort(key=lambda r: (r["studienfach"][0]["notation"], r["art"], r["label_de"], r["id"]))
-    _write_jsonl(THEMEN_HOCHSCHULE, rows)
+    # RVK-Themen stehen kompakt in einer eigenen Datei (Größe), gehören aber zum Gesamtset
+    _write_jsonl(THEMEN_HOCHSCHULE, [r for r in rows if r["art"] != "rvk"])
+    RV.schreibe_repo([r for r in rows if r["art"] == "rvk"])
     return fertig(f"{len(rows)} Themen in {THEMEN_HOCHSCHULE.name} "
                   f"({', '.join(f'{a}: {len(t)}' for a, t in teile.items())})")
 
@@ -479,7 +481,7 @@ def korrekturen(cfg: LLMConfig | None = None, **_):
     n = {"korrigiert": 0, "ausgeschlossen": 0}
     for themen, art, pruef in ((THEMEN_PATH, "openalex", PRUEFLISTE_PATH), (G.THEMEN_GND, "gnd", G.PRUEF_GND),
                                (RV.THEMEN_RVK, "rvk", RV.PRUEF_RVK)):
-        teil = teil_laden(themen, art)
+        teil = RV.teil() if art == "rvk" else teil_laden(themen, art)
         if not teil:
             continue
         rows = []

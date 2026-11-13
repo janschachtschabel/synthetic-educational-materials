@@ -114,7 +114,19 @@ class Erwachsenenbildung(Bildungsbereich):
     def mapping_statistik(self) -> dict:
         from . import build
 
-        return build.statistik() if (DIR / "themen_erwachsenenbildung.jsonl").exists() else {}
+        from collections import Counter
+
+        from . import digcomp
+
+        out = build.statistik() if (DIR / "themen_erwachsenenbildung.jsonl").exists() else {}
+        dc = digcomp.themen(systematik())
+        if dc:
+            out["digcomp"] = {"lernergebnisse": len(dc),
+                              "niveau": dict(Counter(t["digcomp"]["niveau"] for t in dc)),
+                              "art": dict(Counter(t["digcomp"]["art"] for t in dc)),
+                              "ki": dict(Counter(t["digcomp"]["ki"] for t in dc)),
+                              "fachgebiet": dict(Counter(t["fachgebiet"][0]["label"] for t in dc))}
+        return out
 
     # --- Auswahl der Themen ------------------------------------------------------------------
 
