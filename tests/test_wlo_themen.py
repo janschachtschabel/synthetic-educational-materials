@@ -298,6 +298,17 @@ def test_pruefabschnitt_haelt_ueber_der_grenze(tmp_path, monkeypatch, grenze, we
     assert hr["normal"]["gruppen"] == 10 and hr["pruefabschnitt"] == 4 and hr["kosten_usd"] > 0
 
 
+def test_ids_lesen_und_milde_inhaltsleer_regel(tmp_path):
+    f = tmp_path / "fehler.jsonl"
+    f.write_text('{"id": "wa", "fehler": "inhaltsleer"}\n\n{"id": "wb", "fehler": "inhaltsleer"}\n{"id": "wa"}\n',
+                 encoding="utf-8")
+    assert W.ids_lesen(f) == ["wa", "wb"]
+    (tmp_path / "ids.txt").write_text("wc\nwd\n", encoding="utf-8")
+    assert W.ids_lesen(tmp_path / "ids.txt") == ["wc", "wd"]
+    p = W.system_prompt()
+    assert '{"thema": null} NUR' in p and "knappen Titel" in p
+
+
 def test_kosten():
     t = {"eingabe": 2_000_000, "davon_cache": 1_000_000, "ausgabe": 1_000_000}
     assert W.kosten(t, "gpt-6-luna") == pytest.approx(0.05 + 0.005 + 0.25)
@@ -457,3 +468,42 @@ def test_teile_wlo():
     assert _teile_wlo(rest, 10, 0.5) == [(10, rest)]
     assert _teile_wlo(rest + wlo, 10, 0.2) == [(8, rest), (2, wlo)]
 
+
+
+def test_lobid_drossel(monkeypatch):
+    import time
+
+    from sem.quellen import gnd
+    monkeypatch.setattr(gnd, "MIN_ABSTAND", 0.05)
+    monkeypatch.setattr(gnd, "_naechste", 0.0)
+    t0 = time.monotonic()
+    for _ in range(5):
+        gnd._drosseln()
+    assert time.monotonic() - t0 >= 0.19  # 5 Anfragen: 4 Abstände à 0,05 s
+
+
+def test_gnd_online_nur_fachbegriffe_ab_mindestanzahl(ohne_lokal, monkeypatch):
+    p = ohne_lokal / "wlo_abstraktion" / "abstraktion.jsonl"
+    p.parent.mkdir(parents=True)
+    p.write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in ROWS), encoding="utf-8")
+    gefragt = []
+    monkeypatch.setattr(WS, "gnd_online", lambda b, **k: gefragt.append(list(b)) or
+                        {"bruch": {"uri": "https://d-nb.info/gnd/4008131-x", "label": "Bruch"}})
+    WS.bauen([p], gnd={}, vorhanden={"schule": [], "hochschule": []}, online=True, schreiben=False,
+             on_progress=lambda *_: None)
+    assert gefragt == [["Bruch"]]  # Vektorraum nur in einem Thema, Themenlabels werden nicht gefragt
+    gefragt.clear()
+    WS.bauen([p], gnd={}, vorhanden={"schule": [], "hochschule": []}, online=True, online_min=1, schreiben=False,
+             on_progress=lambda *_: None)
+    assert gefragt == [["Bruch", "Vektorraum"]]
+
+
+@pytest.mark.parametrize("thema, grund", [
+    ("Unklarer Lerngegenstand", "ausweich_thema"), ("Nicht erkennbar", "ausweich_thema"),
+    ("Unbekannter mathematischer Lerngegenstand", "ausweich_thema"), ("Mathematik", "thema_nur_fach"),
+    ("Lineare Gleichungssysteme mit zwei Unbekannten", None), ("Bestimmte und unbestimmte Artikel", None),
+    ("Eisenbahngeschichte", None), ("Unbestimmte Integration", None), ("Unbekannte Größen in Gleichungen", None),
+    ("Unklarer fachlicher Inhalt", "ausweich_thema"), ("Unbekannt", "ausweich_thema"),
+])
+def test_kein_thema(thema, grund):
+    assert WS.kein_thema(thema) == grund

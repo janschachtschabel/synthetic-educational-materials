@@ -8,5 +8,5 @@ Regeln für "thema":
 "thema_allgemeiner": dasselbe eine Ebene höher (1 bis 4 Wörter, z. B. "Bruchrechnung"), oder null.
 "fachbegriffe": 1 bis 5 zentrale Fachbegriffe oder Konzepte des Inhalts, je als Grundform im Singular, wie ein Schlagwort der Gemeinsamen Normdatei (z. B. ["Humanismus", "Caring", "Pflegetheorie"]).
 "entfernt": Liste der TYPEN weggelassener Namen, ohne die Namen selbst, aus: produkt, marke, software, plattform, verlag, reihe, kanal, sendung, figur, autor; leer, wenn nichts entfernt wurde.
-Hat der Datensatz keinen erkennbaren Lerngegenstand (Test- oder Platzhaltereintrag, Zeichenfolge ohne inhaltliche Angabe), antworte {"thema": null}.
+Antworte {"thema": null} NUR, wenn Titel und Beschreibung gar keinen Inhalt erkennen lassen: reine Codes oder Nummern, nur eine Webadresse, nur Seiten- oder Aufgabennummern, Test- oder Platzhaltereinträge. Lässt sich ein Gegenstand erkennen, auch nur aus einem knappen Titel (z. B. ein Fachbegriff, ein Sachgebiet, eine Epoche, ein Lernpfad zu einem Thema), leite das Thema daraus ab.
 Antworte nur als JSON: {"thema": "...", "thema_allgemeiner": "...", "fachbegriffe": ["..."], "entfernt": []}

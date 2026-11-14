@@ -146,6 +146,11 @@ das Modell keinen Lerngegenstand, antwortet es `{"thema": null}` (zählt als `in
 `--nur-zaehlen` zeigt die Zahlen ohne API. Für den Volllauf: `--max-kosten 45` fragt zuerst einen Prüfabschnitt
 (`--pruefabschnitt`, Standard 3000 Gruppen, geschichtet) sofort über Flex ab, schreibt Cache-Quote und Hochrechnung
 zum Batch-Preis nach `<ausgabe>.pruefung.json` und läuft nur weiter, wenn die Hochrechnung darunter liegt.
+`--ids DATEI --out …` fragt nur bestimmte Gruppen, z. B. die inhaltsleeren aus `<ausgabe>.fehler.jsonl`, in eine
+eigene Ausgabe; `--zusammenfuehren` liest alle Ausgaben (dieselbe Gruppe: die zuletzt gelesene zählt). Beim Seed-Bau
+fallen Ausweich-Antworten („Unklarer Lerngegenstand“) und Themen weg, die nur ein Fach- oder Stufenname sind.
+`--gnd-online` fragt bei lobid nur Fachbegriffe, die in mindestens `--gnd-online-min` Themen vorkommen (Standard 2),
+höchstens 5 Anfragen pro Sekunde, zwischengespeichert in `data/cache/lobid/`.
 Datensätze ohne Bildungsstufe oder Fach: `--ohne-stufe vorschlag` (Standard: Fach und Stufe vom Modell aus dem
 OEH-Vokabular, markiert als `vorschlag`), `nur-thema` oder `weglassen`; `--pool maskiert` prüft die Vorschläge an
 Datensätzen mit bekanntem Fach und bekannter Stufe (Trefferquote in den Kennzahlen, nie als Seed). `--zusammenfuehren` baut daraus Themen für Schule und Hochschule

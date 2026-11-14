@@ -36,6 +36,22 @@ CACHE_DIR = DATA_DIR / "cache" / "lobid"
 THEMEN_TYPEN = {"SubjectHeadingSensoStricto", "HistoricSingleEventOrEra"}
 
 _lock = threading.Lock()
+# Mindestabstand zwischen zwei Netzanfragen über alle Threads (0 = nur die Pause je Anfrage); Cache-Treffer zählen nicht
+MIN_ABSTAND = 0.0
+_drossel_lock = threading.Lock()
+_naechste = 0.0
+
+
+def _drosseln():
+    global _naechste
+    if MIN_ABSTAND <= 0:
+        return
+    with _drossel_lock:
+        jetzt = time.monotonic()
+        warte = _naechste - jetzt
+        _naechste = max(jetzt, _naechste) + MIN_ABSTAND
+    if warte > 0:
+        time.sleep(warte)
 
 
 def _norm(s: str) -> str:
@@ -49,6 +65,7 @@ def _get(base: str, params: dict, pause: float = 0.05, versuche: int = 5) -> dic
     if path.exists():
         return json.loads(path.read_text(encoding="utf-8"))
     for i in range(versuche):
+        _drosseln()
         try:
             req = urllib.request.Request(url, headers={"Accept": "application/json",
                                                        "User-Agent": "synthetic-educational-materials"})

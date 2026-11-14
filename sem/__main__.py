@@ -234,6 +234,9 @@ def main(argv=None):
                         "Hochrechnung höchstens USD beträgt")
     p.add_argument("--pruefabschnitt", type=int, default=3000, metavar="N",
                    help="mit --max-kosten: Gruppen im Prüfabschnitt (Standard 3000)")
+    p.add_argument("--ids", type=Path, metavar="DATEI",
+                   help="nur diese Gruppen fragen (JSONL mit \"id\", z. B. <ausgabe>.fehler.jsonl, oder eine ID je "
+                        "Zeile); braucht --out")
     p.add_argument("--nur-zaehlen", action="store_true",
                    help="nur lesen und zählen (Gruppen, aussortierte Platzhalter- und Testdatensätze), ohne API")
     p.add_argument("--zusammenfuehren", nargs="*", type=Path, metavar="ABSTRAKTION",
@@ -243,6 +246,8 @@ def main(argv=None):
                    help="mit --zusammenfuehren: Bereiche, für die Themen gebaut werden (Standard schule,hochschule)")
     p.add_argument("--gnd-online", action="store_true", help="mit --zusammenfuehren: Fachbegriffe ohne lokalen "
                                                              "GND-Treffer bei lobid suchen")
+    p.add_argument("--gnd-online-min", type=int, default=2, metavar="N",
+                   help="mit --gnd-online: nur Fachbegriffe, die in mindestens N Themen vorkommen (Standard 2)")
     p.add_argument("--ohne-embeddings", action="store_true", help="mit --zusammenfuehren: nur exakte Verknüpfungen")
     p.add_argument("--embedding-modell", help="Standard intfloat/multilingual-e5-small")
     _llm_args(p)
@@ -426,7 +431,7 @@ def _wlo_themen(a):
 
             emb = Embedder(a.embedding_modell or DEFAULT_EMBEDDING_MODEL)
         st = wlo_seeds.bauen(quellen, [b.strip() for b in a.bereiche.split(",") if b.strip()], embedder=emb,
-                             online=a.gnd_online)
+                             online=a.gnd_online, online_min=a.gnd_online_min)
         print(json.dumps(st, ensure_ascii=False, indent=1))
         return
     csv_pfad = a.csv or (Path(os.environ["WLO_CSV"]) if os.environ.get("WLO_CSV") else None)
@@ -439,6 +444,11 @@ def _wlo_themen(a):
     gruppen = W.gruppieren(W.lesen(csv_pfad, aussortiert=aussortiert))
     print(f"{len(gruppen)} Gruppen nach Dublettenabgleich ({time.time() - t0:.0f} s); aussortiert: "
           + (", ".join(f"{k} {v}" for k, v in aussortiert.most_common()) or "nichts"), flush=True)
+    if a.ids:
+        if not a.out:
+            raise SystemExit("--ids braucht --out (eigene Ausgabe, damit kein anderer Lauf überschrieben wird)")
+        gruppen = {gid: gruppen[gid] for gid in W.ids_lesen(a.ids) if gid in gruppen}
+        print(f"--ids: {len(gruppen)} Gruppen aus {a.ids}", flush=True)
     if a.nur_zaehlen:
         print(json.dumps({"gruppen": len(gruppen), "aussortiert": dict(aussortiert),
                           "gruppen_mit_vorschlag": sum(W.braucht_vorschlag(g, a.ohne_stufe)

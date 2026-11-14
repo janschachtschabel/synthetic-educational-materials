@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 from collections import Counter, defaultdict
 from datetime import date
 from functools import lru_cache
@@ -114,11 +115,15 @@ def gnd_abgleich(begriffe: list[str], index: dict[str, dict], online: dict[str, 
     return out
 
 
-def gnd_online(begriffe: list[str], workers: int = 8, on_progress=None) -> dict[str, dict | None]:
-    """Exakte Suche bei lobid (zwischengespeichert in data/cache), wie bei gnd-ergaenzen."""
+def gnd_online(begriffe: list[str], workers: int = 8, on_progress=None,
+               max_je_sekunde: float = 5.0) -> dict[str, dict | None]:
+    """Exakte Suche bei lobid (zwischengespeichert in data/cache, ein abgebrochener Lauf setzt dort fort), wie bei
+    gnd-ergaenzen; höchstens max_je_sekunde Netzanfragen pro Sekunde."""
     from concurrent.futures import ThreadPoolExecutor
 
     from .quellen import gnd
+
+    gnd.MIN_ABSTAND = 1.0 / max_je_sekunde if max_je_sekunde else 0.0
 
     labels = sorted({b for b in begriffe if len(norm(b)) >= 3})
     out: dict[str, dict | None] = {}
@@ -176,6 +181,26 @@ def _hfs_ebenen(uris: list[str]) -> dict[str, list[dict]]:
             "faechergruppe": [v.ref(u) for u in ebenen[0]]}
 
 
+# Ausweich-Antworten statt eines Themas („Unklarer Lerngegenstand“, „Nicht erkennbar“): kein Seed
+AUSWEICH_THEMA = re.compile(r"(unbekannt|unklar|nicht erkennbar|nicht näher bestimmbar)\w*( \w+er)?"
+                            r"( (inhalt|gegenstand|thema))?", re.IGNORECASE)
+
+
+@lru_cache(maxsize=1)
+def _vokabular_labels() -> frozenset[str]:
+    return frozenset(norm(c["label"]) for v in vokabulare().values() for c in v.concepts)
+
+
+def kein_thema(thema: str) -> str | None:
+    """Grund, warum eine Abstraktion kein brauchbares Thema ist: Ausweich-Antwort oder nur der Name eines Fachs bzw.
+    einer Stufe (z. B. „Mathematik“), was als Seed nichts über den Gegenstand sagt. None = brauchbar."""
+    if AUSWEICH_THEMA.fullmatch(thema.strip()) or "lerngegenstand" in thema.casefold():
+        return "ausweich_thema"
+    if norm(thema) in _vokabular_labels():
+        return "thema_nur_fach"
+    return None
+
+
 def zusammenfassen(rows: list[dict], bereiche=STANDARD_BEREICHE) -> tuple[dict[str, list[dict]], dict]:
     """Abstraktionen → zusammengefasste Themen je Bereich (noch ohne GND und Verknüpfungen) und Zählung."""
     gruppen: dict[str, dict] = {}
@@ -183,6 +208,10 @@ def zusammenfassen(rows: list[dict], bereiche=STANDARD_BEREICHE) -> tuple[dict[s
     for r in rows:
         if not r.get("seed_tauglich"):
             zaehl["nicht_seed_tauglich"] += 1
+            continue
+        grund = kein_thema(r["thema"])
+        if grund:
+            zaehl[grund] += 1
             continue
         z = ziele(r)
         if not z:
@@ -338,7 +367,7 @@ def verknuepfen(neu: list[dict], vorhanden: list[dict], embedder=None) -> dict:
 
 
 def bauen(abstraktion: list[Path], bereiche=STANDARD_BEREICHE, embedder=None, online: bool = False,
-          on_progress=print, gnd: dict | None = None, vorhanden: dict[str, list[dict]] | None = None,
+          online_min: int = 2, on_progress=print, gnd: dict | None = None, vorhanden: dict[str, list[dict]] | None = None,
           schreiben: bool = True) -> dict:
     """Themen-Dateien je Bereich aus einer oder mehreren Abstraktions-Ausgaben; gibt die Statistik zurück."""
     rows: dict[str, dict] = {}
@@ -349,9 +378,13 @@ def bauen(abstraktion: list[Path], bereiche=STANDARD_BEREICHE, embedder=None, on
     gnd = gnd_index() if gnd is None else gnd
     on_lobid = None
     if online:
-        offen = {f for gs in gruppen.values() for g in gs for f in list(g["fachbegriffe"])[:5] + list(g["schreibweisen"])
-                 if norm(f) not in gnd}
-        on_progress(f"lobid: {len(offen)} Begriffe ohne lokalen GND-Treffer")
+        # nur Fachbegriffe (ganze Themen treffen die GND fast nie) und nur solche, die in mindestens online_min
+        # Themen vorkommen: Beim Volllauf sind das rund 63 000 statt 400 000 Anfragen, für 84 % der Vorkommen
+        anzahl = Counter(norm(f) for gs in gruppen.values() for g in gs
+                         for f, _ in g["fachbegriffe"].most_common(5) if norm(f) not in gnd)
+        offen = {f for gs in gruppen.values() for g in gs for f, _ in g["fachbegriffe"].most_common(5)
+                 if anzahl.get(norm(f), 0) >= online_min}
+        on_progress(f"lobid: {len(offen)} Begriffe ohne lokalen GND-Treffer (in mindestens {online_min} Themen)")
         on_lobid = gnd_online(sorted(offen), on_progress=on_progress)
     stat: dict = {"abstraktionen": len(rows), "zaehlung": zaehl, "datum": date.today().isoformat(), "bereiche": {}}
     for b in bereiche:

@@ -687,6 +687,17 @@ def hochrechnung(rows: list[dict], gruppen: dict[str, dict], ids: Iterable[str],
     return out
 
 
+def ids_lesen(p: Path) -> list[str]:
+    """Gruppen-IDs aus einer Datei: JSONL mit "id" (z. B. <ausgabe>.fehler.jsonl) oder eine ID je Zeile."""
+    out = []
+    for z in Path(p).read_text(encoding="utf-8").splitlines():
+        z = z.strip()
+        if not z:
+            continue
+        out.append(json.loads(z)["id"] if z.startswith("{") else z)
+    return list(dict.fromkeys(out))
+
+
 def lade_jsonl(p: Path) -> list[dict]:
     out = []
     for z in Path(p).read_text(encoding="utf-8").splitlines():

@@ -143,7 +143,11 @@ fewer than three letters, "lorem ipsum" in the title) are dropped before queryin
 discarded. If the model finds no subject matter it answers `{"thema": null}` (counted as `inhaltsleer`, no seed).
 `--nur-zaehlen` shows the counts without the API. For the full run, `--max-kosten 45` first queries a check sample
 (`--pruefabschnitt`, default 3000 groups, stratified) immediately via flex, writes the cache rate and the projection at
-batch price to `<output>.pruefung.json` and only continues if the projection stays below the limit. Records without an educational level or subject:
+batch price to `<output>.pruefung.json` and only continues if the projection stays below the limit. `--ids FILE --out …` queries only
+selected groups, e.g. the empty ones from `<output>.fehler.jsonl`, into a separate output; `--zusammenfuehren` reads
+all outputs (same group: the one read last wins). When building seeds, evasive answers ("Unklarer Lerngegenstand")
+and topics that are only a subject or level name are dropped. `--gnd-online` only looks up key terms at lobid that
+occur in at least `--gnd-online-min` topics (default 2), at most 5 requests per second, cached in `data/cache/lobid/`. Records without an educational level or subject:
 `--ohne-stufe vorschlag` (default: subject and level suggested by the model from the OEH vocabulary, flagged as
 `vorschlag`), `nur-thema` or `weglassen`; `--pool maskiert` checks the suggestions on records with known subject and
 level (hit rate in the metrics, never used for seeds). `--zusammenfuehren` builds topics for school and higher education from it (same topic in the
