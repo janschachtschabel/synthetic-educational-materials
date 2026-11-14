@@ -18,7 +18,7 @@ from ... import gnd_ergaenzung
 from ... import schema as S
 from ...paths import MAPPING_DIR
 from ...vocabs import load as load_vocab
-from ..base import Bildungsbereich, MappingSchritt, SeedState, kurz_id  # noqa: F401 (kurz_id: frühere Importstelle)
+from ..base import WLO_ANTEIL, WLO_VORSCHLAG, wlo_passt, Bildungsbereich, MappingSchritt, SeedState, kurz_id  # noqa: F401 (kurz_id: frühere Importstelle)
 
 DIR = MAPPING_DIR / "hochschule"
 THEMEN_DATEI = "themen_hochschule.jsonl"  # Gesamtset aus OpenAlex- und GND-Themen
@@ -122,8 +122,12 @@ class Hochschule(Bildungsbereich):
                                   "fachprofil": "typische Themen aus dem Kurzprofil jedes Studienfachs (Lehrsicht, "
                                                 "auch für Fächer ohne OpenAlex- und GND-Thema)",
                                   "rvk": "thematische Klassen der Regensburger Verbundklassifikation (Bibliotheks"
-                                         "systematik, Tiefe 2 bis 5)"},
+                                         "systematik, Tiefe 2 bis 5)",
+                                  "wlo_abstraktion": "Thema, per LLM aus Titel und Beschreibung von WLO-Datensätzen "
+                                                     "abstrahiert (nur mit lokaler Datei, python -m sem wlo-themen)"},
                         "standard": ["openalex", "gnd", "fachprofil", "rvk"]},
+            "wlo_anteil": WLO_ANTEIL,
+            "wlo_vorschlag": WLO_VORSCHLAG,
             "rvk_tiefe": {"label": "Tiefe der RVK-Klassen (nur RVK)",
                           "beschreibung": "Ebene in der RVK-Hierarchie: 2 = Hauptgruppe (z. B. QP), 3 = Bereich "
                                           "(QP 300 - QP 399), 4 und 5 = Unterklassen",
@@ -174,11 +178,15 @@ class Hochschule(Bildungsbereich):
             out.add("handmapping")
         if b.get("rvk"):
             out.add("rvk")
+        if topic.get("art") == "wlo_abstraktion":
+            out.add("wlo")
         return out
 
     def passt(self, topic: dict, auswahl: dict[str, list[str]]) -> bool:
         m = topic.get("mapping") or {}
         if topic.get("art", "openalex") not in auswahl["quellen"]:
+            return False
+        if not wlo_passt(topic, auswahl):
             return False
         if topic.get("art") == "rvk" and str(topic["rvk"]["tiefe"]) not in auswahl["rvk_tiefe"]:
             return False
@@ -248,7 +256,10 @@ class Hochschule(Bildungsbereich):
         for t in out:  # RVK-Themen: Beschreibung aus dem Pfad (steht nicht in der Datei, um sie klein zu halten)
             if t.get("art") == "rvk" and not t.get("beschreibung_de"):
                 t["beschreibung_de"] = "Teilgebiet von: " + " > ".join(t["rvk"]["pfad"])
-        return out + self._fachprofil_topics(out)
+        from ... import wlo_seeds
+
+        # WLO-Abstraktion (nur mit lokaler Datei) zuletzt: ändert die übrigen Themen nicht
+        return out + self._fachprofil_topics(out) + wlo_seeds.themen(self.key)
 
     def _fachprofil_topics(self, vorhandene: list[dict]) -> list[dict]:
         """Typische Themen aus den Kurzprofilen der Studienfächer (studienfach_profile.jsonl) als dritte Quelle.
@@ -330,6 +341,10 @@ class Hochschule(Bildungsbereich):
                 out["wlo"]["fach_passt"] = w["fach_passt"]
         if b.get("rvk"):
             out["rvk"] = [{k: x[k] for k in ("notation", "label", "uri")} for x in b["rvk"][:5]]
+        if topic.get("art") == "wlo_abstraktion":
+            from ...wlo_seeds import belege_kompakt
+
+            out.update(belege_kompakt(topic))
         return out
 
     # --- Seed ---------------------------------------------------------------------------

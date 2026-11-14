@@ -19,6 +19,7 @@ Platzhalter stehen in doppelten geschweiften Klammern, z. B. `{{thema}}`. Welche
 | `fragen_antworten.md` | Auftrag Frage-Antwort-Paare | JSON `{"paare": [...]}` |
 | `beschreibung_einstieg.md` | nur Befehl `beschreibung-einstieg`: ersten Satz einer fertigen Beschreibung ersetzen | ein Satz |
 | `ausgabesprache.md` | Hinweis an beide Systemprompts, nur wenn beim Erzeugen eine andere Ausgabesprache als Deutsch gewählt ist (App: „Ausgabesprache“, CLI: `--sprache en`) | – |
+| `wlo_themen.md`, `wlo_themen_vorschlag.md` | nur Befehl `wlo-themen`: Thema, allgemeineres Thema und Fachbegriffe aus Titel und Beschreibung eines WLO-Datensatzes; der zweite Teil (Fach-/Stufenvorschlag mit Vokabular) nur mit `--ohne-stufe vorschlag` | JSON |
 
 Die Felder werden nacheinander erzeugt: Titel, Beschreibung, Keywords, Inhaltstyp, Fragen. Jeder Aufruf
 setzt den Felddatei-Text als `{{auftrag}}` in `material.md` ein und sieht die zuvor erzeugten Felder.

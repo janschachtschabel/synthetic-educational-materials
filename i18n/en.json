@@ -639,5 +639,16 @@
  "DigComp-Glossar": "DigComp glossary",
  "deutsche Fachbegriffe für das Glossar (Vorgabe der Übersetzung)": "German terms for the glossary (binding for the translation)",
  "DigComp übersetzen": "Translate DigComp",
- "Bereiche, Kompetenzen und Lernergebnisse ins Deutsche (eigene, nicht amtliche Übersetzung)": "areas, competences and learning outcomes into German (own, unofficial translation)"
+ "Bereiche, Kompetenzen und Lernergebnisse ins Deutsche (eigene, nicht amtliche Übersetzung)": "areas, competences and learning outcomes into German (own, unofficial translation)",
+ "Thema, per LLM aus Titel und Beschreibung von WLO-Datensätzen abstrahiert (nur mit lokaler Datei, python -m sem wlo-themen)": "Topic abstracted by an LLM from title and description of WLO records (only with the local file, python -m sem wlo-themen)",
+ "Anteil WLO-Abstraktion": "Share of WLO abstraction",
+ "Anteil der Seeds aus Themen der WLO-Abstraktion, wenn diese Herkunft gewählt ist (mehrere angehakt: der größte Wert; keiner: so viele, wie es ihrem Anteil an den Themen entspricht)": "Share of seeds from WLO abstraction topics when this origin is selected (several ticked: the largest value; none: in proportion to their share of the topics)",
+ "10 %": "10 %",
+ "20 %": "20 %",
+ "30 %": "30 %",
+ "50 %": "50 %",
+ "Fach und Stufe (WLO-Abstraktion)": "Subject and level (WLO abstraction)",
+ "Themen der WLO-Abstraktion nach Herkunft von Fach und Bildungsstufe": "WLO abstraction topics by origin of subject and educational level",
+ "aus den Metadaten der WLO-Datensätze": "from the metadata of the WLO records",
+ "vom Modell aus dem OEH-Vokabular vorgeschlagen (Datensätze ohne Fach oder Stufe)": "suggested by the model from the OEH vocabulary (records without subject or level)"
 }

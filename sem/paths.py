@@ -14,6 +14,12 @@ LOKALE_DATEIEN = {
     "berufsbildung/rahmenlehrplaene.jsonl": "berufsbildung",
     "erwachsenenbildung/themen_lokal.jsonl": "erwachsenenbildung",
 }
+# Wie LOKALE_DATEIEN, aber eine Quelle zum Zuschalten: Kennung nur, wenn die Datei da ist (fehlt sie, ist das der
+# Normalfall und kein Hinweis wert). Themen der WLO-Themen-Abstraktion (python -m sem wlo-themen).
+ZUSAETZLICHE_LOKALE_DATEIEN = {
+    "wlo_abstraktion/themen_schule.jsonl": "schule",
+    "wlo_abstraktion/themen_hochschule.jsonl": "hochschule",
+}
 
 
 def lokal_pfad(name: str) -> Path:
@@ -29,6 +35,10 @@ def lokale_daten(bereich: str | None = None) -> dict[str, str | None]:
         if bereich in (None, b):
             p = lokal_pfad(name)
             out[name] = hashlib.sha256(p.read_bytes()).hexdigest()[:12] if p.exists() else None
+    for name, b in ZUSAETZLICHE_LOKALE_DATEIEN.items():
+        p = lokal_pfad(name)
+        if bereich in (None, b) and p.exists():
+            out[name] = hashlib.sha256(p.read_bytes()).hexdigest()[:12]
     return out
 PROMPT_DIR = ROOT / "prompts"
 OUTPUT_DIR = ROOT / "output"
