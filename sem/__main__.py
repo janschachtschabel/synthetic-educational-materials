@@ -15,6 +15,9 @@
     python -m sem mappings hochschule [alle|openalex|gnd|rvk|schritt …] [--limit N] [--stimmen 3] [--wlo export.csv …]
                                      [--rvk data/lokal/rvk/rvko_marcxml_2026_3.xml.gz]
     python -m sem mappings hochschule --liste
+    python -m sem wlo-themen --csv wlo_max_dataset_slim.csv [--limit 2000] [--ohne-stufe vorschlag|nur-thema|weglassen]
+                             [--warten]   (Themen-Abstraktion aus WLO-Datensätzen, Batch, fortsetzbar)
+    python -m sem wlo-themen --zusammenfuehren [--gnd-online] [--ohne-embeddings]   (Themen für die Seeds)
 """
 
 from __future__ import annotations
@@ -205,6 +208,45 @@ def main(argv=None):
     _stand_arg(p)
     _llm_args(p)
 
+    p = sub.add_parser("wlo-themen", help="Themen-Abstraktion aus WLO-Datensätzen (Batch, fortsetzbar) und Themen für "
+                                          "die Seeds (Herkunft wlo_abstraktion, nur lokal in data/lokal/wlo_abstraktion/)")
+    p.add_argument("--csv", type=Path, help="WLO-Export (;-getrennt, Standard: WLO_CSV)")
+    p.add_argument("--limit", type=int, help="geschichtete Stichprobe aus N Gruppen (nach Stufe und Fach)")
+    p.add_argument("--ohne-stufe", choices=["vorschlag", "nur-thema", "weglassen"], default="vorschlag",
+                   help="Datensätze ohne Bildungsstufe oder Fach: Thema mit Fach- und Stufenvorschlag aus dem "
+                        "OEH-Vokabular (Standard, markiert als vorschlag), nur Thema, oder (ohne Stufe) weglassen")
+    p.add_argument("--pool", choices=["alle", "ohne_stufe", "maskiert"], default="alle",
+                   help="Stichprobe nur aus Datensätzen ohne Stufe, oder maskiert: Datensätze mit Fach und Stufe "
+                        "ohne beides fragen und die Vorschläge mit den echten Werten vergleichen (nie als Seed)")
+    p.add_argument("--zufall", type=int, default=42, help="Startwert der Stichprobe")
+    p.add_argument("--out", type=Path, help="Ausgabe (Standard: data/lokal/wlo_abstraktion/abstraktion[_nN].jsonl)")
+    p.add_argument("--vergleich-lokal", action="store_true",
+                   help="zusätzlich <ausgabe>.vergleich_lokal.jsonl mit Titel zur Prüfung (nie weitergeben)")
+    p.add_argument("--warten", action="store_true", help="wiederholen, bis alles fertig ist")
+    p.add_argument("--intervall", type=float, default=60, help="mit --warten: Sekunden zwischen den Abfragen")
+    p.add_argument("--sofort", action="store_true",
+                   help="ohne Batch: Anfragen sofort parallel stellen (--workers), etwa wenn die Batch-API hängt; "
+                        "zum Standardpreis (doppelt), mit --flex zum Batch-Preis; laufende Batches werden "
+                        "weiter abgeholt")
+    p.add_argument("--max-kosten", type=float, metavar="USD",
+                   help="erst einen Prüfabschnitt (--pruefabschnitt Gruppen, sofort über Flex) abfragen, Cache-Quote "
+                        "und hochgerechnete Gesamtkosten (Batch-Preis) melden und nur weiterlaufen, wenn die "
+                        "Hochrechnung höchstens USD beträgt")
+    p.add_argument("--pruefabschnitt", type=int, default=3000, metavar="N",
+                   help="mit --max-kosten: Gruppen im Prüfabschnitt (Standard 3000)")
+    p.add_argument("--nur-zaehlen", action="store_true",
+                   help="nur lesen und zählen (Gruppen, aussortierte Platzhalter- und Testdatensätze), ohne API")
+    p.add_argument("--zusammenfuehren", nargs="*", type=Path, metavar="ABSTRAKTION",
+                   help="Themen für die Seeds bauen (ohne LLM) aus den genannten Ausgaben, Standard: alle "
+                        "abstraktion*.jsonl in data/lokal/wlo_abstraktion/")
+    p.add_argument("--bereiche", default="schule,hochschule",
+                   help="mit --zusammenfuehren: Bereiche, für die Themen gebaut werden (Standard schule,hochschule)")
+    p.add_argument("--gnd-online", action="store_true", help="mit --zusammenfuehren: Fachbegriffe ohne lokalen "
+                                                             "GND-Treffer bei lobid suchen")
+    p.add_argument("--ohne-embeddings", action="store_true", help="mit --zusammenfuehren: nur exakte Verknüpfungen")
+    p.add_argument("--embedding-modell", help="Standard intfloat/multilingual-e5-small")
+    _llm_args(p)
+
     a = ap.parse_args(argv)
 
     if a.cmd == "info":
@@ -363,6 +405,87 @@ def main(argv=None):
         print("\n" + prog.line())
         if "fertig" not in prog.status:
             sys.exit(2)
+
+    elif a.cmd == "wlo-themen":
+        _wlo_themen(a)
+
+
+def _wlo_themen(a):
+    import os
+
+    from . import wlo_seeds, wlo_themen as W
+
+    if a.zusammenfuehren is not None:
+        quellen = a.zusammenfuehren or sorted(p for p in W.ordner().glob("abstraktion*.jsonl")
+                                              if not p.name.endswith((".fehler.jsonl", ".vergleich_lokal.jsonl")))
+        if not quellen:
+            raise SystemExit(f"Keine Abstraktion in {W.ordner()}; erst python -m sem wlo-themen --csv … ausführen")
+        emb = None
+        if not a.ohne_embeddings:
+            from .mapping.embeddings import DEFAULT_EMBEDDING_MODEL, Embedder
+
+            emb = Embedder(a.embedding_modell or DEFAULT_EMBEDDING_MODEL)
+        st = wlo_seeds.bauen(quellen, [b.strip() for b in a.bereiche.split(",") if b.strip()], embedder=emb,
+                             online=a.gnd_online)
+        print(json.dumps(st, ensure_ascii=False, indent=1))
+        return
+    csv_pfad = a.csv or (Path(os.environ["WLO_CSV"]) if os.environ.get("WLO_CSV") else None)
+    if not csv_pfad:
+        raise SystemExit("--csv angeben (oder WLO_CSV setzen)")
+    t0 = time.time()
+    from collections import Counter
+
+    aussortiert = Counter()
+    gruppen = W.gruppieren(W.lesen(csv_pfad, aussortiert=aussortiert))
+    print(f"{len(gruppen)} Gruppen nach Dublettenabgleich ({time.time() - t0:.0f} s); aussortiert: "
+          + (", ".join(f"{k} {v}" for k, v in aussortiert.most_common()) or "nichts"), flush=True)
+    if a.nur_zaehlen:
+        print(json.dumps({"gruppen": len(gruppen), "aussortiert": dict(aussortiert),
+                          "gruppen_mit_vorschlag": sum(W.braucht_vorschlag(g, a.ohne_stufe)
+                                                       for g in gruppen.values())}, ensure_ascii=False))
+        return
+    show = lambda st: print(time.strftime("%H:%M:%S"), W.status_zeile(st), flush=True)  # noqa: E731
+    cfg = _cfg(a)
+    if a.max_kosten is not None:
+        _wlo_pruefabschnitt(a, W, gruppen, cfg, show)
+    lauf = W.WloThemenLauf(gruppen, cfg, a.out, limit=a.limit, ohne_stufe=a.ohne_stufe, zufall=a.zufall,
+                           vergleich=a.vergleich_lokal, pool=a.pool, sofort=a.sofort)
+    st = lauf.warten(a.intervall, on_status=show) if a.warten else lauf.weiter()
+    if not a.warten:
+        show(st)
+    if st["abgeschlossen"]:
+        kz = W.kennzahlen(lauf.out_path, lauf.stand)
+        lauf.out_path.with_suffix(".kennzahlen.json").write_text(json.dumps(kz, ensure_ascii=False, indent=1),
+                                                                 encoding="utf-8")
+        print(json.dumps(kz, ensure_ascii=False, indent=1))
+    print(f"→ {lauf.out_path}" + ("" if st["abgeschlossen"] else "  (später erneut aufrufen, um fortzusetzen)"))
+
+
+def _wlo_pruefabschnitt(a, W, gruppen, cfg, show):
+    """Prüfabschnitt vor einem großen Lauf: a.pruefabschnitt Gruppen (geschichtet) sofort über Flex abfragen, dann
+    Cache-Quote und Hochrechnung melden; weiter nur, wenn die Hochrechnung unter a.max_kosten liegt. Die Ergebnisse
+    stehen in derselben Ausgabe und zählen für den Lauf."""
+    from dataclasses import replace
+
+    lauf = W.WloThemenLauf(gruppen, replace(cfg, service_tier="flex"), a.out, limit=a.limit,
+                           ohne_stufe=a.ohne_stufe, zufall=a.zufall, vergleich=a.vergleich_lokal, pool=a.pool,
+                           sofort=True)
+    alle = lauf.ids
+    lauf.ids = W.auswaehlen({gid: gruppen[gid] for gid in alle}, a.ohne_stufe, a.pruefabschnitt, a.zufall + 1,
+                            a.pool)
+    print(f"Prüfabschnitt: {len(lauf.ids)} von {len(alle)} Gruppen, sofort über Flex", flush=True)
+    st = lauf.warten(min(a.intervall, 20), on_status=show)
+    hr = W.hochrechnung(W.lade_jsonl(lauf.out_path), gruppen, alle, a.ohne_stufe, cfg.model)
+    hr.update(max_kosten_usd=a.max_kosten, pruefabschnitt=len(lauf.ids), kosten_pruefabschnitt_usd=st["kosten_usd"])
+    lauf.out_path.with_suffix(".pruefung.json").write_text(json.dumps(hr, ensure_ascii=False, indent=1),
+                                                           encoding="utf-8")
+    print(json.dumps(hr, ensure_ascii=False, indent=1), flush=True)
+    if hr["kosten_usd"] is None or hr["kosten_usd"] > a.max_kosten:
+        raise SystemExit(f"Hochrechnung {hr['kosten_usd']} $ über der Grenze {a.max_kosten} $ (oder nicht "
+                         "berechenbar): Lauf angehalten. Die Ergebnisse des Prüfabschnitts bleiben in "
+                         f"{lauf.out_path}.")
+    print(f"Hochrechnung {hr['kosten_usd']} $ ≤ {a.max_kosten} $: weiter mit dem ganzen Lauf", flush=True)
+
 
 if __name__ == "__main__":
     main()

@@ -126,7 +126,34 @@ python -m sem titel-neu --materialien output/materialien_schule5000_s42.jsonl   
 python -m sem beschreibung-einstieg --materialien output/materialien_schule5000_s42.jsonl   # Schablonen-Anfang der Beschreibung ersetzen
 python -m sem faecher-ergaenzen --materialien output/materialien_schule5000_s42.jsonl   # OEH-Fach in Berufs- und EB-Materialien nachtragen (ohne LLM)
 python -m sem gnd-ergaenzen                         # GND-Motive ersetzen, Themenbeschreibungen aus GND/Wikidata (Netz)
+python -m sem wlo-themen --csv wlo_max_dataset_slim.csv --limit 2000 --warten   # Themen-Abstraktion aus WLO-Datensätzen (Batch, Stichprobe)
+python -m sem wlo-themen --zusammenfuehren          # daraus Themen für Schule und Hochschule (lokal, ohne LLM)
+python -m sem seeds --anzahl schule=5000 --auswahl schule.herkunft=themenbaum,wlo_keyword,wlo_abstraktion schule.wlo_anteil=20 --seed 42
 ```
+
+**Themen aus WLO-Datensätzen (Herkunft `wlo_abstraktion`):** `wlo-themen` lässt ein LLM aus Titel und Beschreibung
+jedes WLO-Datensatzes das fachliche Thema ableiten (Nominalphrase wie ein Lehrplan-Schlagwort, dazu ein
+allgemeineres Thema und Fachbegriffe; Prompt in `prompts/wlo_themen.md`). Gleiche Titel+Beschreibung werden vorher
+zusammengefasst (eine Anfrage, alle Node-IDs bleiben). Läuft über die Batch-Schnittstelle, fortsetzbar wie
+`materialien --batch`; `--limit N` zieht eine nach Stufe und Fach geschichtete Stichprobe, die Kennzahlen
+(Kopien, Länge, GND-Treffer, Tokens, Kosten, Hochrechnung) stehen danach in `<ausgabe>.kennzahlen.json`. Ein Thema,
+das Formulierungen aus Titel oder Beschreibung übernimmt, wird einmal neu angefragt und sonst nicht verwendet.
+Hängt die Batch-Schnittstelle, stellt `--sofort` die Anfragen ohne Batch parallel (`--workers`, mit `--flex` zum
+Batch-Preis, sonst zum doppelten); schon laufende Batches desselben Laufs werden weiter abgeholt.
+Platzhalter- und Testdatensätze (Titel und Beschreibung nur „unbenannt“, „test1“, „asdf“ …, weniger als drei
+Buchstaben, „lorem ipsum“ im Titel) fallen vor der Abfrage weg; eine Blindtext-Beschreibung wird verworfen. Erkennt
+das Modell keinen Lerngegenstand, antwortet es `{"thema": null}` (zählt als `inhaltsleer`, kein Seed).
+`--nur-zaehlen` zeigt die Zahlen ohne API. Für den Volllauf: `--max-kosten 45` fragt zuerst einen Prüfabschnitt
+(`--pruefabschnitt`, Standard 3000 Gruppen, geschichtet) sofort über Flex ab, schreibt Cache-Quote und Hochrechnung
+zum Batch-Preis nach `<ausgabe>.pruefung.json` und läuft nur weiter, wenn die Hochrechnung darunter liegt.
+Datensätze ohne Bildungsstufe oder Fach: `--ohne-stufe vorschlag` (Standard: Fach und Stufe vom Modell aus dem
+OEH-Vokabular, markiert als `vorschlag`), `nur-thema` oder `weglassen`; `--pool maskiert` prüft die Vorschläge an
+Datensätzen mit bekanntem Fach und bekannter Stufe (Trefferquote in den Kennzahlen, nie als Seed). `--zusammenfuehren` baut daraus Themen für Schule und Hochschule
+(gleiches Thema im selben Fach = ein Thema mit allen Node-IDs als Gewicht; Fachbegriffe gegen GND, mit
+`--gnd-online` auch über lobid; Verknüpfung mit ähnlichen vorhandenen Themen über lokale Embeddings). Alles liegt
+in `data/lokal/wlo_abstraktion/` und wird nicht committet. Bei den Seeds ist die Herkunft standardmäßig aus;
+`wlo_anteil` legt fest, welcher Anteil der Seeds aus ihr kommt, `wlo_vorschlag` schaltet Themen mit
+vorgeschlagenem Fach oder vorgeschlagener Stufe getrennt an oder ab. Herkunft und Rechte: `PROVENIENZ.md`.
 
 **Themen auswählen:** Jeder Bereich hat eigene Filter für Quellen bzw. Herkunft, Abstimmungsstatus (Konfidenz:
 `gesichert`, `wahrscheinlich`, `unsicher`, `redaktionell`) und Belege; `python -m sem auswahl <bereich>` zeigt

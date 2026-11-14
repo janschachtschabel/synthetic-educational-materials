@@ -125,7 +125,33 @@ python -m sem titel-neu --materialien output/materialien_schule5000_s42.jsonl   
 python -m sem beschreibung-einstieg --materialien output/materialien_schule5000_s42.jsonl   # replace stock-phrase description openings
 python -m sem faecher-ergaenzen --materialien output/materialien_schule5000_s42.jsonl   # add the OEH subject to vocational and adult education materials (no LLM)
 python -m sem gnd-ergaenzen                         # replace GND motif entries, topic descriptions from GND/Wikidata (network)
+python -m sem wlo-themen --csv wlo_max_dataset_slim.csv --limit 2000 --warten   # topic abstraction from WLO records (batch, sample)
+python -m sem wlo-themen --zusammenfuehren          # turn it into topics for school and higher education (local, no LLM)
+python -m sem seeds --anzahl schule=5000 --auswahl schule.herkunft=themenbaum,wlo_keyword,wlo_abstraktion schule.wlo_anteil=20 --seed 42
 ```
+
+**Topics from WLO records (origin `wlo_abstraktion`):** `wlo-themen` has an LLM derive the subject-matter topic from
+the title and description of each WLO record (a noun phrase like a curriculum heading, plus a broader topic and key
+terms; prompt in `prompts/wlo_themen.md`). Records with the same title and description are merged beforehand (one
+request, all node IDs kept). It runs through the batch API and can be resumed like `materialien --batch`;
+`--limit N` draws a sample stratified by level and subject, and the metrics (copies, length, GND matches, tokens,
+cost, projection) are written to `<output>.kennzahlen.json`. A topic that reuses wording from the title or
+description is requested once more and otherwise not used. If the batch API stalls, `--sofort` sends the requests in parallel
+without a batch (`--workers`; at batch price with `--flex`, otherwise at double price); batches already running for
+the same run are still collected. Placeholder and test records (title and description only "unbenannt", "test1", "asdf" …,
+fewer than three letters, "lorem ipsum" in the title) are dropped before querying; a dummy-text description is
+discarded. If the model finds no subject matter it answers `{"thema": null}` (counted as `inhaltsleer`, no seed).
+`--nur-zaehlen` shows the counts without the API. For the full run, `--max-kosten 45` first queries a check sample
+(`--pruefabschnitt`, default 3000 groups, stratified) immediately via flex, writes the cache rate and the projection at
+batch price to `<output>.pruefung.json` and only continues if the projection stays below the limit. Records without an educational level or subject:
+`--ohne-stufe vorschlag` (default: subject and level suggested by the model from the OEH vocabulary, flagged as
+`vorschlag`), `nur-thema` or `weglassen`; `--pool maskiert` checks the suggestions on records with known subject and
+level (hit rate in the metrics, never used for seeds). `--zusammenfuehren` builds topics for school and higher education from it (same topic in the
+same subject = one topic with all node IDs as weight; key terms matched against the GND, with `--gnd-online` also
+via lobid; links to similar existing topics via local embeddings). Everything stays in `data/lokal/wlo_abstraktion/`
+and is not committed. For seeds, this origin is off by default; `wlo_anteil` sets the share of seeds drawn from it,
+`wlo_vorschlag` switches topics with a suggested subject or level on or off separately.
+Origin and rights: `PROVENIENZ.md`.
 
 **Selecting topics:** each sector offers its own filters for sources/origin, voting status (confidence:
 `gesichert`, `wahrscheinlich`, `unsicher`, `redaktionell`) and evidence; `python -m sem auswahl <bereich>`
