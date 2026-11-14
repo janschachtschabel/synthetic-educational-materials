@@ -51,6 +51,31 @@ def test_lesen_ueberspringt_leere_und_filtert_vokabular(tmp_path):
     assert rows[2]["titel"] == "Titel aus der Spalte title"
 
 
+@pytest.mark.parametrize("titel, beschr, grund", [
+    ("Unbenannt", "", "platzhalter"), ("test 123", "Test", "platzhalter"), ("", "asdf", "platzhalter"),
+    ("Neues Dokument", "", "platzhalter"), ("ha24", "", "ohne_inhalt"), ("", "", "ohne_inhalt"),
+    ("Lorem ipsum dolor", "", "lorem_ipsum"),
+    ("Test", "Satz des Pythagoras an Beispielen", None), ("Testverfahren in der Statistik", "", None),
+    ("SPD", "", None), ("Brüche addieren", "", None),
+])
+def test_platzhalter(titel, beschr, grund):
+    assert W.platzhalter(titel, beschr) == grund
+
+
+def test_lesen_sortiert_platzhalter_aus_und_zaehlt(tmp_path):
+    from collections import Counter
+    p = _csv(tmp_path, [
+        ["n1", "Unbenannt", "", f"{DISC}380", "", f"{CTX}grundschule"],
+        ["n2", "test1", "test1", f"{DISC}380", "", ""],
+        ["n3", "Brüche addieren", "Lorem ipsum dolor sit amet", f"{DISC}380", "", ""],  # Blindtext weg, Titel bleibt
+        ["n4", "x1", "", "", "", ""],
+    ])
+    c = Counter()
+    rows = list(W.lesen(p, aussortiert=c))
+    assert [r["node"] for r in rows] == ["n3"] and rows[0]["beschreibung"] == ""
+    assert c == {"platzhalter": 2, "ohne_inhalt": 1, "beschreibung_blindtext": 1}
+
+
 def test_dublettenschluessel_normalisiert_und_behaelt_alle_nodes():
     a = W.schluessel("Brüche addieren!", "Wir addieren  Brüche.")
     assert a == W.schluessel("brüche addieren", "wir addieren brüche")
@@ -128,6 +153,8 @@ def test_auswerten_und_vorschlag_nur_aus_vokabular():
     assert not W.auswerten(d, g, "nur-thema")["vorschlag"]
     with pytest.raises(ValueError):
         W.auswerten({"thema": ""}, g, "weglassen")
+    with pytest.raises(W.Inhaltsleer):
+        W.auswerten({"thema": None}, g, "weglassen")
 
 
 def test_vokabular_im_festen_prompt_anfang():
@@ -218,6 +245,57 @@ def test_sofort_ohne_batch(tmp_path, tier, faktor):
     assert st["kosten_usd"] == pytest.approx(W.kosten(lauf.stand["tokens"], "gpt-6-luna") * faktor)
     kz = W.kennzahlen(out, lauf.stand, gnd={})
     assert kz["hochrechnung"]["kosten_usd"] == pytest.approx(W.kosten(lauf.stand["tokens"], "gpt-6-luna"), abs=0.01)
+
+
+def test_inhaltsleer_wird_nicht_neu_gefragt(tmp_path):
+    gruppen = {"a": _gruppe("a", [f"{DISC}380"], [f"{CTX}grundschule"], "qase Staging"),
+               "b": _gruppe("b", [f"{DISC}380"], [f"{CTX}grundschule"], "Zahlen bis zwanzig")}
+    fake = FakeOpenAI(lambda u: json.dumps({"thema": None}) if "qase" in u else
+                      json.dumps({"thema": "Zahlenraum und Zählen", "fachbegriffe": ["Zahl"], "entfernt": []}))
+    out = tmp_path / "abstraktion.jsonl"
+    lauf = W.WloThemenLauf(gruppen, LLMConfig(api_key="x"), out, client=fake)
+    lauf.weiter()
+    st = lauf.weiter()
+    assert st["abgeschlossen"] and st["fertig"] == 1 and st["fehlgeschlagen"] == 1 and st["runde"] == 1
+    assert [r["id"] for r in W.lade_jsonl(out)] == ["b"]
+    assert W.kennzahlen(out, lauf.stand, gnd={})["inhaltsleer"] == 1
+
+
+def test_hochrechnung_getrennt_nach_vorschlag():
+    gruppen = {f"n{i}": _gruppe(f"n{i}", [f"{DISC}380"], [f"{CTX}grundschule"]) for i in range(8)}
+    gruppen |= {f"v{i}": _gruppe(f"v{i}", [], []) for i in range(2)}
+    rows = [{"id": "n0", "tokens": {"eingabe": 1_000_000, "davon_cache": 0, "ausgabe": 0}},
+            {"id": "v0", "tokens": {"eingabe": 1_000_000, "davon_cache": 1_000_000, "ausgabe": 0}}]
+    hr = W.hochrechnung(rows, gruppen, gruppen, "vorschlag", "gpt-6-luna")
+    assert hr["normal"]["kosten_usd"] == pytest.approx(8 * 0.05) and hr["normal"]["cache_quote"] == 0
+    assert hr["vorschlag"]["kosten_usd"] == pytest.approx(2 * 0.005) and hr["vorschlag"]["cache_quote"] == 1
+    assert hr["kosten_usd"] == pytest.approx(0.41)
+    assert W.hochrechnung(rows[:1], gruppen, gruppen, "vorschlag", "gpt-6-luna")["kosten_usd"] is None
+    assert W.hochrechnung(rows[:1], gruppen, gruppen, "nur-thema", "gpt-6-luna")["kosten_usd"] == pytest.approx(0.5)
+
+
+@pytest.mark.parametrize("grenze, weiter", [(1.0, True), (0.00001, False)])
+def test_pruefabschnitt_haelt_ueber_der_grenze(tmp_path, monkeypatch, grenze, weiter):
+    from types import SimpleNamespace
+
+    from sem import __main__ as M
+    gruppen = {f"g{i}": _gruppe(f"g{i}", [f"{DISC}380"], [f"{CTX}grundschule"], f"Titel {i}") for i in range(10)}
+    fake = _FakeChat(lambda u: json.dumps({"thema": "Rechnen im Zahlenraum", "fachbegriffe": ["Zahl"],
+                                           "entfernt": []}))
+    echt = W.WloThemenLauf
+    monkeypatch.setattr(W, "WloThemenLauf", lambda *x, **k: echt(*x, client=fake, **k))
+    out = tmp_path / "abstraktion.jsonl"
+    a = SimpleNamespace(out=out, limit=None, ohne_stufe="vorschlag", zufall=42, vergleich_lokal=False, pool="alle",
+                        pruefabschnitt=4, intervall=0, max_kosten=grenze)
+    cfg = LLMConfig(api_key="x", model="gpt-6-luna")
+    if weiter:
+        M._wlo_pruefabschnitt(a, W, gruppen, cfg, lambda st: None)
+    else:
+        with pytest.raises(SystemExit):
+            M._wlo_pruefabschnitt(a, W, gruppen, cfg, lambda st: None)
+    assert len(W.lade_jsonl(out)) == 4 and set(fake.tiers) == {"flex"}
+    hr = json.loads(out.with_suffix(".pruefung.json").read_text(encoding="utf-8"))
+    assert hr["normal"]["gruppen"] == 10 and hr["pruefabschnitt"] == 4 and hr["kosten_usd"] > 0
 
 
 def test_kosten():

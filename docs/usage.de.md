@@ -140,6 +140,12 @@ zusammengefasst (eine Anfrage, alle Node-IDs bleiben). Läuft über die Batch-Sc
 das Formulierungen aus Titel oder Beschreibung übernimmt, wird einmal neu angefragt und sonst nicht verwendet.
 Hängt die Batch-Schnittstelle, stellt `--sofort` die Anfragen ohne Batch parallel (`--workers`, mit `--flex` zum
 Batch-Preis, sonst zum doppelten); schon laufende Batches desselben Laufs werden weiter abgeholt.
+Platzhalter- und Testdatensätze (Titel und Beschreibung nur „unbenannt“, „test1“, „asdf“ …, weniger als drei
+Buchstaben, „lorem ipsum“ im Titel) fallen vor der Abfrage weg; eine Blindtext-Beschreibung wird verworfen. Erkennt
+das Modell keinen Lerngegenstand, antwortet es `{"thema": null}` (zählt als `inhaltsleer`, kein Seed).
+`--nur-zaehlen` zeigt die Zahlen ohne API. Für den Volllauf: `--max-kosten 45` fragt zuerst einen Prüfabschnitt
+(`--pruefabschnitt`, Standard 3000 Gruppen, geschichtet) sofort über Flex ab, schreibt Cache-Quote und Hochrechnung
+zum Batch-Preis nach `<ausgabe>.pruefung.json` und läuft nur weiter, wenn die Hochrechnung darunter liegt.
 Datensätze ohne Bildungsstufe oder Fach: `--ohne-stufe vorschlag` (Standard: Fach und Stufe vom Modell aus dem
 OEH-Vokabular, markiert als `vorschlag`), `nur-thema` oder `weglassen`; `--pool maskiert` prüft die Vorschläge an
 Datensätzen mit bekanntem Fach und bekannter Stufe (Trefferquote in den Kennzahlen, nie als Seed). `--zusammenfuehren` baut daraus Themen für Schule und Hochschule

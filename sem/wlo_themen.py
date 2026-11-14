@@ -63,6 +63,13 @@ PREISE = {"gpt-6-luna": {"eingabe": 0.05, "cache": 0.005, "ausgabe": 0.25}}
 MAX_ANFRAGEN = 50_000             # je Batch-Datei
 MAX_BYTES = 190 * 1024 ** 2       # je Batch-Datei
 MAX_API_FEHLER = 3
+# Platzhalter- und Testdatensätze (vor der Abfrage aussortiert): Titel und Beschreibung sind jeweils ganz einer
+# dieser Ausdrücke (normalisiert), der Titel enthält „lorem ipsum“, oder der Text hat (fast) keine Buchstaben.
+# Eine Beschreibung mit „lorem ipsum“ (Blindtext einer Vorlage) wird verworfen, der Titel bleibt.
+PLATZHALTER = re.compile(r"(test(e|en|s|ing|datensatz|eintrag|material|upload|objekt|inhalt)?|tst|asdf\w*|qwert\w*|"
+                         r"(bla\s*)+|x+|abcd?|a{3,}|dummy|platzhalter|unbenannt|untitled|ohne titel|"
+                         r"neues? (material|dokument|element|objekt|inhalt)|new (document|material|item))(\s*\d+)?")
+MIN_BUCHSTABEN = 3  # weniger Buchstaben in Titel und Beschreibung zusammen: kein Inhalt
 KOPIE_HINWEIS = ("\n\nHinweis: Eine frühere Antwort übernahm Formulierungen aus Titel oder Beschreibung "
                  "(„{thema}“). Benenne den Lerngegenstand allgemeiner und mit eigenen Worten.")
 
@@ -88,6 +95,19 @@ def norm(s: str | None) -> str:
     return " ".join(re.sub(r"[^\w\s-]", " ", (s or "").casefold()).split())
 
 
+def platzhalter(titel: str, beschreibung: str) -> str | None:
+    """Grund, warum ein Datensatz als Platzhalter oder Test gilt (None = hat Inhalt)."""
+    if sum(c.isalpha() for c in titel + beschreibung) < MIN_BUCHSTABEN:
+        return "ohne_inhalt"
+    t, b = norm(titel), norm(beschreibung)
+    if "lorem ipsum" in t:
+        return "lorem_ipsum"
+    leer = [x for x in (t, b) if x]
+    if all(PLATZHALTER.fullmatch(x) for x in leer):
+        return "platzhalter"
+    return None
+
+
 def schluessel(titel: str, beschreibung: str) -> str:
     """Dublettenschlüssel: normalisierter Titel und normalisierte Beschreibung (gekürzt wie im Prompt)."""
     roh = norm(titel[:TITEL_MAX]) + "\x1f" + norm(beschreibung[:BESCHR_MAX])
@@ -110,9 +130,10 @@ def ref(uri: str) -> dict:
     return {"uri": uri, "label": uri.rsplit("/", 1)[-1]}
 
 
-def lesen(pfad: Path, delimiter: str = ";") -> Iterator[dict]:
+def lesen(pfad: Path, delimiter: str = ";", aussortiert: Counter | None = None) -> Iterator[dict]:
     """Datensätze mit Titel oder Beschreibung: {node, titel, beschreibung, faecher, stufen} (Fach und Stufe als URIs
-    der OEH-Vokabulare; andere Werte, z. B. „legal“ in ccm:educationalcontext, werden verworfen)."""
+    der OEH-Vokabulare; andere Werte, z. B. „legal“ in ccm:educationalcontext, werden verworfen). Platzhalter- und
+    Testdatensätze fallen weg und werden je Grund in aussortiert gezählt."""
     csv.field_size_limit(10 ** 9)
     vok = vokabulare()
     fach_uris = set(vok["discipline"].by_uri) | set(vok[HFS].by_uri)
@@ -126,7 +147,16 @@ def lesen(pfad: Path, delimiter: str = ";") -> Iterator[dict]:
         for row in r:
             titel = text(row.get(spalte["cclom:title"])) or (text(row.get("title")) if hat_title else "")
             beschr = text(row.get(spalte["cclom:general_description"]))
+            if "lorem ipsum" in norm(beschr):
+                beschr = ""
+                if aussortiert is not None:
+                    aussortiert["beschreibung_blindtext"] += 1
             if not (titel or beschr):
+                continue
+            grund = platzhalter(titel[:TITEL_MAX], beschr[:BESCHR_MAX])
+            if grund:
+                if aussortiert is not None:
+                    aussortiert[grund] += 1
                 continue
             faecher = [u for u in liste(row.get(spalte["ccm:taxonid"])) + liste(row.get(spalte["ccm:oeh_taxonid_university"]))
                        if u in fach_uris]
@@ -286,8 +316,15 @@ def vorschlag_pruefen(v, vokabular: str) -> dict | None:
     return {"uri": c["uri"], "label": c["label"]}
 
 
+class Inhaltsleer(ValueError):
+    """Das Modell erkennt keinen Lerngegenstand ("thema": null): nicht neu fragen, nicht als Seed nutzen."""
+
+
 def auswerten(d, g: dict, ohne_stufe: str) -> dict:
-    """Antwort des Modells → Ergebnisfelder (ohne Quelltexte). ValueError bei unbrauchbarer Antwort."""
+    """Antwort des Modells → Ergebnisfelder (ohne Quelltexte). ValueError bei unbrauchbarer Antwort, Inhaltsleer bei
+    "thema": null."""
+    if isinstance(d, dict) and "thema" in d and d["thema"] is None:
+        raise Inhaltsleer("kein Lerngegenstand erkennbar")
     if not isinstance(d, dict) or not isinstance(d.get("thema"), str) or not d["thema"].strip():
         raise ValueError("Antwort ohne Thema")
     thema = " ".join(d["thema"].split())
@@ -472,6 +509,10 @@ class WloThemenLauf:
             g = maskiert(g)
         try:
             erg = auswerten(json_aus_text(body["choices"][0]["message"].get("content") or ""), g, self.ohne_stufe)
+        except Inhaltsleer:
+            self.stand["inhaltsleer"] = self.stand.get("inhaltsleer", 0) + 1
+            self._fehlgeschlagen(gid, "inhaltsleer")
+            return
         except (ValueError, KeyError, TypeError) as e:
             z["ungueltig"] = z.get("ungueltig", 0) + 1
             if z["ungueltig"] >= MAX_API_FEHLER:
@@ -603,12 +644,13 @@ def vorschlag_kennzahlen(rows: list[dict]) -> dict:
     return out
 
 
-def kosten(tokens: dict, modell: str) -> float | None:
+def kosten(tokens: dict, modell: str, stellen: int | None = 4) -> float | None:
     p = PREISE.get(modell)
     if not p or not tokens:
         return None
     ein, cache, aus = tokens.get("eingabe", 0), tokens.get("davon_cache", 0), tokens.get("ausgabe", 0)
-    return round(((ein - cache) * p["eingabe"] + cache * p["cache"] + aus * p["ausgabe"]) / 1e6, 4)
+    k = ((ein - cache) * p["eingabe"] + cache * p["cache"] + aus * p["ausgabe"]) / 1e6
+    return round(k, stellen) if stellen is not None else k
 
 
 def kosten_lauf(stand: dict, modell: str) -> float | None:
@@ -616,6 +658,32 @@ def kosten_lauf(stand: dict, modell: str) -> float | None:
     k = kosten(stand.get("tokens") or {}, modell)
     extra = kosten(stand.get("tokens_standardpreis") or {}, modell)
     return round(k + (extra or 0), 4) if k is not None else None
+
+
+def hochrechnung(rows: list[dict], gruppen: dict[str, dict], ids: Iterable[str], ohne_stufe: str,
+                 modell: str) -> dict:
+    """Gesamtkosten für die Gruppen ids zum Batch-Preis, getrennt nach Gruppen mit und ohne Vorschlag (der Vorschlag
+    kostet wegen des Vokabulars im Prompt mehr; eine geschichtete Stichprobe enthält davon anteilig zu wenige).
+    Dazu die Cache-Quote: Anteil der Eingabe-Tokens aus dem Cache. kosten_usd ist None, solange eine Art fehlt."""
+    ids = list(ids)
+    art = {gid: "vorschlag" if braucht_vorschlag(gruppen[gid], ohne_stufe) else "normal" for gid in ids}
+    out, gesamt = {}, 0.0
+    for name in ("normal", "vorschlag"):
+        anzahl = sum(1 for v in art.values() if v == name)
+        rs = [r for r in rows if art.get(r["id"]) == name]
+        tok = Counter()
+        for r in rs:
+            tok.update(r.get("tokens") or {})
+        k = kosten(dict(tok), modell, stellen=None) if rs else None
+        je = k / len(rs) if k is not None else None
+        out[name] = {"gruppen": anzahl, "stichprobe": len(rs),
+                     "kosten_je_gruppe_usd": round(je, 7) if je is not None else None,
+                     "cache_quote": round(tok["davon_cache"] / tok["eingabe"], 3) if tok["eingabe"] else None,
+                     "kosten_usd": round(je * anzahl, 4) if je is not None else (0.0 if not anzahl else None)}
+        gesamt = None if gesamt is None or out[name]["kosten_usd"] is None else gesamt + out[name]["kosten_usd"]
+    out["kosten_usd"] = round(gesamt, 4) if gesamt is not None else None
+    out["preis"] = "batch"
+    return out
 
 
 def lade_jsonl(p: Path) -> list[dict]:
@@ -670,6 +738,7 @@ def kennzahlen(out_path: Path, stand: dict | None = None, gnd: dict | None = Non
         "themen_distinct": len(tn), "themen_mehrfach": sum(1 for v in tn.values() if v >= 2),
         "allgemeiner_distinct": len(tan), "allgemeiner_top": dict(tan.most_common(10)),
         "vorschlag": vorschlag_kennzahlen(rows),
+        "inhaltsleer": stand.get("inhaltsleer", 0),
         "ohne_fach": sum(not x["fach"] for x in rows), "ohne_stufe": sum(not x["stufe"] for x in rows),
         "tokens": tok, "tokens_je_gruppe": je, "modell": modell, "kosten_usd": k,
         "hochrechnung": {"gruppen": pool, "gruppen_gesamt_ohne_filter": gesamt_pool, "preis": "batch",

@@ -228,6 +228,14 @@ def main(argv=None):
                    help="ohne Batch: Anfragen sofort parallel stellen (--workers), etwa wenn die Batch-API hängt; "
                         "zum Standardpreis (doppelt), mit --flex zum Batch-Preis; laufende Batches werden "
                         "weiter abgeholt")
+    p.add_argument("--max-kosten", type=float, metavar="USD",
+                   help="erst einen Prüfabschnitt (--pruefabschnitt Gruppen, sofort über Flex) abfragen, Cache-Quote "
+                        "und hochgerechnete Gesamtkosten (Batch-Preis) melden und nur weiterlaufen, wenn die "
+                        "Hochrechnung höchstens USD beträgt")
+    p.add_argument("--pruefabschnitt", type=int, default=3000, metavar="N",
+                   help="mit --max-kosten: Gruppen im Prüfabschnitt (Standard 3000)")
+    p.add_argument("--nur-zaehlen", action="store_true",
+                   help="nur lesen und zählen (Gruppen, aussortierte Platzhalter- und Testdatensätze), ohne API")
     p.add_argument("--zusammenfuehren", nargs="*", type=Path, metavar="ABSTRAKTION",
                    help="Themen für die Seeds bauen (ohne LLM) aus den genannten Ausgaben, Standard: alle "
                         "abstraktion*.jsonl in data/lokal/wlo_abstraktion/")
@@ -425,11 +433,23 @@ def _wlo_themen(a):
     if not csv_pfad:
         raise SystemExit("--csv angeben (oder WLO_CSV setzen)")
     t0 = time.time()
-    gruppen = W.gruppieren(W.lesen(csv_pfad))
-    print(f"{len(gruppen)} Gruppen nach Dublettenabgleich ({time.time() - t0:.0f} s)", flush=True)
-    lauf = W.WloThemenLauf(gruppen, _cfg(a), a.out, limit=a.limit, ohne_stufe=a.ohne_stufe, zufall=a.zufall,
-                           vergleich=a.vergleich_lokal, pool=a.pool, sofort=a.sofort)
+    from collections import Counter
+
+    aussortiert = Counter()
+    gruppen = W.gruppieren(W.lesen(csv_pfad, aussortiert=aussortiert))
+    print(f"{len(gruppen)} Gruppen nach Dublettenabgleich ({time.time() - t0:.0f} s); aussortiert: "
+          + (", ".join(f"{k} {v}" for k, v in aussortiert.most_common()) or "nichts"), flush=True)
+    if a.nur_zaehlen:
+        print(json.dumps({"gruppen": len(gruppen), "aussortiert": dict(aussortiert),
+                          "gruppen_mit_vorschlag": sum(W.braucht_vorschlag(g, a.ohne_stufe)
+                                                       for g in gruppen.values())}, ensure_ascii=False))
+        return
     show = lambda st: print(time.strftime("%H:%M:%S"), W.status_zeile(st), flush=True)  # noqa: E731
+    cfg = _cfg(a)
+    if a.max_kosten is not None:
+        _wlo_pruefabschnitt(a, W, gruppen, cfg, show)
+    lauf = W.WloThemenLauf(gruppen, cfg, a.out, limit=a.limit, ohne_stufe=a.ohne_stufe, zufall=a.zufall,
+                           vergleich=a.vergleich_lokal, pool=a.pool, sofort=a.sofort)
     st = lauf.warten(a.intervall, on_status=show) if a.warten else lauf.weiter()
     if not a.warten:
         show(st)
@@ -439,6 +459,32 @@ def _wlo_themen(a):
                                                                  encoding="utf-8")
         print(json.dumps(kz, ensure_ascii=False, indent=1))
     print(f"→ {lauf.out_path}" + ("" if st["abgeschlossen"] else "  (später erneut aufrufen, um fortzusetzen)"))
+
+
+def _wlo_pruefabschnitt(a, W, gruppen, cfg, show):
+    """Prüfabschnitt vor einem großen Lauf: a.pruefabschnitt Gruppen (geschichtet) sofort über Flex abfragen, dann
+    Cache-Quote und Hochrechnung melden; weiter nur, wenn die Hochrechnung unter a.max_kosten liegt. Die Ergebnisse
+    stehen in derselben Ausgabe und zählen für den Lauf."""
+    from dataclasses import replace
+
+    lauf = W.WloThemenLauf(gruppen, replace(cfg, service_tier="flex"), a.out, limit=a.limit,
+                           ohne_stufe=a.ohne_stufe, zufall=a.zufall, vergleich=a.vergleich_lokal, pool=a.pool,
+                           sofort=True)
+    alle = lauf.ids
+    lauf.ids = W.auswaehlen({gid: gruppen[gid] for gid in alle}, a.ohne_stufe, a.pruefabschnitt, a.zufall + 1,
+                            a.pool)
+    print(f"Prüfabschnitt: {len(lauf.ids)} von {len(alle)} Gruppen, sofort über Flex", flush=True)
+    st = lauf.warten(min(a.intervall, 20), on_status=show)
+    hr = W.hochrechnung(W.lade_jsonl(lauf.out_path), gruppen, alle, a.ohne_stufe, cfg.model)
+    hr.update(max_kosten_usd=a.max_kosten, pruefabschnitt=len(lauf.ids), kosten_pruefabschnitt_usd=st["kosten_usd"])
+    lauf.out_path.with_suffix(".pruefung.json").write_text(json.dumps(hr, ensure_ascii=False, indent=1),
+                                                           encoding="utf-8")
+    print(json.dumps(hr, ensure_ascii=False, indent=1), flush=True)
+    if hr["kosten_usd"] is None or hr["kosten_usd"] > a.max_kosten:
+        raise SystemExit(f"Hochrechnung {hr['kosten_usd']} $ über der Grenze {a.max_kosten} $ (oder nicht "
+                         "berechenbar): Lauf angehalten. Die Ergebnisse des Prüfabschnitts bleiben in "
+                         f"{lauf.out_path}.")
+    print(f"Hochrechnung {hr['kosten_usd']} $ ≤ {a.max_kosten} $: weiter mit dem ganzen Lauf", flush=True)
 
 
 if __name__ == "__main__":

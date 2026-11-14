@@ -138,7 +138,12 @@ request, all node IDs kept). It runs through the batch API and can be resumed li
 cost, projection) are written to `<output>.kennzahlen.json`. A topic that reuses wording from the title or
 description is requested once more and otherwise not used. If the batch API stalls, `--sofort` sends the requests in parallel
 without a batch (`--workers`; at batch price with `--flex`, otherwise at double price); batches already running for
-the same run are still collected. Records without an educational level or subject:
+the same run are still collected. Placeholder and test records (title and description only "unbenannt", "test1", "asdf" …,
+fewer than three letters, "lorem ipsum" in the title) are dropped before querying; a dummy-text description is
+discarded. If the model finds no subject matter it answers `{"thema": null}` (counted as `inhaltsleer`, no seed).
+`--nur-zaehlen` shows the counts without the API. For the full run, `--max-kosten 45` first queries a check sample
+(`--pruefabschnitt`, default 3000 groups, stratified) immediately via flex, writes the cache rate and the projection at
+batch price to `<output>.pruefung.json` and only continues if the projection stays below the limit. Records without an educational level or subject:
 `--ohne-stufe vorschlag` (default: subject and level suggested by the model from the OEH vocabulary, flagged as
 `vorschlag`), `nur-thema` or `weglassen`; `--pool maskiert` checks the suggestions on records with known subject and
 level (hit rate in the metrics, never used for seeds). `--zusammenfuehren` builds topics for school and higher education from it (same topic in the
