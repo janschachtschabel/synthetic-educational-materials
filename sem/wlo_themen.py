@@ -236,6 +236,7 @@ def auswaehlen(gruppen: dict[str, dict], ohne_stufe: str = "vorschlag", limit: i
 
 # --- Prompt ---------------------------------------------------------------------------------------------
 
+@lru_cache(maxsize=2)  # ein String für alle Anfragen: Ein Volllauf hält sonst je Anfrage eine Kopie im Speicher
 def system_prompt(vorschlag: bool = False) -> str:
     base = (paths.PROMPT_DIR / "wlo_themen.md").read_text(encoding="utf-8").strip()
     if not vorschlag:
