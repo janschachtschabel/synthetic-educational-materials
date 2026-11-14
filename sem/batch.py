@@ -68,6 +68,60 @@ class OpenAIBatches:
         return info.status, zeilen, _batch_fehler(info) if info.status == "failed" else ""
 
 
+class OpenAISofort(OpenAIBatches):
+    """Wie OpenAIBatches, aber ohne Batch: Die Anfragen einer Runde werden sofort parallel gestellt und die Antworten
+    in der Form der Batch-Ausgabe neben der Anfragedatei gespeichert (<datei>.ergebnis.jsonl). Für den Fall, dass die
+    Batch-Schnittstelle hängt. Batches eines früheren Aufrufs (IDs ohne „sofort:“) werden weiter normal abgeholt.
+    Mit cfg.service_tier="flex" zum Batch-Preis; Antworten zum Standardpreis tragen "standardpreis": true."""
+
+    def __init__(self, client, cfg: LLMConfig, ordner: Path, workers: int = 8):
+        super().__init__(client)
+        self.cfg = cfg
+        self.ordner = ordner
+        self.workers = max(1, workers)
+
+    def _eine(self, cid: str, body: dict) -> dict:
+        import openai
+
+        from .llm import FLEX_VERSUCHE, FLEX_WARTEN
+
+        params = dict(body)
+        if self.cfg.service_tier:
+            params["service_tier"] = self.cfg.service_tier
+        fehler = ""
+        for i in range(FLEX_VERSUCHE + 2):
+            if params.get("service_tier") == "flex" and i >= FLEX_VERSUCHE:
+                params.pop("service_tier")  # keine Flex-Kapazität: zum Standardpreis
+            try:
+                resp = self.client.chat.completions.create(**params)
+                return {"custom_id": cid, "standardpreis": params.get("service_tier") != "flex",
+                        "response": {"status_code": 200, "body": resp.model_dump()}}
+            except (openai.RateLimitError, openai.APIConnectionError, openai.APITimeoutError,
+                    openai.InternalServerError) as e:
+                fehler = str(e)
+                time.sleep(min(FLEX_WARTEN * 2 ** i, 300))
+            except openai.APIStatusError as e:
+                return {"custom_id": cid, "response": {"status_code": e.status_code, "body": {"error": str(e)[:300]}}}
+        return {"custom_id": cid, "response": {"status_code": 503, "body": {"error": fehler[:300]}}}
+
+    def anlegen(self, datei: Path, runde: int, teil: list[tuple[str, dict]]) -> tuple[str, str]:
+        from concurrent.futures import ThreadPoolExecutor
+
+        datei.write_text("".join(json.dumps({"custom_id": cid, "body": body}, ensure_ascii=False) + "\n"
+                                 for cid, body in teil), encoding="utf-8")
+        ergebnis = datei.with_suffix(".ergebnis.jsonl")
+        with ThreadPoolExecutor(self.workers) as ex, ergebnis.open("w", encoding="utf-8") as f:
+            for r in ex.map(lambda t: self._eine(*t), teil):
+                f.write(json.dumps(r, ensure_ascii=False) + "\n")
+        return f"sofort:{ergebnis.name}", "completed"
+
+    def abrufen(self, bid: str, cids: list[str]):
+        if not bid.startswith("sofort:"):
+            return super().abrufen(bid, cids)
+        p = self.ordner / bid.removeprefix("sofort:")
+        return "completed", [json.loads(z) for z in p.read_text(encoding="utf-8").splitlines() if z.strip()], ""
+
+
 class AnthropicBatches:
     """Message Batches von Anthropic. Eine custom_id darf dort nur Buchstaben, Ziffern, - und _ enthalten
     (höchstens 64 Zeichen): geschickt wird die Nummer der Anfrage im Batch, zurückübersetzt über die gespeicherte

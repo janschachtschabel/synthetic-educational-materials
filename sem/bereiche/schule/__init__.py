@@ -19,7 +19,7 @@ from ... import gnd_ergaenzung
 from ... import schema as S
 from ...paths import MAPPING_DIR
 from ...vocabs import load as load_vocab
-from ..base import Bildungsbereich, MappingSchritt, SeedState
+from ..base import WLO_ANTEIL, WLO_VORSCHLAG, wlo_passt, Bildungsbereich, MappingSchritt, SeedState
 from ..hochschule import load_jsonl
 
 DIR = MAPPING_DIR / "schule"
@@ -28,6 +28,9 @@ STUFEN = ["primar", "sek1", "sek2"]
 STUFEN_LABEL = {"primar": "Primarstufe", "sek1": "Sekundarstufe I", "sek2": "Sekundarstufe II"}
 # Fremdsprachenportale: Zielsprache zusätzlich als Sprache des Materials
 ZIELSPRACHE = {"Englisch": "en", "Französisch": "fr", "Spanisch": "es", "Türkisch": "tr"}
+FACH_METHODE = {"themenbaum": "relatedMatch des Themas im WLO-Themenbaum",
+                "wlo_keyword": "Abstimmung aus den Fächern der WLO-Datensätze mit diesem Keyword",
+                "wlo_abstraktion": "Fach der WLO-Datensätze, aus denen das Thema abstrahiert wurde"}
 
 __all__ = ["Schule", "DIR", "STUFEN", "load_jsonl"]
 
@@ -96,8 +99,12 @@ class Schule(Bildungsbereich):
         return {
             "herkunft": {"label": "Herkunft der Themen", "beschreibung": "Themenbaum oder Schlagwörter der WLO-Materialien",
                          "werte": {"themenbaum": "Thema aus den WLO-Themenbäumen (Lehrplanthemen)",
-                                   "wlo_keyword": "feineres Thema aus WLO-Keywords, als GND-Sachbegriff normiert"},
+                                   "wlo_keyword": "feineres Thema aus WLO-Keywords, als GND-Sachbegriff normiert",
+                                   "wlo_abstraktion": "Thema, per LLM aus Titel und Beschreibung von WLO-Datensätzen "
+                                                      "abstrahiert (nur mit lokaler Datei, python -m sem wlo-themen)"},
                          "standard": ["themenbaum", "wlo_keyword"]},
+            "wlo_anteil": WLO_ANTEIL,
+            "wlo_vorschlag": WLO_VORSCHLAG,
             "stufen": {"label": "Schulstufen", "beschreibung": "nur Seeds dieser Stufen (z. B. nur Sekundarstufe II)",
                        "werte": {k: v for k, v in STUFEN_LABEL.items()}, "standard": list(STUFEN)},
             "art": {"label": "Themenart", "beschreibung": "Abstimmung",
@@ -122,6 +129,8 @@ class Schule(Bildungsbereich):
     def belege_des_themas(topic: dict) -> set[str]:
         out = set()
         if (topic.get("belege") or {}).get("wlo"):
+            out.add("wlo")
+        if topic.get("herkunft") == "wlo_abstraktion":
             out.add("wlo")
         if topic.get("herkunft") == "wlo_keyword" or (topic.get("belege") or {}).get("wlo_keyword"):
             out.add("wlo_keyword")
@@ -152,6 +161,8 @@ class Schule(Bildungsbereich):
         if (m.get("art") or {}).get("status", "gesichert") not in auswahl["art_status"]:
             return False
         if topic.get("herkunft", "themenbaum") not in auswahl["herkunft"]:
+            return False
+        if not wlo_passt(topic, auswahl):
             return False
         if (m.get("fach") or {}).get("status", "gesichert") not in auswahl["fach_status"]:
             return False
@@ -192,11 +203,13 @@ class Schule(Bildungsbereich):
         return gnd_ergaenzung.anwenden(self._topics_roh(), self.key)
 
     def _topics_roh(self) -> list[dict]:
+        from ... import wlo_seeds
+
         path = DIR / "themen_schule.jsonl"
         out = load_jsonl(path) if path.exists() else []
         if not out:
             raise FileNotFoundError(f"Keine Themen in {DIR}. Erst die Mappings bauen: python -m sem mappings schule")
-        return out
+        return out + wlo_seeds.themen(self.key)  # WLO-Abstraktion, nur mit lokaler Datei
 
     def balance_key(self, topic: dict, balance: str) -> str:
         if balance == "thema":
@@ -238,8 +251,7 @@ class Schule(Bildungsbereich):
         if faecher:
             S.set_controlled(seed, S.F_TAXON, [self.disciplines.ref(u) for u in faecher], S.provenance(
                 "OpenEduHub discipline", uri=self.disciplines.scheme["uri"], license="CC0-1.0",
-                method="relatedMatch des Themas im WLO-Themenbaum" if topic.get("herkunft", "themenbaum") == "themenbaum"
-                else "Abstimmung aus den Fächern der WLO-Datensätze mit diesem Keyword"))
+                method=FACH_METHODE.get(topic.get("herkunft", "themenbaum"), FACH_METHODE["wlo_keyword"])))
         m = topic.get("mapping", {})
         q = topic["quelle"]
         if topic.get("herkunft", "themenbaum") == "themenbaum":
@@ -273,6 +285,10 @@ class Schule(Bildungsbereich):
             status={"stufen": m.get("status"), "art": (m.get("art") or {}).get("status"),
                     **({"fach": m["fach"]["status"]} if m.get("fach") else {})},
             belege={"erfuellt": sorted(self.belege_des_themas(topic))})
+        if topic.get("herkunft") == "wlo_abstraktion":
+            from ...wlo_seeds import belege_kompakt
+
+            seed[S.F_PROVENANCE][S.F_THEMA]["belege"].update(belege_kompakt(topic))
 
         from .bildungsstandards import fuer_seed
 

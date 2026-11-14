@@ -35,6 +35,31 @@ NACHNAMEN = ["Becker", "Yılmaz", "Nowak", "Schmidt", "Hoffmann", "Kowalski", "W
              "Wolf", "Ivanova", "Richter", "Klein", "Hassan", "Neumann", "Kaya", "Zimmermann", "Schröder"]
 
 
+# IDs der Themen aus der WLO-Themen-Abstraktion (sem/wlo_seeds.py): „wlo-abstraktion:<bereich>:<hash>“
+WLO_THEMA_PREFIX = "wlo-abstraktion:"
+# Filter für den Anteil dieser Themen an den Seeds (Prozent); gewählt ist der größte angehakte Wert
+WLO_ANTEIL = {"label": "Anteil WLO-Abstraktion",
+              "beschreibung": "Anteil der Seeds aus Themen der WLO-Abstraktion, wenn diese Herkunft gewählt ist "
+                              "(mehrere angehakt: der größte Wert; keiner: so viele, wie es ihrem Anteil an den "
+                              "Themen entspricht)",
+              "werte": {"10": "10 %", "20": "20 %", "30": "30 %", "50": "50 %"}, "standard": ["20"]}
+# Filter: Themen der WLO-Abstraktion, deren Fach oder Stufe das Modell vorgeschlagen hat (Datensatz ohne Fach/Stufe)
+WLO_VORSCHLAG = {"label": "Fach und Stufe (WLO-Abstraktion)",
+                 "beschreibung": "Themen der WLO-Abstraktion nach Herkunft von Fach und Bildungsstufe",
+                 "werte": {"metadaten": "aus den Metadaten der WLO-Datensätze",
+                           "vorschlag": "vom Modell aus dem OEH-Vokabular vorgeschlagen (Datensätze ohne Fach oder "
+                                        "Stufe)"},
+                 "standard": ["metadaten", "vorschlag"]}
+
+
+def wlo_passt(topic: dict, auswahl: dict[str, list[str]]) -> bool:
+    """Filter wlo_vorschlag für ein Thema der WLO-Abstraktion (andere Themen passen immer)."""
+    if not str(topic.get("id", "")).startswith(WLO_THEMA_PREFIX) or "wlo_vorschlag" not in auswahl:
+        return True
+    art = "vorschlag" if (topic.get("wlo") or {}).get("vorschlag") else "metadaten"
+    return art in auswahl["wlo_vorschlag"]
+
+
 @dataclass
 class MappingSchritt:
     key: str
@@ -197,6 +222,12 @@ class Bildungsbereich(ABC):
         """Ob ein Thema zur Auswahl passt. Standard: immer."""
         return True
 
+    @staticmethod
+    def wlo_anteil(auswahl: dict[str, list[str]]) -> float | None:
+        """Anteil der Seeds aus der WLO-Abstraktion (Filter wlo_anteil), None = keine Vorgabe."""
+        werte = [int(w) for w in auswahl.get("wlo_anteil") or [] if str(w).isdigit()]
+        return max(werte) / 100 if werte else None
+
     def auswahl_pruefen(self, auswahl: dict[str, list[str]] | None) -> dict[str, list[str]]:
         """Ergänzt fehlende Filter mit ihrem Standard und weist unbekannte Werte zurück."""
         opts = self.auswahl_optionen()
@@ -228,7 +259,7 @@ STANDARD_KONFIDENZ = ["gesichert", "wahrscheinlich", "redaktionell"]
 def filtergruppe(name: str, option: dict) -> str:
     """Gruppe eines Filters für Oberfläche und CLI: „quellen“ (Quellen, Herkunft, Belege), „konfidenz“
     (Status einer Zuordnung aus der Abstimmung) oder „inhalt“ (alles andere, z. B. Stufen, Themenart)."""
-    if name in ("quellen", "herkunft", "belege"):
+    if name in ("quellen", "herkunft", "belege", "wlo_anteil", "wlo_vorschlag"):
         return "quellen"
     if set(option["werte"]) == set(STATUS_WERTE):
         return "konfidenz"
@@ -291,6 +322,17 @@ def ohne_urls(text: str) -> str:
     return re.sub(r"\s+([.,;:])", r"\1", _URL.sub(" ", text)).strip()
 
 
+def _teile_wlo(themen: list[dict], n: int, anteil: float | None) -> list[tuple[int, list[dict]]]:
+    """Seeds auf Themen der WLO-Abstraktion und übrige Themen verteilen: [(Anzahl, Themen), …]. Ohne Vorgabe oder
+    wenn eine der beiden Mengen leer ist, ein Teil (wie bisher)."""
+    wlo = [t for t in themen if str(t["id"]).startswith(WLO_THEMA_PREFIX)]
+    rest = [t for t in themen if not str(t["id"]).startswith(WLO_THEMA_PREFIX)]
+    if anteil is None or not wlo or not rest:
+        return [(n, themen)]
+    n_wlo = round(n * anteil)
+    return [(n - n_wlo, rest), (n_wlo, wlo)]
+
+
 def build_seeds(bereich: Bildungsbereich, n: int, balance: str | None = None, seed: int = 42,
                 id_prefix: str | None = None, auswahl: dict[str, list[str]] | None = None) -> list[dict]:
     balance = balance or bereich.default_balance
@@ -299,18 +341,24 @@ def build_seeds(bereich: Bildungsbereich, n: int, balance: str | None = None, se
                          f"Möglich: {', '.join(bereich.balance_options)}")
     rng = random.Random(seed)
     auswahl = bereich.auswahl_pruefen(auswahl)
-    groups: dict[str, list[dict]] = defaultdict(list)
-    for t in bereich.themen_auswahl(auswahl):
-        groups[bereich.balance_key(t, balance)].append(t)
-    if not groups:
+    themen = bereich.themen_auswahl(auswahl)
+    if not themen:
         raise ValueError(f"Keine Themen für {bereich.key} mit dieser Auswahl: {auswahl}")
     state = SeedState()
     seeds = []
     prefix = id_prefix or bereich.key
     # Kennung der lokalen Dateien des Bereichs: gleicher Startwert ergibt nur bei gleicher Kennung dieselben Seeds
     lokal = lokale_daten(bereich.key)
-    gewichte = bereich.gruppen_gewichte(balance, groups)
-    for i, (group, topic) in enumerate(allocate(n, groups, rng, gewichte), 1):
+    zuteilung = []
+    teile = _teile_wlo(themen, n, bereich.wlo_anteil(auswahl))
+    for n_teil, teil in teile:
+        groups: dict[str, list[dict]] = defaultdict(list)
+        for t in teil:
+            groups[bereich.balance_key(t, balance)].append(t)
+        zuteilung += allocate(n_teil, groups, rng, bereich.gruppen_gewichte(balance, groups))
+    if len(teile) > 1:
+        rng.shuffle(zuteilung)
+    for i, (group, topic) in enumerate(zuteilung, 1):
         state.group = group
         s = {"id": f"{prefix}-{seed}-{i:06d}"}
         s.update(bereich.make_seed(topic, rng, state))

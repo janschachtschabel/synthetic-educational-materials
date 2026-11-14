@@ -49,6 +49,10 @@ OPEN_TOPIC_PREFIXES = (
 )
 
 
+# Topics abstracted by the project from WirLernenOnline records (python -m sem wlo-themen): label only, no URI
+OWN_TOPIC_PREFIXES = ("wlo-abstraktion:",)
+
+
 # Export columns and their types (str, list of str, bool, int, qa); schema() turns them into a pyarrow schema
 COLUMNS = [
     ("id", "str"), ("education_sector", "str"), ("language", "str"), ("title", "str"), ("description", "str"),
@@ -137,7 +141,9 @@ def flatten(r: dict) -> dict:
     topic_uri = thema.get("id") or ""
     # learning-field topics (ESCO occupation|kmk:…) are kept locally only
     open_topic = topic_uri.startswith(OPEN_TOPIC_PREFIXES) and "kmk:" not in topic_uri
-    profile_topic = "#thema-" in topic_uri  # topic from the project's own subject profiles (CC0): label only
+    # topics of the project's own making (CC0), label only: subject profiles and topics abstracted from WirLernenOnline
+    # records (no source text, see PROVENIENZ.md)
+    profile_topic = "#thema-" in topic_uri or topic_uri.startswith(OWN_TOPIC_PREFIXES)
     if open_topic and "|" in topic_uri:  # ESCO occupation|skill: the topic is the skill
         topic_uri = (r.get("synth:kompetenz") or {}).get("uri") or topic_uri.split("|")[0]
     niveau = r.get("synth:niveau") or {}

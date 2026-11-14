@@ -464,6 +464,8 @@ def umfang(key: str, auswahl: dict | None, anzahl_seeds: int, balance: str) -> d
     pruef = b.auswahl_pruefen(auswahl)
     aus = []
     for name, o in b.auswahl_optionen().items():
+        if name == "wlo_anteil":  # Anteil, kein Ausschluss
+            continue
         if name == "belege":
             if pruef.get(name):
                 aus.append((o["label"], [o["werte"][w] for w in pruef[name]], True))
