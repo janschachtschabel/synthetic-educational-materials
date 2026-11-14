@@ -138,6 +138,8 @@ zusammengefasst (eine Anfrage, alle Node-IDs bleiben). Läuft über die Batch-Sc
 `materialien --batch`; `--limit N` zieht eine nach Stufe und Fach geschichtete Stichprobe, die Kennzahlen
 (Kopien, Länge, GND-Treffer, Tokens, Kosten, Hochrechnung) stehen danach in `<ausgabe>.kennzahlen.json`. Ein Thema,
 das Formulierungen aus Titel oder Beschreibung übernimmt, wird einmal neu angefragt und sonst nicht verwendet.
+Hängt die Batch-Schnittstelle, stellt `--sofort` die Anfragen ohne Batch parallel (`--workers`, mit `--flex` zum
+Batch-Preis, sonst zum doppelten); schon laufende Batches desselben Laufs werden weiter abgeholt.
 Datensätze ohne Bildungsstufe oder Fach: `--ohne-stufe vorschlag` (Standard: Fach und Stufe vom Modell aus dem
 OEH-Vokabular, markiert als `vorschlag`), `nur-thema` oder `weglassen`; `--pool maskiert` prüft die Vorschläge an
 Datensätzen mit bekanntem Fach und bekannter Stufe (Trefferquote in den Kennzahlen, nie als Seed). `--zusammenfuehren` baut daraus Themen für Schule und Hochschule

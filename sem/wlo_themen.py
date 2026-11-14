@@ -340,8 +340,9 @@ class WloThemenLauf:
 
     def __init__(self, gruppen: dict[str, dict], cfg: LLMConfig, out_path: Path | None = None,
                  limit: int | None = None, ohne_stufe: str = "vorschlag", zufall: int = 42,
-                 vergleich: bool = False, client=None, pool: str = "alle"):
-        from .batch import AnthropicBatches, OpenAIBatches
+                 vergleich: bool = False, client=None, pool: str = "alle", sofort: bool = False):
+        from .batch import AnthropicBatches, OpenAIBatches, OpenAISofort
+        from .llm import FLEX_TIMEOUT
 
         self.gruppen = gruppen
         self.cfg = cfg
@@ -367,8 +368,15 @@ class WloThemenLauf:
             else:
                 from openai import OpenAI
 
-                client = OpenAI(base_url=cfg.base_url, api_key=cfg.api_key, timeout=cfg.timeout)
-        self.api = AnthropicBatches(client) if cfg.anbieter == "anthropic" else OpenAIBatches(client)
+                timeout = max(cfg.timeout, FLEX_TIMEOUT) if sofort and cfg.service_tier == "flex" else cfg.timeout
+                client = OpenAI(base_url=cfg.base_url, api_key=cfg.api_key, timeout=timeout, max_retries=0 if sofort
+                                else 2)
+        if sofort and cfg.anbieter == "anthropic":
+            raise ValueError("--sofort gibt es nur für OpenAI-kompatible APIs")
+        if sofort:
+            self.api = OpenAISofort(client, cfg, self.ordner, cfg.workers)
+        else:
+            self.api = AnthropicBatches(client) if cfg.anbieter == "anthropic" else OpenAIBatches(client)
         parameter = {"modell": cfg.model, "anbieter": cfg.anbieter, "reasoning_effort": cfg.reasoning_effort,
                      "prompt_hash": prompt_hash(ohne_stufe), "limit": limit, "ohne_stufe": ohne_stufe,
                      "zufall": zufall, "gruppen": len(self.ids)}
@@ -454,6 +462,10 @@ class WloThemenLauf:
         for k, v in t.items():
             tok[k] = tok.get(k, 0) + v
         z["tokens"] = {k: z.get("tokens", {}).get(k, 0) + v for k, v in t.items()}
+        if r.get("standardpreis"):  # sofort ohne Flex: doppelter Preis, für die Kosten getrennt gezählt
+            std = self.stand.setdefault("tokens_standardpreis", {})
+            for k, v in t.items():
+                std[k] = std.get(k, 0) + v
         g = self.gruppen[gid]
         wahr = g
         if self.pool == "maskiert":
@@ -539,7 +551,7 @@ class WloThemenLauf:
         return {"gruppen": len(self.ids), "fertig": fertig, "fehlgeschlagen": len(self.stand["fehlgeschlagen"]),
                 "offen": offen, "wiederholung_kopie": sum(1 for z in self.stand["offen"].values() if z.get("vorige")),
                 "runde": self.stand["runde"], "tokens": self.stand["tokens"],
-                "kosten_usd": kosten(self.stand["tokens"], self.cfg.model),
+                "kosten_usd": kosten_lauf(self.stand, self.cfg.model),
                 "batches_laufend": [{"id": b["id"], "status": b["status"], "anfragen": len(b["anfragen"])}
                                     for b in laufend],
                 "abgeschlossen": offen == 0 and not laufend}
@@ -599,6 +611,13 @@ def kosten(tokens: dict, modell: str) -> float | None:
     return round(((ein - cache) * p["eingabe"] + cache * p["cache"] + aus * p["ausgabe"]) / 1e6, 4)
 
 
+def kosten_lauf(stand: dict, modell: str) -> float | None:
+    """Kosten eines Laufs: alle Tokens zum Batch-Preis, Anfragen zum Standardpreis (sofort ohne Flex) doppelt."""
+    k = kosten(stand.get("tokens") or {}, modell)
+    extra = kosten(stand.get("tokens_standardpreis") or {}, modell)
+    return round(k + (extra or 0), 4) if k is not None else None
+
+
 def lade_jsonl(p: Path) -> list[dict]:
     out = []
     for z in Path(p).read_text(encoding="utf-8").splitlines():
@@ -623,7 +642,8 @@ def kennzahlen(out_path: Path, stand: dict | None = None, gnd: dict | None = Non
     fbs = [f for x in rows for f in x["fachbegriffe"]]
     tok = stand.get("tokens") or {}
     modell = modell or (stand.get("parameter") or {}).get("modell")
-    k = kosten(tok, modell) if modell else None
+    k = kosten_lauf(stand, modell) if modell else None
+    kb = kosten(tok, modell) if modell else None  # Hochrechnung zum Batch-Preis (Volllauf über die Batch-API)
     pool = pool_gruppen or (stand.get("pool") or {}).get("gruppen_auswahl")
     gesamt_pool = (stand.get("pool") or {}).get("gruppen")
     je = {key: round(tok.get(key, 0) / n, 1) for key in ("eingabe", "davon_cache", "ausgabe", "davon_reasoning")} \
@@ -652,8 +672,8 @@ def kennzahlen(out_path: Path, stand: dict | None = None, gnd: dict | None = Non
         "vorschlag": vorschlag_kennzahlen(rows),
         "ohne_fach": sum(not x["fach"] for x in rows), "ohne_stufe": sum(not x["stufe"] for x in rows),
         "tokens": tok, "tokens_je_gruppe": je, "modell": modell, "kosten_usd": k,
-        "hochrechnung": {"gruppen": pool, "gruppen_gesamt_ohne_filter": gesamt_pool,
-                         "kosten_usd": round(k / n * pool, 2) if k is not None and n and pool else None,
-                         "kosten_usd_alle_gruppen": round(k / n * gesamt_pool, 2) if k is not None and n and gesamt_pool
-                         else None},
+        "hochrechnung": {"gruppen": pool, "gruppen_gesamt_ohne_filter": gesamt_pool, "preis": "batch",
+                         "kosten_usd": round(kb / n * pool, 2) if kb is not None and n and pool else None,
+                         "kosten_usd_alle_gruppen": round(kb / n * gesamt_pool, 2)
+                         if kb is not None and n and gesamt_pool else None},
     }

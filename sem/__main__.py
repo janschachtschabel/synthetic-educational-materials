@@ -224,6 +224,10 @@ def main(argv=None):
                    help="zusätzlich <ausgabe>.vergleich_lokal.jsonl mit Titel zur Prüfung (nie weitergeben)")
     p.add_argument("--warten", action="store_true", help="wiederholen, bis alles fertig ist")
     p.add_argument("--intervall", type=float, default=60, help="mit --warten: Sekunden zwischen den Abfragen")
+    p.add_argument("--sofort", action="store_true",
+                   help="ohne Batch: Anfragen sofort parallel stellen (--workers), etwa wenn die Batch-API hängt; "
+                        "zum Standardpreis (doppelt), mit --flex zum Batch-Preis; laufende Batches werden "
+                        "weiter abgeholt")
     p.add_argument("--zusammenfuehren", nargs="*", type=Path, metavar="ABSTRAKTION",
                    help="Themen für die Seeds bauen (ohne LLM) aus den genannten Ausgaben, Standard: alle "
                         "abstraktion*.jsonl in data/lokal/wlo_abstraktion/")
@@ -424,7 +428,7 @@ def _wlo_themen(a):
     gruppen = W.gruppieren(W.lesen(csv_pfad))
     print(f"{len(gruppen)} Gruppen nach Dublettenabgleich ({time.time() - t0:.0f} s)", flush=True)
     lauf = W.WloThemenLauf(gruppen, _cfg(a), a.out, limit=a.limit, ohne_stufe=a.ohne_stufe, zufall=a.zufall,
-                           vergleich=a.vergleich_lokal, pool=a.pool)
+                           vergleich=a.vergleich_lokal, pool=a.pool, sofort=a.sofort)
     show = lambda st: print(time.strftime("%H:%M:%S"), W.status_zeile(st), flush=True)  # noqa: E731
     st = lauf.warten(a.intervall, on_status=show) if a.warten else lauf.weiter()
     if not a.warten:

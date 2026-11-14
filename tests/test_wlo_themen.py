@@ -188,6 +188,38 @@ def test_batch_lauf_kopie_wird_einmal_neu_gefragt(tmp_path):
         W.WloThemenLauf(gruppen, LLMConfig(api_key="x"), out, client=fake, ohne_stufe="nur-thema")
 
 
+class _FakeChat:
+    """chat.completions.create für den Sofort-Modus; Flex-Anfragen werden protokolliert."""
+
+    def __init__(self, antwort):
+        self.antwort, self.tiers = antwort, []
+        self.chat = type("C", (), {"completions": type("K", (), {"create": staticmethod(self._create)})()})()
+
+    def _create(self, **params):
+        from types import SimpleNamespace
+        self.tiers.append(params.get("service_tier"))
+        body = {"choices": [{"message": {"content": self.antwort(params["messages"][1]["content"])}}],
+                "usage": {"prompt_tokens": 100, "completion_tokens": 10}}
+        return SimpleNamespace(model_dump=lambda: body)
+
+
+@pytest.mark.parametrize("tier, faktor", [(None, 2), ("flex", 1)])
+def test_sofort_ohne_batch(tmp_path, tier, faktor):
+    gruppen = {"a": _gruppe("a", [f"{DISC}380"], [f"{CTX}grundschule"], "Zahlen bis zwanzig"),
+               "b": _gruppe("b", [f"{DISC}380"], [f"{CTX}sekundarstufe_1"], "Lineare Funktionen zeichnen")}
+    fake = _FakeChat(lambda u: json.dumps({"thema": "Rechnen mit natürlichen Zahlen", "thema_allgemeiner": "Arithmetik",
+                                           "fachbegriffe": ["Addition"], "entfernt": []}))
+    out = tmp_path / "abstraktion.jsonl"
+    lauf = W.WloThemenLauf(gruppen, LLMConfig(api_key="x", service_tier=tier), out, client=fake, sofort=True)
+    st = lauf.weiter()  # schickt und beantwortet sofort
+    st = lauf.weiter()  # wertet aus
+    assert st["abgeschlossen"] and st["fertig"] == 2 and fake.tiers == [tier, tier]
+    assert lauf.stand["batches"][0]["id"].startswith("sofort:")
+    assert st["kosten_usd"] == pytest.approx(W.kosten(lauf.stand["tokens"], "gpt-6-luna") * faktor)
+    kz = W.kennzahlen(out, lauf.stand, gnd={})
+    assert kz["hochrechnung"]["kosten_usd"] == pytest.approx(W.kosten(lauf.stand["tokens"], "gpt-6-luna"), abs=0.01)
+
+
 def test_kosten():
     t = {"eingabe": 2_000_000, "davon_cache": 1_000_000, "ausgabe": 1_000_000}
     assert W.kosten(t, "gpt-6-luna") == pytest.approx(0.05 + 0.005 + 0.25)
