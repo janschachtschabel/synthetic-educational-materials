@@ -17,11 +17,13 @@ Placeholders use double curly braces, e.g. `{{thema}}`. See
 | `keywords.md` | Keywords task | comma-separated list, at least 5, at most 8 kept |
 | `inhaltstyp.md` | Content type verification task (without seed value) | one ID from `{{kategorien}}` (with text-type description) |
 | `fragen_antworten.md` | Question-and-answer pairs task | JSON `{"paare": [...]}` |
+| `lernziele.md` | Competence-oriented learning objectives with taxonomy level | JSON `{"lernziele": [...]}`, 2–4 |
+| `suchanfragen.md` | Short search queries (search box) | JSON `{"suchanfragen": [...]}`, 4–8 retained |
 | `beschreibung_einstieg.md` | only the `beschreibung-einstieg` command: replace the first sentence of a finished description | one sentence |
 | `ausgabesprache.md` | Note for both system prompts, only when an output language other than German is selected during generation (app: “Ausgabesprache” (output language), CLI: `--sprache en`) | – |
 | `wlo_themen.md`, `wlo_themen_vorschlag.md` | only the `wlo-themen` command: topic, broader topic and key terms from the title and description of a WLO record; the second part (subject/level suggestion with vocabulary) only with `--ohne-stufe vorschlag` | JSON |
 
-The fields are generated sequentially: Title, Description, Keywords, Content type, Questions. Each call
+The fields are generated sequentially: Title, Description, Keywords, then simultaneously Content type, Questions, Learning objectives and Search queries. Each call
 inserts the field file text as `{{auftrag}}` in `material.md` and sees the fields generated previously.
 The topic from the seed is visible only to the full-text prompt; the metadata is derived from the text.
 

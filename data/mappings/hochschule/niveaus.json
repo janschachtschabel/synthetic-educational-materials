@@ -1,34 +1,9 @@
 {
- "beschreibung": "Niveaustufen innerhalb der Bildungsstufe Hochschule. exactMatch verweist auf die KIM-Bildungsstufen (ISCED 2011). ausgeschlossen_fuer_lehrebene: Kombinationen, die beim Ziehen vermieden werden.",
- "quelle": {
-  "name": "Projekt, angelehnt an Hochschulqualifikationsrahmen (HQR) und DQR",
-  "lizenz": "CC0-1.0"
- },
+ "beschreibung": "Niveaustufen innerhalb der Bildungsstufe Hochschule. exactMatch verweist auf die KIM-Bildungsstufen (ISCED 2011). ausgeschlossen_fuer_lehrebene: Kombinationen, die beim Ziehen vermieden werden. sprachprofil: Vorgabe für Satzbau, Wortwahl und Fachsprache des Volltexts auf diesem Niveau (geht in den Volltext-Prompt, nur für Materialien an Lernende).",
+ "quelle": {"name": "Projekt, angelehnt an Hochschulqualifikationsrahmen (HQR) und DQR", "lizenz": "CC0-1.0"},
  "niveaus": [
-  {
-   "id": "bachelor_einstieg",
-   "label": "Bachelor, 1.–2. Studienjahr",
-   "dqr": 6,
-   "exactMatch": "http://w3id.org/kim/educationalLevel/level_6",
-   "ausgeschlossen_fuer_lehrebene": [
-    "forschung"
-   ]
-  },
-  {
-   "id": "bachelor_fortgeschritten",
-   "label": "Bachelor, ab 3. Studienjahr",
-   "dqr": 6,
-   "exactMatch": "http://w3id.org/kim/educationalLevel/level_6",
-   "ausgeschlossen_fuer_lehrebene": []
-  },
-  {
-   "id": "master",
-   "label": "Master",
-   "dqr": 7,
-   "exactMatch": "http://w3id.org/kim/educationalLevel/level_7",
-   "ausgeschlossen_fuer_lehrebene": [
-    "grundlagen"
-   ]
-  }
+  {"id": "bachelor_einstieg", "label": "Bachelor, 1.–2. Studienjahr", "dqr": 6, "exactMatch": "http://w3id.org/kim/educationalLevel/level_6", "ausgeschlossen_fuer_lehrebene": ["forschung"], "sprachprofil": "Studieneinstieg: Fachsprache des Studienfachs, neue Fachbegriffe beim ersten Auftreten definieren, Herleitungen Schritt für Schritt, Bezug zu Schulwissen herstellen"},
+  {"id": "bachelor_fortgeschritten", "label": "Bachelor, ab 3. Studienjahr", "dqr": 6, "exactMatch": "http://w3id.org/kim/educationalLevel/level_6", "ausgeschlossen_fuer_lehrebene": [], "sprachprofil": "fortgeschrittenes Bachelorstudium: Fachsprache und Grundbegriffe werden vorausgesetzt, Methoden und Modelle kritisch einordnen, Anwendung auf komplexere Fälle"},
+  {"id": "master", "label": "Master", "dqr": 7, "exactMatch": "http://w3id.org/kim/educationalLevel/level_7", "ausgeschlossen_fuer_lehrebene": ["grundlagen"], "sprachprofil": "Masterniveau: wissenschaftliches Register, Grundlagen werden vorausgesetzt, Forschungsstand, Methodenkritik und offene Fragen; keine Einführungserklärungen"}
  ]
 }

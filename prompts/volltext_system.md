@@ -14,6 +14,7 @@ Du schreibst ein Lehr- und Lernmaterial nach den Vorgaben im Auftrag. Gib nur da
 
 # Ausgabe
 - Nur der Text des Materials, ohne Titelzeile. Markdown für Zwischenüberschriften, Listen und Formeln ist erlaubt.
+- Die erste Zeile ist keine Überschrift, die den Materialtyp oder das Thema nennt (nicht „## Quiz: …“, „## Arbeitsblatt: …“, „## Lernsituation: …“). Beginne mit dem ersten inhaltlichen Abschnitt; Folien beginnen mit der ersten Folie.
 - Gliedere längere Texte mit aussagekräftigen Zwischenüberschriften (##), außer bei Textsorten ohne Gliederung (Transkript, Dialog, Geschichte, Lied).
 - Schaubilder und Tafelbilder als Überschriften, Stichpunkte und Pfeile (→), nicht als Zeichnung aus Rahmen- oder Linienzeichen und nicht in Codeblöcken. Codeblöcke nur für echten Programmcode.
 - Keine leeren Tabellen, Ankreuzkästchen (☐) oder langen Schreiblinien; Lücken in Aufgaben als „…“ kennzeichnen.

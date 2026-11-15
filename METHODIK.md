@@ -681,14 +681,21 @@ identische Seeds. Neben jeder Seed-Datei liegt eine `.stats.json` mit Parametern
 
 ## Materialien
 
-Pro Seed bis zu sechs LLM-Aufrufe (OpenAI-kompatible API, Standardmodell `gpt-6-luna`):
+Pro Seed bis zu acht LLM-Aufrufe (OpenAI-kompatible API, Standardmodell `gpt-6-luna`):
 
 1. **Volltext** aus dem Seed: `volltext_system.md` und `volltext.md`. Der Umfang hängt vom Inhaltstyp ab
    (`umfang` in `inhaltstypen.json`, z. B. Merksatz 60–180, Arbeitsblatt 300–500, Lehrbuchauszug
    Hochschule 700–1.100 Wörter; ohne Angabe 400–550, Elementar 350–500). Texte unter 60 % der
    Untergrenze (mindestens 60 Wörter) werden verworfen und neu angefragt. Der Seed gibt außerdem eine
-   Einstiegsart (Fallbeispiel, Frage, Beobachtung …) und Namen für Personen im Text vor, damit nicht
-   alle Texte gleich anfangen und dieselben Namen tragen.
+   Einstiegsart (Fallbeispiel, Frage, Beobachtung …; für Transkripte eigene Einstiege statt
+   „Willkommen zu …“) und Namen für Personen im Text vor, damit nicht alle Texte gleich anfangen und
+   dieselben Namen tragen. Für Materialien an Lernende kommt ein Sprachprofil des Niveaus dazu
+   (`sprachprofil` in `niveaus.json`: Satzlänge, Wortwahl, Fachsprache, z. B. Klasse 1–2 kurze
+   Hauptsätze, Master wissenschaftliches Register). Die erste Zeile soll keine Überschrift mit
+   Materialtyp oder Thema sein („## Quiz: …“), weil ein Modell sonst Typ und Titel einfach abliest.
+   In der Schule gilt eine Zielsprache nur, wenn das Fach zum Fremdsprachenportal passt; Fach
+   Deutsch als Zweitsprache bekommt sprachsensible Vorgaben. Die Hochschule hat einen eigenen
+   Volltext-Prompt (`prompts/hochschule/volltext.md`).
 2. **Titel, Beschreibung, Keywords**, je ein Aufruf in dieser Reihenfolge. Alle nutzen denselben
    Systemprompt (`system.md`) und dieselbe Materialvorlage (`material.md`): Volltext, die festen
    Metadaten des Seeds (Bildungsstufe, Fach, Zielgruppe, Sprache, Materialart) und die schon
@@ -711,12 +718,23 @@ Pro Seed bis zu sechs LLM-Aufrufe (OpenAI-kompatible API, Standardmodell `gpt-6-
    Qualitätsmaß; `ccm:oeh_lrt` bleibt der Seed-Wert.
 4. **Frage-Antwort-Paare** (`fragen_antworten.md`, JSON): Ziel 10 Paare mit Lernzielstufe nach
    Bloom/Anderson, mindestens 8. Der Typ ist immer deutsch (auch bei anderer Ausgabesprache);
-   übersetzte Typen werden zurückgeführt, Paare mit unbekanntem Typ verworfen. Schritt 3 und 4 laufen gleichzeitig.
+   übersetzte Typen werden zurückgeführt, Paare mit unbekanntem Typ verworfen.
+5. **Lernziele** (`lernziele.md`, JSON, `synth:lernziele`): 2–4 kompetenzorientierte Lernziele
+   („Die Schülerinnen und Schüler können … beschreiben“) mit Operator und Stufe der Lernzieltaxonomie
+   nach Anderson und Krathwohl (deutsch, wie bei den Fragen). Ziele mit vagem Schlussverb (verstehen,
+   kennen, wissen) werden verworfen. In der Schule steht zusätzlich der KMK-Anforderungsbereich, aus
+   der Stufe abgeleitet (erinnern, verstehen: I; anwenden, analysieren: II; bewerten, erschaffen: III).
+6. **Suchanfragen** (`suchanfragen.md`, JSON, `synth:suchanfragen`): 5–8 kurze Eingaben, wie Suchende
+   sie in den Suchschlitz eines Bildungsportals tippen (meist 1–3 Wörter, höchstens 6 übernommen), für
+   die das Material ein passender Treffer ist. Gedacht als Trainingspaare Anfrage → Material für
+   Such- und Embedding-Modelle.
+
+Schritt 3 bis 6 laufen gleichzeitig.
 
 Jedes Material vermerkt in `synth:generierung` die Dauer und welche Felder neu angefragt werden mussten
 (`neu_angefragt`). Die Fortschrittsanzeige zählt außerdem Wiederholungen ganzer Materialien
 (z. B. nach Rate-Limit oder Zeitüberschreitung) und zeigt die letzte Meldung. Ein Material braucht fünf
-aufeinanderfolgende Aufrufe; bei Reasoning-Modellen verkürzt ein geringerer Reasoning-Aufwand
+aufeinanderfolgende Runden; bei Reasoning-Modellen verkürzt ein geringerer Reasoning-Aufwand
 (`--reasoning-effort`, Oberfläche „Reasoning-Aufwand“) die Laufzeit deutlich.
 
 Die Prompts für Titel, Beschreibung, Keywords und Inhaltstyp sowie der gemeinsame Systemprompt sind

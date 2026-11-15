@@ -490,8 +490,15 @@ Up to six LLM calls per seed (OpenAI-compatible API, default model `gpt-6-luna`)
    content type (`umfang` in `inhaltstypen.json`, e.g. Merksatz 60–180, worksheet 300–500, higher
    education textbook excerpt 700–1,100 words; without a value 400–550, early childhood 350–500). Texts
    below 60% of the lower bound (at least 60 words) are discarded and requested again. The seed also sets
-   an opening type (case example, question, observation …) and names for people in the text, so that
-   texts do not all start the same way or use the same names.
+   an opening type (case example, question, observation …; transcripts get their own openings instead of
+   “Willkommen zu …”) and names for people in the text, so that texts do not all start the same way or use
+   the same names. Materials for learners also get a language profile of the level (`sprachprofil` in
+   `niveaus.json`: sentence length, word choice, technical language, e.g. short main clauses for grades
+   1–2, academic register for master's level). The first line should not be a heading naming the material
+   type or topic („## Quiz: …“), since a model would otherwise just read off type and title. In school, a
+   target language only applies when the subject matches the foreign-language portal; the subject German
+   as a second language gets language-sensitive instructions. Higher education has its own full-text
+   prompt (`prompts/hochschule/volltext.md`).
 2. **Title, description, keywords**, one call each, in that order. All use the same system prompt
    (`system.md`) and the same material template (`material.md`): full text, the seed’s fixed
    metadata (educational level, subject, target audience, language, material type), and the fields
@@ -513,11 +520,21 @@ Up to six LLM calls per seed (OpenAI-compatible API, default model `gpt-6-luna`)
    as a quality measure; `ccm:oeh_lrt` remains the seed value.
 4. **Question-answer pairs** (`fragen_antworten.md`, JSON): Target 10 pairs with a learning objective
    level according to Bloom/Anderson, minimum 8. The type is always German (also for other output
-   languages); translated types are mapped back, pairs with an unknown type are dropped. Steps 3 and 4 run simultaneously.
+   languages); translated types are mapped back, pairs with an unknown type are dropped.
+5. **Learning objectives** (`lernziele.md`, JSON, `synth:lernziele`): 2–4 competence-oriented learning
+   objectives („Die Schülerinnen und Schüler können … beschreiben“) with operator and level of the
+   Anderson/Krathwohl taxonomy (German, as for the questions). Objectives ending in a vague verb
+   (verstehen, kennen, wissen) are dropped. In school, the KMK requirement area derived from the level is
+   added (remember, understand: I; apply, analyse: II; evaluate, create: III).
+6. **Search queries** (`suchanfragen.md`, JSON, `synth:suchanfragen`): 5–8 short inputs as users type them
+   into the search box of an education portal (mostly 1–3 words, at most 6 retained) for which the
+   material is a fitting hit. Intended as query → material training pairs for search and embedding models.
+
+Steps 3 to 6 run simultaneously.
 
 Each material records in `synth:generierung` the duration and which fields had to be requested again
 (`neu_angefragt`). The progress display also counts retries of whole materials (e.g. after a rate
-limit or timeout) and shows the latest message. A material needs five consecutive calls; with
+limit or timeout) and shows the latest message. A material needs five consecutive rounds; with
 reasoning models, a lower reasoning effort (`--reasoning-effort`, interface “Reasoning effort”)
 shortens the run time considerably.
 

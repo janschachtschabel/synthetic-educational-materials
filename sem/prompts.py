@@ -16,8 +16,8 @@ from .paths import PROMPT_DIR
 # die Felddateien liefern den jeweiligen Auftrag; ausgabesprache wird nur bei anderer Sprache als Deutsch an
 # beide Systemprompts angehängt
 PROMPT_FILES = ["volltext_system", "volltext", "system", "material", "titel", "beschreibung", "keywords",
-                "inhaltstyp", "fragen_antworten", "ausgabesprache"]
-FELD_PROMPTS = ["titel", "beschreibung", "keywords", "inhaltstyp", "fragen_antworten"]
+                "inhaltstyp", "fragen_antworten", "lernziele", "suchanfragen", "ausgabesprache"]
+FELD_PROMPTS = ["titel", "beschreibung", "keywords", "inhaltstyp", "fragen_antworten", "lernziele", "suchanfragen"]
 
 _SECTION = re.compile(r"\{\{#(\w+)\}\}(.*?)\{\{/\1\}\}", re.S)
 _VAR = re.compile(r"\{\{(\w+)\}\}")

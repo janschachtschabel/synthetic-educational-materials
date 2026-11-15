@@ -6,8 +6,8 @@ Pro Seed nacheinander:
      gemeinsamer Materialvorlage (material); der Auftrag kommt aus der Felddatei. Jeder Aufruf
      sieht den Volltext, die festen Metadaten des Seeds und die schon erzeugten Felder.
   3. gleichzeitig: Inhaltstyp-Prüfung (der Inhaltstyp wird ohne Kenntnis des Seed-Werts aus dem
-     fertigen Material bestimmt und mit dem Seed verglichen, nur protokolliert) und
-     Frage-Antwort-Paare (JSON)
+     fertigen Material bestimmt und mit dem Seed verglichen, nur protokolliert), Frage-Antwort-Paare,
+     kompetenzorientierte Lernziele mit Taxonomiestufe und Suchanfragen (je JSON)
 Liefert ein Feld nichts Brauchbares, wird nur dieses Feld erneut angefragt. Dauer und
 Neuanfragen je Feld stehen in synth:generierung.
 
@@ -41,7 +41,9 @@ FELD_VERSUCHE = 3
 MIN_WOERTER = 60  # Volltext: absolute Untergrenze; die eigentliche Grenze hängt vom Umfang des Inhaltstyps ab
 MIN_ANTEIL_UMFANG = 0.6  # kürzer als 60 % der unteren Umfangsgrenze: neu anfragen
 # Stufen eines Materials; die Felder einer Stufe hängen nicht voneinander ab und laufen gleichzeitig
-STUFEN = [["volltext"], ["titel"], ["beschreibung"], ["keywords"], ["inhaltstyp", "fragen_antworten"]]
+STUFEN = [["volltext"], ["titel"], ["beschreibung"], ["keywords"],
+          ["inhaltstyp", "fragen_antworten", "lernziele", "suchanfragen"]]
+JSON_FELDER = {"fragen_antworten", "lernziele", "suchanfragen"}
 # Ausgabesprachen (ISO 639-1 → Name im Prompt); andere Codes werden unverändert übergeben
 SPRACHEN = {"de": "Deutsch", "en": "Englisch", "fr": "Französisch", "es": "Spanisch", "it": "Italienisch",
             "nl": "Niederländisch", "pl": "Polnisch", "tr": "Türkisch", "uk": "Ukrainisch", "ru": "Russisch",
@@ -237,6 +239,48 @@ def parse_paare(data: dict | list, minimum: int) -> list[dict]:
     return qa
 
 
+# Anforderungsbereich der KMK aus der Taxonomiestufe (Schule): I Reproduktion, II Reorganisation und Transfer,
+# III Reflexion und Problemlösung
+ANFORDERUNGSBEREICH = {"erinnern": "I", "verstehen": "I", "anwenden": "II", "analysieren": "II",
+                       "bewerten": "III", "erschaffen": "III"}
+_LERNZIEL_VAGE = re.compile(r"\b(verstehen|kennen|wissen|lernen|kennenlernen|bewusst sein|bewusst werden)\W*$", re.I)
+
+
+def parse_lernziele(data: dict | list, minimum: int = 2, maximum: int = 4) -> list[dict]:
+    """Lernziele mit Operator und Taxonomiestufe; Ziele ohne gültige Stufe oder mit vagem Schlussverb
+    („… verstehen“) fallen weg und zählen nicht zum Minimum."""
+    ziele = data.get("lernziele", []) if isinstance(data, dict) else data
+    out: list[dict] = []
+    for z in ziele:
+        if not isinstance(z, dict):
+            continue
+        text = _einzeilig(str(z.get("lernziel") or ""))
+        stufe = bloom_typ(str(z.get("stufe") or ""))
+        if not (20 <= len(text) <= 300 and stufe) or _LERNZIEL_VAGE.search(text.rstrip(".")):
+            continue
+        out.append({"lernziel": text if text.endswith(".") else text + ".",
+                    "operator": _einzeilig(str(z.get("operator") or "")), "stufe": stufe})
+    if len(out) < minimum:
+        raise ValueError(f"{len(out)} brauchbare Lernziele")
+    return out[:maximum]
+
+
+SUCHANFRAGE_MAX_WOERTER = 6  # Prompt: höchstens 5 Wörter
+
+
+def parse_suchanfragen(data: dict | list, minimum: int = 4, maximum: int = 8) -> list[str]:
+    """Kurze Suchschlitz-Eingaben; ganze Sätze und zu lange Anfragen fallen weg, Dubletten ohne Groß/klein."""
+    roh = data.get("suchanfragen", []) if isinstance(data, dict) else data
+    out: dict[str, str] = {}
+    for q in roh:
+        q = _einzeilig(str(q)).rstrip(".")
+        if q and len(q) <= 60 and len(q.split()) <= SUCHANFRAGE_MAX_WOERTER:
+            out.setdefault(q.casefold(), q)
+    if len(out) < minimum:
+        raise ValueError(f"{len(out)} brauchbare Suchanfragen")
+    return list(out.values())[:maximum]
+
+
 # --- Ein Material -----------------------------------------------------------------------------
 
 def material_user(prompts: dict, values: dict, felder: dict, text: str, auftrag: str,
@@ -290,6 +334,7 @@ class Material:
         self.values.setdefault("einstieg", stil.get("einstieg", ""))
         self.values.setdefault("namen", ", ".join(stil.get("namen", [])))
         self.values.setdefault("beschreibung_form", satzform(str(seed.get("id", ""))))
+        self.values.setdefault("sprachprofil", self.bereich.sprachprofil(seed))
         self.hinweis = ""
         if ausgabesprache != "de":
             name = SPRACHEN.get(ausgabesprache, ausgabesprache)
@@ -336,7 +381,7 @@ class Material:
             # ohne den Inhaltstyp des Seeds: das Modell bestimmt ihn aus dem fertigen Material
             return Anfrage(feld, system, material_user(p, v, self.felder, text, auftrag, inhaltstyp=False))
         return Anfrage(feld, system, material_user(p, v, self.felder, text, render(p[feld], v)),
-                       json_mode=feld == "fragen_antworten")
+                       json_mode=feld in JSON_FELDER)
 
     def antwort(self, feld: str, text: str, tokens: dict | None = None) -> bool:
         """Prüft die Antwort auf ein Feld. True = übernommen, False = wird neu angefragt."""
@@ -361,6 +406,10 @@ class Material:
             return {"uri": k["uri"], "name": k["name"]}
         if feld == "fragen_antworten":
             return parse_paare(json_aus_text(text), self.qa_min)
+        if feld == "lernziele":
+            return parse_lernziele(json_aus_text(text))
+        if feld == "suchanfragen":
+            return parse_suchanfragen(json_aus_text(text))
         if feld == "titel":
             t = parse_titel(text)
             # weiche Prüfung: beim letzten Versuch wird der Titel trotzdem übernommen (das Wort kann zum Inhalt
@@ -384,6 +433,12 @@ class Material:
         rec[S.F_KEYWORD] = f["keywords"]
         rec[S.F_FULLTEXT] = f["volltext"]
         rec[S.F_QA] = f["fragen_antworten"]
+        if "lernziele" in f:  # fehlt bei Materialien, deren Erzeugung vor diesen Feldern begann
+            schule = self.bereich.key == "schule"
+            rec[S.F_LERNZIELE] = [{**z, **({"anforderungsbereich": ANFORDERUNGSBEREICH[z["stufe"]]} if schule else {})}
+                                  for z in f["lernziele"]]
+        if "suchanfragen" in f:
+            rec[S.F_SUCHANFRAGEN] = f["suchanfragen"]
         if a != "de":
             rec[S.F_LANGUAGE] = list(dict.fromkeys([a, *[x for x in rec.get(S.F_LANGUAGE, []) if x != "de"]]))
         if "inhaltstyp" in f:
@@ -396,7 +451,10 @@ class Material:
             prov[S.F_LANGUAGE] = S.provenance("Generierung", method=f"Ausgabesprache {a} beim Erzeugen gewählt")
         prov[S.F_FULLTEXT] = dict(S.provenance("LLM", method="aus dem Seed erzeugt (volltext)"), modell=meta["modell"])
         for feld, datei in ((S.F_TITLE, "titel"), (S.F_DESCRIPTION, "beschreibung"), (S.F_KEYWORD, "keywords"),
-                            (S.F_QA, "fragen_antworten")):
+                            (S.F_QA, "fragen_antworten"), (S.F_LERNZIELE, "lernziele"),
+                            (S.F_SUCHANFRAGEN, "suchanfragen")):
+            if feld not in rec:
+                continue
             prov[feld] = dict(S.provenance("LLM", method=f"aus Volltext und festen Metadaten erzeugt ({datei})"),
                               modell=meta["modell"])
         rec[S.F_GENERATION] = {**meta, "dauer_sekunden": round(dauer, 1), "neu_angefragt": self.neu}
