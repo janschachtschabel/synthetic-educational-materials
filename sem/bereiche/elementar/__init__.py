@@ -4,6 +4,8 @@ Themen: GND-Sachbegriffe aus LLM-Themenlisten je Bildungsbereich und aus WLO-Key
 Elementarbereichs, per Mehrfachabstimmung als Thema für Angebote mit Kindern oder für Fachkräfte und Eltern
 eingestuft und einem bis zwei der sieben Bildungsbereiche des Gemeinsamen Rahmens der Länder (Fassung 2022)
 sowie einer Altersgruppe zugeordnet. Fach im OEH-Sinn: closeMatch der Bildungsbereiche auf OEH-Schulfächer.
+Weitere Themen, nur lokal: WLO-Abstraktion (data/lokal/wlo_abstraktion/themen_elementar.jsonl, Herkunft
+„wlo_abstraktion“, Standard aus; Bildungsbereich, Altersgruppe und Themenart ohne LLM, siehe sem/wlo_zuordnung.py).
 """
 
 from __future__ import annotations
@@ -16,7 +18,8 @@ from ... import gnd_ergaenzung
 from ... import schema as S
 from ...paths import MAPPING_DIR
 from ...vocabs import load as load_vocab
-from ..base import Bildungsbereich, MappingSchritt, SeedState
+from ..base import (WLO_ANTEIL, WLO_EIGNUNG, WLO_VORSCHLAG, WLO_ZUORDNUNG, Bildungsbereich, MappingSchritt, SeedState,
+                    ist_wlo, wlo_passt)
 from ..hochschule import load_jsonl
 
 DIR = MAPPING_DIR / "elementar"
@@ -86,8 +89,15 @@ class Elementar(Bildungsbereich):
                               "fachthema": "Thema für Fachkräfte und Eltern"},
                     "standard": ["kinderthema", "fachthema"]},
             "herkunft": {"label": "Herkunft der Kandidaten", "beschreibung": "woher der Begriff als Kandidat kam",
-                         "werte": {"llm": "LLM-Themenliste je Bildungsbereich", "wlo": "WLO-Keyword im Elementarbereich"},
+                         "werte": {"llm": "LLM-Themenliste je Bildungsbereich", "wlo": "WLO-Keyword im Elementarbereich",
+                                   "wlo_abstraktion": "Thema, per LLM aus Titel und Beschreibung von WLO-Datensätzen "
+                                                      "abstrahiert, Bildungsbereich ohne LLM zugeordnet (nur mit "
+                                                      "lokaler Datei, python -m sem wlo-themen)"},
                          "standard": ["llm", "wlo"]},
+            "wlo_anteil": WLO_ANTEIL,
+            "wlo_vorschlag": WLO_VORSCHLAG,
+            "wlo_eignung": WLO_EIGNUNG,
+            "wlo_zuordnung": WLO_ZUORDNUNG,
             "eignung_status": {"label": "Status der Eignung", "beschreibung": "Abstimmung", "werte": status,
                                "standard": std},
             "bereich_status": {"label": "Status des Bildungsbereichs", "beschreibung": "Abstimmung", "werte": status,
@@ -104,7 +114,7 @@ class Elementar(Bildungsbereich):
     @staticmethod
     def belege_des_themas(topic: dict) -> set[str]:
         out = set()
-        if (topic.get("belege") or {}).get("wlo"):
+        if (topic.get("belege") or {}).get("wlo") or ist_wlo(topic):
             out.add("wlo")
         if (topic.get("mapping") or {}).get("llm_kandidat_bestaetigt"):
             out.add("llm_bestaetigt")
@@ -114,6 +124,9 @@ class Elementar(Bildungsbereich):
         m = topic.get("mapping") or {}
         if topic["art"] not in auswahl["art"] or not set(topic["herkunft"]) & set(auswahl["herkunft"]):
             return False
+        if ist_wlo(topic):  # nicht abgestimmt: eigene Filter statt der Status der Abstimmung
+            return wlo_passt(topic, auswahl) and (not auswahl["belege"] or
+                                                  bool(self.belege_des_themas(topic) & set(auswahl["belege"])))
         if (m.get("eignung") or {}).get("status", "gesichert") not in auswahl["eignung_status"]:
             return False
         if m.get("status", "gesichert") not in auswahl["bereich_status"]:
@@ -158,10 +171,12 @@ class Elementar(Bildungsbereich):
 
     def _topics_roh(self) -> list[dict]:
         path = DIR / "themen_elementar.jsonl"
+        from ... import wlo_seeds
+
         out = load_jsonl(path) if path.exists() else []
         if not out:
             raise FileNotFoundError(f"Keine Themen in {DIR}. Erst die Mappings bauen: python -m sem mappings elementar")
-        return out
+        return out + wlo_seeds.themen(self.key)  # WLO-Abstraktion, nur mit lokaler Datei
 
     def balance_key(self, topic: dict, balance: str) -> str:
         if balance == "thema":
@@ -223,6 +238,11 @@ class Elementar(Bildungsbereich):
             status={"bildungsbereich": m.get("status"), "eignung": (m.get("eignung") or {}).get("status"),
                     "alter": (m.get("alter") or {}).get("status")},
             herkunft=topic["herkunft"], belege={"erfuellt": sorted(self.belege_des_themas(topic))})
+        if ist_wlo(topic):
+            from ...wlo_seeds import belege_kompakt
+
+            seed[S.F_PROVENANCE][S.F_THEMA]["status"]["eignung"] = topic["wlo"]["eignung"]["status"]
+            seed[S.F_PROVENANCE][S.F_THEMA]["belege"].update(belege_kompakt(topic))
 
         seed[S.F_NIVEAU] = {"id": niveau["id"], "label": niveau["label"], "alter": niveau["alter"],
                             "exactMatch": niveau["exactMatch"]}

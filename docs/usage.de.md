@@ -127,8 +127,10 @@ python -m sem beschreibung-einstieg --materialien output/materialien_schule5000_
 python -m sem faecher-ergaenzen --materialien output/materialien_schule5000_s42.jsonl   # OEH-Fach in Berufs- und EB-Materialien nachtragen (ohne LLM)
 python -m sem gnd-ergaenzen                         # GND-Motive ersetzen, Themenbeschreibungen aus GND/Wikidata (Netz)
 python -m sem wlo-themen --csv wlo_max_dataset_slim.csv --limit 2000 --warten   # Themen-Abstraktion aus WLO-Datensätzen (Batch, Stichprobe)
-python -m sem wlo-themen --zusammenfuehren          # daraus Themen für Schule und Hochschule (lokal, ohne LLM)
+python -m sem wlo-themen --zusammenfuehren          # daraus Themen für Schule, Hochschule, Erwachsenen- und Elementarbildung (lokal, ohne LLM)
+python -m sem wlo-themen --zusammenfuehren --bereiche erwachsenenbildung,elementar   # nur diese Bereiche neu bauen
 python -m sem seeds --anzahl schule=5000 --auswahl schule.herkunft=themenbaum,wlo_keyword,wlo_abstraktion schule.wlo_anteil=20 --seed 42
+python -m sem seeds --anzahl erwachsenenbildung=2000 --auswahl erwachsenenbildung.quellen=gnd,rahmencurriculum,schulthemen,grundbildung,digcomp,wlo_abstraktion erwachsenenbildung.wlo_anteil=30 --seed 42
 ```
 
 **Themen aus WLO-Datensätzen (Herkunft `wlo_abstraktion`):** `wlo-themen` lässt ein LLM aus Titel und Beschreibung
@@ -159,6 +161,26 @@ Datensätzen mit bekanntem Fach und bekannter Stufe (Trefferquote in den Kennzah
 in `data/lokal/wlo_abstraktion/` und wird nicht committet. Bei den Seeds ist die Herkunft standardmäßig aus;
 `wlo_anteil` legt fest, welcher Anteil der Seeds aus ihr kommt, `wlo_vorschlag` schaltet Themen mit
 vorgeschlagenem Fach oder vorgeschlagener Stufe getrennt an oder ab. Herkunft und Rechte: `PROVENIENZ.md`.
+
+**WLO-Abstraktion in Erwachsenen- und Elementarbildung:** Diese Bereiche gliedern anders als die OEH-Fächer, deshalb
+ordnet `--zusammenfuehren` ihre Themen ohne LLM zu (`sem/wlo_zuordnung.py`): gleiche Themen werden über alle Fächer
+zusammengefasst; je Ziel (EB: Fachgebiet der Volkshochschul-Statistik, Programmbereich 6 als ein Ziel 6.07;
+Elementar: einer der sieben Bildungsbereiche) zählt 0,6 × Ähnlichkeit zu den drei ähnlichsten vorhandenen,
+abgestimmten Themen des Ziels plus 0,4 × Ähnlichkeit zur Zielbeschreibung (e5-small, Text „Thema (allgemeineres
+Thema)“). Ein Ziel, das zum Fach der WLO-Datensätze passt (umgekehrtes closeMatch-Handmapping), gewinnt bei knappem
+Abstand; Sprachkurse, Grundbildung und Schulabschluss nur mit passendem Fach oder Muster („englisch“, „DaZ“,
+„Alphabetisierung“). Status: `gesichert` (Embeddings und Fach einig), `wahrscheinlich`, `unsicher` (Embeddings gegen
+das Fach), Filter `wlo_zuordnung` (Standard: alle). EB: Themenart `kursleitungsthema` über ein Muster (Didaktik,
+Erwachsenenbildung, Unterricht …). Elementar: Altersgruppe und Themenart aus den zehn ähnlichsten vorhandenen
+Themen, `fachthema` auch über ein Muster. Nicht Passendes wird markiert, nicht gelöscht (`wlo.eignung` mit Gründen):
+EB `eher_berufsbildung` (nur Fächer der beruflichen Bildung und näher an ESCO-Fähigkeiten als an EB-Themen),
+`schulstoff` (nur Physik/Chemie/Biologie/Mathematik mit Sekundarstufe); Elementar `schulbezug` (Schule, Unterricht,
+Klasse im Thema, außer Übergang/Kita), `kita_fern` (Kita-Nähe der Embeddings unter −0,025), `breit_verschlagwortet`
+(auch Sekundarstufe, Hochschule, Berufs- oder Erwachsenenbildung und Kita-Nähe unter 0), `zu_allgemein`; in beiden
+Bereichen `produktname` (Produkt- oder Plattformname im Thema, z. B. Excel, H5P). Filter
+`wlo_eignung`, Standard nur `geeignet`. Stichprobe von je 100 Themen (November 2026): nach dem Standardfilter
+83 % (EB) bzw. 84 % (Elementar) geeignet; der Rest sind vor allem falsche Fachgebiete bzw. Kita-ferne Themen, die
+keine Regel erkennt.
 
 **Themen auswählen:** Jeder Bereich hat eigene Filter für Quellen bzw. Herkunft, Abstimmungsstatus (Konfidenz:
 `gesichert`, `wahrscheinlich`, `unsicher`, `redaktionell`) und Belege; `python -m sem auswahl <bereich>` zeigt

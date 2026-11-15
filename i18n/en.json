@@ -650,5 +650,16 @@
  "Fach und Stufe (WLO-Abstraktion)": "Subject and level (WLO abstraction)",
  "Themen der WLO-Abstraktion nach Herkunft von Fach und Bildungsstufe": "WLO abstraction topics by origin of subject and educational level",
  "aus den Metadaten der WLO-Datensätze": "from the metadata of the WLO records",
- "vom Modell aus dem OEH-Vokabular vorgeschlagen (Datensätze ohne Fach oder Stufe)": "suggested by the model from the OEH vocabulary (records without subject or level)"
+ "vom Modell aus dem OEH-Vokabular vorgeschlagen (Datensätze ohne Fach oder Stufe)": "suggested by the model from the OEH vocabulary (records without subject or level)",
+ "Eignung (WLO-Abstraktion)": "Suitability (WLO abstraction)",
+ "Themen der WLO-Abstraktion, die eine Regel als fraglich markiert hat (z. B. eher Berufsbildung, Schulstoff, Schulbezug, Kita-fern); Gründe stehen am Thema": "WLO abstraction topics that a rule marked as questionable (e.g. rather vocational training, school content, school reference, far from early childhood); the reasons are stored with the topic",
+ "ohne Markierung": "not marked",
+ "als fraglich markiert": "marked as questionable",
+ "Zuordnung (WLO-Abstraktion)": "Assignment (WLO abstraction)",
+ "Status der Zuordnung zu Fachgebiet bzw. Bildungsbereich: gesichert = Embeddings und Fach der Datensätze einig, wahrscheinlich = zum Fach passendes Ziel gewählt oder kein Fach, unsicher = Embeddings gegen das Fach": "Status of the assignment to subject area or education area: confirmed = embeddings and the records' subject agree, probable = target matching the subject chosen or no subject, uncertain = embeddings against the subject",
+ "Embeddings und Fach einig": "embeddings and subject agree",
+ "Fach-Ziel oder ohne Fach": "subject target or no subject",
+ "Embeddings gegen das Fach": "embeddings against the subject",
+ "Thema, per LLM aus Titel und Beschreibung von WLO-Datensätzen abstrahiert, Fachgebiet ohne LLM zugeordnet (nur mit lokaler Datei, python -m sem wlo-themen)": "Topic abstracted by an LLM from title and description of WLO records, subject area assigned without an LLM (only with the local file, python -m sem wlo-themen)",
+ "Thema, per LLM aus Titel und Beschreibung von WLO-Datensätzen abstrahiert, Bildungsbereich ohne LLM zugeordnet (nur mit lokaler Datei, python -m sem wlo-themen)": "Topic abstracted by an LLM from title and description of WLO records, education area assigned without an LLM (only with the local file, python -m sem wlo-themen)"
 }

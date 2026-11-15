@@ -52,12 +52,40 @@ WLO_VORSCHLAG = {"label": "Fach und Stufe (WLO-Abstraktion)",
                  "standard": ["metadaten", "vorschlag"]}
 
 
+# Filter (Erwachsenenbildung, Elementarbereich): Eignung der ohne LLM zugeordneten Themen (sem/wlo_zuordnung.py)
+WLO_EIGNUNG = {"label": "Eignung (WLO-Abstraktion)",
+               "beschreibung": "Themen der WLO-Abstraktion, die eine Regel als fraglich markiert hat (z. B. eher "
+                               "Berufsbildung, Schulstoff, Schulbezug, Kita-fern); Gründe stehen am Thema",
+               "werte": {"geeignet": "ohne Markierung", "fraglich": "als fraglich markiert"},
+               "standard": ["geeignet"]}
+# Filter (Erwachsenenbildung, Elementarbereich): Status der Zuordnung; ersetzt für diese Themen die Status-Filter der
+# Abstimmung (die WLO-Themen wurden nicht abgestimmt)
+WLO_ZUORDNUNG = {"label": "Zuordnung (WLO-Abstraktion)",
+                 "beschreibung": "Status der Zuordnung zu Fachgebiet bzw. Bildungsbereich: gesichert = Embeddings und "
+                                 "Fach der Datensätze einig, wahrscheinlich = zum Fach passendes Ziel gewählt oder kein "
+                                 "Fach, unsicher = Embeddings gegen das Fach",
+                 "werte": {"gesichert": "Embeddings und Fach einig", "wahrscheinlich": "Fach-Ziel oder ohne Fach",
+                           "unsicher": "Embeddings gegen das Fach"},
+                 "standard": ["gesichert", "wahrscheinlich", "unsicher"]}
+
+
+def ist_wlo(topic: dict) -> bool:
+    return str(topic.get("id", "")).startswith(WLO_THEMA_PREFIX)
+
+
 def wlo_passt(topic: dict, auswahl: dict[str, list[str]]) -> bool:
-    """Filter wlo_vorschlag für ein Thema der WLO-Abstraktion (andere Themen passen immer)."""
-    if not str(topic.get("id", "")).startswith(WLO_THEMA_PREFIX) or "wlo_vorschlag" not in auswahl:
+    """Filter wlo_vorschlag, wlo_eignung, wlo_zuordnung für ein Thema der WLO-Abstraktion (andere Themen passen
+    immer; ein Filter, den der Bereich nicht hat, prüft nichts)."""
+    if not ist_wlo(topic):
         return True
-    art = "vorschlag" if (topic.get("wlo") or {}).get("vorschlag") else "metadaten"
-    return art in auswahl["wlo_vorschlag"]
+    w = topic.get("wlo") or {}
+    if "wlo_vorschlag" in auswahl and ("vorschlag" if w.get("vorschlag") else "metadaten") not in auswahl["wlo_vorschlag"]:
+        return False
+    if "wlo_eignung" in auswahl and (w.get("eignung") or {}).get("status", "geeignet") not in auswahl["wlo_eignung"]:
+        return False
+    if "wlo_zuordnung" in auswahl and (topic.get("mapping") or {}).get("status", "gesichert") not in auswahl["wlo_zuordnung"]:
+        return False
+    return True
 
 
 @dataclass
@@ -259,7 +287,7 @@ STANDARD_KONFIDENZ = ["gesichert", "wahrscheinlich", "redaktionell"]
 def filtergruppe(name: str, option: dict) -> str:
     """Gruppe eines Filters für Oberfläche und CLI: „quellen“ (Quellen, Herkunft, Belege), „konfidenz“
     (Status einer Zuordnung aus der Abstimmung) oder „inhalt“ (alles andere, z. B. Stufen, Themenart)."""
-    if name in ("quellen", "herkunft", "belege", "wlo_anteil", "wlo_vorschlag"):
+    if name in ("quellen", "herkunft", "belege", "wlo_anteil", "wlo_vorschlag", "wlo_eignung", "wlo_zuordnung"):
         return "quellen"
     if set(option["werte"]) == set(STATUS_WERTE):
         return "konfidenz"
