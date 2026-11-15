@@ -126,8 +126,10 @@ python -m sem beschreibung-einstieg --materialien output/materialien_schule5000_
 python -m sem faecher-ergaenzen --materialien output/materialien_schule5000_s42.jsonl   # add the OEH subject to vocational and adult education materials (no LLM)
 python -m sem gnd-ergaenzen                         # replace GND motif entries, topic descriptions from GND/Wikidata (network)
 python -m sem wlo-themen --csv wlo_max_dataset_slim.csv --limit 2000 --warten   # topic abstraction from WLO records (batch, sample)
-python -m sem wlo-themen --zusammenfuehren          # turn it into topics for school and higher education (local, no LLM)
+python -m sem wlo-themen --zusammenfuehren          # turn it into topics for school, higher, adult and early childhood education (local, no LLM)
+python -m sem wlo-themen --zusammenfuehren --bereiche erwachsenenbildung,elementar   # rebuild only these sectors
 python -m sem seeds --anzahl schule=5000 --auswahl schule.herkunft=themenbaum,wlo_keyword,wlo_abstraktion schule.wlo_anteil=20 --seed 42
+python -m sem seeds --anzahl erwachsenenbildung=2000 --auswahl erwachsenenbildung.quellen=gnd,rahmencurriculum,schulthemen,grundbildung,digcomp,wlo_abstraktion erwachsenenbildung.wlo_anteil=30 --seed 42
 ```
 
 **Topics from WLO records (origin `wlo_abstraktion`):** `wlo-themen` has an LLM derive the subject-matter topic from
@@ -156,6 +158,23 @@ via lobid; links to similar existing topics via local embeddings). Everything st
 and is not committed. For seeds, this origin is off by default; `wlo_anteil` sets the share of seeds drawn from it,
 `wlo_vorschlag` switches topics with a suggested subject or level on or off separately.
 Origin and rights: `PROVENIENZ.md`.
+
+**WLO abstraction in adult and early childhood education:** these sectors are structured differently from the OEH
+subjects, so `--zusammenfuehren` assigns their topics without an LLM (`sem/wlo_zuordnung.py`): identical topics are
+merged across subjects; for each target (adult education: subject area of the adult education centre statistics,
+programme area 6 as one target 6.07; early childhood: one of the seven education areas) the score is 0.6 × similarity
+to the three most similar existing, voted topics of the target plus 0.4 × similarity to the target description
+(e5-small, text "topic (broader topic)"). A target that matches the records' subject (reversed closeMatch hand
+mapping) wins if it is close; language courses, basic education and school qualifications only with a matching
+subject or pattern ("englisch", "DaZ", "Alphabetisierung"). Status `gesichert`, `wahrscheinlich`, `unsicher`
+(embeddings against the subject), filter `wlo_zuordnung` (default: all). Adult education: topic type
+`kursleitungsthema` by pattern. Early childhood: age group and topic type from the ten most similar existing topics.
+Unsuitable topics are marked, not deleted (`wlo.eignung` with reasons): adult education `eher_berufsbildung`,
+`schulstoff`; early childhood `schulbezug`, `kita_fern`, `breit_verschlagwortet`, `zu_allgemein`; both `produktname` (product or
+platform name in the topic, e.g. Excel, H5P). Filter
+`wlo_eignung`, default only `geeignet`. Sample of 100 topics each (November 2026): after the default filter 83 %
+(adult) and 84 % (early childhood) suitable; the rest are mostly wrong subject areas or topics far from early
+childhood education that no rule catches.
 
 **Selecting topics:** each sector offers its own filters for sources/origin, voting status (confidence:
 `gesichert`, `wahrscheinlich`, `unsicher`, `redaktionell`) and evidence; `python -m sem auswahl <bereich>`

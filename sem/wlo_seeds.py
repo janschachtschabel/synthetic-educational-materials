@@ -1,14 +1,17 @@
 """Themen aus der WLO-Themen-Abstraktion für die Seeds (Herkunft „wlo_abstraktion“).
 
 `python -m sem wlo-themen --zusammenfuehren` liest die Abstraktion (sem/wlo_themen.py) und schreibt je
-Bildungsbereich eine Themen-Datei nach data/lokal/wlo_abstraktion/ (themen_schule.jsonl, themen_hochschule.jsonl).
-Die Bereiche Schule und Hochschule laden sie, wenn vorhanden, als weitere Themenquelle; über die Filter
-herkunft/quellen ist sie an- und abschaltbar, über wlo_anteil der Anteil der Seeds steuerbar.
+Bildungsbereich eine Themen-Datei nach data/lokal/wlo_abstraktion/ (themen_schule.jsonl, themen_hochschule.jsonl,
+themen_erwachsenenbildung.jsonl, themen_elementar.jsonl). Die Bereiche laden sie, wenn vorhanden, als weitere
+Themenquelle; über die Filter herkunft/quellen ist sie an- und abschaltbar, über wlo_anteil der Anteil der Seeds
+steuerbar.
 
 - Schule: Primarstufe, Sekundarstufe I und II aus der Bildungsstufe der WLO-Datensätze, Fach = OEH discipline.
 - Hochschule: Fach = OEH-Hochschulfächersystematik (Destatis), Lehrebene offen.
-- Berufs-, Erwachsenen- und Elementarbildung: Die Abstraktion läuft mit, gemappt wird standardmäßig nicht
-  (--bereiche; die Bereiche haben noch keinen Seed-Bau für diese Themen, gezählt wird in der Statistik).
+- Erwachsenenbildung: Fachgebiet der Volkshochschul-Statistik, Elementarbereich: Bildungsbereich, Altersgruppe und
+  Themenart, beide ohne LLM zugeordnet (sem/wlo_zuordnung.py); Eignung als "wlo.eignung" markiert (Filter
+  wlo_eignung), gleiche Themen über alle Fächer zusammengefasst.
+- Berufsbildung: Die Abstraktion läuft mit, gemappt wird nicht (gezählt in der Statistik).
 
 Dubletten werden verknüpft, nicht gelöscht: gleiches normalisiertes Thema im selben Bereich und Fach → ein Thema mit
 allen Node-IDs und deren Zahl als Gewicht. Nahe Dubletten (Embedding-Ähnlichkeit) und Überschneidungen mit den
@@ -35,17 +38,23 @@ GND_PREFIX = "https://d-nb.info/gnd/"
 SCHULSTUFEN = {CTX + "grundschule": "primar", CTX + "sekundarstufe_1": "sek1", CTX + "sekundarstufe_2": "sek2"}
 BEREICHE_STUFE = {CTX + "berufliche_bildung": "berufsbildung", CTX + "erwachsenenbildung": "erwachsenenbildung",
                   CTX + "elementarbereich": "elementar", CTX + "hochschule": "hochschule"}
-STANDARD_BEREICHE = ("schule", "hochschule")
+STANDARD_BEREICHE = ("schule", "hochschule", "erwachsenenbildung", "elementar")
 QUELLE = {"name": "WirLernenOnline (Themen-Abstraktion aus Titel und Beschreibung der Datensätze)",
           "uri": "https://wirlernenonline.de",
           "lizenz": "CC0-1.0 (vom Projekt abstrahiertes Thema; Titel und Beschreibungen nicht übernommen)"}
 METHODE = ("LLM-Themen-Abstraktion aus Titel und Beschreibung von WLO-Datensätzen (Kopierprüfung bestanden); Fach "
            "und Bildungsstufe aus den Metadaten der Datensätze{vorschlag}; gleiche Themen je Fach zusammengefasst")
+METHODE_ZUORDNUNG = ("LLM-Themen-Abstraktion aus Titel und Beschreibung von WLO-Datensätzen (Kopierprüfung bestanden); "
+                     "Bildungsstufe aus den Metadaten der Datensätze{vorschlag}; gleiche Themen zusammengefasst; {ziel} "
+                     "ohne LLM aus lokalen Embeddings (Ähnlichkeit zu den vorhandenen Themen des Bereichs und zur "
+                     "Beschreibung) und dem Fach der Datensätze (sem/wlo_zuordnung.py)")
 # Ähnlichkeit (multilingual-e5-small, beide Seiten mit „query:“) ab der verknüpft wird; gemessen im 2.000er-Testlauf
 SCHWELLE_DUBLETTE = 0.93
 SCHWELLE_VORHANDEN = 0.92
 MAX_VERKNUEPFUNGEN = 3
-DATEIEN = {"schule": "themen_schule.jsonl", "hochschule": "themen_hochschule.jsonl"}
+DATEIEN_FACH = {"schule": "themen_schule.jsonl", "hochschule": "themen_hochschule.jsonl"}
+DATEIEN = {**DATEIEN_FACH, "erwachsenenbildung": "themen_erwachsenenbildung.jsonl",
+           "elementar": "themen_elementar.jsonl"}
 
 
 def themen_pfad(bereich: str) -> Path:
@@ -220,7 +229,9 @@ def zusammenfassen(rows: list[dict], bereiche=STANDARD_BEREICHE) -> tuple[dict[s
             if b not in bereiche:
                 zaehl[f"nicht_gemappt_{b}"] += 1
                 continue
-            key = _hash(b, norm(r["thema"]), ziel["faecher"][0])
+            # Schule/Hochschule: je Fach ein Thema; EB/Elementar: Fachgebiet bzw. Bildungsbereich kommt erst aus der
+            # Zuordnung (sem/wlo_zuordnung.py), gleiche Themen werden über alle Fächer zusammengefasst
+            key = _hash(b, norm(r["thema"]), ziel["faecher"][0] if b in DATEIEN_FACH else "")
             g = gruppen.setdefault(key, {"bereich": b, "key": key, "schreibweisen": Counter(), "node_ids": [],
                                          "faecher": [], "stufen": [], "fachbegriffe": Counter(),
                                          "allgemeiner": Counter(), "abstraktionen": 0, "vorschlag": True})
@@ -228,6 +239,8 @@ def zusammenfassen(rows: list[dict], bereiche=STANDARD_BEREICHE) -> tuple[dict[s
             g["node_ids"] += [n for n in r["node_ids"] if n not in g["node_ids"]]
             g["faecher"] += [u for u in ziel["faecher"] if u not in g["faecher"]]
             g["stufen"] += [s for s in ziel["stufen"] if s not in g["stufen"]]
+            g.setdefault("stufen_uris", [])
+            g["stufen_uris"] += [s["uri"] for s in r["stufe"] if s["uri"] not in g["stufen_uris"]]
             g["fachbegriffe"].update(r["fachbegriffe"])
             if r.get("thema_allgemeiner"):
                 g["allgemeiner"][r["thema_allgemeiner"]] += 1
@@ -240,7 +253,7 @@ def zusammenfassen(rows: list[dict], bereiche=STANDARD_BEREICHE) -> tuple[dict[s
     return out, dict(zaehl)
 
 
-def _thema(g: dict, gnd: dict[str, dict], online: dict | None) -> dict:
+def _thema(g: dict, gnd: dict[str, dict], online: dict | None, zuordnung: dict | None = None) -> dict:
     b = g["bereich"]
     label = g["schreibweisen"].most_common(1)[0][0]
     ta = g["allgemeiner"].most_common(1)[0][0] if g["allgemeiner"] else None
@@ -255,6 +268,8 @@ def _thema(g: dict, gnd: dict[str, dict], online: dict | None) -> dict:
     t: dict = {"id": f"{WLO_THEMA_PREFIX}{b}:{g['key']}", "label_de": label, "herkunft": "wlo_abstraktion",
                "quelle": QUELLE, "thema_allgemeiner": ta, "fachbegriffe": fb, "wlo": wlo}
     thema_gnd = gnd.get(norm(label)) or (online or {}).get(norm(label))
+    if b in ("erwachsenenbildung", "elementar"):
+        return _thema_zuordnung(t, g, fb, ta, zuordnung, thema_gnd)
     if b == "schule":
         fach = vokabulare()["discipline"].by_uri[g["faecher"][0]]["label"]
         t.update(portal=fach, pfad=[ta] if ta else [], definition="",
@@ -272,13 +287,53 @@ def _thema(g: dict, gnd: dict[str, dict], online: dict | None) -> dict:
     return t
 
 
+def _thema_zuordnung(t: dict, g: dict, fb: list, ta: str | None, z: dict, thema_gnd: dict | None) -> dict:
+    """Thema für Erwachsenenbildung bzw. Elementarbereich im Format der vorhandenen Themen des Bereichs; Fachgebiet
+    bzw. Bildungsbereich, Art, Altersgruppe und Eignung aus sem/wlo_zuordnung.py."""
+    from . import wlo_zuordnung as Z
+
+    b = g["bereich"]
+    vorschlag = " (fehlende vom Modell aus dem OEH-Vokabular vorgeschlagen)" if g["vorschlag"] else ""
+    t["wlo"]["faecher"] = g["faecher"]
+    t["wlo"]["eignung"] = z["eignung"]
+    kw = list(dict.fromkeys([f["label"] for f in fb] + ([ta] if ta else [])))
+    mapping = {"status": z["status"], "wert": z["wert"], "datum": date.today().isoformat(),
+               "embedding_modell": z.get("embedding_modell")}
+    if b == "erwachsenenbildung":
+        fg = next(x for x in Z.eb_ziele() if x["notation"] == z["fachgebiet"])
+        t.update(art=z["art"], fachgebiet=[{k: fg[k] for k in ("notation", "uri", "label")}],
+                 programmbereich=[fg["programmbereich"]], synonyme=[], definition="", oberbegriffe=[], keywords=kw,
+                 mapping={"methode": METHODE_ZUORDNUNG.format(vorschlag=vorschlag, ziel="Fachgebiet der "
+                                                              "Volkshochschul-Statistik"), **mapping})
+    else:
+        bb = next(x for x in Z.el_bereiche() if x["id"] == z["bildungsbereich"])
+        basis = json.loads((Z.EL_DIR / "bildungsbereiche.json").read_text(encoding="utf-8"))["uri_basis"]
+        t.update(herkunft=["wlo_abstraktion"], art=z["art"], altersgruppe=z["altersgruppe"],
+                 bildungsbereich=[{"id": bb["id"], "uri": basis + bb["id"], "label": bb["label"]}],
+                 synonyme=kw[:4], definition="", oberbegriffe=[],
+                 mapping={"methode": METHODE_ZUORDNUNG.format(vorschlag=vorschlag, ziel="Bildungsbereich, "
+                                                              "Altersgruppe und Themenart"), **mapping})
+    if thema_gnd:
+        t["gnd"] = {"uri": thema_gnd["uri"], "label": thema_gnd["label"]}
+    return t
+
+
 def _faecher_des_themas(t: dict) -> set[str]:
+    """Gruppe, innerhalb der verknüpft wird: Fach (Schule), Hochschulfächer, VHS-Fachgebiet, Bildungsbereich."""
+    if "fachgebiet" in t:
+        return {f["notation"] for f in t.get("fachgebiet") or []}
+    if "bildungsbereich" in t:
+        return {x["id"] for x in t.get("bildungsbereich") or []}
     if "faecher" in t:
         return set(t.get("faecher") or [])
     return {f["uri"] for k in ("studienfach", "studienbereich", "faechergruppe") for f in t.get(k) or []}
 
 
 def _hauptfach(t: dict) -> str:
+    if "fachgebiet" in t:
+        return t["fachgebiet"][0]["notation"]
+    if "bildungsbereich" in t:
+        return t["bildungsbereich"][0]["id"]
     return t["faecher"][0] if "faecher" in t else t["studienfach"][0]["uri"]
 
 
@@ -291,7 +346,8 @@ def _beste(zeile):
 
 
 def _herkunft(t: dict) -> str:
-    return t.get("herkunft") or t.get("art") or "themenbaum"
+    h = t.get("herkunft") or t.get("art") or "themenbaum"
+    return "+".join(h) if isinstance(h, list) else h
 
 
 def vorhandene_themen(bereich: str) -> list[dict]:
@@ -306,6 +362,8 @@ def vorhandene_themen(bereich: str) -> list[dict]:
 def verknuepfen(neu: list[dict], vorhanden: list[dict], embedder=None) -> dict:
     """Trägt "verknuepft_mit" ein: gleiche Schreibweise im selben Fach (Ähnlichkeit 1,0) und, mit embedder, nahe
     Dubletten unter den neuen Themen und Überschneidungen mit vorhandenen Themen (nur innerhalb eines Fachs)."""
+    if not neu:
+        return {}
     zaehl = Counter()
     je_fach_v: dict[str, list[int]] = defaultdict(list)
     for i, t in enumerate(vorhanden):
@@ -368,8 +426,10 @@ def verknuepfen(neu: list[dict], vorhanden: list[dict], embedder=None) -> dict:
 
 def bauen(abstraktion: list[Path], bereiche=STANDARD_BEREICHE, embedder=None, online: bool = False,
           online_min: int = 2, on_progress=print, gnd: dict | None = None, vorhanden: dict[str, list[dict]] | None = None,
-          schreiben: bool = True) -> dict:
-    """Themen-Dateien je Bereich aus einer oder mehreren Abstraktions-Ausgaben; gibt die Statistik zurück."""
+          schreiben: bool = True, berufe: list[str] | None = None) -> dict:
+    """Themen-Dateien je Bereich aus einer oder mehreren Abstraktions-Ausgaben; gibt die Statistik zurück.
+    Erwachsenenbildung und Elementarbereich brauchen Embeddings (Zuordnung); berufe = Labels der
+    ESCO-Fähigkeiten für die Markierung „eher_berufsbildung“ (Standard: aus data/mappings/berufsbildung)."""
     rows: dict[str, dict] = {}
     for p in abstraktion:
         for r in lade_jsonl(p):
@@ -391,9 +451,14 @@ def bauen(abstraktion: list[Path], bereiche=STANDARD_BEREICHE, embedder=None, on
         if b not in DATEIEN:
             stat["bereiche"][b] = {"hinweis": "kein Seed-Bau für diesen Bereich"}
             continue
-        neu = [_thema(g, gnd, on_lobid) for g in gruppen.get(b, [])]
+        gs = gruppen.get(b, [])
+        v = vorhanden[b] if vorhanden is not None and b in vorhanden else (vorhandene_themen(b) if gs else [])
+        zu = [None] * len(gs)
+        if b in ZUORDNUNG and gs:
+            embedder = embedder or _standard_embedder()
+            zu = zuordnen(b, gs, v, embedder, berufe=berufe)
+        neu = [_thema(g, gnd, on_lobid, z) for g, z in zip(gs, zu)]
         neu.sort(key=lambda t: t["id"])
-        v = vorhanden[b] if vorhanden is not None else vorhandene_themen(b)
         on_progress(f"{b}: {len(neu)} Themen, verknüpfen mit {len(v)} vorhandenen")
         vz = verknuepfen(neu, v, embedder)
         fbs = [f for t in neu for f in t["fachbegriffe"]]
@@ -405,11 +470,74 @@ def bauen(abstraktion: list[Path], bereiche=STANDARD_BEREICHE, embedder=None, on
             "fachbegriffe": len(fbs), "fachbegriffe_gnd": sum(bool(f["gnd"]) for f in fbs),
             "thema_gnd": sum(bool(t.get("gnd") or t.get("gnd_treffer")) for t in neu),
             "verknuepfung": vz, "embeddings": getattr(embedder, "model", None)}
+        stat["bereiche"][b].update(kennzahlen_verknuepfung(neu))
+        if b in ZUORDNUNG:
+            stat["bereiche"][b].update(kennzahlen_zuordnung(neu))
         if schreiben:
             p = themen_pfad(b)
             p.parent.mkdir(parents=True, exist_ok=True)
             p.write_text("".join(json.dumps(t, ensure_ascii=False) + "\n" for t in neu), encoding="utf-8")
     if schreiben:
-        (ordner() / "zusammenfuehrung.json").write_text(json.dumps(stat, ensure_ascii=False, indent=1),
-                                                       encoding="utf-8")
+        p = ordner() / "zusammenfuehrung.json"
+        alt = json.loads(p.read_text(encoding="utf-8")) if p.exists() else {}
+        # Bereiche, die dieser Lauf nicht gebaut hat, behalten ihre Kennzahlen aus dem vorigen Lauf
+        stat = {**alt, **stat, "zaehlung": {**alt.get("zaehlung", {}), **zaehl},
+                "bereiche": {**alt.get("bereiche", {}), **stat["bereiche"]}}
+        for b2, x in stat["bereiche"].items():
+            if "themen" in x:
+                stat["zaehlung"].pop(f"nicht_gemappt_{b2}", None)
+        p.write_text(json.dumps(stat, ensure_ascii=False, indent=1), encoding="utf-8")
     return stat
+
+
+ZUORDNUNG = ("erwachsenenbildung", "elementar")
+
+
+def _standard_embedder():
+    from .mapping.embeddings import DEFAULT_EMBEDDING_MODEL, Embedder
+
+    return Embedder(DEFAULT_EMBEDDING_MODEL)
+
+
+def zuordnen(bereich: str, gruppen: list[dict], vorhanden: list[dict], embedder,
+             berufe: list[str] | None = None) -> list[dict]:
+    """Fachgebiet (EB) bzw. Bildungsbereich (Elementar) je zusammengefasster Gruppe, siehe sem/wlo_zuordnung.py."""
+    from . import wlo_zuordnung as Z
+
+    themen_ = [{"label": g["schreibweisen"].most_common(1)[0][0],
+                "allgemeiner": g["allgemeiner"].most_common(1)[0][0] if g["allgemeiner"] else None,
+                "faecher": g["faecher"], "stufen_uris": g.get("stufen_uris", [])} for g in gruppen]
+    if bereich == "erwachsenenbildung":
+        if berufe is None:
+            p = paths.MAPPING_DIR / "berufsbildung" / "kompetenzen.jsonl"
+            berufe = [x["label"] for x in lade_jsonl(p)] if p.exists() else []
+        out = Z.zuordnen_eb(themen_, vorhanden, embedder, berufe)
+    else:
+        out = Z.zuordnen_elementar(themen_, vorhanden, embedder)
+    for z in out:
+        z["embedding_modell"] = getattr(embedder, "model", None)
+    return out
+
+
+def kennzahlen_verknuepfung(neu: list[dict]) -> dict:
+    """alle, mit naher Dublette, einzigartig (ohne nahe Dublette), einzigartig ohne vorhandenes Thema; je mit
+    Zahl der Themen mit vorgeschlagener Stufe/Fach."""
+    def arten(t):
+        return {x["art"] for x in t.get("verknuepft_mit") or []}
+
+    gruppen = {"alle": neu, "nahe_dublette": [t for t in neu if "nahe_dublette" in arten(t)],
+               "einzigartig": [t for t in neu if "nahe_dublette" not in arten(t)],
+               "einzigartig_ohne_vorhandene": [t for t in neu if not arten(t)]}
+    return {"uebersicht": {k: {"themen": len(v), "vorschlag": sum(t["wlo"]["vorschlag"] for t in v)}
+                           for k, v in gruppen.items()}}
+
+
+def kennzahlen_zuordnung(neu: list[dict]) -> dict:
+    ziel = (lambda t: t["fachgebiet"][0]["notation"]) if neu and "fachgebiet" in neu[0] else         (lambda t: t["bildungsbereich"][0]["id"])
+    return {"status": dict(Counter(t["mapping"]["status"] for t in neu)),
+            "art": dict(Counter(t["art"] for t in neu)),
+            "eignung": dict(Counter(t["wlo"]["eignung"]["status"] for t in neu)),
+            "eignung_gruende": dict(Counter(g for t in neu for g in t["wlo"]["eignung"]["gruende"])),
+            "ziel": dict(sorted(Counter(ziel(t) for t in neu).items())),
+            **({"altersgruppe": dict(Counter(t["altersgruppe"] for t in neu))} if neu and "altersgruppe" in neu[0]
+               else {})}

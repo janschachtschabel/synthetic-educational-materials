@@ -242,8 +242,9 @@ def main(argv=None):
     p.add_argument("--zusammenfuehren", nargs="*", type=Path, metavar="ABSTRAKTION",
                    help="Themen für die Seeds bauen (ohne LLM) aus den genannten Ausgaben, Standard: alle "
                         "abstraktion*.jsonl in data/lokal/wlo_abstraktion/")
-    p.add_argument("--bereiche", default="schule,hochschule",
-                   help="mit --zusammenfuehren: Bereiche, für die Themen gebaut werden (Standard schule,hochschule)")
+    p.add_argument("--bereiche", default="schule,hochschule,erwachsenenbildung,elementar",
+                   help="mit --zusammenfuehren: Bereiche, für die Themen gebaut werden (Standard alle vier: schule, "
+                        "hochschule, erwachsenenbildung, elementar; die übrigen behalten ihre Datei und Kennzahlen)")
     p.add_argument("--gnd-online", action="store_true", help="mit --zusammenfuehren: Fachbegriffe ohne lokalen "
                                                              "GND-Treffer bei lobid suchen")
     p.add_argument("--gnd-online-min", type=int, default=2, metavar="N",

@@ -8,6 +8,8 @@ Die berufliche Aufstiegsfortbildung (Meister, Fachwirt) gehört zur Berufsbildun
 Weitere Themenquelle: Lernergebnisse aus DigComp 3.0 (CC BY 4.0, eigene Übersetzung, siehe digcomp.py).
 Themen aus urheberrechtlich geschützten Gliederungen (Rahmencurriculum Integrationskurse, Grundbildung) stehen
 nur lokal in data/lokal/erwachsenenbildung/themen_lokal.jsonl und kommen dazu, wenn die Datei existiert.
+Ebenso nur lokal: Themen der WLO-Abstraktion (data/lokal/wlo_abstraktion/themen_erwachsenenbildung.jsonl, Herkunft
+„wlo_abstraktion“, Standard aus; Fachgebiet ohne LLM zugeordnet, siehe sem/wlo_zuordnung.py).
 """
 
 from __future__ import annotations
@@ -21,7 +23,8 @@ from ... import faecher, gnd_ergaenzung
 from ... import schema as S
 from ...paths import MAPPING_DIR, lokal_pfad
 from ...vocabs import load as load_vocab
-from ..base import Bildungsbereich, MappingSchritt, SeedState
+from ..base import (WLO_ANTEIL, WLO_EIGNUNG, WLO_VORSCHLAG, WLO_ZUORDNUNG, Bildungsbereich, MappingSchritt, SeedState,
+                    ist_wlo, wlo_passt)
 from ..hochschule import load_jsonl
 
 DIR = MAPPING_DIR / "erwachsenenbildung"
@@ -64,7 +67,11 @@ def lade_themen() -> list[dict]:
         out += digcomp.themen(systematik())
     if lokal.exists():
         out += load_jsonl(lokal)
-    elif out:
+    if out:
+        from ... import wlo_seeds
+
+        out += wlo_seeds.themen("erwachsenenbildung")  # WLO-Abstraktion, nur mit lokaler Datei
+    if not lokal.exists() and out:
         warnings.warn(f"{lokal} fehlt: keine Themen aus Rahmencurriculum Integrationskurse und Grundbildung "
                       "(siehe data/README.md, data/lokal/)")
     return sortiert(out)
@@ -148,8 +155,15 @@ class Erwachsenenbildung(Bildungsbereich):
                                   "grundbildung": "Gliederung der lea.-Alpha-Levels und DVV-Rahmencurricula Lesen, "
                                                   "Schreiben, Rechnen (Grundbildung)",
                                   "digcomp": "Lernergebnisse des europäischen Kompetenzrahmens DigComp 3.0 (digitale "
-                                             "Kompetenzen, eigene Übersetzung)"},
+                                             "Kompetenzen, eigene Übersetzung)",
+                                  "wlo_abstraktion": "Thema, per LLM aus Titel und Beschreibung von WLO-Datensätzen "
+                                                     "abstrahiert, Fachgebiet ohne LLM zugeordnet (nur mit lokaler "
+                                                     "Datei, python -m sem wlo-themen)"},
                         "standard": ["gnd", "rahmencurriculum", "schulthemen", "grundbildung", "digcomp"]},
+            "wlo_anteil": WLO_ANTEIL,
+            "wlo_vorschlag": WLO_VORSCHLAG,
+            "wlo_eignung": WLO_EIGNUNG,
+            "wlo_zuordnung": WLO_ZUORDNUNG,
             "art": {"label": "Themenart", "beschreibung": "Abstimmung",
                     "werte": {"kursthema": "Kursthema für Teilnehmende",
                               "kursleitungsthema": "Thema für Kursleitende"},
@@ -167,7 +181,7 @@ class Erwachsenenbildung(Bildungsbereich):
     @staticmethod
     def belege_des_themas(topic: dict) -> set[str]:
         out = set()
-        if (topic.get("belege") or {}).get("wlo"):
+        if (topic.get("belege") or {}).get("wlo") or ist_wlo(topic):
             out.add("wlo")
         if (topic.get("mapping") or {}).get("llm_kandidat_bestaetigt"):
             out.add("llm_bestaetigt")
@@ -179,6 +193,9 @@ class Erwachsenenbildung(Bildungsbereich):
             return False
         if topic.get("herkunft", "gnd") not in auswahl["quellen"]:
             return False
+        if ist_wlo(topic):  # nicht abgestimmt: eigene Filter statt der Status der Abstimmung
+            return wlo_passt(topic, auswahl) and (not auswahl["belege"] or
+                                                  bool(self.belege_des_themas(topic) & set(auswahl["belege"])))
         if (m.get("eignung") or {}).get("status", "gesichert") not in auswahl["eignung_status"]:
             return False
         if m.get("status", "gesichert") not in auswahl["fachgebiet_status"]:
@@ -313,6 +330,12 @@ class Erwachsenenbildung(Bildungsbereich):
         seed[S.F_PROVENANCE][S.F_THEMA].update(
             status={"fachgebiet": m.get("status"), "eignung": (m.get("eignung") or {}).get("status")},
             belege={"erfuellt": sorted(self.belege_des_themas(topic))})
+        if ist_wlo(topic):
+            from ...wlo_seeds import belege_kompakt
+
+            seed[S.F_PROVENANCE][S.F_THEMA]["status"]["eignung"] = topic["wlo"]["eignung"]["status"]
+            seed[S.F_PROVENANCE][S.F_THEMA]["herkunft"] = "wlo_abstraktion"
+            seed[S.F_PROVENANCE][S.F_THEMA]["belege"].update(belege_kompakt(topic))
         if niveau:
             seed[S.F_NIVEAU] = {k: niveau[k] for k in ("id", "label", "exactMatch") if k in niveau}
             seed[S.F_PROVENANCE][S.F_NIVEAU] = S.provenance(

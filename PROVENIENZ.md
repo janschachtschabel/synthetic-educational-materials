@@ -30,8 +30,9 @@ the records it was derived from.*
 4. **Zusammenführen:** Gleiches normalisiertes Thema im selben Bereich und Fach ergibt ein Thema mit allen Node-IDs;
    deren Zahl ist das Gewicht. Fachbegriffe werden gegen GND-Sachschlagwörter abgeglichen (Labels aus den Mappings
    dieses Repos, optional lobid). Nahe Dubletten und Überschneidungen mit vorhandenen Themen (Themenbaum,
-   WLO-Keywords, OpenAlex, GND, RVK, Fachprofile) werden über lokale Embeddings verknüpft (`verknuepft_mit`),
-   nichts wird gelöscht.
+   WLO-Keywords, OpenAlex, GND, RVK, Fachprofile; in EB und Elementar die abgestimmten Themen desselben Fachgebiets
+   bzw. Bildungsbereichs) werden über lokale Embeddings verknüpft (`verknuepft_mit`), nichts wird gelöscht. In
+   Erwachsenen- und Elementarbildung wird über alle Fächer zusammengefasst und danach ohne LLM zugeordnet.
 
 ## Was gespeichert und weitergegeben wird
 
@@ -53,5 +54,8 @@ Die Abstraktion und die daraus gebauten Themen liegen nur lokal (`data/lokal/`, 
 ob und wie sie veröffentlicht werden. Bei den Seeds ist die Herkunft standardmäßig ausgeschaltet (Filter `herkunft`
 bzw. `quellen`, Anteil über `wlo_anteil`). Datensätze ohne Bildungsstufe oder Fach werden mitverarbeitet: Fach
 und Stufe schlägt dann das Modell aus dem OEH-Vokabular vor (markiert als `vorschlag: true`, im Seed-Filter
-`wlo_vorschlag` getrennt abschaltbar). Berufs-, Erwachsenen- und Elementarbildung: Die Abstraktion läuft mit,
-Themen für diese Bereiche werden noch nicht gebaut.
+`wlo_vorschlag` getrennt abschaltbar). Erwachsenen- und Elementarbildung: Themen in
+`themen_erwachsenenbildung.jsonl` und `themen_elementar.jsonl`; Fachgebiet der Volkshochschul-Statistik bzw.
+Bildungsbereich, Altersgruppe und Themenart ordnet `sem/wlo_zuordnung.py` ohne LLM zu (lokale Embeddings, Fach der
+Datensätze; Status im Filter `wlo_zuordnung`), fragliche Themen sind mit Gründen markiert (`wlo.eignung`, Filter
+`wlo_eignung`, Standard nur geeignete). Berufsbildung: Die Abstraktion läuft mit, Themen werden noch nicht gebaut.
