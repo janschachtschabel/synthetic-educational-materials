@@ -243,6 +243,7 @@ def parse_paare(data: dict | list, minimum: int) -> list[dict]:
 # III Reflexion und Problemlösung
 ANFORDERUNGSBEREICH = {"erinnern": "I", "verstehen": "I", "anwenden": "II", "analysieren": "II",
                        "bewerten": "III", "erschaffen": "III"}
+LERNZIEL_MAX = 160  # Prompt verlangt höchstens 120 Zeichen; Spielraum gegen unnötige Neuanfragen
 _LERNZIEL_VAGE = re.compile(r"\b(verstehen|kennen|wissen|lernen|kennenlernen|bewusst sein|bewusst werden)\W*$", re.I)
 
 
@@ -256,7 +257,7 @@ def parse_lernziele(data: dict | list, minimum: int = 2, maximum: int = 4) -> li
             continue
         text = _einzeilig(str(z.get("lernziel") or ""))
         stufe = bloom_typ(str(z.get("stufe") or ""))
-        if not (20 <= len(text) <= 300 and stufe) or _LERNZIEL_VAGE.search(text.rstrip(".")):
+        if not (20 <= len(text) <= LERNZIEL_MAX and stufe) or _LERNZIEL_VAGE.search(text.rstrip(".")):
             continue
         out.append({"lernziel": text if text.endswith(".") else text + ".",
                     "operator": _einzeilig(str(z.get("operator") or "")), "stufe": stufe})
@@ -269,7 +270,8 @@ SUCHANFRAGE_MAX_WOERTER = 6  # Prompt: höchstens 5 Wörter
 
 
 def parse_suchanfragen(data: dict | list, minimum: int = 4, maximum: int = 8) -> list[str]:
-    """Kurze Suchschlitz-Eingaben; ganze Sätze und zu lange Anfragen fallen weg, Dubletten ohne Groß/klein."""
+    """Kurze Suchschlitz-Eingaben; ganze Sätze und zu lange Anfragen fallen weg, Dubletten ohne Groß/klein. Die
+    Schreibweise bleibt wie erzeugt (gemischt wie echte Eingaben); vereinheitlichen kann das Training."""
     roh = data.get("suchanfragen", []) if isinstance(data, dict) else data
     out: dict[str, str] = {}
     for q in roh:

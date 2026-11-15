@@ -162,3 +162,10 @@ def test_parse_suchanfragen():
     assert q == ["Eigenwerte", "spektralsatz", "matrix übung", "diagonalisierung"]
     with pytest.raises(ValueError):
         parse_suchanfragen({"suchanfragen": ["eins", "zwei"]})
+
+
+def test_lernziel_zu_lang_faellt_weg():
+    lang = "Die Studierenden können " + "sehr " * 40 + "berechnen"
+    daten = json.loads(LERNZIELE_JSON)
+    daten["lernziele"].append({"lernziel": lang, "stufe": "anwenden"})
+    assert len(parse_lernziele(daten)) == 2

@@ -720,12 +720,13 @@ Pro Seed bis zu acht LLM-Aufrufe (OpenAI-kompatible API, Standardmodell `gpt-6-l
    Bloom/Anderson, mindestens 8. Der Typ ist immer deutsch (auch bei anderer Ausgabesprache);
    übersetzte Typen werden zurückgeführt, Paare mit unbekanntem Typ verworfen.
 5. **Lernziele** (`lernziele.md`, JSON, `synth:lernziele`): 2–4 kompetenzorientierte Lernziele
-   („Die Schülerinnen und Schüler können … beschreiben“) mit Operator und Stufe der Lernzieltaxonomie
+   („Die Schülerinnen und Schüler können … beschreiben“, höchstens etwa 120 Zeichen) mit Operator und Stufe der Lernzieltaxonomie
    nach Anderson und Krathwohl (deutsch, wie bei den Fragen). Ziele mit vagem Schlussverb (verstehen,
    kennen, wissen) werden verworfen. In der Schule steht zusätzlich der KMK-Anforderungsbereich, aus
    der Stufe abgeleitet (erinnern, verstehen: I; anwenden, analysieren: II; bewerten, erschaffen: III).
 6. **Suchanfragen** (`suchanfragen.md`, JSON, `synth:suchanfragen`): 5–8 kurze Eingaben, wie Suchende
-   sie in den Suchschlitz eines Bildungsportals tippen (meist 1–3 Wörter, höchstens 6 übernommen), für
+   sie in den Suchschlitz eines Bildungsportals tippen (meist 1–3 Wörter, höchstens 6 übernommen; Groß- und
+   Kleinschreibung gemischt wie echte Eingaben), für
    die das Material ein passender Treffer ist. Gedacht als Trainingspaare Anfrage → Material für
    Such- und Embedding-Modelle.
 

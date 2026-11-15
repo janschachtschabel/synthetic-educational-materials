@@ -522,12 +522,13 @@ Up to six LLM calls per seed (OpenAI-compatible API, default model `gpt-6-luna`)
    level according to Bloom/Anderson, minimum 8. The type is always German (also for other output
    languages); translated types are mapped back, pairs with an unknown type are dropped.
 5. **Learning objectives** (`lernziele.md`, JSON, `synth:lernziele`): 2–4 competence-oriented learning
-   objectives („Die Schülerinnen und Schüler können … beschreiben“) with operator and level of the
+   objectives („Die Schülerinnen und Schüler können … beschreiben“, at most about 120 characters) with operator and level of the
    Anderson/Krathwohl taxonomy (German, as for the questions). Objectives ending in a vague verb
    (verstehen, kennen, wissen) are dropped. In school, the KMK requirement area derived from the level is
    added (remember, understand: I; apply, analyse: II; evaluate, create: III).
 6. **Search queries** (`suchanfragen.md`, JSON, `synth:suchanfragen`): 5–8 short inputs as users type them
-   into the search box of an education portal (mostly 1–3 words, at most 6 retained) for which the
+   into the search box of an education portal (mostly 1–3 words, at most 6 retained; mixed upper and lower
+   case like real input) for which the
    material is a fitting hit. Intended as query → material training pairs for search and embedding models.
 
 Steps 3 to 6 run simultaneously.
