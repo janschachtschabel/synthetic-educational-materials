@@ -461,6 +461,34 @@ def test_filter_wlo_vorschlag():
     assert "wlo_vorschlag" in get("schule").auswahl_optionen() and "wlo_vorschlag" in get("hochschule").auswahl_optionen()
 
 
+def test_filter_wlo_dubletten():
+    from sem.bereiche.base import ohne_wlo_dubletten, wlo_dubletten_schwelle
+
+    P = WLO_THEMA_PREFIX
+
+    def w(i, gewicht, links=()):
+        return {"id": P + i, "wlo": {"gewicht": gewicht},
+                "verknuepft_mit": [{"id": z if ":" in z else P + z, "art": "vorhanden" if ":" in z else "nahe_dublette",
+                                    "aehnlichkeit": s} for z, s in links]}
+
+    themen = [{"id": "gnd:1"},
+              w("a", 2, [("b", 0.98)]),           # a hat weniger Datensätze als b: fällt bei 0,97 weg
+              w("b", 5),                           # Verknüpfung nur bei a eingetragen: gilt trotzdem
+              w("c", 9, [("gnd:1", 0.99)]),        # gibt es schon aus der GND: fällt weg
+              w("d", 1, [("b", 0.95)]),            # nur verwandt: bleibt bei 0,97, fällt bei 0,95 weg
+              w("e", 1, [("d", 0.98)])]            # nur direkte Paare: e bleibt, wenn d wegfällt
+    ids = lambda xs: [x["id"].removeprefix(P) for x in xs]
+    assert ids(ohne_wlo_dubletten(themen, 0.97)) == ["gnd:1", "b", "d"]
+    assert ids(ohne_wlo_dubletten(themen, 0.95)) == ["gnd:1", "b", "e"]
+    assert ids(ohne_wlo_dubletten(themen, 0.995)) == ["gnd:1", "a", "b", "c", "d", "e"]
+    # gefiltertes Ziel (nicht in der Auswahl) hält kein Thema zurück
+    assert ids(ohne_wlo_dubletten(themen[2:3] + themen[3:4], 0.93)) == ["b", "c"]
+    assert wlo_dubletten_schwelle({"wlo_dubletten": ["97", "95"]}) == 0.95
+    assert wlo_dubletten_schwelle({"wlo_dubletten": []}) is None and wlo_dubletten_schwelle({}) is None
+    for b in ("schule", "hochschule"):
+        assert get(b).standard_auswahl()["wlo_dubletten"] == ["97"]
+
+
 def test_teile_wlo():
     wlo = [{"id": WLO_THEMA_PREFIX + "x"}]
     rest = [{"id": "a"}, {"id": "b"}]

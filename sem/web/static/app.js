@@ -9,6 +9,21 @@
       var fs = document.getElementById(el.dataset.schaltet);
       if (fs) fs.disabled = !el.checked;
     }
+    // Anbieterwechsel in den Einstellungen: Modell und Base-URL auf die Vorgaben des neuen Anbieters setzen, wenn das
+    // Feld leer ist oder noch zum anderen Anbieter gehört (Standardmodell, gpt-/claude-Modell, Standard-URL)
+    if (el.matches("[data-anbieter-modell]") && el.checked) {
+      var modell = document.getElementById("e-model"), url = document.getElementById("e-url");
+      var andere = Array.prototype.filter.call(document.querySelectorAll("[data-anbieter-modell]"),
+        function (r) { return r !== el; });
+      var fremdesModell = andere.some(function (r) { return modell.value.trim() === r.dataset.anbieterModell; }) ||
+        (el.value === "anthropic" && /^gpt-|^o\d/.test(modell.value.trim())) ||
+        (el.value !== "anthropic" && /^claude-/.test(modell.value.trim()));
+      if (modell && (!modell.value.trim() || fremdesModell)) modell.value = el.dataset.anbieterModell;
+      if (url) {
+        if (andere.some(function (r) { return url.value.trim() === r.dataset.anbieterUrl; })) url.value = "";
+        url.placeholder = el.dataset.anbieterUrl;
+      }
+    }
     // Konfidenz für alle Bereiche: setzt die Status-Filter jedes Bereichs auf denselben Wert
     if (el.matches("[data-konfidenz-global]")) {
       document.querySelectorAll('[data-konfidenz="' + el.dataset.konfidenzGlobal + '"]').forEach(function (c) {

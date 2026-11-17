@@ -13,15 +13,15 @@
       <legend>{{ T("Anbieter") }}</legend>
       {% for a, text, hilfe in [("openai", T("OpenAI-kompatibel"), T("OpenAI oder jede API mit derselben Schnittstelle (z. B. OpenRouter). Halber Preis mit Flex oder Batch.")),
                                ("anthropic", "Anthropic (Claude)", T("Claude-Modelle über die Anthropic-API, Standardmodell {modell}. Halber Preis mit Batch; Flex gibt es dort nicht.", modell=modelle["anthropic"]))] %}
-        <div class="wahl"><input type="radio" id="e-anb-{{ a }}" name="anbieter" value="{{ a }}" {% if a == e.anbieter %}checked{% endif %} aria-describedby="e-anb-{{ a }}-h">
+        <div class="wahl"><input type="radio" id="e-anb-{{ a }}" name="anbieter" value="{{ a }}" data-anbieter-modell="{{ modelle[a] }}" data-anbieter-url="{{ urls[a] }}" {% if a == e.anbieter %}checked{% endif %} aria-describedby="e-anb-{{ a }}-h">
           <label for="e-anb-{{ a }}" class="inline">{{ text }}</label> <span id="e-anb-{{ a }}-h" class="hilfe">{{ hilfe }}</span></div>
       {% endfor %}
-      <p class="hilfe">{{ T("Nach einem Wechsel speichern: Base-URL, Modell und Key gelten dann für den gewählten Anbieter. Ein Modell des anderen Anbieters wird durch das Standardmodell ersetzt.") }}</p>
+      <p class="hilfe">{{ T("Beim Wechsel setzt die Seite Modell und Base-URL auf die Vorgaben des Anbieters (eigene Werte bleiben, wenn sie zum Anbieter passen); danach speichern. Key und Base-URL gelten je Anbieter.") }}</p>
     </fieldset>
     <p class="hilfe">{{ T("Leere Felder: Werte aus {kv}_BASE_URL, {kv}_API_KEY, LLM_MODEL.", kv=kv) }}</p>
     <div class="feld">
       <label for="e-url">Base-URL</label>
-      <input type="url" id="e-url" name="base_url" value="{{ e.base_url }}" placeholder="{{ 'https://api.anthropic.com' if e.anbieter == 'anthropic' else 'https://api.openai.com/v1' }}" spellcheck="false">
+      <input type="url" id="e-url" name="base_url" value="{{ e.base_url }}" placeholder="{{ urls[e.anbieter] }}" spellcheck="false">
     </div>
     <div class="feld">
       <label for="e-model">{{ T("Modell") }}</label>

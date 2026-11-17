@@ -135,12 +135,19 @@ def env_namen(anbieter: str) -> dict:
     return {"base_url": f"{p}_BASE_URL", "api_key": f"{p}_API_KEY"}
 
 
+def client_base_url(cfg: LLMConfig) -> str:
+    """Base-URL für den SDK-Client, nie leer: Ohne Angabe lesen die SDKs {ANBIETER}_BASE_URL selbst, und eine leer
+    gesetzte Variable ergibt beim Anthropic-SDK eine ungültige URL."""
+    return cfg.base_url or DEFAULT_BASE_URLS[cfg.anbieter]
+
+
 def api_key_fuer(base_url: str | None, api_key: str | None, env: LLMConfig) -> str | None:
     """Eingetragener Key, sonst der aus OPENAI_API_KEY (bzw. ANTHROPIC_API_KEY), aber nur für die Base-URL aus der Umgebung:
     Eine in der Oberfläche eingetragene andere Base-URL erhält den Key aus der Umgebung nicht."""
     if api_key:
         return api_key
-    return env.api_key if (base_url or None) == env.base_url else None
+    standard = DEFAULT_BASE_URLS.get(env.anbieter)
+    return env.api_key if (base_url or standard) == (env.base_url or standard) else None
 
 
 def _effort(value: str | None) -> str | None:
@@ -230,11 +237,11 @@ class LLMClient:
         if cfg.anbieter == "anthropic":
             from anthropic import Anthropic
 
-            self.client = Anthropic(base_url=cfg.base_url, api_key=cfg.api_key, timeout=timeout, max_retries=0)
+            self.client = Anthropic(base_url=client_base_url(cfg), api_key=cfg.api_key, timeout=timeout, max_retries=0)
         else:
             from openai import OpenAI
 
-            self.client = OpenAI(base_url=cfg.base_url, api_key=cfg.api_key, timeout=timeout, max_retries=0)
+            self.client = OpenAI(base_url=client_base_url(cfg), api_key=cfg.api_key, timeout=timeout, max_retries=0)
 
     def chat(self, system: str, user: str, json_mode: bool = False) -> str:
         if self.stop is not None and self.stop.is_set():

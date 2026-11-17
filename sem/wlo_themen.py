@@ -41,7 +41,7 @@ from pathlib import Path
 from typing import Iterable, Iterator
 
 from . import paths
-from .llm import LLMConfig, _zeilenende, env_namen, json_aus_text, read_done, sperre_nehmen, tokens_aus_usage
+from .llm import LLMConfig, _zeilenende, client_base_url, env_namen, json_aus_text, read_done, sperre_nehmen, tokens_aus_usage
 
 ORDNER = "wlo_abstraktion"
 P = "properties."
@@ -402,12 +402,12 @@ class WloThemenLauf:
             if cfg.anbieter == "anthropic":
                 from anthropic import Anthropic
 
-                client = Anthropic(base_url=cfg.base_url, api_key=cfg.api_key, timeout=cfg.timeout)
+                client = Anthropic(base_url=client_base_url(cfg), api_key=cfg.api_key, timeout=cfg.timeout)
             else:
                 from openai import OpenAI
 
                 timeout = max(cfg.timeout, FLEX_TIMEOUT) if sofort and cfg.service_tier == "flex" else cfg.timeout
-                client = OpenAI(base_url=cfg.base_url, api_key=cfg.api_key, timeout=timeout, max_retries=0 if sofort
+                client = OpenAI(base_url=client_base_url(cfg), api_key=cfg.api_key, timeout=timeout, max_retries=0 if sofort
                                 else 2)
         if sofort and cfg.anbieter == "anthropic":
             raise ValueError("--sofort gibt es nur für OpenAI-kompatible APIs")

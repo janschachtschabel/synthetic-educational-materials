@@ -26,7 +26,7 @@ from . import schema as S
 from .bereiche import get as get_bereich
 from .generate import Material, meta_fuer, read_seeds
 from .laeufe import lauf_speichern
-from .llm import (LLMConfig, _zeilenende, anthropic_text, anthropic_usage, env_namen, read_done, sperre_nehmen,
+from .llm import (LLMConfig, _zeilenende, anthropic_text, anthropic_usage, client_base_url, env_namen, read_done, sperre_nehmen,
                   tokens_aus_usage)
 from .prompts import load_prompts
 
@@ -195,11 +195,11 @@ class BatchLauf:
             if cfg.anbieter == "anthropic":
                 from anthropic import Anthropic
 
-                client = Anthropic(base_url=cfg.base_url, api_key=cfg.api_key, timeout=cfg.timeout)
+                client = Anthropic(base_url=client_base_url(cfg), api_key=cfg.api_key, timeout=cfg.timeout)
             else:
                 from openai import OpenAI
 
-                client = OpenAI(base_url=cfg.base_url, api_key=cfg.api_key, timeout=cfg.timeout)
+                client = OpenAI(base_url=client_base_url(cfg), api_key=cfg.api_key, timeout=cfg.timeout)
         self.client = client
         self.api = AnthropicBatches(client) if cfg.anbieter == "anthropic" else OpenAIBatches(client)
         parameter = {"modell": cfg.model, "prompt_hash": self.meta["prompt_hash"],

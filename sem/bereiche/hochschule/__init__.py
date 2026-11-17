@@ -18,7 +18,7 @@ from ... import gnd_ergaenzung
 from ... import schema as S
 from ...paths import MAPPING_DIR
 from ...vocabs import load as load_vocab
-from ..base import WLO_ANTEIL, WLO_VORSCHLAG, wlo_passt, Bildungsbereich, MappingSchritt, SeedState, kurz_id  # noqa: F401 (kurz_id: frühere Importstelle)
+from ..base import WLO_ANTEIL, WLO_DUBLETTEN, WLO_VORSCHLAG, wlo_passt, Bildungsbereich, MappingSchritt, SeedState, kurz_id  # noqa: F401 (kurz_id: frühere Importstelle)
 
 DIR = MAPPING_DIR / "hochschule"
 THEMEN_DATEI = "themen_hochschule.jsonl"  # Gesamtset aus OpenAlex- und GND-Themen
@@ -128,6 +128,7 @@ class Hochschule(Bildungsbereich):
                         "standard": ["openalex", "gnd", "fachprofil", "rvk"]},
             "wlo_anteil": WLO_ANTEIL,
             "wlo_vorschlag": WLO_VORSCHLAG,
+            "wlo_dubletten": WLO_DUBLETTEN,
             "rvk_tiefe": {"label": "Tiefe der RVK-Klassen (nur RVK)",
                           "beschreibung": "Ebene in der RVK-Hierarchie: 2 = Hauptgruppe (z. B. QP), 3 = Bereich "
                                           "(QP 300 - QP 399), 4 und 5 = Unterklassen",

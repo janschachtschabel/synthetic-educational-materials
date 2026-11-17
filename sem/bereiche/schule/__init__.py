@@ -19,7 +19,7 @@ from ... import gnd_ergaenzung
 from ... import schema as S
 from ...paths import MAPPING_DIR
 from ...vocabs import load as load_vocab
-from ..base import WLO_ANTEIL, WLO_VORSCHLAG, wlo_passt, Bildungsbereich, MappingSchritt, SeedState
+from ..base import WLO_ANTEIL, WLO_DUBLETTEN, WLO_VORSCHLAG, wlo_passt, Bildungsbereich, MappingSchritt, SeedState
 from ..hochschule import load_jsonl
 
 DIR = MAPPING_DIR / "schule"
@@ -111,6 +111,7 @@ class Schule(Bildungsbereich):
                          "standard": ["themenbaum", "wlo_keyword"]},
             "wlo_anteil": WLO_ANTEIL,
             "wlo_vorschlag": WLO_VORSCHLAG,
+            "wlo_dubletten": WLO_DUBLETTEN,
             "stufen": {"label": "Schulstufen", "beschreibung": "nur Seeds dieser Stufen (z. B. nur Sekundarstufe II)",
                        "werte": {k: v for k, v in STUFEN_LABEL.items()}, "standard": list(STUFEN)},
             "art": {"label": "Themenart", "beschreibung": "Abstimmung",
