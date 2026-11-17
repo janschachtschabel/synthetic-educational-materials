@@ -160,6 +160,37 @@ def test_batch_bei_anthropic(seeds_datei, tmp_path):  # noqa: F811
                     client=fake)
 
 
+def test_anthropic_kleine_teile_mit_fortschritt(seeds_datei, tmp_path, monkeypatch):  # noqa: F811
+    """Anthropic bekommt die Anfragen im Request selbst: große Runden gehen in kleinen Teilen hoch, die Oberfläche
+    erfährt vor jedem Teil, welcher gerade geschickt wird; ein abgebrochener Teil wird beim Fortsetzen neu geschickt,
+    ohne die schon angelegten Teile zu wiederholen."""
+    path, seeds = seeds_datei
+    monkeypatch.setattr(B.AnthropicBatches, "max_bytes", 1)  # jede Anfrage ein eigener Teil
+    fake = FakeAnthropic(Antworten(load_prompts("hochschule"), titel_kaputt=0), ablaufen=0, fehler=0)
+    echt = fake.messages.batches.create
+    aufrufe = []
+
+    def anlegen(requests, timeout=None):
+        aufrufe.append(len(requests))
+        if len(aufrufe) == 2:
+            raise RuntimeError("500 timeout_error")
+        return echt(requests, timeout=timeout)
+
+    fake.messages.batches.create = anlegen
+    lauf = B.BatchLauf(path, tmp_path / "materialien_t.jsonl", _cfg(), client=fake)
+    meldungen = []
+    lauf.fortschritt = meldungen.append
+    with pytest.raises(RuntimeError):
+        lauf.weiter()
+    assert aufrufe == [1, 1] and "Teil 1 von 3" in meldungen[0] and "Teil 2 von 3" in meldungen[1]
+    assert len(lauf.stand["batches"]) == 1  # der erste Teil ist gespeichert
+    fake.messages.batches.retrieve = lambda bid: SimpleNamespace(id=bid, processing_status="in_progress")
+    lauf = B.BatchLauf(path, tmp_path / "materialien_t.jsonl", _cfg(), client=fake)
+    st = lauf.weiter()
+    assert aufrufe[2:] == [1, 1]  # nur die zwei fehlenden Volltexte, der erste kommt nicht doppelt
+    assert st["runde"] == 2
+
+
 def test_prozess_bekommt_anthropic_key():
     args, env = prozess.llm_umgebung(_cfg(api_key="sk-ant", workers=9))
     assert env["LLM_ANBIETER"] == "anthropic" and env["ANTHROPIC_API_KEY"] == "sk-ant"

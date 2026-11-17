@@ -354,7 +354,32 @@ def main(argv=None):
                 schreiber(p, ende=ende, batch=status_zeile(st), abgeschlossen=st["abgeschlossen"],
                           wartet=bool(a.warten and not ende))
 
+            hochladen = {"text": None}  # Teil, der gerade hochgeladen wird (kann bei langsamer Leitung Minuten dauern)
+
+            def fortschritt(text):
+                print(time.strftime("%H:%M:%S"), text, flush=True)
+                hochladen["text"] = text
+                hochladen_melden()
+
+            def hochladen_melden():
+                if schreiber is not None and hochladen["text"]:
+                    schreiber.zuletzt = 0.0  # nicht drosseln: Meldungen kommen hier ohnehin selten
+                    schreiber(Progress(total=len(lauf.seeds), status="schickt Batches"),
+                              batch=hochladen["text"], abgeschlossen=False, wartet=bool(a.warten))
+
+            if schreiber is not None:
+                import threading
+
+                lauf.fortschritt = fortschritt
+
+                def puls():  # Stand auffrischen, damit ein langer Upload nicht als „hängt“ erscheint
+                    while not stop.wait(20):
+                        hochladen_melden()
+
+                threading.Thread(target=puls, daemon=True).start()
+
             def show(st):
+                hochladen["text"] = None
                 print(time.strftime("%H:%M:%S"), status_zeile(st), flush=True)
                 stand(st)
 
