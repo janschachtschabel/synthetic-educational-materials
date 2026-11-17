@@ -33,6 +33,9 @@ from .prompts import load_prompts
 ENDPUNKT = "/v1/chat/completions"
 MAX_ANFRAGEN = 50_000            # je Batch-Datei (Grenze der API)
 MAX_BYTES = 190 * 1024 ** 2      # je Batch-Datei (Grenze der API: 200 MB)
+# Anthropic: Die Anfragen gehen direkt im Request mit. Der Server bricht lange Uploads ab (500 timeout_error, bei
+# ~190 MB und langsamer Leitung beobachtet); kleine Teile laden auch bei ~300 KB/s in gut einer Minute hoch.
+MAX_BYTES_ANTHROPIC = 24 * 1024 ** 2
 MAX_API_FEHLER = 3               # so oft wird eine Anfrage neu gestellt, die im Batch selbst scheitert
 MAX_BATCH_FEHLER_IN_FOLGE = 3    # so viele ganze Batches dürfen nacheinander scheitern, dann hält der Lauf an
 DATEI_TIMEOUT = 1800.0           # Sekunden für Hoch- und Herunterladen der Batch-Dateien (bis 190 MB)
@@ -41,6 +44,8 @@ FERTIG = {"completed", "failed", "expired", "cancelled"}
 
 class OpenAIBatches:
     """Batch über hochgeladene JSONL-Dateien (files + batches)."""
+
+    max_bytes = MAX_BYTES
 
     def __init__(self, client):
         self.client = client
@@ -127,6 +132,8 @@ class AnthropicBatches:
     (höchstens 64 Zeichen): geschickt wird die Nummer der Anfrage im Batch, zurückübersetzt über die gespeicherte
     Liste der Anfragen. Abgelaufene und abgebrochene Anfragen fehlen im Ergebnis und werden neu gestellt."""
 
+    max_bytes = MAX_BYTES_ANTHROPIC
+
     def __init__(self, client):
         self.client = client
 
@@ -201,6 +208,7 @@ class BatchLauf:
 
                 client = OpenAI(base_url=client_base_url(cfg), api_key=cfg.api_key, timeout=cfg.timeout)
         self.client = client
+        self.fortschritt = None  # optional: fortschritt(text) vor jedem Hochladen eines Teils (für die Oberfläche)
         self.api = AnthropicBatches(client) if cfg.anbieter == "anthropic" else OpenAIBatches(client)
         parameter = {"modell": cfg.model, "prompt_hash": self.meta["prompt_hash"],
                      "inhaltstyp_pruefung": inhaltstyp_pruefen, "ausgabesprache": ausgabesprache,
@@ -360,15 +368,20 @@ class BatchLauf:
             return
         self.stand["runde"] = runde
         self.ordner.mkdir(parents=True, exist_ok=True)
-        teil, groesse, nr = [], 0, 0
-        for cid, body, t, n in zeilen + [(None, None, 0, 0)]:
-            if teil and (body is None or len(teil) >= MAX_ANFRAGEN or groesse + n > MAX_BYTES):
-                nr += 1
-                self._batch_anlegen(runde, nr, teil)
+        max_bytes = getattr(self.api, "max_bytes", MAX_BYTES)
+        teile, teil, groesse = [], [], 0
+        for cid, body, t, n in zeilen:
+            if teil and (len(teil) >= MAX_ANFRAGEN or groesse + n > max_bytes):
+                teile.append(teil)
                 teil, groesse = [], 0
-            if body is not None:
-                teil.append((cid, body, t))
-                groesse += n
+            teil.append((cid, body, t))
+            groesse += n
+        teile.append(teil)
+        for nr, teil in enumerate(teile, 1):
+            if self.fortschritt:
+                self.fortschritt(f"Runde {runde}: schickt Teil {nr} von {len(teile)} ({len(teil)} Anfragen) "
+                                 "an den Anbieter …")
+            self._batch_anlegen(runde, nr, teil)
 
     def _batch_anlegen(self, runde: int, nr: int, teil: list[tuple[str, dict, int]]):
         datei = self.ordner / f"runde{runde:03d}_{nr:02d}.jsonl"
