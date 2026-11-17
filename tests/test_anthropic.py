@@ -199,3 +199,31 @@ def test_oberflaeche_anthropic_waehlen(client, ordner, monkeypatch):  # noqa: F8
     cfg = gestartet[-1][2]
     assert (cfg.anbieter, cfg.model, cfg.api_key) == ("openai", "m1", "sk-oai")
     web._api_key.clear()
+
+
+def test_batch_warten_bis_fertig_und_stop(seeds_datei, tmp_path):  # noqa: F811
+    import threading
+
+    path, _ = seeds_datei
+    fake = FakeAnthropic(Antworten(load_prompts("hochschule"), titel_kaputt=0))
+    lauf = B.BatchLauf(path, tmp_path / "materialien_w.jsonl", _cfg(), client=fake)
+    meldungen = []
+    st = lauf.warten(0, on_status=meldungen.append, stop=threading.Event())
+    assert st["abgeschlossen"] and len(meldungen) > 1 and len(read_done(tmp_path / "materialien_w.jsonl")) == 3
+    stop = threading.Event()
+    stop.set()
+    lauf2 = B.BatchLauf(path, tmp_path / "materialien_w2.jsonl", _cfg(), client=fake)
+    st = lauf2.warten(5, stop=stop)  # gesetzt: nach der ersten Abfrage zurück, ohne zu warten
+    assert not st["abgeschlossen"] and st["runde"] == 1
+
+
+def test_oberflaeche_batch_wartet_selbst(client, ordner, monkeypatch):  # noqa: F811
+    out, gestartet = ordner
+    (out / "seeds_t.jsonl").write_text('{"id": "a"}\n', encoding="utf-8")
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant")
+    client.post("/einstellungen", headers=HX, data={"anbieter": "anthropic", "model": "", "workers": "4"})
+    client.post("/materialien/start", headers=HX, data={"src": "seeds_t.jsonl", "verarbeitung": "batch",
+                                                       "workers": "4", "limit": "0", "name": "t"})
+    argv = gestartet[-1][1]
+    assert "--batch" in argv and "--warten" in argv
+    web._api_key.clear()

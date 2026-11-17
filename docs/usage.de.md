@@ -201,7 +201,9 @@ Material). Hat Flex keine Kapazität (Fehler 429), wird eine Anfrage zweimal wie
 gestellt; wie oft, steht je Material unter `synth:generierung.tokens.aufrufe_standard`. `--batch` bzw.
 „Verarbeitung: Batch“ im Reiter „Materialien“ schickt die Anfragen gesammelt an die Batch-Schnittstelle: eine Runde je
 Stufe (Volltext, Titel, Beschreibung, Keywords, Abschluss), jede bis zu 24 Stunden, oft schneller. Jeder Aufruf holt
-Fertiges ab und schickt die nächste Runde; `--warten` wiederholt das bis zum Ende. Der Stand liegt in
+Fertiges ab und schickt die nächste Runde; `--warten` wiederholt das bis zum Ende. Die Oberfläche startet Batch-Läufe
+immer mit `--warten`: Sie fragt alle 30 s nach, zeigt den Stand und schickt die Runden selbst (große Runden in
+Teil-Batches); „Anhalten“ beendet nur das Nachfragen, die Batches laufen beim Anbieter weiter. Der Stand liegt in
 `output/materialien_<name>.batch/`. Prompts, Prüfungen und Ergebnis sind in allen Fällen gleich;
 `synth:generierung.verarbeitung` vermerkt `flex` oder `batch`.
 

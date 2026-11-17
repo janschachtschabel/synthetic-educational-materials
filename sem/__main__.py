@@ -338,18 +338,38 @@ def main(argv=None):
 
             lauf = BatchLauf(a.seeds, out, _cfg(a), limit=a.limit, inhaltstyp_pruefen=not a.ohne_inhaltstyp_pruefung,
                              ausgabesprache=a.sprache)
-            show = lambda st: print(time.strftime("%H:%M:%S"), status_zeile(st), flush=True)  # noqa: E731
-            st = lauf.warten(a.intervall, on_status=show) if a.warten else lauf.weiter()
-            if not a.warten:
-                show(st)
-            print(f"→ {out}" + ("" if st["abgeschlossen"] else "  (später erneut aufrufen, um fortzusetzen)"))
-            if a.stand:  # Oberfläche: Stand der Batch-Runde
+            schreiber = stop = None
+            if a.stand:  # Oberfläche: Stand der Batch-Runden
                 from .llm import Progress
-                from .prozess import StandSchreiber
+                from .prozess import StandSchreiber, stop_beobachten
 
-                p = Progress(total=st["materialien"], done=st["fertig"], failed=st["fehlgeschlagen"],
-                             status="fertig" if st["abgeschlossen"] else "Runde verschickt")
-                StandSchreiber(a.stand).ende(p, batch=status_zeile(st), abgeschlossen=st["abgeschlossen"])
+                schreiber, stop = StandSchreiber(a.stand), stop_beobachten(a.stand)
+
+            def stand(st, ende=False):
+                if schreiber is None:
+                    return
+                status = "fertig" if st["abgeschlossen"] else (
+                    "Runde verschickt" if ende else "wartet auf die Batches des Anbieters")
+                p = Progress(total=st["materialien"], done=st["fertig"], failed=st["fehlgeschlagen"], status=status)
+                schreiber(p, ende=ende, batch=status_zeile(st), abgeschlossen=st["abgeschlossen"],
+                          wartet=bool(a.warten and not ende))
+
+            def show(st):
+                print(time.strftime("%H:%M:%S"), status_zeile(st), flush=True)
+                stand(st)
+
+            try:
+                # Oberfläche: höchstens 30 s zwischen den Abfragen, sonst gälte der Lauf als hängend (60 s ohne Stand)
+                intervall = min(a.intervall, 30) if schreiber else a.intervall
+                st = lauf.warten(intervall, on_status=show, stop=stop) if a.warten else lauf.weiter()
+            except BaseException as e:
+                if schreiber is not None:
+                    schreiber.ende(None, fehler=f"{type(e).__name__}: {e}")
+                raise
+            if not a.warten:
+                print(time.strftime("%H:%M:%S"), status_zeile(st), flush=True)
+            print(f"→ {out}" + ("" if st["abgeschlossen"] else "  (später erneut aufrufen, um fortzusetzen)"))
+            stand(st, ende=True)
             return
         prog = _mit_stand(a, lambda **kw: generate(a.seeds, out, _cfg(a), **kw), limit=a.limit,
                           inhaltstyp_pruefen=not a.ohne_inhaltstyp_pruefung, ausgabesprache=a.sprache)

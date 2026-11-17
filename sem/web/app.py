@@ -567,7 +567,7 @@ def materialien_start(request: Request, src: str = Form(...), name: str = Form("
     cfg = llm_cfg(workers=max(1, min(1000, workers)), service_tier="flex" if verarbeitung == "flex" else None)
     argv = _mat_argv(ctx["src"], ctx["out"], sprache_, max(0, limit), lrt)
     if verarbeitung == "batch":
-        argv.append("--batch")
+        argv += ["--batch", "--warten"]  # holt fertige Runden selbst ab und schickt die nächste
     starten("mat", argv, cfg)
     return seite(request, "teil_status.html", lauf=lauf_ansicht("mat"), name="mat")
 
@@ -603,9 +603,9 @@ def fortsetzen(request: Request, name: str, aktion: str = Form("fortsetzen"), ve
                   service_tier="flex" if verarbeitung == "flex" and not batch else None)
     if aktion == "neu":
         argv = _mat_argv(Path(L["seeds"]), freier_name(Path(L["ausgabe"])), L["ausgabesprache"], L["limit"] or 0,
-                         L["inhaltstyp_pruefen"]) + (["--batch"] if batch else [])
+                         L["inhaltstyp_pruefen"]) + (["--batch", "--warten"] if batch else [])
     else:
-        argv = ["materialien", "--fortsetzen", L["name"]]
+        argv = ["materialien", "--fortsetzen", L["name"]] + (["--warten"] if batch else [])
         if not batch and verarbeitung != "flex":
             argv.append("--ohne-flex")
     starten("mat", argv, cfg)
