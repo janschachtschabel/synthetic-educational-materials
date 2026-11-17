@@ -51,6 +51,18 @@ WLO_VORSCHLAG = {"label": "Fach und Stufe (WLO-Abstraktion)",
                            "vorschlag": "vom Modell aus dem OEH-Vokabular vorgeschlagen (Datensätze ohne Fach oder "
                                         "Stufe)"},
                  "standard": ["metadaten", "vorschlag"]}
+# Filter (Schule, Hochschule): nahe Dubletten der WLO-Abstraktion zusammenfassen. Grundlage sind die beim Bau der
+# Themen gespeicherten Verknüpfungen (verknuepft_mit, lokale Embeddings, gleiches Fach): nahe_dublette = anderes
+# WLO-Thema, vorhanden = Thema aus einer anderen Quelle. Unter etwa 0,97 sind es oft verwandte, aber verschiedene
+# Themen (z. B. Management und Marketing von Nonprofit-Organisationen), darüber meist echte Dubletten.
+WLO_DUBLETTEN = {"label": "Nahe Dubletten (WLO-Abstraktion)",
+                 "beschreibung": "Ein Thema der WLO-Abstraktion fällt weg, wenn ein anderes gewähltes Thema desselben "
+                                 "Fachs mindestens so ähnlich ist (Embeddings); behalten wird das Thema einer anderen "
+                                 "Quelle, sonst das mit den meisten WLO-Datensätzen (mehrere angehakt: die niedrigste "
+                                 "Schwelle; keiner: alle behalten)",
+                 "werte": {"99": "ab Ähnlichkeit 0,99", "97": "ab Ähnlichkeit 0,97", "95": "ab Ähnlichkeit 0,95",
+                           "93": "ab Ähnlichkeit 0,93 (alle beim Bau verknüpften)"},
+                 "standard": ["97"]}
 
 
 # Filter (Erwachsenenbildung, Elementarbereich): Eignung der ohne LLM zugeordneten Themen (sem/wlo_zuordnung.py)
@@ -72,6 +84,34 @@ WLO_ZUORDNUNG = {"label": "Zuordnung (WLO-Abstraktion)",
 
 def ist_wlo(topic: dict) -> bool:
     return str(topic.get("id", "")).startswith(WLO_THEMA_PREFIX)
+
+
+def wlo_dubletten_schwelle(auswahl: dict[str, list[str]]) -> float | None:
+    """Schwelle des Filters wlo_dubletten (die niedrigste angehakte), None = alle Themen behalten."""
+    werte = [int(w) for w in auswahl.get("wlo_dubletten") or [] if str(w).isdigit()]
+    return min(werte) / 100 if werte else None
+
+
+def ohne_wlo_dubletten(themen: list[dict], schwelle: float) -> list[dict]:
+    """Fasst nahe Dubletten der WLO-Abstraktion paarweise zusammen: Ein WLO-Thema fällt weg, wenn es mit einem
+    behaltenen Thema der Auswahl mit Ähnlichkeit >= schwelle verknüpft ist. Themen anderer Quellen bleiben immer;
+    WLO-Themen kommen nach Zahl ihrer Datensätze dran (dann nach ID), das häufigste einer Gruppe bleibt.
+    Verknüpfungen gelten in beide Richtungen (beim Bau sind sie je Thema begrenzt). Nur direkte Paare zählen, keine
+    Ketten: Diese verbinden sonst über viele Schritte sehr verschiedene Themen. Reihenfolge bleibt erhalten."""
+    nachbarn: dict[str, set[str]] = defaultdict(set)
+    for t in themen:
+        if not ist_wlo(t):
+            continue
+        for x in t.get("verknuepft_mit") or []:
+            if x.get("aehnlichkeit", 0) >= schwelle - 1e-9 and x.get("id") and x["id"] != t["id"]:
+                nachbarn[t["id"]].add(x["id"])
+                nachbarn[x["id"]].add(t["id"])
+    behalten = {t["id"] for t in themen if not ist_wlo(t)}
+    wlo = sorted((t for t in themen if ist_wlo(t)), key=lambda t: (-((t.get("wlo") or {}).get("gewicht") or 0), t["id"]))
+    for t in wlo:
+        if not nachbarn[t["id"]] & behalten:
+            behalten.add(t["id"])
+    return [t for t in themen if t["id"] in behalten]
 
 
 def wlo_passt(topic: dict, auswahl: dict[str, list[str]]) -> bool:
@@ -296,7 +336,9 @@ class Bildungsbereich(ABC):
 
     def themen_auswahl(self, auswahl: dict[str, list[str]] | None = None) -> list[dict]:
         auswahl = self.auswahl_pruefen(auswahl)
-        return [t for t in self.topics() if self.passt(t, auswahl)]
+        themen = [t for t in self.topics() if self.passt(t, auswahl)]
+        schwelle = wlo_dubletten_schwelle(auswahl)
+        return ohne_wlo_dubletten(themen, schwelle) if schwelle else themen
 
     def describe(self) -> dict:
         return {"key": self.key, "label": self.label, "balance_options": self.balance_options,
@@ -312,7 +354,7 @@ STANDARD_KONFIDENZ = ["gesichert", "wahrscheinlich", "redaktionell"]
 def filtergruppe(name: str, option: dict) -> str:
     """Gruppe eines Filters für Oberfläche und CLI: „quellen“ (Quellen, Herkunft, Belege), „konfidenz“
     (Status einer Zuordnung aus der Abstimmung) oder „inhalt“ (alles andere, z. B. Stufen, Themenart)."""
-    if name in ("quellen", "herkunft", "belege", "wlo_anteil", "wlo_vorschlag", "wlo_eignung", "wlo_zuordnung"):
+    if name in ("quellen", "herkunft", "belege", "wlo_anteil", "wlo_vorschlag", "wlo_dubletten", "wlo_eignung", "wlo_zuordnung"):
         return "quellen"
     if set(option["werte"]) == set(STATUS_WERTE):
         return "konfidenz"

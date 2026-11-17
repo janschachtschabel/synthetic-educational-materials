@@ -156,7 +156,10 @@ level (hit rate in the metrics, never used for seeds). `--zusammenfuehren` build
 same subject = one topic with all node IDs as weight; key terms matched against the GND, with `--gnd-online` also
 via lobid; links to similar existing topics via local embeddings). Everything stays in `data/lokal/wlo_abstraktion/`
 and is not committed. For seeds, this origin is off by default; `wlo_anteil` sets the share of seeds drawn from it,
-`wlo_vorschlag` switches topics with a suggested subject or level on or off separately.
+`wlo_vorschlag` switches topics with a suggested subject or level on or off separately. `wlo_dubletten` (default
+0.97) leaves out near duplicates: a WLO topic is dropped if a kept topic of the selection in the same subject is at
+least this similar (stored links, nothing is recomputed); topics from other sources stay, otherwise the one with the
+most records. Below about 0.97 they are often related but different topics.
 Origin and rights: `PROVENIENZ.md`.
 
 **WLO abstraction in adult and early childhood education:** these sectors are structured differently from the OEH

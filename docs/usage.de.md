@@ -160,7 +160,10 @@ Datensätzen mit bekanntem Fach und bekannter Stufe (Trefferquote in den Kennzah
 `--gnd-online` auch über lobid; Verknüpfung mit ähnlichen vorhandenen Themen über lokale Embeddings). Alles liegt
 in `data/lokal/wlo_abstraktion/` und wird nicht committet. Bei den Seeds ist die Herkunft standardmäßig aus;
 `wlo_anteil` legt fest, welcher Anteil der Seeds aus ihr kommt, `wlo_vorschlag` schaltet Themen mit
-vorgeschlagenem Fach oder vorgeschlagener Stufe getrennt an oder ab. Herkunft und Rechte: `PROVENIENZ.md`.
+vorgeschlagenem Fach oder vorgeschlagener Stufe getrennt an oder ab. `wlo_dubletten` (Standard 0,97) lässt
+nahe Dubletten weg: Ein WLO-Thema fällt weg, wenn ein behaltenes Thema der Auswahl im selben Fach mindestens so
+ähnlich ist (gespeicherte Verknüpfungen, keine neue Berechnung); Themen anderer Quellen bleiben, sonst das mit den
+meisten Datensätzen. Unter etwa 0,97 sind es oft verwandte, aber verschiedene Themen. Herkunft und Rechte: `PROVENIENZ.md`.
 
 **WLO-Abstraktion in Erwachsenen- und Elementarbildung:** Diese Bereiche gliedern anders als die OEH-Fächer, deshalb
 ordnet `--zusammenfuehren` ihre Themen ohne LLM zu (`sem/wlo_zuordnung.py`): gleiche Themen werden über alle Fächer
