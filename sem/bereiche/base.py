@@ -11,6 +11,7 @@ Oberfläche zeigen diese Schritte ohne weitere Anpassung an.
 
 from __future__ import annotations
 
+import json
 import random
 import re
 from abc import ABC, abstractmethod
@@ -20,7 +21,7 @@ from typing import Callable
 
 from .. import schema as S
 from ..llm import Progress
-from ..paths import lokale_daten
+from ..paths import MAPPING_DIR, lokale_daten
 
 
 # Namen für Personen in den Texten (gemischte Herkunft, wie in deutschen Lerngruppen); verhindert, dass das Modell
@@ -164,6 +165,13 @@ class Bildungsbereich(ABC):
         "mit einer kurzen Begriffsklärung", "mit einem überraschenden Befund oder Widerspruch",
         "mit einer Beobachtung oder einem Versuch", "direkt mit dem ersten inhaltlichen Punkt, ohne Vorrede")
 
+    # Einstiegsarten für Transkripte (Video, Podcast, Vorlesung): sonst begann rund die Hälfte der Podcasts mit
+    # „Willkommen zu …“
+    einstiege_transkript: tuple[str, ...] = (
+        "mitten im Gespräch mit einer Frage an die Gastperson", "mit einem kurzen Fallbeispiel, das die sprechende "
+        "Person erzählt", "mit einer Beobachtung, die gleich erklärt wird", "mit einer verbreiteten Fehlvorstellung",
+        "mit einer konkreten Frage aus dem Publikum oder der Hörerschaft", "direkt mit dem ersten Erklärschritt")
+
     def gruppen_gewichte(self, balance: str, groups: dict[str, list[dict]]) -> dict[str, float] | None:
         """Gewichte der Gruppen für die Verteilung der Seeds; None = alle gleich (Standard)."""
         return None
@@ -176,13 +184,30 @@ class Bildungsbereich(ABC):
                 return int(t["umfang"][0]), int(t["umfang"][1])
         return self.umfang_standard
 
-    def stil(self, seed_id: str) -> dict:
+    def stil(self, seed_id: str, medienform: str = "") -> dict:
         """Stilvorgaben gegen gleichförmige Texte: Einstiegsart und Namen für Personen im Text. Fest zur Seed-ID,
-        damit ein Neuaufbau dieselben Vorgaben ergibt und die übrigen Zufallswerte des Seeds unberührt bleiben."""
+        damit ein Neuaufbau dieselben Vorgaben ergibt und die übrigen Zufallswerte des Seeds unberührt bleiben.
+        Transkripte bekommen eigene Einstiegsarten."""
         rng = random.Random(f"stil:{seed_id}")
         vornamen = rng.sample(VORNAMEN, 2)
-        return {"einstieg": rng.choice(self.einstiege),
+        einstiege = self.einstiege_transkript if "Transkript" in (medienform or "") else self.einstiege
+        return {"einstieg": rng.choice(einstiege),
                 "namen": [*vornamen, f"{rng.choice(['Frau', 'Herr'])} {rng.choice(NACHNAMEN)}"]}
+
+    def sprachprofil(self, seed: dict) -> str:
+        """Vorgabe für Satzbau und Wortwahl auf dem Niveau des Seeds (niveaus.json, Feld sprachprofil); nur für
+        Materialien an Lernende, Texte für Lehrkräfte, Fachkräfte und Eltern bleiben in der Fachsprache."""
+        rollen = [r.rsplit("/", 1)[-1] for r in seed.get(S.F_ROLE) or []]
+        if rollen and "learner" not in rollen:
+            return ""
+        nid = (seed.get(S.F_NIVEAU) or {}).get("id")
+        if not nid:
+            return ""
+        if not hasattr(self, "_sprachprofile"):
+            pfad = MAPPING_DIR / self.key / "niveaus.json"
+            daten = json.loads(pfad.read_text(encoding="utf-8")) if pfad.exists() else {}
+            self._sprachprofile = {n["id"]: n.get("sprachprofil", "") for n in daten.get("niveaus", [])}
+        return self._sprachprofile.get(nid, "")
 
     # benannte Schrittfolgen, z. B. {"openalex": [...], "gnd": [...]}; „alle“ = alle nacheinander
     mapping_folgen: dict[str, list[str]] = {}
@@ -399,7 +424,7 @@ def build_seeds(bereich: Bildungsbereich, n: int, balance: str | None = None, se
                 thema[feld] = topic[feld]
         von, bis = bereich.umfang(s)
         s[S.F_UMFANG] = {"von": von, "bis": bis}
-        s[S.F_STIL] = bereich.stil(s["id"])
+        s[S.F_STIL] = bereich.stil(s["id"], s.get(S.F_MEDIENFORM, ""))
         s["synth:seed_parameter"] = {"gleichverteilung": balance, "gruppe": group, "zufalls_seed": seed,
                                      "auswahl": auswahl, **({"lokale_daten": lokal} if lokal else {})}
         seeds.append(s)

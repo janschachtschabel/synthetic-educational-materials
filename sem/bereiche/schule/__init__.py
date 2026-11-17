@@ -28,6 +28,12 @@ STUFEN = ["primar", "sek1", "sek2"]
 STUFEN_LABEL = {"primar": "Primarstufe", "sek1": "Sekundarstufe I", "sek2": "Sekundarstufe II"}
 # Fremdsprachenportale: Zielsprache zusätzlich als Sprache des Materials
 ZIELSPRACHE = {"Englisch": "en", "Französisch": "fr", "Spanisch": "es", "Türkisch": "tr"}
+
+
+def zielsprache_gilt(portal: str, faecher: list[str]) -> bool:
+    """Fremdsprachenportal mit passendem Fach. Keyword-Themen mit Fach „Berufliche Bildung“ hingen im 50k-Datensatz
+    am Portal Englisch und wurden deshalb als englische Materialien geschrieben, auch für Klasse 1–2."""
+    return portal in ZIELSPRACHE and (not faecher or portal in faecher)
 FACH_METHODE = {"themenbaum": "relatedMatch des Themas im WLO-Themenbaum",
                 "wlo_keyword": "Abstimmung aus den Fächern der WLO-Datensätze mit diesem Keyword",
                 "wlo_abstraktion": "Fach der WLO-Datensätze, aus denen das Thema abstrahiert wurde"}
@@ -271,8 +277,9 @@ class Schule(Bildungsbereich):
         S.set_controlled(seed, S.F_ROLE, [self.roles.ref(role)], S.provenance(
             "OpenEduHub intendedEndUserRole", uri=self.roles.scheme["uri"], license="CC0-1.0",
             method="gewichtet zufällig je Themenart"))
-        seed[S.F_LANGUAGE] = list(dict.fromkeys(opt["sprache"]["werte"] + ([ZIELSPRACHE[topic["portal"]]]
-                                                                           if topic["portal"] in ZIELSPRACHE else [])))
+        fach_labels = seed.get(S.F_TAXON + "_DISPLAYNAME", [])
+        seed[S.F_LANGUAGE] = list(dict.fromkeys(opt["sprache"]["werte"] + (
+            [ZIELSPRACHE[topic["portal"]]] if zielsprache_gilt(topic["portal"], fach_labels) else [])))
 
         seed[S.F_THEMA] = {"id": topic["id"], "label_de": topic["label_de"], "beschreibung_de": topic.get("definition", ""),
                            "keywords_de": list(dict.fromkeys([topic["label_de"], *topic.get("keywords", [])[:6]])),
@@ -337,22 +344,27 @@ class Schule(Bildungsbereich):
         rolle = seed[S.F_ROLE][0].rsplit("/", 1)[-1]
         sprachen = {"de": "Deutsch", "en": "Englisch", "fr": "Französisch", "es": "Spanisch", "tr": "Türkisch"}
         stufe = seed[S.F_CONTEXT + "_DISPLAYNAME"][0]
+        faecher = seed.get(S.F_TAXON + "_DISPLAYNAME", [])
+        portal = t["fachportal"]
+        if portal in ZIELSPRACHE and not zielsprache_gilt(portal, faecher):
+            portal = faecher[0]  # Fremdsprachenportal ohne passendes Fach: das Fach zählt, nicht das Portal
         return {
-            "rolle": f"eine erfahrene Lehrkraft für {t['fachportal']}",
+            "rolle": f"eine erfahrene Lehrkraft für {portal}",
             "sprache": ", ".join(sprachen.get(x, x) for x in seed.get(S.F_LANGUAGE, [])),
             "textsorte": seed["synth:textsorte"],
             "inhaltstyp": seed[S.F_LRT + "_DISPLAYNAME"][0],
             "medienform": seed[S.F_MEDIENFORM],
             "thema": t["label_de"],
-            "thema_pfad": " > ".join([t["fachportal"], *t.get("pfad", []), t["label_de"]]),
+            "thema_pfad": " > ".join([portal, *(t.get("pfad", []) if portal == t["fachportal"] else []), t["label_de"]]),
             "thema_beschreibung": t.get("beschreibung_de", ""),
             "thema_keywords": ", ".join(t.get("keywords_de", [])),
-            "fach": ", ".join(seed.get(S.F_TAXON + "_DISPLAYNAME", [])) or t["fachportal"],
+            "fach": ", ".join(faecher) or t["fachportal"],
             "bildungsstufe": stufe,
             "niveau": seed[S.F_NIVEAU]["label"],
             "zielgruppe": {"learner": f"Schülerinnen und Schüler ({seed[S.F_NIVEAU]['label']})",
                            "teacher": "Lehrkräfte"}.get(rolle, seed[S.F_ROLE + "_DISPLAYNAME"][0]),
-            "zielsprache": sprachen.get(ZIELSPRACHE.get(t["fachportal"], ""), ""),
+            "zielsprache": sprachen.get(ZIELSPRACHE[portal], "") if zielsprache_gilt(portal, faecher) else "",
+            "daz": "ja" if "Deutsch als Zweitsprache" in (portal, *faecher) else "",
             "didaktische_funktion": seed.get(S.F_DIDAKTIK, ""),
             "bearbeitungsdauer": seed.get(S.F_LEARNING_TIME, ""),
             "anforderungsbereich": seed.get("synth:anforderungsbereich", ""),

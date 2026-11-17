@@ -18,6 +18,15 @@ def _marker(template):
     return max((z.strip() for z in template.splitlines() if z.strip() and "{{" not in z), key=len)
 
 
+LERNZIELE_JSON = json.dumps({"lernziele": [
+    {"lernziel": "Die Studierenden können den Begriff des Eigenwerts definieren", "operator": "definieren",
+     "stufe": "erinnern"},
+    {"lernziel": "Die Studierenden können Eigenwerte einer 2x2-Matrix berechnen", "operator": "berechnen",
+     "stufe": "anwenden"}]})
+SUCHANFRAGEN_JSON = json.dumps({"suchanfragen": ["eigenwerte", "eigenwerte berechnen", "spektralsatz",
+                                                 "diagonalisierung matrix übung", "symmetrische matrix"]})
+
+
 class Antworten:
     """Gültige Antworten je Feld; der erste Titel ist zu kurz und wird neu angefragt."""
 
@@ -38,6 +47,10 @@ class Antworten:
             return "Eins, Zwei, Drei, Vier, Fünf"
         if feld == "inhaltstyp":
             return next(z for z in user.splitlines() if z.startswith("- ") and "→" in z).split("→")[1].split(":")[0].strip()
+        if feld == "lernziele":
+            return LERNZIELE_JSON
+        if feld == "suchanfragen":
+            return SUCHANFRAGEN_JSON
         return json.dumps({"paare": [{"frage": f"F{i}?", "antwort": "A.", "typ": "verstehen"} for i in range(10)]})
 
 
@@ -140,14 +153,15 @@ def test_batch_ergibt_dieselben_materialien_wie_sofort(seeds_datei, tmp_path):
     for s in seeds:
         sofort = generate_one(Sofort(), s, {"hochschule": prompts}, lauf.meta)
         b = out[s["id"]]
-        for feld in (S.F_TITLE, S.F_DESCRIPTION, S.F_KEYWORD, S.F_FULLTEXT, S.F_QA, S.F_LRT_CHECK, S.F_PROVENANCE):
+        for feld in (S.F_TITLE, S.F_DESCRIPTION, S.F_KEYWORD, S.F_FULLTEXT, S.F_QA, S.F_LRT_CHECK, S.F_PROVENANCE,
+                     S.F_LERNZIELE, S.F_SUCHANFRAGEN):
             assert b[feld] == sofort[feld]
         assert b[S.F_GENERATION]["verarbeitung"] == "batch"
-        assert b[S.F_GENERATION]["tokens"]["aufrufe"] == 6 + b[S.F_GENERATION]["neu_angefragt"].get("titel", 0)
-    # Batch-Anfragen ohne service_tier, JSON-Modus nur für die Frage-Antwort-Paare
+        assert b[S.F_GENERATION]["tokens"]["aufrufe"] == 8 + b[S.F_GENERATION]["neu_angefragt"].get("titel", 0)
+    # Batch-Anfragen ohne service_tier, JSON-Modus nur für Frage-Antwort-Paare, Lernziele und Suchanfragen
     bodies = [r["body"] for r in client.anfragen]
     assert not any("service_tier" in x for x in bodies)
-    assert all(("response_format" in x) == r["custom_id"].split("|")[1].startswith("fragen")
+    assert all(("response_format" in x) == r["custom_id"].split("|")[1].startswith(("fragen", "lernziele", "such"))
                for x, r in zip(bodies, client.anfragen))
 
 

@@ -57,6 +57,8 @@ are never seen during training.
 | `description` | description derived from the full text (250–1,200 characters) |
 | `keywords` | 4–8 keywords derived from the full text |
 | `qa_pairs` | at least 8 question-answer pairs with `question`, `answer` and `type` (cognitive level after Bloom/Anderson, in German, e.g. `erinnern`, `verstehen`, `anwenden`) |
+| `learning_objectives` | 2–4 competence-oriented learning objectives with `objective`, `operator` and `level` (Anderson/Krathwohl, in German); only in runs from November 2026 on, otherwise empty |
+| `search_queries` | 4–8 short search-box queries for which the material is a fitting hit (query → document pairs for retrieval); only in runs from November 2026 on, otherwise empty |
 | `educational_context`, `_uri` | educational level (OpenEduHub vocabulary `educationalContext`) |
 | `subject`, `_uri` | school subject, higher-education subject, occupational group (KldB 2010) or adult-education subject area, depending on the sector |
 | `content_type`, `_uri` | content type (OpenEduHub vocabulary `new_lrt`), e.g. worksheet, explanatory video transcript, case study |

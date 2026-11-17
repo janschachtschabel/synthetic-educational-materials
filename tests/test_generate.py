@@ -5,8 +5,10 @@ import pytest
 from sem import schema as S
 from sem.bereiche import get
 from sem.bereiche.base import build_seeds
-from sem.generate import generate_one, parse_inhaltstyp, parse_keywords, parse_titel, titel_nennt_form
+from sem.generate import (generate_one, parse_inhaltstyp, parse_keywords, parse_lernziele, parse_suchanfragen,
+                          parse_titel, titel_nennt_form)
 from sem.prompts import load_prompts
+from tests.test_batch import LERNZIELE_JSON, SUCHANFRAGEN_JSON
 
 VOLLTEXT = " ".join(["Die Eigenwerte einer symmetrischen Matrix sind reell."] * 160)
 
@@ -34,6 +36,10 @@ class FakeClient:
         if "Materialart ausschließlich" in user:
             assert "Materialart: -" in user  # Seed-Wert wird nicht verraten
             return self.kategorie
+        if "kompetenzorientierte Lernziele" in user:
+            return LERNZIELE_JSON
+        if "Suchanfragen, die Lehrende" in user:
+            return SUCHANFRAGEN_JSON
         if "Frage-Antwort-Paare" in user:
             return json.dumps({"paare": [{"frage": f"F{i}?", "antwort": "A.", "typ": "verstehen"} for i in range(10)]})
         raise AssertionError(user[:200])
@@ -86,7 +92,8 @@ def test_generate_one_einzelaufrufe_und_inhaltstyp_pruefung(hochschule):
     assert rec[S.F_KEYWORD] == ["Eigenwert", "Diagonalisierung", "Symmetrische Matrix", "Spektralsatz", "Orthogonalbasis"]
     assert len(rec[S.F_QA]) == 10 and rec[S.F_LRT_CHECK]["uebereinstimmung"]
     # Volltext, Titel (2x), Beschreibung, Keywords, Inhaltstyp, Fragen
-    assert len(client.calls) == 7
+    assert len(client.calls) == 9  # + Lernziele, Suchanfragen
+    assert len(rec[S.F_LERNZIELE]) == 2 and len(rec[S.F_SUCHANFRAGEN]) == 5
     # spätere Felder sehen die früheren
     assert "Titel: Eigenwerte Diagonalisierung" in client.calls[-1]
 
@@ -132,3 +139,33 @@ def test_titel_nennt_form():
     assert titel_nennt_form("Urheberrecht in der Kita", {**kita, "thema": "Urheberrecht in der Kita"}) is None
     # nur Wörter, die auch in den Metadaten stehen
     assert titel_nennt_form("Quiz und Rätsel im Mittelalter", {"inhaltstyp": "Arbeitsblatt"}) is None
+
+
+def test_parse_lernziele():
+    z = parse_lernziele(json.loads(LERNZIELE_JSON))
+    assert [x["stufe"] for x in z] == ["erinnern", "anwenden"] and z[0]["lernziel"].endswith(".")
+    vage = {"lernziele": [{"lernziel": "Die Studierenden können Eigenwerte verstehen", "stufe": "verstehen"},
+                          {"lernziel": "Die Studierenden können Eigenwerte berechnen", "stufe": "apply"}]}
+    with pytest.raises(ValueError):  # „verstehen“ fällt weg, eines reicht nicht
+        parse_lernziele(vage)
+    vage["lernziele"].append({"lernziel": "Die Studierenden können den Spektralsatz anwenden", "stufe": "x"})
+    with pytest.raises(ValueError):  # unbekannte Stufe zählt nicht
+        parse_lernziele(vage)
+    vage["lernziele"].append({"lernziel": "Die Studierenden können zwei Verfahren vergleichen", "stufe": "analysieren"})
+    assert [x["stufe"] for x in parse_lernziele(vage)] == ["anwenden", "analysieren"]
+
+
+def test_parse_suchanfragen():
+    q = parse_suchanfragen({"suchanfragen": ["Eigenwerte", "eigenwerte", "spektralsatz", "matrix übung",
+                                             "wie berechnet man eigenwerte einer symmetrischen matrix schnell",
+                                             "diagonalisierung."]})
+    assert q == ["Eigenwerte", "spektralsatz", "matrix übung", "diagonalisierung"]
+    with pytest.raises(ValueError):
+        parse_suchanfragen({"suchanfragen": ["eins", "zwei"]})
+
+
+def test_lernziel_zu_lang_faellt_weg():
+    lang = "Die Studierenden können " + "sehr " * 40 + "berechnen"
+    daten = json.loads(LERNZIELE_JSON)
+    daten["lernziele"].append({"lernziel": lang, "stufe": "anwenden"})
+    assert len(parse_lernziele(daten)) == 2

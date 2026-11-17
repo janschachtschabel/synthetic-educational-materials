@@ -1,18 +1,18 @@
 {
- "beschreibung": "Niveaus je Programmbereich (Empfehlung im Recherchedokument): Sprachen nach dem Gemeinsamen europäischen Referenzrahmen (GER), Grundbildung nach Alpha-Levels (leo.-Studien, DVV-Rahmencurricula decken 1–4 ab), Schulabschlüsse nach Fachgebiet, sonst Einsteiger und Fortgeschrittene. programmbereiche: Notationen 1–7; fachgebiete: optional auf Fachgebiete beschränkt. exactMatch: KIM-Bildungsstufe, wo sinnvoll.",
+ "beschreibung": "Niveaus je Programmbereich (Empfehlung im Recherchedokument): Sprachen nach dem Gemeinsamen europäischen Referenzrahmen (GER), Grundbildung nach Alpha-Levels (leo.-Studien, DVV-Rahmencurricula decken 1–4 ab), Schulabschlüsse nach Fachgebiet, sonst Einsteiger und Fortgeschrittene. programmbereiche: Notationen 1–7; fachgebiete: optional auf Fachgebiete beschränkt. exactMatch: KIM-Bildungsstufe, wo sinnvoll. sprachprofil: Vorgabe für Satzbau, Wortwahl und Fachsprache des Volltexts auf diesem Niveau (geht in den Volltext-Prompt, nur für Materialien an Lernende).",
  "quelle": {"name": "Projekt, angelehnt an GER (Europarat), Alpha-Levels (leo.-Studien, Universität Hamburg) und die Schulabschlüsse", "lizenz": "CC0-1.0"},
  "niveaus": [
-  {"id": "ger_a1", "label": "GER A1", "programmbereiche": ["4"]},
-  {"id": "ger_a2", "label": "GER A2", "programmbereiche": ["4"]},
-  {"id": "ger_b1", "label": "GER B1", "programmbereiche": ["4"]},
-  {"id": "ger_b2", "label": "GER B2", "programmbereiche": ["4"]},
-  {"id": "ger_c1", "label": "GER C1", "programmbereiche": ["4"]},
-  {"id": "alpha_1_2", "label": "Alpha-Level 1–2 (Buchstaben und Wörter)", "programmbereiche": ["7"], "fachgebiete": ["7.01", "7.03", "7.04", "7.00"]},
-  {"id": "alpha_3_4", "label": "Alpha-Level 3–4 (Sätze und kurze Texte)", "programmbereiche": ["7"]},
-  {"id": "hauptschulabschluss", "label": "Vorbereitung Hauptschulabschluss (Erster Schulabschluss)", "programmbereiche": ["6"], "fachgebiete": ["6.01", "6.06", "6.07", "6.00"], "exactMatch": "http://w3id.org/kim/educationalLevel/level_2"},
-  {"id": "realschulabschluss", "label": "Vorbereitung Realschulabschluss (Mittlerer Schulabschluss)", "programmbereiche": ["6"], "fachgebiete": ["6.02", "6.06", "6.07", "6.00"], "exactMatch": "http://w3id.org/kim/educationalLevel/level_2"},
-  {"id": "hochschulreife", "label": "Vorbereitung Fachhochschulreife oder Abitur", "programmbereiche": ["6"], "fachgebiete": ["6.03", "6.04", "6.05", "6.06", "6.07", "6.08", "6.00"], "exactMatch": "http://w3id.org/kim/educationalLevel/level_3"},
-  {"id": "einsteiger", "label": "Einsteiger ohne Vorkenntnisse", "programmbereiche": ["1", "2", "3", "5"]},
-  {"id": "fortgeschrittene", "label": "Fortgeschrittene mit Vorkenntnissen", "programmbereiche": ["1", "2", "3", "5"]}
+  {"id": "ger_a1", "label": "GER A1", "programmbereiche": ["4"], "sprachprofil": "Zielsprache auf Niveau A1: sehr kurze Sätze, Grundwortschatz, Präsens, feste Redemittel"},
+  {"id": "ger_a2", "label": "GER A2", "programmbereiche": ["4"], "sprachprofil": "Zielsprache auf Niveau A2: kurze Sätze, häufige Alltagswörter, einfache Vergangenheitsformen, Redemittel für Alltagssituationen"},
+  {"id": "ger_b1", "label": "GER B1", "programmbereiche": ["4"], "sprachprofil": "Zielsprache auf Niveau B1: einfache zusammenhängende Texte zu vertrauten Themen, gängige Nebensätze"},
+  {"id": "ger_b2", "label": "GER B2", "programmbereiche": ["4"], "sprachprofil": "Zielsprache auf Niveau B2: zusammenhängende Texte auch zu abstrakteren Themen, Argumentation, idiomatische Wendungen in Maßen"},
+  {"id": "ger_c1", "label": "GER C1", "programmbereiche": ["4"], "sprachprofil": "Zielsprache auf Niveau C1: anspruchsvolle, auch implizite Texte, differenzierter Wortschatz, komplexe Satzstrukturen"},
+  {"id": "alpha_1_2", "label": "Alpha-Level 1–2 (Buchstaben und Wörter)", "programmbereiche": ["7"], "fachgebiete": ["7.01", "7.03", "7.04", "7.00"], "sprachprofil": "Alphabetisierung Level 1–2: einzelne kurze Wörter und sehr kurze Sätze, häufige Wörter, große klare Gliederung, keine Fremdwörter"},
+  {"id": "alpha_3_4", "label": "Alpha-Level 3–4 (Sätze und kurze Texte)", "programmbereiche": ["7"], "sprachprofil": "Alphabetisierung Level 3–4: kurze Sätze und kurze Texte, ein Gedanke pro Satz, bekannte Wörter, schwierige Wörter erklären"},
+  {"id": "hauptschulabschluss", "label": "Vorbereitung Hauptschulabschluss (Erster Schulabschluss)", "programmbereiche": ["6"], "fachgebiete": ["6.01", "6.06", "6.07", "6.00"], "exactMatch": "http://w3id.org/kim/educationalLevel/level_2", "sprachprofil": "Vorbereitung Hauptschulabschluss: klare, kurze Sätze, Fachbegriffe erklären, Bezug zu Alltag und Beruf"},
+  {"id": "realschulabschluss", "label": "Vorbereitung Realschulabschluss (Mittlerer Schulabschluss)", "programmbereiche": ["6"], "fachgebiete": ["6.02", "6.06", "6.07", "6.00"], "exactMatch": "http://w3id.org/kim/educationalLevel/level_2", "sprachprofil": "Vorbereitung Mittlerer Schulabschluss: sachliche Sprache, Fachbegriffe mit kurzer Erklärung, Prüfungsbezug"},
+  {"id": "hochschulreife", "label": "Vorbereitung Fachhochschulreife oder Abitur", "programmbereiche": ["6"], "fachgebiete": ["6.03", "6.04", "6.05", "6.06", "6.07", "6.08", "6.00"], "exactMatch": "http://w3id.org/kim/educationalLevel/level_3", "sprachprofil": "Vorbereitung Fachhochschulreife oder Abitur: Fachsprache, Argumentation und Begründung, Prüfungsbezug"},
+  {"id": "einsteiger", "label": "Einsteiger ohne Vorkenntnisse", "programmbereiche": ["1", "2", "3", "5"], "sprachprofil": "Einsteiger ohne Vorkenntnisse: verständliche Sprache, jeden Fachbegriff erklären, kleine Schritte, Beispiele aus dem Alltag"},
+  {"id": "fortgeschrittene", "label": "Fortgeschrittene mit Vorkenntnissen", "programmbereiche": ["1", "2", "3", "5"], "sprachprofil": "Fortgeschrittene: Grundbegriffe werden vorausgesetzt, vertiefende Inhalte und Anwendungsfälle"}
  ]
 }
