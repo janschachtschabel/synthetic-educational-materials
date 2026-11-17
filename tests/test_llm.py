@@ -142,6 +142,9 @@ def test_env_key_nur_fuer_env_base_url():
     assert api_key_fuer("https://fremd.example/v1", "eigener", env) == "eigener"
     env = LLMConfig(base_url="https://intern.example/v1", api_key="env-key")
     assert api_key_fuer("https://intern.example/v1", "", env) == "env-key"
+    # ausdrücklich eingetragene Standard-URL zählt wie ein leeres Feld
+    env = LLMConfig(anbieter="anthropic", base_url=None, api_key="env-key")
+    assert api_key_fuer("https://api.anthropic.com", None, env) == "env-key"
 
 
 def test_flex_ohne_kapazitaet_faellt_auf_standard_zurueck(monkeypatch):

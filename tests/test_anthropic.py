@@ -166,6 +166,16 @@ def test_prozess_bekommt_anthropic_key():
     assert env["ANTHROPIC_BASE_URL"] == "" and "OPENAI_API_KEY" not in env and "--flex" not in args
 
 
+def test_leere_base_url_ergibt_standard_url(monkeypatch):
+    """Der Lauf-Prozess bekommt ANTHROPIC_BASE_URL="" (eine geerbte URL soll nicht gelten); das SDK nähme den leeren
+    Wert als URL, deshalb setzt der Client die Standard-URL selbst."""
+
+    monkeypatch.setenv("ANTHROPIC_BASE_URL", "")
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant")
+    cfg = LLMConfig.from_env(anbieter="anthropic")
+    assert str(LLMClient(cfg).client.base_url).rstrip("/") == "https://api.anthropic.com"
+
+
 def test_oberflaeche_anthropic_waehlen(client, ordner, monkeypatch):  # noqa: F811
     out, gestartet = ordner
     monkeypatch.delenv("LLM_MODEL", raising=False)

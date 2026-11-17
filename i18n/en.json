@@ -571,7 +571,7 @@
  "OpenAI-kompatibel": "OpenAI-compatible",
  "OpenAI oder jede API mit derselben Schnittstelle (z. B. OpenRouter). Halber Preis mit Flex oder Batch.": "OpenAI or any API with the same interface (e.g. OpenRouter). Half price with Flex or Batch.",
  "Claude-Modelle über die Anthropic-API, Standardmodell {modell}. Halber Preis mit Batch; Flex gibt es dort nicht.": "Claude models via the Anthropic API, default model {modell}. Half price with Batch; there is no Flex.",
- "Nach einem Wechsel speichern: Base-URL, Modell und Key gelten dann für den gewählten Anbieter. Ein Modell des anderen Anbieters wird durch das Standardmodell ersetzt.": "Save after switching: base URL, model and key then apply to the selected provider. A model of the other provider is replaced by the default model.",
+ "Beim Wechsel setzt die Seite Modell und Base-URL auf die Vorgaben des Anbieters (eigene Werte bleiben, wenn sie zum Anbieter passen); danach speichern. Key und Base-URL gelten je Anbieter.": "When switching, the page sets model and base URL to the provider's defaults (your own values stay if they fit the provider); then save. Key and base URL apply per provider.",
  "Leere Felder: Werte aus {kv}_BASE_URL, {kv}_API_KEY, LLM_MODEL.": "Blank fields use values from {kv}_BASE_URL, {kv}_API_KEY, LLM_MODEL.",
  "Leer: Der Key aus {kv}_API_KEY wird verwendet.": "Empty: the key from {kv}_API_KEY is used.",
  "Andere Base-URL als in {kv}_BASE_URL: Der Key aus {kv}_API_KEY wird dafür nicht verwendet. Bitte einen Key eintragen.": "Base URL differs from {kv}_BASE_URL: the key from {kv}_API_KEY is not used for it. Please enter a key.",

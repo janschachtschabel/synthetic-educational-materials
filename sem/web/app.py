@@ -29,7 +29,7 @@ from ..bereiche import BEREICHE
 from ..bereiche.base import STANDARD_KONFIDENZ, STATUS_WERTE, filtergruppe
 from ..generate import SPRACHEN
 from ..i18n import UI_SPRACHEN, t
-from ..llm import ANBIETER, DEFAULT_MODELLE, DEFAULT_WORKERS, LLMConfig, _prozess_laeuft, api_key_fuer
+from ..llm import ANBIETER, DEFAULT_BASE_URLS, DEFAULT_MODELLE, DEFAULT_WORKERS, LLMConfig, _prozess_laeuft, api_key_fuer
 from ..prompts import PROMPT_FILES, placeholders, prompt_path
 from . import dateien
 
@@ -131,7 +131,7 @@ def key_zustand(e: Einstellungen) -> str:
     if _api_key.get(e.anbieter):
         return "eingetragen"
     if env.api_key:
-        return "umgebung" if (e.base_url or None) == env.base_url else "fremde_url"
+        return "umgebung" if api_key_fuer(e.base_url, None, env) else "fremde_url"
     return "fehlt"
 
 
@@ -358,7 +358,7 @@ def einstellungen_seite(request: Request, gespeichert: bool = False):
     e = einstellungen()
     return seite(request, "seite_einstellungen.html", e=e, efforts=EFFORTS, key=key_zustand(e),
                  env_url=LLMConfig.from_env(anbieter=e.anbieter).base_url, gespeichert=gespeichert,
-                 anbieter_liste=ANBIETER, modelle=DEFAULT_MODELLE)
+                 anbieter_liste=ANBIETER, modelle=DEFAULT_MODELLE, urls=DEFAULT_BASE_URLS)
 
 
 def _modell_fuer(anbieter: str, model: str) -> str:
@@ -382,6 +382,8 @@ def einstellungen_speichern(anbieter: str = Form("openai"), base_url: str = Form
     alt = einstellungen()
     if anbieter != alt.anbieter and base_url.strip() == alt.base_url:
         base_url = ""  # Base-URL des bisherigen Anbieters nicht mitnehmen
+    if base_url.strip() in {u for a, u in DEFAULT_BASE_URLS.items() if a != anbieter}:
+        base_url = ""  # Standard-URL des anderen Anbieters
     e = Einstellungen(anbieter=anbieter, base_url=base_url.strip(), model=_modell_fuer(anbieter, model),
                       workers=max(1, min(1000, workers)),
                       reasoning_effort=reasoning_effort if reasoning_effort in EFFORTS else "low",
