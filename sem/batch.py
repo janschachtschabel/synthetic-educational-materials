@@ -397,15 +397,17 @@ class BatchLauf:
                                      "anfragen": len(b["anfragen"]), "gestartet": b["gestartet"]} for b in laufend],
                 "abgeschlossen": offen == 0 and not laufend}
 
-    def warten(self, intervall: float = 60.0, on_status=None) -> dict:
-        """weiter() wiederholen, bis alle Materialien fertig oder fehlgeschlagen sind."""
+    def warten(self, intervall: float = 60.0, on_status=None, stop=None) -> dict:
+        """weiter() wiederholen, bis alle Materialien fertig oder fehlgeschlagen sind; stop (threading.Event): nach
+        der laufenden Abfrage aufhören (die Batches laufen beim Anbieter weiter, „Fortsetzen“ holt sie später ab)."""
         while True:
             st = self.weiter()
             if on_status:
                 on_status(st)
-            if st["abgeschlossen"]:
+            if st["abgeschlossen"] or (stop is not None and stop.wait(intervall)):
                 return st
-            time.sleep(intervall)
+            if stop is None:
+                time.sleep(intervall)
 
 
 def _tokens_geschaetzt(a) -> int:

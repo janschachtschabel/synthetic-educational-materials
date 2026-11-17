@@ -195,7 +195,9 @@ If Flex has no capacity (error 429), a request is retried twice and then sent at
 recorded per material under `synth:generierung.tokens.aufrufe_standard`. `--batch` or “Verarbeitung: Batch” in the
 “Materials” tab sends the requests collected to the Batch API: one round per stage (full text, title, description,
 keywords, completion), each up to 24 hours, often faster. Every call collects finished results and sends the next
-round; `--warten` repeats this until done. The state is kept in `output/materialien_<name>.batch/`. Prompts, checks
+round; `--warten` repeats this until done. The interface always starts batch runs with `--warten`: it checks every
+30 s, shows the status and sends the rounds itself (large rounds in partial batches); “Stop” only ends the checking,
+the batches keep running at the provider. The state is kept in `output/materialien_<name>.batch/`. Prompts, checks
 and results are the same in all cases; `synth:generierung.verarbeitung` records `flex` or `batch`.
 
 **Interrupted runs:** every run records in `output/materialien_<name>.lauf.json` what it is meant to produce (seed

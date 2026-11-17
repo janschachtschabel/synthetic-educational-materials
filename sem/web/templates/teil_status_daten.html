@@ -37,7 +37,7 @@
   {% endif %}
 
   {% if lauf.batch %}<p>{{ lauf.batch }}</p>
-    {% if not lauf.abgeschlossen %}<p class="klein">{{ T("Die nächste Runde holt „Fortsetzen“ beim unfertigen Lauf ab, sobald OpenAI die Batches fertig hat (bis zu 24 h).") }}</p>{% endif %}
+    {% if not lauf.abgeschlossen %}<p class="klein">{% if lauf.wartet and lauf.laeuft %}{{ T("Der Lauf fragt alle 30 s nach, holt fertige Runden selbst ab und schickt die nächste. App und Rechner müssen dafür laufen; eine Runde dauert beim Anbieter meist unter einer Stunde, höchstens 24 h.") }}{% else %}{{ T("Die Batches laufen beim Anbieter weiter (bis zu 24 h). „Fortsetzen“ beim unfertigen Lauf holt fertige Runden ab und wartet dann selbst auf die nächsten.") }}{% endif %}</p>{% endif %}
   {% endif %}
   {% if lauf.ausgabe and lauf.phase == 'fertig' and lauf.name == 'seeds' %}
     <p>{{ T("Gespeichert als {datei}. Weiter im Reiter „Materialien“.", datei=lauf.ausgabe.replace('\\', '/').split('/')[-1]) }}</p>
