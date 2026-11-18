@@ -17,6 +17,9 @@ und liefern die Ergebnisse in der Form der OpenAI-Batch-Ausgabe zurück.
 from __future__ import annotations
 
 import json
+import mmap
+import re
+import sqlite3
 import time
 from contextlib import contextmanager
 from datetime import datetime
@@ -175,6 +178,99 @@ def _anthropic_status(s: str) -> str:
     return {"in_progress": "in_progress", "canceling": "cancelling", "ended": "completed"}.get(s, s)
 
 
+STUFEN = ("volltext", "titel", "beschreibung", "keywords")
+
+
+def _stufe(z: dict) -> str:
+    felder = z.get("felder", {})
+    return next((f for f in STUFEN if f not in felder), "abschluss")
+
+
+class Zustaende:
+    """Zwischenstand der Materialien (fertige Felder samt Volltext, Fehlversuche, Tokens) in einer SQLite-Datei
+    neben stand.json. Früher stand das in stand.json selbst: Bei 100.000 Materialien wurde die Datei fast 500 MB
+    groß, jedes Speichern schrieb sie ganz neu, und Laden plus Speichern brauchten mehr Arbeitsspeicher, als ein
+    Laptop hat (MemoryError). Änderungen werden mit commit() zusammen mit stand.json festgeschrieben."""
+
+    def __init__(self, pfad: Path):
+        pfad.parent.mkdir(parents=True, exist_ok=True)
+        self.db = sqlite3.connect(pfad)
+        self.db.execute("CREATE TABLE IF NOT EXISTS zustand (sid TEXT PRIMARY KEY, stufe TEXT, daten TEXT)")
+
+    def get(self, sid: str, default=None):
+        r = self.db.execute("SELECT daten FROM zustand WHERE sid = ?", (sid,)).fetchone()
+        return json.loads(r[0]) if r else default
+
+    def __setitem__(self, sid: str, z: dict):
+        self.db.execute("INSERT OR REPLACE INTO zustand VALUES (?, ?, ?)",
+                        (sid, _stufe(z), json.dumps(z, ensure_ascii=False)))
+
+    def pop(self, sid: str, default=None):
+        z = self.get(sid, default)
+        self.db.execute("DELETE FROM zustand WHERE sid = ?", (sid,))
+        return z
+
+    def stufen(self) -> dict[str, str]:
+        return dict(self.db.execute("SELECT sid, stufe FROM zustand"))
+
+    def __len__(self) -> int:
+        return self.db.execute("SELECT COUNT(*) FROM zustand").fetchone()[0]
+
+    def commit(self):
+        self.db.commit()
+
+    def close(self):
+        self.db.close()
+
+
+_ZEICHEN = re.compile(rb'[{}"\\]')
+
+
+def _alten_stand_umziehen(stand_path: Path, zust: Zustaende) -> dict:
+    """Liest eine stand.json im alten Format (mit "materialien") Eintrag für Eintrag, ohne das ganze Objekt in den
+    Speicher zu laden: Jeder Zustand geht in die SQLite-Datei, zurück kommt der Rest des Stands. Die alte Datei
+    bleibt unverändert, bis der Aufrufer den neuen Stand speichert; ein Abbruch mittendrin schadet also nicht."""
+    with stand_path.open("rb") as f, mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ) as mm:
+        start = mm.find(b'"materialien": {')
+        if start < 0:
+            return json.loads(mm[:].decode("utf-8"))
+        i = start + len(b'"materialien": {')
+        n = 0
+        while True:
+            while mm[i:i + 1] in (b" ", b",", b"\n"):
+                i += 1
+            if mm[i:i + 1] == b"}":
+                ende = i + 1
+                break
+            k_ende = mm.find(b'"', i + 1)
+            sid = mm[i + 1:k_ende].decode("utf-8")
+            j = mm.find(b"{", k_ende)
+            tiefe, in_text, pos = 0, False, j
+            while True:
+                m = _ZEICHEN.search(mm, pos)
+                c, pos = m.group(), m.end()
+                if in_text:
+                    if c == b"\\":
+                        pos += 1
+                    elif c == b'"':
+                        in_text = False
+                elif c == b'"':
+                    in_text = True
+                elif c == b"{":
+                    tiefe += 1
+                elif c == b"}":
+                    tiefe -= 1
+                    if tiefe == 0:
+                        break
+            zust[sid] = json.loads(mm[j:pos].decode("utf-8"))
+            i = pos
+            n += 1
+        rest = (mm[:start] + b'"materialien_umgezogen": ' + str(n).encode() + mm[ende:]).decode("utf-8")
+    stand = json.loads(rest)
+    stand.pop("materialien_umgezogen", None)
+    return stand
+
+
 def batch_ordner(out_path: Path) -> Path:
     return Path(out_path).with_name(Path(out_path).stem + ".batch")
 
@@ -216,13 +312,14 @@ class BatchLauf:
                      "reasoning_effort": cfg.reasoning_effort}
         if cfg.anbieter != "openai":  # fehlt bei OpenAI, damit ältere Läufe weiterhin passen
             parameter["anbieter"] = cfg.anbieter
+        self.zustaende = Zustaende(self.ordner / "materialien.sqlite")
         if self.stand_path.exists():
-            self.stand = json.loads(self.stand_path.read_text(encoding="utf-8"))
+            self.stand = _alten_stand_umziehen(self.stand_path, self.zustaende)
             if self.stand["parameter"] != parameter:
                 raise ValueError(f"{self.ordner.name} gehört zu einem Lauf mit anderen Einstellungen oder Prompts "
                                  f"({self.stand['parameter']}). Für einen neuen Lauf einen anderen Ausgabenamen wählen.")
         else:
-            self.stand = {"gestartet": time.time(), "parameter": parameter, "runde": 0, "materialien": {},
+            self.stand = {"gestartet": time.time(), "parameter": parameter, "runde": 0,
                           "fehlgeschlagen": [], "batches": []}
         self.stand.setdefault("token_budget", None)  # geschätzte Tokens, die höchstens gleichzeitig unterwegs sind
         self.stand.setdefault("batch_fehler_in_folge", 0)
@@ -232,6 +329,7 @@ class BatchLauf:
 
     def _speichern(self):
         self.ordner.mkdir(parents=True, exist_ok=True)
+        self.zustaende.commit()  # zuerst die Zustände: stand.json verweist nie auf Ungespeichertes
         tmp = self.stand_path.with_suffix(".tmp")
         tmp.write_text(json.dumps(self.stand, ensure_ascii=False), encoding="utf-8")
         tmp.replace(self.stand_path)
@@ -249,7 +347,7 @@ class BatchLauf:
 
     def _material(self, sid: str) -> Material:
         seed = self.seeds[sid]
-        z = self.stand["materialien"].get(sid)
+        z = self.zustaende.get(sid)
         return Material(seed, self.prompts, inhaltstyp_pruefen=self.inhaltstyp_pruefen,
                         ausgabesprache=self.ausgabesprache, zustand=z, bereich=self.bereiche[seed[S.F_BEREICH]])
 
@@ -323,70 +421,75 @@ class BatchLauf:
             _zeilenende(self.out_path)
             with self.out_path.open("a", encoding="utf-8") as f:
                 f.write(json.dumps(m.ergebnis(self.meta, dauer), ensure_ascii=False) + "\n")
-            self.stand["materialien"].pop(sid, None)
+            self.zustaende.pop(sid, None)
         else:
-            self.stand["materialien"][sid] = {**self.stand["materialien"].get(sid, {}), **m.zustand()}
+            self.zustaende[sid] = {**self.zustaende.get(sid, {}), **m.zustand()}
 
     def _api_fehler(self, cid: str, grund: str):
         sid = cid.split("|")[0]
         if sid in self.stand["fehlgeschlagen"]:
             return
-        z = self.stand["materialien"].setdefault(sid, {})
+        z = self.zustaende.get(sid, {})
         z["api_fehler"] = z.get("api_fehler", 0) + 1
+        self.zustaende[sid] = z
         if z["api_fehler"] >= MAX_API_FEHLER:
             self._fehlgeschlagen(sid, f"Batch-Anfrage {MAX_API_FEHLER}x gescheitert: {grund}")
 
     def _fehlgeschlagen(self, sid: str, grund: str):
-        self.stand["materialien"].pop(sid, None)
+        self.zustaende.pop(sid, None)
         self.stand["fehlgeschlagen"].append(sid)
         _zeilenende(self.err_path)
         with self.err_path.open("a", encoding="utf-8") as f:
             f.write(json.dumps({"id": sid, "fehler": grund}, ensure_ascii=False) + "\n")
 
     def _abschicken(self):
+        """Nächste Runde: Anfragen bauen und jeden Teil sofort schicken, sobald er voll ist (nicht erst alle Anfragen
+        der Runde sammeln: bei 100.000 Materialien mit Volltext im Prompt wären das mehrere GB)."""
         unterwegs = self._unterwegs()
         budget = self.stand["token_budget"]
         tokens = sum(b.get("tokens", 0) for b in self.stand["batches"] if not b["ausgewertet"])
-        zeilen = []
         runde = self.stand["runde"] + 1
+        max_bytes = getattr(self.api, "max_bytes", MAX_BYTES)
+        teil, groesse, nr, gesamt = [], 0, 0, 0
         voll = False
+
+        def schicken():
+            nonlocal teil, groesse, nr
+            nr += 1
+            self.stand["runde"] = runde
+            if self.fortschritt:
+                self.fortschritt(f"Runde {runde}: schickt Teil {nr} ({len(teil)} Anfragen, {gesamt} insgesamt bis hier) "
+                                 "an den Anbieter …")
+            self._batch_anlegen(runde, nr, teil)
+            teil, groesse = [], 0
+
         for sid in self._offene_ids():
             for a in self._material(sid).anfragen():
                 if (sid, a.feld) in unterwegs:
                     continue
                 n = _tokens_geschaetzt(a)
                 # mit Budget: höchstens so viel gleichzeitig unterwegs (eine Anfrage immer, wenn nichts unterwegs ist)
-                if budget and tokens + n > budget and (zeilen or tokens):
+                if budget and tokens + n > budget and (gesamt or tokens):
                     voll = True  # Rest in einer späteren Runde, wenn Platz in der Warteschlange ist
                     break
                 body = self.cfg.parameter(a.system, a.user, a.json_mode, batch=True)
-                cid = f"{sid}|{a.feld}|{runde}"
+                b = len(json.dumps(body, ensure_ascii=False).encode("utf-8")) + 200
+                if teil and (len(teil) >= MAX_ANFRAGEN or groesse + b > max_bytes):
+                    schicken()
+                teil.append((f"{sid}|{a.feld}|{runde}", body, n))
+                groesse += b
                 tokens += n
-                zeilen.append((cid, body, n, len(json.dumps(body, ensure_ascii=False).encode("utf-8")) + 200))
+                gesamt += 1
             if voll:
                 break
-        if not zeilen:
-            return
-        self.stand["runde"] = runde
-        self.ordner.mkdir(parents=True, exist_ok=True)
-        max_bytes = getattr(self.api, "max_bytes", MAX_BYTES)
-        teile, teil, groesse = [], [], 0
-        for cid, body, t, n in zeilen:
-            if teil and (len(teil) >= MAX_ANFRAGEN or groesse + n > max_bytes):
-                teile.append(teil)
-                teil, groesse = [], 0
-            teil.append((cid, body, t))
-            groesse += n
-        teile.append(teil)
-        for nr, teil in enumerate(teile, 1):
-            if self.fortschritt:
-                self.fortschritt(f"Runde {runde}: schickt Teil {nr} von {len(teile)} ({len(teil)} Anfragen) "
-                                 "an den Anbieter …")
-            self._batch_anlegen(runde, nr, teil)
+        if teil:
+            schicken()
 
     def _batch_anlegen(self, runde: int, nr: int, teil: list[tuple[str, dict, int]]):
         datei = self.ordner / f"runde{runde:03d}_{nr:02d}.jsonl"
         bid, status = self.api.anlegen(datei, runde, [(c, body) for c, body, _ in teil])
+        # zuerst ins Log: scheitert das Speichern danach, lässt sich der Batch beim Anbieter noch zuordnen
+        print(time.strftime("%H:%M:%S"), f"Batch {bid} angelegt ({datei.name}, {len(teil)} Anfragen)", flush=True)
         self.stand["batches"].append({"id": bid, "runde": runde, "datei": datei.name, "status": status,
                                       "gestartet": datetime.now().isoformat(timespec="seconds"),
                                       "anfragen": [c for c, _, _ in teil], "tokens": sum(t for _, _, t in teil),
@@ -398,10 +501,9 @@ class BatchLauf:
     def status(self) -> dict:
         fertig = len(read_done(self.out_path) & set(self.seeds))
         stufen: dict[str, int] = {}
+        je_material = self.zustaende.stufen()
         for sid in self._offene_ids():
-            felder = self.stand["materialien"].get(sid, {}).get("felder", {})
-            stufe = next((f for f in ("volltext", "titel", "beschreibung", "keywords") if f not in felder),
-                         "abschluss")
+            stufe = je_material.get(sid, "volltext")
             stufen[stufe] = stufen.get(stufe, 0) + 1
         laufend = [b for b in self.stand["batches"] if not b["ausgewertet"]]
         offen = sum(stufen.values())
