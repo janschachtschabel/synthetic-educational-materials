@@ -306,6 +306,7 @@ class BatchLauf:
                 client = OpenAI(base_url=client_base_url(cfg), api_key=cfg.api_key, timeout=cfg.timeout)
         self.client = client
         self.fortschritt = None  # optional: fortschritt(text) vor jedem Hochladen eines Teils (für die Oberfläche)
+        self.puls = None  # optional: puls(text) beim Abfragen jedes Batches (für die Oberfläche, nicht fürs Log)
         self.api = AnthropicBatches(client) if cfg.anbieter == "anthropic" else OpenAIBatches(client)
         parameter = {"modell": cfg.model, "prompt_hash": self.meta["prompt_hash"],
                      "inhaltstyp_pruefung": inhaltstyp_pruefen, "ausgabesprache": ausgabesprache,
@@ -364,9 +365,12 @@ class BatchLauf:
     def weiter(self) -> dict:
         """Fertige Batches abholen und auswerten, dann die nächste Runde schicken. Gibt den Stand zurück."""
         with self._sperre():
-            for b in self.stand["batches"]:
-                if not b["ausgewertet"]:
-                    self._abholen(b)
+            offen = [b for b in self.stand["batches"] if not b["ausgewertet"]]
+            for i, b in enumerate(offen, 1):
+                if self.puls:
+                    self.puls(f"Runde {self.stand['runde']}: fragt Batch {i} von {len(offen)} beim Anbieter ab "
+                              "und wertet fertige aus …")
+                self._abholen(b)
             self._abschicken()
             self._speichern()
         return self.status()
@@ -463,7 +467,12 @@ class BatchLauf:
             self._batch_anlegen(runde, nr, teil)
             teil, groesse = [], 0
 
+        # Materialien mit einer Anfrage unterwegs überspringen: Ihr nächster Schritt hängt an deren Antwort, und den
+        # Zustand jedes offenen Materials (mit Volltext) bei jeder Abfrage zu laden, kostete bei 80.000 Minuten
+        mit_anfrage = {sid for sid, _ in unterwegs}
         for sid in self._offene_ids():
+            if sid in mit_anfrage:
+                continue
             for a in self._material(sid).anfragen():
                 if (sid, a.feld) in unterwegs:
                     continue
