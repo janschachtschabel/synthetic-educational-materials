@@ -386,7 +386,7 @@ def main(argv=None):
             try:
                 # Oberfläche: höchstens 30 s zwischen den Abfragen, sonst gälte der Lauf als hängend (60 s ohne Stand)
                 intervall = min(a.intervall, 30) if schreiber else a.intervall
-                st = lauf.warten(intervall, on_status=show, stop=stop) if a.warten else lauf.weiter()
+                st = lauf.warten(intervall, on_status=show, stop=stop, on_fehler=lauf.fortschritt) if a.warten else lauf.weiter()
             except BaseException as e:
                 if schreiber is not None:
                     schreiber.ende(None, fehler=f"{type(e).__name__}: {e}")

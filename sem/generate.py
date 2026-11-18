@@ -82,11 +82,35 @@ def _fremdes_zeichen(t: str) -> str | None:
     return None
 
 
-def parse_titel(text: str) -> str:
+TITEL_MAX_LETZTER_VERSUCH = 95  # beim letzten Versuch: lieber ein etwas langer Titel als ein verworfenes Material
+
+
+def titel_reparieren(text: str) -> str:
+    """Letzter Versuch: Ein Titel mit Untertitel („Thema: Zusatz“, „Thema – Zusatz“) wird auf den Teil gekürzt, der
+    für sich die Prüfung besteht (zuerst der vordere); ein etwas zu langer Titel wird bis TITEL_MAX_LETZTER_VERSUCH
+    Zeichen angenommen. ValueError, wenn auch das nicht hilft."""
+    try:
+        return parse_titel(text)
+    except ValueError as e:
+        fehler = e
+    t = _einzeilig(text.strip().splitlines()[0] if text.strip() else "")
+    for teil in _TITEL_TRENNER.split(t):
+        if len(teil.split()) >= 2:
+            try:
+                return parse_titel(teil)
+            except ValueError:
+                pass
+    try:
+        return parse_titel(text, max_laenge=TITEL_MAX_LETZTER_VERSUCH)
+    except ValueError:
+        raise fehler from None
+
+
+def parse_titel(text: str, max_laenge: int = TITEL_MAX) -> str:
     t = _einzeilig(_einzeilig(text.strip().splitlines()[0] if text.strip() else "").rstrip("."))
     if t.count("„") > t.count("“"):  # _einzeilig nimmt ein schließendes Zitatzeichen am Ende mit: „Faust“
         t += "“"
-    if not 10 <= len(t) <= TITEL_MAX:
+    if not 10 <= len(t) <= max_laenge:
         raise ValueError(f"Titel mit {len(t)} Zeichen")
     if _TITEL_TRENNER.search(t):
         raise ValueError("Titel mit Doppelpunkt oder Gedankenstrich")
@@ -413,7 +437,8 @@ class Material:
         if feld == "suchanfragen":
             return parse_suchanfragen(json_aus_text(text))
         if feld == "titel":
-            t = parse_titel(text)
+            letzter = self.neu.get("titel", 0) >= FELD_VERSUCHE - 1
+            t = titel_reparieren(text) if letzter else parse_titel(text)
             # weiche Prüfung: beim letzten Versuch wird der Titel trotzdem übernommen (das Wort kann zum Inhalt
             # gehören, etwa „Lied“ in einem Material über Lieder)
             if (w := titel_nennt_form(t, self.values)) and self.neu.get("titel", 0) < FELD_VERSUCHE - 1:

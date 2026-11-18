@@ -9,7 +9,7 @@ import pytest
 try:
     import httpx2 as httpx
 except ImportError:
-    import httpx
+    from anthropic._exceptions import httpx2 as httpx
 
 from sem import batch as B
 from sem import llm, prozess
@@ -246,6 +246,45 @@ def test_batch_warten_bis_fertig_und_stop(seeds_datei, tmp_path):  # noqa: F811
     lauf2 = B.BatchLauf(path, tmp_path / "materialien_w2.jsonl", _cfg(), client=fake)
     st = lauf2.warten(5, stop=stop)  # gesetzt: nach der ersten Abfrage zurück, ohne zu warten
     assert not st["abgeschlossen"] and st["runde"] == 1
+
+
+def test_batch_warten_uebersteht_serverfehler(seeds_datei, tmp_path):  # noqa: F811
+    """Ein 500er des Anbieters beim Abholen beendet den wartenden Lauf nicht; nach der Pause geht es weiter, ohne
+    etwas doppelt zu schicken. Andere Fehler (z. B. Guthaben, Schlüssel) beenden ihn sofort."""
+    import threading
+
+    import anthropic
+    from anthropic._exceptions import httpx2 as httpx
+
+    path, _ = seeds_datei
+    fake = FakeAnthropic(Antworten(load_prompts("hochschule"), titel_kaputt=0), ablaufen=0, fehler=0)
+    echt = fake.messages.batches.retrieve
+    stoerung = {"n": 2}
+
+    def abrufen(bid):
+        if stoerung["n"]:
+            stoerung["n"] -= 1
+            antwort = httpx.Response(500, request=httpx.Request("GET", "https://api.anthropic.com"))
+            raise anthropic.InternalServerError("timeout_error", response=antwort, body=None)
+        return echt(bid)
+
+    fake.messages.batches.retrieve = abrufen
+    lauf = B.BatchLauf(path, tmp_path / "materialien_s.jsonl", _cfg(), client=fake)
+    fehler = []
+    st = lauf.warten(0, stop=threading.Event(), on_fehler=fehler.append)
+    assert st["abgeschlossen"] and len(read_done(tmp_path / "materialien_s.jsonl")) == 3
+    assert len(fehler) == 2 and "InternalServerError" in fehler[0]
+    gefragt = [r["params"]["messages"][0]["content"] for r in fake.anfragen]
+    assert len(gefragt) == len(set(gefragt))  # nichts doppelt geschickt
+
+    def kaputt(bid):
+        raise ValueError("kein vorübergehender Fehler")
+
+    fake.messages.batches.retrieve = kaputt
+    lauf = B.BatchLauf(path, tmp_path / "materialien_s2.jsonl", _cfg(), client=fake)
+    lauf.weiter()
+    with pytest.raises(ValueError):
+        lauf.warten(0, stop=threading.Event())
 
 
 def test_oberflaeche_batch_wartet_selbst(client, ordner, monkeypatch):  # noqa: F811
