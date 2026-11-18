@@ -757,6 +757,20 @@ mit dem Materialtyp beginnen; der Rest bleibt wörtlich. Die alte Beschreibung s
 `synth:beschreibung_alt`, Modell und Prompt-Hash in `synth:generierung.beschreibung_einstieg`.
 Beschreibungen ohne Schablone werden unverändert übernommen. Ausgabe `…_einstieg.jsonl`, fortsetzbar.
 
+**Gezielte Korrekturen nach einer Prüfung.** `python -m sem korrektur vorbereiten --materialien
+output/materialien_….jsonl` wählt Materialien aus, die bei der Prüfung des Hochschul-Datensatzes auffielen:
+RVK-Themen mit Klammerzusatz (der Zusatz wurde als Fachaussage übernommen; Material wird mit den aktuellen
+Prompts ganz neu erzeugt), Frage-Antwort-Paare mit mindestens drei Fragen zu den erfundenen Figuren aus
+`synth:stil` (nur die Paare neu) und Beschreibungen mit „E-Book“ aus dem Inhaltstyp-Label (nur die Beschreibung
+neu). Es schreibt die Auswahl als Seed-Datei (`output/seeds_korrektur_hochschule.jsonl`) und legt den Batch-Stand
+so an, dass alle übrigen Felder schon fertig sind; der normale Batch-Lauf (`python -m sem materialien --seeds …
+--batch --warten`) stellt dann nur die fehlenden Anfragen. `python -m sem korrektur zusammenfuehren` übernimmt
+nur die korrigierten Felder in eine neue Datei (`…_korrigiert.jsonl`); die bisherigen Werte stehen in
+`synth:beschreibung_alt`, `synth:frage_antwort_paare_alt` und `synth:suchanfragen_alt`, Angaben zur Korrektur in
+`synth:generierung.korrektur`. Dabei werden auch Suchanfragen gekürzt: Von mehreren Anfragen mit Stufenbegriff
+(„… hochschule“, „… studium“) bleibt die erste, solange mindestens vier Anfragen übrig bleiben. Scheitert eine
+Korrektur, bleibt das Material unverändert. Der Export nennt die Korrekturen in der Spalte `correction`.
+
 Jedes Material behält alle Seed-Felder und bekommt `synth:volltext` sowie `synth:generierung` (Modell,
 Base-URL, Datum, Hash der verwendeten Prompts).
 

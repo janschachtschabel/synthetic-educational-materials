@@ -100,10 +100,11 @@ project's own subject profiles, label only. `openalex`, `gnd`, `rvk`: topics fro
 | `topic_source` | where the topic comes from (see table above) |
 | `rvk_notation` | class of the Regensburger Verbundklassifikation (RVK), for topics from RVK |
 | `generator_model` | language model that generated the texts |
+| `correction` | post-hoc correction of the record, if any: `regenerated`, `description`, `qa_pairs`, `search_queries` (see "How the data was created") |
+| `description_previous` | earlier description, where the description was corrected afterwards |
 
 Columns for other education sectors (`occupation`, `competence`, `curriculum`, `programme_area`, `digcomp_*`, …) are
-kept for schema compatibility with the 50k dataset and are empty here; `title_previous` and `description_previous`
-are empty as well.
+kept for schema compatibility with the 50k dataset and are empty here; `title_previous` is empty as well.
 
 Controlled values are given as labels together with their URIs, following the OpenEduHub / edu-sharing metadata
 schema used by [WirLernenOnline](https://wirlernenonline.de).

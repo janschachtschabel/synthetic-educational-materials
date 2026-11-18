@@ -110,3 +110,18 @@ def test_hochschul_karte(tmp_path):
     import json
     zeile = next(z for z in text.splitlines() if z.startswith("pretty_name:"))
     assert json.loads(zeile.split(":", 1)[1]) == "X: Y (100k)"
+
+
+def test_korrekturen_in_spalte_und_karte():
+    """Nachträgliche Korrekturen (python -m sem korrektur): Spalte correction und ein Satz in der Karte."""
+    basis = {"synth:bildungsbereich": "hochschule", "synth:thema": {"id": "https://openalex.org/T1", "label_de": "T"},
+             "ccm:oeh_taxonid_university": ["u"], "ccm:oeh_taxonid_university_DISPLAYNAME": ["Physik"],
+             "synth:niveau": {"label": "Bachelor"}, "synth:lernziele": [], "synth:suchanfragen": ["a", "b"]}
+    voll = {**basis, "id": "m0", "synth:generierung": {"modell": "m", "korrektur": {"neu_erzeugt": True}}}
+    felder = {**basis, "id": "m1", "synth:beschreibung_alt": "alt", "synth:suchanfragen_alt": ["a", "b", "c"],
+              "synth:generierung": {"modell": "m", "korrektur": {"felder": ["beschreibung", "fragen_antworten"]}}}
+    rows = [E.flatten(_material(r)) for r in (voll, felder, {**basis, "id": "m2"})]
+    assert [r["correction"] for r in rows] == ["regenerated", "description, qa_pairs, search_queries", None]
+    text = E.build_card({"train": rows}, "x", "dataset_card_university.md", "X")
+    assert "1 materials whose RVK topic" in text and "only the first of these was kept" in text
+    assert "only that sentence was rewritten" not in text  # description_previous stammt hier aus der Korrektur, nicht vom Einstieg
