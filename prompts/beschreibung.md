@@ -5,6 +5,7 @@ Erstelle eine zusammenfassende Beschreibung des Inhalts mit folgenden Anforderun
 - Einstieg: Beginne direkt mit dem Thema selbst{{#beschreibung_form}}; Form des ersten Satzes: {{beschreibung_form}}{{/beschreibung_form}}. Beginne NICHT mit „Im Mittelpunkt“, „Das Material“, „Dieses Material“, „In diesem/dieser …“, „Hier …“ oder mit dem Materialtyp („Das Arbeitsblatt …“, „Die Präsentation …“). Verschiebe diese Schablone auch nicht ans Satzende („… steht im Mittelpunkt / im Fokus“, „… ist das zentrale Thema“, „… wird behandelt / thematisiert / betrachtet“, „Es geht um …“): Der erste Satz macht eine Aussage zur Sache.
 - Fachbegriffe und gängige Suchbegriffe sollen möglichst vielfältig, natürlich und sinnvoll eingebunden werden, um die Auffindbarkeit zu verbessern.
 - Verwende ausschließlich Inhalte, die im Ausgangsmaterial belegt sind. Keine erfundenen Details, keine Ergänzungen ohne Beleg.
+- Die Materialart mit eigenen Worten nennen, wie sie sich aus dem Inhalt ergibt; keine Zusätze aus der Metadaten-Bezeichnung übernehmen (nicht „auch als E-Book“).
 - Keine Floskeln wie „Hier finden Sie …“, keine URLs, Dateinamen oder anderen technischen Angaben.
 Ausgabe: Nur der reine Beschreibungstext, ohne zusätzliche Formatierungen, Überschriften oder Felder.
 {{#ausgabesprache}}- Schreibe auf {{ausgabesprache}} (Beispiele zeigen nur das Format; die verbotenen Anfänge gelten sinngemäß).{{/ausgabesprache}}
