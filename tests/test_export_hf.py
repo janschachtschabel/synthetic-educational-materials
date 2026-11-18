@@ -103,6 +103,10 @@ def test_hochschul_karte(tmp_path):
              "synth:suchanfragen": ["a", "b"]}
         rows.append(E.flatten(_material(r)))
     assert [r["topic_source"] for r in rows] == ["openalex", "wlo_abstraction"]
-    text = E.build_card({"train": rows}, "x-university-100k", "dataset_card_university.md", "X (100k)")
-    assert "{{" not in text and "pretty_name: X (100k)" in text and "| wlo_abstraction | 1 | 50.0 % |" in text
+    text = E.build_card({"train": rows}, "x-university-100k", "dataset_card_university.md", "X: Y (100k)")
+    assert "{{" not in text and 'pretty_name: "X: Y (100k)"' in text and "| wlo_abstraction | 1 | 50.0 % |" in text
     assert "{{" not in E.build_card({"train": rows}, "x-50k")
+    # YAML-Kopf: Ein Doppelpunkt im Namen braucht Anführungszeichen (sonst lehnt der Hub die Karte ab)
+    import json
+    zeile = next(z for z in text.splitlines() if z.startswith("pretty_name:"))
+    assert json.loads(zeile.split(":", 1)[1]) == "X: Y (100k)"
