@@ -345,12 +345,23 @@ def main(argv=None):
 
                 schreiber, stop = StandSchreiber(a.stand), stop_beobachten(a.stand)
 
+            letzter = {"st": None}  # letzter Stand: Zahlen bleiben sichtbar, während der Lauf abfragt oder hochlädt
+
+            def fortschritt_aus(st, status):
+                # Tempo und Restzeit seit Beginn des Laufs (nicht seit dem Aufruf: sonst unsinnig große Werte)
+                p = Progress(total=st["materialien"] if st else len(lauf.seeds), status=status,
+                             started=lauf.stand["gestartet"])
+                if st:
+                    p.done, p.failed = st["fertig"], st["fehlgeschlagen"]
+                return p
+
             def stand(st, ende=False):
+                letzter["st"] = st
                 if schreiber is None:
                     return
                 status = "fertig" if st["abgeschlossen"] else (
                     "Runde verschickt" if ende else "wartet auf die Batches des Anbieters")
-                p = Progress(total=st["materialien"], done=st["fertig"], failed=st["fehlgeschlagen"], status=status)
+                p = fortschritt_aus(st, status)
                 schreiber(p, ende=ende, batch=status_zeile(st), abgeschlossen=st["abgeschlossen"],
                           wartet=bool(a.warten and not ende))
 
@@ -364,13 +375,19 @@ def main(argv=None):
             def hochladen_melden():
                 if schreiber is not None and hochladen["text"]:
                     schreiber.zuletzt = 0.0  # nicht drosseln: Meldungen kommen hier ohnehin selten
-                    schreiber(Progress(total=len(lauf.seeds), status="schickt Batches"),
+                    schreiber(fortschritt_aus(letzter["st"], "arbeitet"),
                               batch=hochladen["text"], abgeschlossen=False, wartet=bool(a.warten))
 
             if schreiber is not None:
                 import threading
 
                 lauf.fortschritt = fortschritt
+
+                def puls_text(text):
+                    hochladen["text"] = text
+                    hochladen_melden()
+
+                lauf.puls = puls_text
 
                 def puls():  # Stand auffrischen, damit ein langer Upload nicht als „hängt“ erscheint
                     while not stop.wait(20):
