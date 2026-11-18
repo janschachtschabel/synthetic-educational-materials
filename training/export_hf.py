@@ -316,7 +316,9 @@ def build_card(rows_by_split: dict[str, list[dict]], name: str, card: str = "dat
         "name": name, "size_category": size, "n_total": f"{n:,}", "split_table": "\n".join(table),
         "length_table": "\n".join(lengths), "qa_median": f"{int(statistics.median(qa)) if qa else 0}",
         "qa_total": f"{sum(qa):,}", "content_type_match": match, "models": models, "export_date": date.today().isoformat(),
-        "title_note": title_note, "pretty_name": pretty_name,
+        "title_note": title_note,
+        # quoted: a colon in the name would otherwise break the YAML front matter on the Hub
+        "pretty_name": json.dumps(pretty_name, ensure_ascii=False),
         "n_topics": f"{len({r['topic'] for r in rows if r['topic']}):,}",
         "lo_total": f"{sum(lo):,}", "lo_median": f"{int(statistics.median(lo)) if lo else 0}",
         "sq_total": f"{sum(sq):,}", "sq_median": f"{int(statistics.median(sq)) if sq else 0}",
