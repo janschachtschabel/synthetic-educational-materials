@@ -50,6 +50,10 @@ Im Hugging-Face-Export erscheint nur das Thema als Label, ohne URI und ohne Node
 
 ## Status
 
+**Veröffentlichung (Entscheidung 2026-11-18):** Im Hugging-Face-Export gehen die Themen der WLO-Abstraktion als Label
+(`topic`, Herkunft in `topic_source` = `wlo_abstraction`) mit, ohne URI, Node-IDs, Titel oder Beschreibung; zuerst im
+Datensatz `synthetic-german-educational-materials-university-100k`.
+
 Die Abstraktion und die daraus gebauten Themen liegen nur lokal (`data/lokal/`, nicht im Repo), bis entschieden ist,
 ob und wie sie veröffentlicht werden. Bei den Seeds ist die Herkunft standardmäßig ausgeschaltet (Filter `herkunft`
 bzw. `quellen`, Anteil über `wlo_anteil`). Datensätze ohne Bildungsstufe oder Fach werden mitverarbeitet: Fach
