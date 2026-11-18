@@ -76,8 +76,20 @@ COLUMNS = [
     ("cross_cutting_topic", "str"), ("generator_model", "str"), ("title_previous", "str"),
     ("description_previous", "str"), ("rvk_notation", "str"), ("digcomp_area", "str"), ("digcomp_competence", "str"),
     ("digcomp_competence_id", "str"), ("digcomp_level", "str"), ("digcomp_knowledge_type", "str"),
-    ("digcomp_ai", "str"), ("topic_source", "str"),
+    ("digcomp_ai", "str"), ("topic_source", "str"), ("correction", "str"),
 ]
+
+# fields corrected afterwards (python -m sem korrektur), names as in the export
+_KORREKTUR_FELD = {"beschreibung": "description", "fragen_antworten": "qa_pairs"}
+
+
+def correction(r: dict) -> str | None:
+    """What was corrected afterwards: regenerated, description, qa_pairs, search_queries (comma-separated)."""
+    k = (r.get("synth:generierung") or {}).get("korrektur") or {}
+    out = ["regenerated"] if k.get("neu_erzeugt") else [_KORREKTUR_FELD.get(f, f) for f in k.get("felder", [])]
+    if r.get("synth:suchanfragen_alt") is not None:
+        out.append("search_queries")
+    return ", ".join(out) or None
 
 
 def schema():
@@ -236,6 +248,7 @@ def flatten(r: dict) -> dict:
         "description_previous": r.get("synth:beschreibung_alt"),
         # RVK class of the topic (higher education, topic source RVK)
         "rvk_notation": (thema.get("rvk") or {}).get("notation"),
+        "correction": correction(r),
         # DigComp 3.0 (adult education, optionally vocational): area, competence, level (Basic … Highly advanced),
         # knowledge/skill/attitude and AI relation (explicit, implicit, none); German labels are the project's own
         # translation
@@ -304,11 +317,26 @@ def build_card(rows_by_split: dict[str, list[dict]], name: str, card: str = "dat
                   f" Titles were regenerated afterwards with a revised title prompt (readable phrase instead of a keyword "
                   f"chain; {replaced:,} of {len(regenerated):,} titles changed); the earlier titles are kept in "
                   f"`title_previous`.")
-    rewritten = [r for r in rows if r.get("description_previous") is not None]
+    rewritten = [r for r in rows if r.get("description_previous") is not None
+                 and "description" not in (r.get("correction") or "")]
     if rewritten:
         title_note += (f" In {len(rewritten):,} descriptions whose first sentence was a stock phrase (e.g. „Im Mittelpunkt "
                        f"steht …“, „Das Material behandelt …“), only that sentence was rewritten afterwards; the rest is "
                        f"unchanged and the earlier description is kept in `description_previous`.")
+    corr = Counter(c for r in rows for c in (r.get("correction") or "").split(", ") if c)
+    if corr:
+        teile = [(corr["regenerated"], "materials whose RVK topic carried a scope note in brackets (e.g. „ohne Spaltung "
+                                       "und Streuung“) that the first run had turned into factual claims were "
+                                       "regenerated completely with revised prompts"),
+                 (corr["qa_pairs"], "materials with at least three questions about the invented persons of the text "
+                                    "(e.g. „Was rät Frau Krüger?“) got new question-answer pairs"),
+                 (corr["description"], "descriptions that had taken over a vocabulary addition („auch als E-Book“) "
+                                       "were regenerated (earlier text in `description_previous`)"),
+                 (corr["search_queries"], "materials had more than one search query with a level term (e.g. "
+                                          "„… hochschule“, „… studium“); only the first of these was kept")]
+        title_note += (" After a review of the finished data, a few targeted corrections were made: "
+                       + "; ".join(f"{n:,} {t}" for n, t in teile if n)
+                       + ". The column `correction` names what was changed in each record.")
     lo = [len(r["learning_objectives"]) for r in rows]
     sq = [len(r["search_queries"]) for r in rows]
     text = (HERE / card).read_text(encoding="utf-8")

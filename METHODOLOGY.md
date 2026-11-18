@@ -557,6 +557,21 @@ with the material type; the rest stays verbatim. The old description is kept in 
 and prompt hash in `synth:generierung.beschreibung_einstieg`. Descriptions without a stock phrase are
 copied unchanged. Output `…_einstieg.jsonl`, resumable.
 
+**Targeted corrections after a review.** `python -m sem korrektur vorbereiten --materialien
+output/materialien_….jsonl` selects materials that stood out in the review of the higher-education dataset:
+RVK topics with a bracketed scope note (the note was taken over as a factual claim; the material is regenerated
+completely with the current prompts), question-answer pairs with at least three questions about the invented
+persons from `synth:stil` (only the pairs are regenerated) and descriptions with „E-Book“ taken from the content
+type label (only the description is regenerated). It writes the selection as a seed file
+(`output/seeds_korrektur_hochschule.jsonl`) and prepares the batch state so that all other fields are already
+done; the normal batch run (`python -m sem materialien --seeds … --batch --warten`) then sends only the missing
+requests. `python -m sem korrektur zusammenfuehren` takes over only the corrected fields into a new file
+(`…_korrigiert.jsonl`); the previous values are kept in `synth:beschreibung_alt`, `synth:frage_antwort_paare_alt`
+and `synth:suchanfragen_alt`, details of the correction in `synth:generierung.korrektur`. Search queries are
+shortened as well: of several queries with a level term („… hochschule“, „… studium“) the first is kept, as long as
+at least four queries remain. If a correction fails, the material stays unchanged. The export names the
+corrections in the column `correction`.
+
 Each material retains all seed fields and gets `synth:volltext` and `synth:generierung` (model,
 Base URL, date, hash of the prompts used).
 

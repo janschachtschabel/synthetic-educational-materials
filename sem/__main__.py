@@ -12,6 +12,8 @@
     python -m sem titel-neu --materialien output/materialien_….jsonl [--out …] [--limit N]   (nur Titel neu)
     python -m sem beschreibung-einstieg --materialien output/materialien_….jsonl   (nur Schablonen-Anfang neu)
     python -m sem faecher-ergaenzen --materialien output/materialien_….jsonl   (OEH-Fach für Berufs- und EB nachtragen)
+    python -m sem korrektur vorbereiten|zusammenfuehren --materialien output/materialien_….jsonl [--out …]
+                            (gezielte Korrekturen nach der Prüfung, siehe sem/korrektur.py)
     python -m sem mappings hochschule [alle|openalex|gnd|rvk|schritt …] [--limit N] [--stimmen 3] [--wlo export.csv …]
                                      [--rvk data/lokal/rvk/rvko_marcxml_2026_3.xml.gz]
     python -m sem mappings hochschule --liste
@@ -183,6 +185,14 @@ def main(argv=None):
                             "nachtragen (Handmapping, ohne LLM, neue Datei)")
     p.add_argument("--materialien", type=Path, required=True, help="fertige Materialien (JSONL)")
     p.add_argument("--out", type=Path, help="Ausgabe (Standard: <eingabe>_faecher.jsonl daneben)")
+
+    p = sub.add_parser("korrektur", help="Gezielte Korrekturen an fertigen Materialien: Auswahl vorbereiten (Seeds und "
+                                         "Batch-Stand), nach dem Batch-Lauf zusammenführen (neue Datei)")
+    p.add_argument("schritt", choices=["vorbereiten", "zusammenfuehren"])
+    p.add_argument("--materialien", type=Path, required=True, help="fertige Materialien (JSONL)")
+    p.add_argument("--name", default="korrektur_hochschule",
+                   help="Name des Korrekturlaufs (output/seeds_<name>.jsonl, output/materialien_<name>.jsonl)")
+    p.add_argument("--out", type=Path, help="zusammenfuehren: Ausgabe (Standard: <eingabe>_korrigiert.jsonl daneben)")
 
     p = sub.add_parser("gnd-ergaenzen", help="GND-Themen aller Bereiche ergänzen: Ersatz für Motiv-Sätze und "
                                              "Kurzbeschreibungen (GND, Wikidata) → data/mappings/gnd_ergaenzungen.jsonl")
@@ -418,6 +428,22 @@ def main(argv=None):
         print(f"{prog.done} neu, {prog.skipped} schon vorhanden, {prog.failed} fehlgeschlagen → {out}")
         if prog.status != "fertig":
             sys.exit(2)
+
+    elif a.cmd == "korrektur":
+        from .korrektur import pfade, vorbereiten, zusammenfuehren
+
+        if a.schritt == "vorbereiten":
+            z = vorbereiten(a.materialien, a.name)
+            for k, v in z.items():
+                print(f"{k}: {v:,}")
+            print(f"Seeds → {pfade(a.name)['seeds']}\nWeiter: python -m sem materialien --seeds "
+                  f"{pfade(a.name)['seeds']} --anbieter anthropic --batch --warten")
+        else:
+            out = a.out or a.materialien.with_name(a.materialien.stem + "_korrigiert.jsonl")
+            z = zusammenfuehren(a.materialien, out, a.name)
+            for k, v in sorted(z.items()):
+                print(f"{k}: {v:,}")
+            print(f"→ {out}")
 
     elif a.cmd == "titel-neu":
         from .titel_neu import standard_ausgabe, titel_neu
