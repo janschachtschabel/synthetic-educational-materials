@@ -12,6 +12,7 @@ Gemessene Zahlen zu Datensatz, Tokenlängen, Rechenzeit und Hardware: **[TRAININ
 |---|---|
 | `export_hf.py` | Materialien-JSONL → flacher Datensatz (Parquet, Splits nach Thema) mit englischer Datensatzkarte |
 | `dataset_card.md` | Vorlage der Datensatzkarte; Zahlen setzt `export_hf.py` ein |
+| `dataset_card_university.md` | Vorlage der Karte für den Hochschul-Datensatz (`--card university`) |
 | `train_mt5.py` | Finetuning mit Source-Prefixen `title: `, `description: `, `keywords: ` |
 | `evaluate_meta.py` | Modelle auf Testmaterialien vergleichen: Titel-Treffer, Keyword-F1, ROUGE-L |
 | `predict.py` | Metadaten für eine Textdatei erzeugen, mit Zeit je Feld |
@@ -40,6 +41,13 @@ Eigene Materialien exportieren und hochladen:
 python training/export_hf.py output/materialien_….jsonl --out training/hf_export
 huggingface-cli login
 huggingface-cli upload JanSchachtschabel/synthetic-german-educational-materials-50k training/hf_export . --repo-type dataset
+```
+
+Hochschul-Datensatz mit eigener Karte:
+
+```
+python training/export_hf.py output/materialien_hochschule_s42_gesamt.jsonl --out training/hf_export_university --card university --name synthetic-german-educational-materials-university-100k --pretty-name "Synthetic German Educational Materials: Higher Education (100k)"
+huggingface-cli upload JanSchachtschabel/synthetic-german-educational-materials-university-100k training/hf_export_university . --repo-type dataset
 ```
 
 oder den fertigen Datensatz holen (Parquet, 149 MB, ohne Login):

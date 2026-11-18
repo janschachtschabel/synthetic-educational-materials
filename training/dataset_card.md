@@ -2,7 +2,7 @@
 language:
 - de
 license: cc-by-4.0
-pretty_name: Synthetic German Educational Materials (50k)
+pretty_name: {{pretty_name}}
 size_categories:
 - {{size_category}}
 task_categories:
@@ -79,6 +79,7 @@ are never seen during training.
 | `text_type`, `media_form` | text type and media form the full text was written as (e.g. text, slides, video or audio transcript) |
 | `didactic_function`, `duration_minutes` | optional: didactic function and working time |
 | `topic`, `topic_uri` | topic the material was generated from (GND, OpenEduHub topic trees, ESCO, OpenAlex, RVK or DigComp 3.0 learning outcomes; in higher education also typical topics from the project's own subject profiles, label only), empty for topics from sources that are not openly licensed |
+| `topic_source` | where the topic comes from (`gnd`, `openalex`, `rvk`, `oeh_topics`, `esco`, `digcomp`, `subject_profile`, `wlo_abstraction`, `framework_curriculum`, `other`); set even when the topic label is not exported |
 | `generator_model` | language model that generated the texts |
 | `title_previous` | earlier title if the title was regenerated afterwards, otherwise empty |
 | `description_previous` | earlier description if its first sentence was rewritten afterwards, otherwise empty |

@@ -86,3 +86,23 @@ def test_export_mit_wlo_themen(ohne_lokal):
                              "synth:volltext": "V"})
             assert row["topic"] == s["synth:thema"]["label_de"] and row["topic_uri"] is None
             assert row["subject_uri"] and s["synth:thema"]["id"].startswith(WLO_THEMA_PREFIX)
+
+
+def test_hochschul_karte(tmp_path):
+    """Eigene Karte je Bereich: alle Platzhalter ersetzt, Themenquelle als Spalte und Tabelle."""
+    assert E.topic_source("https://openalex.org/T123") == "openalex"
+    assert E.topic_source("wlo-abstraktion:hochschule:ab12") == "wlo_abstraction"
+    assert E.topic_source("https://example.org/fach#thema-3") == "subject_profile"
+    assert E.topic_source("http://data.europa.eu/esco/occupation/x|kmk:lf1") == "framework_curriculum"
+    rows = []
+    for i, (tid, label) in enumerate((("https://openalex.org/T1", "Thermodynamik"),
+                                      ("wlo-abstraktion:hochschule:1", "Grundlagen der Bilanzierung"))):
+        r = {"id": f"m{i}", "synth:bildungsbereich": "hochschule", "synth:thema": {"id": tid, "label_de": label},
+             "ccm:oeh_taxonid_university": ["u"], "ccm:oeh_taxonid_university_DISPLAYNAME": ["Physik"],
+             "synth:niveau": {"label": "Bachelor"}, "synth:lernziele": [{"lernziel": "x", "operator": "y", "stufe": "z"}],
+             "synth:suchanfragen": ["a", "b"]}
+        rows.append(E.flatten(_material(r)))
+    assert [r["topic_source"] for r in rows] == ["openalex", "wlo_abstraction"]
+    text = E.build_card({"train": rows}, "x-university-100k", "dataset_card_university.md", "X (100k)")
+    assert "{{" not in text and "pretty_name: X (100k)" in text and "| wlo_abstraction | 1 | 50.0 % |" in text
+    assert "{{" not in E.build_card({"train": rows}, "x-50k")

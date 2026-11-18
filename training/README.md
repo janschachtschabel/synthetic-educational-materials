@@ -12,6 +12,7 @@ Measured numbers for the dataset, token lengths, compute time and hardware: **[T
 |---|---|
 | `export_hf.py` | materials JSONL → flat dataset (Parquet, splits by topic) with English dataset card |
 | `dataset_card.md` | dataset card template; `export_hf.py` fills in the numbers |
+| `dataset_card_university.md` | card template for the higher-education dataset (`--card university`) |
 | `train_mt5.py` | fine-tuning with source prefixes `title: `, `description: `, `keywords: ` |
 | `evaluate_meta.py` | compare models on test materials: title matches, keyword F1, ROUGE-L |
 | `predict.py` | generate metadata for a text file, with time per field |
@@ -40,6 +41,13 @@ Export your own materials and upload them:
 python training/export_hf.py output/materialien_….jsonl --out training/hf_export
 huggingface-cli login
 huggingface-cli upload JanSchachtschabel/synthetic-german-educational-materials-50k training/hf_export . --repo-type dataset
+```
+
+Higher-education dataset with its own card:
+
+```
+python training/export_hf.py output/materialien_hochschule_s42_gesamt.jsonl --out training/hf_export_university --card university --name synthetic-german-educational-materials-university-100k --pretty-name "Synthetic German Educational Materials: Higher Education (100k)"
+huggingface-cli upload JanSchachtschabel/synthetic-german-educational-materials-university-100k training/hf_export_university . --repo-type dataset
 ```
 
 or download the published dataset (Parquet, 149 MB, no login needed):
