@@ -220,6 +220,13 @@ def parse_inhaltstyp(text: str, kategorien: list[dict]) -> dict:
     for k in kategorien:
         if t in (k["id"], k["name"].casefold()):
             return k
+    # Antwort als Satz („Das Material ist eine Anleitung: …“, auch englisch „… is a glossary“): gilt, wenn genau
+    # eine Kategorie als Wort(anfang) darin vorkommt; nennt der Satz mehrere, bleibt es unklar und wird neu angefragt
+    treffer = {k["id"]: k for k in kategorien
+               for n in {k["id"].casefold(), k["name"].casefold()} if len(n) >= 4
+               and re.search(r"(?<![\w-])" + re.escape(n), t)}
+    if len(treffer) == 1:
+        return next(iter(treffer.values()))
     raise ValueError(f"unbekannte Kategorie {t[:40]!r}")
 
 
@@ -433,7 +440,9 @@ class Material:
         if feld == "fragen_antworten":
             return parse_paare(json_aus_text(text), self.qa_min)
         if feld == "lernziele":
-            return parse_lernziele(json_aus_text(text))
+            # letzter Versuch: ein brauchbares Lernziel genügt, statt das ganze Material zu verwerfen
+            letzter = self.neu.get("lernziele", 0) >= FELD_VERSUCHE - 1
+            return parse_lernziele(json_aus_text(text), minimum=1 if letzter else 2)
         if feld == "suchanfragen":
             return parse_suchanfragen(json_aus_text(text))
         if feld == "titel":
