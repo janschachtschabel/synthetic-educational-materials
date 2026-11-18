@@ -33,11 +33,25 @@ def _pfad(name: str, endung: str, ordner: Path | None = None) -> Path:
     return (ordner or PROZESS_DIR) / f"{name}{endung}"
 
 
+def datei_ersetzen(tmp: Path, ziel: Path, versuche: int = 8):
+    """os.replace mit Wiederholung. Unter Windows schlägt das Umbenennen mit „Zugriff verweigert“ fehl, solange ein
+    anderer Prozess die Zieldatei gerade offen hat (die Oberfläche beim Lesen, ein Virenscanner, die Suche). Das dauert
+    nur Millisekunden: kurz warten und erneut versuchen."""
+    for i in range(versuche):
+        try:
+            os.replace(tmp, ziel)
+            return
+        except PermissionError:
+            if i == versuche - 1:
+                raise
+            time.sleep(min(0.05 * 2 ** i, 1.0))
+
+
 def _json_schreiben(p: Path, daten: dict):
     """Erst in eine Nebendatei, dann umbenennen: Die Oberfläche liest nie eine halb geschriebene Datei."""
     tmp = p.with_name(p.name + ".tmp")
     tmp.write_text(json.dumps(daten, ensure_ascii=False), encoding="utf-8")
-    os.replace(tmp, p)
+    datei_ersetzen(tmp, p)
 
 
 def _json_lesen(p: Path) -> dict | None:
@@ -136,12 +150,21 @@ class StandSchreiber:
             return
         with self._sperre:
             self.zuletzt = jetzt
-            _json_schreiben(self.pfad, {
-                "total": p.total, "done": p.done, "failed": p.failed, "skipped": p.skipped, "retries": p.retries,
-                "aktiv": p.aktiv, "anfragen": p.anfragen, "status": p.status, "zeile": p.line(),
-                "pro_minute": round(p.rate * 60, 1), "rest_sekunden": p.eta_seconds, "letzte_meldung": p.last_error,
-                "aktualisiert": datetime.now().isoformat(timespec="seconds"), "ende": ende, "fehler": fehler,
-                **extra})
+            try:
+                self._schreiben(p, ende, fehler, extra)
+            except OSError as e:
+                if ende:
+                    raise
+                # nur die Anzeige: Ein gesperrter Stand darf den (bezahlten) Lauf nicht beenden, der nächste kommt gleich
+                print(f"Stand nicht geschrieben ({type(e).__name__}: {e})", file=sys.stderr, flush=True)
+
+    def _schreiben(self, p: Progress, ende: bool, fehler: str | None, extra: dict):
+        _json_schreiben(self.pfad, {
+            "total": p.total, "done": p.done, "failed": p.failed, "skipped": p.skipped, "retries": p.retries,
+            "aktiv": p.aktiv, "anfragen": p.anfragen, "status": p.status, "zeile": p.line(),
+            "pro_minute": round(p.rate * 60, 1), "rest_sekunden": p.eta_seconds, "letzte_meldung": p.last_error,
+            "aktualisiert": datetime.now().isoformat(timespec="seconds"), "ende": ende, "fehler": fehler,
+            **extra})
 
     def ende(self, p: Progress | None, fehler: str | None = None, **extra):
         self(p or Progress(total=0, status="abgebrochen"), ende=True, fehler=fehler, **extra)
