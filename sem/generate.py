@@ -316,6 +316,15 @@ def parse_suchanfragen(data: dict | list, minimum: int = 4, maximum: int = 8) ->
 
 # --- Ein Material -----------------------------------------------------------------------------
 
+_MATERIALART_ZUSATZ = re.compile(r"\s*\((?:auch [^()]*|Lehr- und Lernmaterial)\)")
+
+
+def materialart(label: str) -> str:
+    """Inhaltstyp für Prompts ohne Zusätze der Vokabular-Bezeichnung, die das Modell sonst als Aussage übernimmt
+    („Lehrbuch und Grundlagenwerk (auch E-Book)“ → Beschreibung „… auch als E-Book“)."""
+    return _MATERIALART_ZUSATZ.sub("", label).strip()
+
+
 def material_user(prompts: dict, values: dict, felder: dict, text: str, auftrag: str,
                   inhaltstyp: bool = True) -> str:
     v = {k: values.get(k) or LEER for k in ("bildungsstufe", "fach", "zielgruppe", "sprache")}
@@ -359,6 +368,8 @@ class Material:
         self.qa_min = qa_min
         self.ausgabesprache = ausgabesprache
         self.values = self.bereich.prompt_values(seed)
+        if self.values.get("inhaltstyp"):
+            self.values["inhaltstyp"] = materialart(self.values["inhaltstyp"])
         # Umfang aus dem Seed (ältere Seeds: aus dem Inhaltstyp), Stilvorgaben nur, wenn der Seed welche hat
         umfang = seed.get(S.F_UMFANG) or dict(zip(("von", "bis"), self.bereich.umfang(seed)))
         self.values.setdefault("umfang_von", umfang["von"])

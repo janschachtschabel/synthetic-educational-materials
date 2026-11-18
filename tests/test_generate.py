@@ -199,3 +199,16 @@ def test_lernziel_zu_lang_faellt_weg():
     daten = json.loads(LERNZIELE_JSON)
     daten["lernziele"].append({"lernziel": lang, "stufe": "anwenden"})
     assert len(parse_lernziele(daten)) == 2
+
+
+def test_klammerzusaetze_werden_keine_fachaussagen():
+    """Stichprobe HS: „(auch E-Book)“ landete in Beschreibungen, RVK-Zusätze wie „(ohne Spaltung und Streuung)“
+    wurden als Fachaussage geschrieben."""
+    from sem.bereiche.hochschule import thema_und_abgrenzung
+    from sem.generate import materialart
+
+    assert materialart("Lehrbuch und Grundlagenwerk (auch E-Book)") == "Lehrbuch und Grundlagenwerk"
+    assert materialart("Experiment (Lehr- und Lernmaterial)") == "Experiment"
+    assert materialart("Lösungs(beispiel) und Erwartungshorizont") == "Lösungs(beispiel) und Erwartungshorizont"
+    assert thema_und_abgrenzung("Kernphysik (ohne Spaltung und Streuung)") == ("Kernphysik", "ohne Spaltung und Streuung")
+    assert thema_und_abgrenzung("Magnetresonanztomographie (MRT)") == ("Magnetresonanztomographie (MRT)", "")

@@ -28,6 +28,17 @@ _PREFIX = re.compile(r"^Studienbereich\s+")
 _ADMIN_NOTE = re.compile(r"\s*\((?:nicht |nur |ohne Lehramt|einschl\.).*?\)\s*$")
 
 
+# Klammerzusatz eines RVK-Themas, der es nur eingrenzt („Kernphysik (ohne Spaltung und Streuung)“); Abkürzungen
+# ohne Leerzeichen („(MRT)“) bleiben im Thema
+_RVK_ABGRENZUNG = re.compile(r"^(?P<thema>.+?)\s*\((?P<zusatz>[^()]*\s[^()]*)\)\s*$")
+
+
+def thema_und_abgrenzung(label: str) -> tuple[str, str]:
+    """Thema für den Prompt und die Abgrenzung getrennt: sonst schreibt das Modell den Zusatz als Fachaussage."""
+    m = _RVK_ABGRENZUNG.match(label or "")
+    return (m["thema"].strip(), m["zusatz"].strip()) if m else (label, "")
+
+
 def clean_label(label: str) -> str:
     """Label für Prompts: ohne „Studienbereich“-Präfix und Verwaltungszusätze in Klammern."""
     return _ADMIN_NOTE.sub("", _PREFIX.sub("", label)).strip()
@@ -419,13 +430,17 @@ class Hochschule(Bildungsbereich):
 
     def prompt_values(self, seed: dict) -> dict:
         t = seed[S.F_THEMA]
+        thema, abgrenzung = t.get("label_de") or t.get("label_en"), ""
+        if t.get("rvk"):
+            thema, abgrenzung = thema_und_abgrenzung(thema)
         return {
             "rolle": "eine erfahrene Hochschullehrkraft",
             "sprache": ", ".join({"de": "Deutsch", "en": "Englisch"}.get(x, x) for x in seed.get(S.F_LANGUAGE, [])),
             "textsorte": seed["synth:textsorte"],
             "inhaltstyp": seed[S.F_LRT + "_DISPLAYNAME"][0],
             "medienform": seed[S.F_MEDIENFORM],
-            "thema": t.get("label_de") or t.get("label_en"),
+            "thema": thema,
+            "thema_abgrenzung": abgrenzung,
             "thema_beschreibung": t.get("beschreibung_de", ""),
             "thema_keywords": ", ".join(t.get("keywords_de", [])),
             "fach": ", ".join(clean_label(l) for l in seed[S.F_TAXON_UNI + "_DISPLAYNAME"]),

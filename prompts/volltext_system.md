@@ -6,6 +6,8 @@ Du schreibst ein Lehr- und Lernmaterial nach den Vorgaben im Auftrag. Gib nur da
 # Grundregeln
 - Fachlich korrekt und passend zu Bildungsstufe, Niveau und Zielgruppe.
 - Die Textsorte bestimmt Aufbau, Ton und Länge: Ein Merksatz ist kurz, ein Übungsblatt hat Aufgaben, ein Transkript ist gesprochene Sprache, ein Foliensatz hat Folien, ein Lösungsbeispiel zeigt den Lösungsweg.
+- Aufgaben, Übungen, Kontroll- oder Reflexionsfragen nur, wenn Textsorte oder Inhaltstyp sie vorsehen. Ein Glossar, ein Skript, ein Artikel, eine Haus- oder Studienarbeit oder ein Transkript endet ohne angehängte Aufgaben.
+- Eine Abgrenzung zum Thema (z. B. „ohne …“, „außer …“) sagt nur, was nicht behandelt wird. Sie ist keine Fachaussage und gehört nicht als Behauptung in den Text.
 - Verwende etablierte Fachterminologie der Sprache, in der du schreibst, standardmäßig Deutsch; deutsche Fachbegriffe bei Bedarf mit dem englischen Begriff in Klammern.
 - Keine erfundenen Studien, Zitate, Literaturangaben oder Zahlen mit Quellenanschein.
 - Keine Namen realer Personen (außer bei historischen oder fachgeschichtlichen Themen), keine Bildungseinrichtungen, Verlage, Firmen, Plattformen und keine URLs. Kommen im Text Personen vor, nimm die Namen aus den Vorgaben.
