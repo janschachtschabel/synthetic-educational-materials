@@ -110,3 +110,27 @@ def test_llm_umgebung_gibt_nur_den_eingetragenen_schluessel_weiter():
                                                reasoning_effort=None, service_tier="flex", workers=7))
     assert env["OPENAI_API_KEY"] == "" and env["OPENAI_BASE_URL"] == "https://fremd.example/v1"
     assert env["LLM_REASONING_EFFORT"] == "standard" and env["LLM_WORKERS"] == "7" and "--flex" in args
+
+
+def test_stand_uebersteht_gesperrte_datei(tmp_path, monkeypatch):
+    """Windows: Liest die Oberfläche den Stand gerade, schlägt das Umbenennen fehl (WinError 5). Das darf den Lauf
+    nicht beenden: kurz warten und erneut versuchen, sonst diese Anzeige auslassen."""
+    echt, fehlschlaege = prozess.os.replace, {"n": 2}
+
+    def gesperrt(a, b):
+        if fehlschlaege["n"] > 0:
+            fehlschlaege["n"] -= 1
+            raise PermissionError(13, "Zugriff verweigert")
+        echt(a, b)
+
+    monkeypatch.setattr(prozess.os, "replace", gesperrt)
+    monkeypatch.setattr(prozess.time, "sleep", lambda s: None)
+    schreiber = prozess.StandSchreiber(tmp_path / "x.stand.json", intervall=0)
+    schreiber(Progress(total=3, status="arbeitet"))
+    assert json.loads((tmp_path / "x.stand.json").read_text(encoding="utf-8"))["total"] == 3
+
+    fehlschlaege["n"] = 10 ** 6  # dauerhaft gesperrt: Zwischenstand fällt aus, der Lauf geht weiter
+    schreiber(Progress(total=4, status="arbeitet"))
+    assert json.loads((tmp_path / "x.stand.json").read_text(encoding="utf-8"))["total"] == 3
+    with pytest.raises(PermissionError):  # der Endstand dagegen muss ankommen
+        schreiber.ende(Progress(total=4, status="fertig"))

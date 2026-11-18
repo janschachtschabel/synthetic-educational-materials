@@ -32,6 +32,7 @@ from .laeufe import lauf_speichern
 from .llm import (LLMConfig, _zeilenende, anthropic_text, anthropic_usage, client_base_url, env_namen, read_done, sperre_nehmen,
                   tokens_aus_usage)
 from .prompts import load_prompts
+from .prozess import datei_ersetzen
 
 ENDPUNKT = "/v1/chat/completions"
 MAX_ANFRAGEN = 50_000            # je Batch-Datei (Grenze der API)
@@ -333,7 +334,7 @@ class BatchLauf:
         self.zustaende.commit()  # zuerst die Zustände: stand.json verweist nie auf Ungespeichertes
         tmp = self.stand_path.with_suffix(".tmp")
         tmp.write_text(json.dumps(self.stand, ensure_ascii=False), encoding="utf-8")
-        tmp.replace(self.stand_path)
+        datei_ersetzen(tmp, self.stand_path)
 
     @contextmanager
     def _sperre(self):

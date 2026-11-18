@@ -42,6 +42,7 @@ from typing import Iterable, Iterator
 
 from . import paths
 from .llm import LLMConfig, _zeilenende, client_base_url, env_namen, json_aus_text, read_done, sperre_nehmen, tokens_aus_usage
+from .prozess import datei_ersetzen
 
 ORDNER = "wlo_abstraktion"
 P = "properties."
@@ -437,7 +438,7 @@ class WloThemenLauf:
         self.ordner.mkdir(parents=True, exist_ok=True)
         tmp = self.stand_path.with_suffix(".tmp")
         tmp.write_text(json.dumps(self.stand, ensure_ascii=False), encoding="utf-8")
-        tmp.replace(self.stand_path)
+        datei_ersetzen(tmp, self.stand_path)
 
     @contextmanager
     def _sperre(self):
