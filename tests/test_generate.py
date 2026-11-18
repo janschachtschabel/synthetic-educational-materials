@@ -6,7 +6,7 @@ from sem import schema as S
 from sem.bereiche import get
 from sem.bereiche.base import build_seeds
 from sem.generate import (generate_one, parse_inhaltstyp, parse_keywords, parse_lernziele, parse_suchanfragen,
-                          parse_titel, titel_nennt_form)
+                          parse_titel, titel_nennt_form, titel_reparieren)
 from sem.prompts import load_prompts
 from tests.test_batch import LERNZIELE_JSON, SUCHANFRAGEN_JSON
 
@@ -56,6 +56,18 @@ def hochschule():
     except FileNotFoundError:
         pytest.skip("keine Themen gebaut")
     return b
+
+
+def test_titel_reparieren_beim_letzten_versuch():
+    """Statt ein bezahltes Material am Titel scheitern zu lassen: Untertitel abschneiden, etwas längere Titel annehmen."""
+    assert titel_reparieren("Wechselstrom im Haushalt: Effektivwert und Phasenlage") == "Wechselstrom im Haushalt"
+    assert titel_reparieren("Phasen – Effektivwert und Phasenlage im Wechselstromkreis") == \
+        "Effektivwert und Phasenlage im Wechselstromkreis"
+    lang = "Effektivwert und Phasenlage im Wechselstromkreis eines einfachen Haushalts mit vielen Geräten"
+    assert 80 < len(lang) <= 95 and titel_reparieren(lang) == lang
+    for kaputt in ("x" * 120, "Natur | Garten", "Kurz: Zu"):
+        with pytest.raises(ValueError):
+            titel_reparieren(kaputt)
 
 
 def test_parser():

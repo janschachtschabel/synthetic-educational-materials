@@ -39,6 +39,7 @@ MAX_BYTES_ANTHROPIC = 24 * 1024 ** 2
 MAX_API_FEHLER = 3               # so oft wird eine Anfrage neu gestellt, die im Batch selbst scheitert
 MAX_BATCH_FEHLER_IN_FOLGE = 3    # so viele ganze Batches dürfen nacheinander scheitern, dann hält der Lauf an
 DATEI_TIMEOUT = 1800.0           # Sekunden für Hoch- und Herunterladen der Batch-Dateien (bis 190 MB)
+MAX_STOERUNGEN_IN_FOLGE = 12        # so viele vorübergehende Fehler nacheinander übersteht warten()
 FERTIG = {"completed", "failed", "expired", "cancelled"}
 
 
@@ -410,11 +411,36 @@ class BatchLauf:
                                      "anfragen": len(b["anfragen"]), "gestartet": b["gestartet"]} for b in laufend],
                 "abgeschlossen": offen == 0 and not laufend}
 
-    def warten(self, intervall: float = 60.0, on_status=None, stop=None) -> dict:
+    def warten(self, intervall: float = 60.0, on_status=None, stop=None, on_fehler=None) -> dict:
         """weiter() wiederholen, bis alle Materialien fertig oder fehlgeschlagen sind; stop (threading.Event): nach
-        der laufenden Abfrage aufhören (die Batches laufen beim Anbieter weiter, „Fortsetzen“ holt sie später ab)."""
+        der laufenden Abfrage aufhören (die Batches laufen beim Anbieter weiter, „Fortsetzen“ holt sie später ab).
+        Vorübergehende Fehler des Anbieters (5xx, Zeitüberschreitung, Verbindung, Rate-Limit) beenden den Lauf nicht:
+        Er versucht es nach der Pause erneut, erst nach MAX_STOERUNGEN_IN_FOLGE Fehlern hintereinander gibt er auf."""
+        from .llm import _ist, _is_connection_error
+
+        stoerungen = 0
         while True:
-            st = self.weiter()
+            try:
+                st = self.weiter()
+            except Exception as e:
+                if not (_is_connection_error(e) or _ist(e, "RateLimitError")):
+                    raise
+                stoerungen += 1
+                if stoerungen >= MAX_STOERUNGEN_IN_FOLGE:
+                    raise
+                text = (f"Vorübergehender Fehler beim Anbieter ({stoerungen}/{MAX_STOERUNGEN_IN_FOLGE - 1} "
+                        f"Wiederholungen), neuer Versuch gleich: {type(e).__name__}: {str(e)[:200]}")
+                print(time.strftime("%H:%M:%S"), text, flush=True)
+                if on_fehler:
+                    on_fehler(text)
+                pause = min(intervall * stoerungen, 600)
+                if stop is not None:
+                    if stop.wait(pause):
+                        return self.status()
+                else:
+                    time.sleep(pause)
+                continue
+            stoerungen = 0
             if on_status:
                 on_status(st)
             if st["abgeschlossen"] or (stop is not None and stop.wait(intervall)):
