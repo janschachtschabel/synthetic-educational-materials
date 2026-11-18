@@ -1,5 +1,6 @@
 """Anthropic als Anbieter: Parameter, sofortige Anfragen mit Workern, Fehlerklassen, Batch, Oberfläche, ohne Netz."""
 
+import json
 import re
 from types import SimpleNamespace
 
@@ -182,13 +183,46 @@ def test_anthropic_kleine_teile_mit_fortschritt(seeds_datei, tmp_path, monkeypat
     lauf.fortschritt = meldungen.append
     with pytest.raises(RuntimeError):
         lauf.weiter()
-    assert aufrufe == [1, 1] and "Teil 1 von 3" in meldungen[0] and "Teil 2 von 3" in meldungen[1]
+    assert aufrufe == [1, 1] and "Teil 1 (" in meldungen[0] and "Teil 2 (" in meldungen[1]
     assert len(lauf.stand["batches"]) == 1  # der erste Teil ist gespeichert
     fake.messages.batches.retrieve = lambda bid: SimpleNamespace(id=bid, processing_status="in_progress")
     lauf = B.BatchLauf(path, tmp_path / "materialien_t.jsonl", _cfg(), client=fake)
     st = lauf.weiter()
     assert aufrufe[2:] == [1, 1]  # nur die zwei fehlenden Volltexte, der erste kommt nicht doppelt
     assert st["runde"] == 2
+
+
+def test_alter_stand_wird_umgezogen(seeds_datei, tmp_path):  # noqa: F811
+    """Läufe mit Zwischenständen in stand.json (altes Format) laufen weiter: Die Zustände wandern Eintrag für Eintrag
+    in die SQLite-Datei, stand.json bleibt danach klein; Sonderzeichen in Texten überstehen das unverändert."""
+    import sqlite3
+
+    path, _ = seeds_datei
+    fake = FakeAnthropic(Antworten(load_prompts("hochschule"), titel_kaputt=0), ablaufen=0, fehler=0)
+    out = tmp_path / "materialien_u.jsonl"
+    lauf = B.BatchLauf(path, out, _cfg(), client=fake)
+    lauf.weiter()
+    lauf.weiter()  # Volltexte ausgewertet, Titel unterwegs
+    alt = {sid: lauf.zustaende.get(sid) for sid in lauf.zustaende.stufen()}
+    assert alt and all(z["felder"].get("volltext") for z in alt.values())
+    sid0 = next(iter(alt))
+    alt[sid0]["felder"]["volltext"] += ' Text mit "Zitat", {Klammer}, Backslash \\ und „Umlauten“ äöü ∑ 🙂'
+    lauf.zustaende.close()
+    stand = dict(lauf.stand)
+    stand_alt = {k: stand[k] for k in ("gestartet", "parameter", "runde")} | {"materialien": alt} | \
+        {k: v for k, v in stand.items() if k not in ("gestartet", "parameter", "runde")}
+    (lauf.ordner / "stand.json").write_text(json.dumps(stand_alt, ensure_ascii=False), encoding="utf-8")
+    (lauf.ordner / "materialien.sqlite").unlink()
+
+    lauf = B.BatchLauf(path, out, _cfg(), client=fake)
+    assert {sid: lauf.zustaende.get(sid) for sid in lauf.zustaende.stufen()} == alt
+    assert lauf.stand["batches"] == stand["batches"] and "materialien" not in lauf.stand
+    for _ in range(12):
+        if lauf.weiter()["abgeschlossen"]:
+            break
+    assert len(read_done(out)) == 3 and "materialien" not in json.loads((lauf.ordner / "stand.json").read_text())
+    con = sqlite3.connect(lauf.ordner / "materialien.sqlite")
+    assert con.execute("SELECT COUNT(*) FROM zustand").fetchone()[0] == 0  # fertige Materialien sind entfernt
 
 
 def test_prozess_bekommt_anthropic_key():
