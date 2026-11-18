@@ -82,7 +82,7 @@ label only. `subject_profile`: typical topics from the project's own subject pro
 | `id` | record ID |
 | `education_sector` | always `higher_education` |
 | `language` | language of the texts (`de`) |
-| `fulltext` | generated full text in Markdown, about 400–550 words |
+| `fulltext` | generated full text in Markdown, typically 450–900 words (see lengths below) |
 | `title` | title derived from the full text: a readable phrase, not a keyword chain |
 | `description` | description derived from the full text |
 | `keywords` | 5–8 keywords derived from the full text |
@@ -172,8 +172,8 @@ useful for training. Export date: {{export_date}}.
 - **Length.** Full texts are about one A4 page. Real lecture notes, slides or web pages are often longer and contain
   navigation or layout residue; preprocess them (cleaning, shortening) before applying a model trained on this data.
 - **German context.** The texts are in German and refer to the German higher-education system.
-- **Uneven coverage.** Most topics come from WirLernenOnline records, so subjects with many records there are
-  covered in more depth than others.
+- **Uneven coverage.** Topic sources differ in depth between subjects (for example, RVK and WirLernenOnline are
+  richer in some fields than in others), so some subjects are covered in more depth than others.
 
 ## Sources and licenses
 
