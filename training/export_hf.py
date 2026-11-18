@@ -3,6 +3,12 @@
     python training/export_hf.py output/materialien_….jsonl --out hf_export
     huggingface-cli upload JanSchachtschabel/synthetic-german-educational-materials-50k hf_export . --repo-type dataset
 
+One sector only, with its own card (template training/dataset_card_<card>.md):
+
+    python training/export_hf.py output/materialien_hochschule_….jsonl --out hf_export_university --card university \
+        --name synthetic-german-educational-materials-university-100k \
+        --pretty-name "Synthetic German Educational Materials: Higher Education (100k)"
+
 Only the fields useful for training text models are exported, flattened and with English column names. Left out:
 provenance, generation details, seed parameters and topic labels from sources that are kept locally only
 (KMK learning fields, educational standards outlines, adult-education curricula); see METHODOLOGY.md.
@@ -70,7 +76,7 @@ COLUMNS = [
     ("cross_cutting_topic", "str"), ("generator_model", "str"), ("title_previous", "str"),
     ("description_previous", "str"), ("rvk_notation", "str"), ("digcomp_area", "str"), ("digcomp_competence", "str"),
     ("digcomp_competence_id", "str"), ("digcomp_level", "str"), ("digcomp_knowledge_type", "str"),
-    ("digcomp_ai", "str"),
+    ("digcomp_ai", "str"), ("topic_source", "str"),
 ]
 
 
@@ -134,6 +140,26 @@ NOT_EXPORTED_SEED_FIELDS = {
     "synth:bildungsstandards": "KMK educational standards outline, kept locally only (not openly licensed)",
     "synth:lernfeld": "KMK framework curricula, kept locally only (not openly licensed)",
 }
+
+
+# Topic source by topic ID (column topic_source)
+TOPIC_SOURCES = (
+    ("https://d-nb.info/gnd/", "gnd"), ("https://openalex.org/", "openalex"),
+    ("http://rvk.uni-regensburg.de/nt/", "rvk"), ("http://w3id.org/openeduhub/vocabs/oeh-topics/", "oeh_topics"),
+    ("http://data.europa.eu/esco/", "esco"), ("https://publications.jrc.ec.europa.eu/repository/handle/JRC144121#", "digcomp"),
+    ("wlo-abstraktion:", "wlo_abstraction"),
+)
+
+
+def topic_source(topic_id: str) -> str:
+    if "kmk:" in topic_id:
+        return "framework_curriculum"
+    if "#thema-" in topic_id:
+        return "subject_profile"
+    for prefix, name in TOPIC_SOURCES:
+        if topic_id.startswith(prefix):
+            return name
+    return "other" if topic_id else ""
 
 
 def flatten(r: dict) -> dict:
@@ -221,6 +247,9 @@ def flatten(r: dict) -> dict:
             r.get("synth:digcomp_art"), r.get("synth:digcomp_art")),
         "digcomp_ai": {"explizit": "explicit", "implizit": "implicit", "ohne": "none"}.get(
             r.get("synth:digcomp_ki"), r.get("synth:digcomp_ki")),
+        # where the topic comes from (gnd, openalex, rvk, oeh_topics, esco, digcomp, subject_profile, wlo_abstraction,
+        # framework_curriculum, other); also set when the topic label itself is not exported
+        "topic_source": topic_source(thema.get("id") or ""),
     }
 
 
@@ -231,7 +260,19 @@ def _stats(values: list[int]) -> str:
     return f"{int(statistics.median(s)):,} / {s[int(0.95 * (len(s) - 1))]:,}"
 
 
-def build_card(rows_by_split: dict[str, list[dict]], name: str) -> str:
+def _count_table(head: str, counts: Counter, n: int, top: int | None = None) -> str:
+    lines = [f"| {head} | materials | share |", "|---|---:|---:|"]
+    items = counts.most_common(top)
+    for k, c in items:
+        lines.append(f"| {k or '(none)'} | {c:,} | {100 * c / n:.1f} % |")
+    rest = sum(counts.values()) - sum(c for _, c in items)
+    if rest:
+        lines.append(f"| other ({len(counts) - len(items):,} more) | {rest:,} | {100 * rest / n:.1f} % |")
+    return "\n".join(lines)
+
+
+def build_card(rows_by_split: dict[str, list[dict]], name: str, card: str = "dataset_card.md",
+               pretty_name: str = "Synthetic German Educational Materials (50k)") -> str:
     rows = [r for rs in rows_by_split.values() for r in rs]
     n = len(rows)
     sectors = Counter(r["education_sector"] for r in rows)
@@ -268,12 +309,22 @@ def build_card(rows_by_split: dict[str, list[dict]], name: str) -> str:
         title_note += (f" In {len(rewritten):,} descriptions whose first sentence was a stock phrase (e.g. „Im Mittelpunkt "
                        f"steht …“, „Das Material behandelt …“), only that sentence was rewritten afterwards; the rest is "
                        f"unchanged and the earlier description is kept in `description_previous`.")
-    text = (HERE / "dataset_card.md").read_text(encoding="utf-8")
+    lo = [len(r["learning_objectives"]) for r in rows]
+    sq = [len(r["search_queries"]) for r in rows]
+    text = (HERE / card).read_text(encoding="utf-8")
     values = {
         "name": name, "size_category": size, "n_total": f"{n:,}", "split_table": "\n".join(table),
         "length_table": "\n".join(lengths), "qa_median": f"{int(statistics.median(qa)) if qa else 0}",
         "qa_total": f"{sum(qa):,}", "content_type_match": match, "models": models, "export_date": date.today().isoformat(),
-        "title_note": title_note,
+        "title_note": title_note, "pretty_name": pretty_name,
+        "n_topics": f"{len({r['topic'] for r in rows if r['topic']}):,}",
+        "lo_total": f"{sum(lo):,}", "lo_median": f"{int(statistics.median(lo)) if lo else 0}",
+        "sq_total": f"{sum(sq):,}", "sq_median": f"{int(statistics.median(sq)) if sq else 0}",
+        "topic_source_table": _count_table("Topic source", Counter(r["topic_source"] for r in rows), n),
+        "subject_table": _count_table("Subject", Counter(s for r in rows for s in r["subject"][:1]), n, top=25),
+        "level_table": _count_table("Level", Counter(r["level"] for r in rows), n, top=10),
+        "content_type_table": _count_table("Content type", Counter(c for r in rows for c in r["content_type"][:1]), n,
+                                           top=15),
     }
     for k, v in values.items():
         text = text.replace("{{" + k + "}}", v)
@@ -285,6 +336,8 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("materials", nargs="+", type=Path, help="materials JSONL file(s) from python -m sem")
     ap.add_argument("--out", type=Path, default=Path("hf_export"))
     ap.add_argument("--name", default="synthetic-german-educational-materials-50k", help="dataset name in the card")
+    ap.add_argument("--pretty-name", default="Synthetic German Educational Materials (50k)", help="pretty_name in the card")
+    ap.add_argument("--card", default="", help="card template training/dataset_card_<card>.md (default: all sectors)")
     ap.add_argument("--val", type=int, default=5, help="validation share in percent")
     ap.add_argument("--test", type=int, default=5, help="test share in percent")
     a = ap.parse_args(argv)
@@ -311,7 +364,8 @@ def main(argv: list[str] | None = None) -> int:
     data_dir.mkdir(parents=True, exist_ok=True)
     for split, rows in rows_by_split.items():
         pq.write_table(pa.Table.from_pylist(rows, schema=schema()), data_dir / f"{split}-00000-of-00001.parquet", compression="zstd")
-    (a.out / "README.md").write_text(build_card(rows_by_split, a.name), encoding="utf-8")
+    card = f"dataset_card_{a.card}.md" if a.card else "dataset_card.md"
+    (a.out / "README.md").write_text(build_card(rows_by_split, a.name, card, a.pretty_name), encoding="utf-8")
     print(f"{len(seen):,} materials exported to {a.out} "
           + ", ".join(f"{s}: {len(r):,}" for s, r in sorted(rows_by_split.items()))
           + (f"; skipped {skipped} (duplicate or incomplete)" if skipped else ""))
