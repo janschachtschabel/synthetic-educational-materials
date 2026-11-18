@@ -95,6 +95,24 @@ def test_parser():
         parse_inhaltstyp("quiz", kat)
 
 
+def test_inhaltstyp_aus_einem_satz():
+    """Antwortet das Modell mit einem Satz, gilt die Kategorie, wenn genau eine darin vorkommt."""
+    kat = [{"id": "anleitung", "name": "Anleitung", "uri": "a"}, {"id": "glossar", "name": "Glossar", "uri": "g"},
+           {"id": "uebungsblatt", "name": "Übungsblatt", "uri": "u"}]
+    assert parse_inhaltstyp("Das Material ist eine Anleitung: Schritt für Schritt.", kat)["uri"] == "a"
+    assert parse_inhaltstyp("Kategorie: Glossar", kat)["uri"] == "g"
+    for unklar in ("kein Übungsblatt, sondern eine Anleitung", "Bedienungsanleitung für das Gerät", "ein Quiz"):
+        with pytest.raises(ValueError):
+            parse_inhaltstyp(unklar, kat)
+
+
+def test_letzter_versuch_ein_lernziel_genuegt():
+    eins = {"lernziele": [{"lernziel": "Die Studierenden können Eigenwerte berechnen", "stufe": "anwenden"}]}
+    with pytest.raises(ValueError):
+        parse_lernziele(eins)
+    assert len(parse_lernziele(eins, minimum=1)) == 1
+
+
 def test_generate_one_einzelaufrufe_und_inhaltstyp_pruefung(hochschule):
     seed = build_seeds(hochschule, 1, seed=3)[0]
     kat = {k["uri"]: k for k in hochschule.inhaltstyp_kategorien()}
