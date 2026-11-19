@@ -489,6 +489,28 @@ def test_filter_wlo_dubletten():
         assert get(b).standard_auswahl()["wlo_dubletten"] == ["97"]
 
 
+
+def test_schule_themen_auswahl_filtert_wlo_dubletten(monkeypatch):
+    """Schule überschreibt themen_auswahl (Stufen für make_seed) und muss den Dublettenfilter trotzdem anwenden."""
+    from sem.bereiche.schule import Schule
+
+    P = WLO_THEMA_PREFIX
+
+    def w(i, gewicht, links=()):
+        return {"id": P + i, "label_de": i, "portal": "Mathematik", "faecher": [], "art": "unterrichtsthema",
+                "stufen": ["sek1"], "herkunft": "wlo_abstraktion", "wlo": {"gewicht": gewicht},
+                "mapping": {"status": "gesichert"},
+                "verknuepft_mit": [{"id": P + z, "art": "nahe_dublette", "aehnlichkeit": s} for z, s in links]}
+
+    themen = [w("a", 2, [("b", 0.98)]), w("b", 5), w("c", 1, [("b", 0.95)])]
+    s = Schule()
+    monkeypatch.setattr(Schule, "topics", lambda self: themen)
+    herkunft = {"herkunft": ["wlo_abstraktion"]}
+    assert [t["id"] for t in s.themen_auswahl(herkunft)] == [P + "b", P + "c"]
+    assert [t["id"] for t in s.themen_auswahl({**herkunft, "wlo_dubletten": ["95"]})] == [P + "b"]
+    assert len(s.themen_auswahl({**herkunft, "wlo_dubletten": []})) == 3
+    assert s._stufen_auswahl == ["primar", "sek1", "sek2"]
+
 def test_teile_wlo():
     wlo = [{"id": WLO_THEMA_PREFIX + "x"}]
     rest = [{"id": "a"}, {"id": "b"}]

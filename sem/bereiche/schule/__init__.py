@@ -150,7 +150,7 @@ class Schule(Bildungsbereich):
     def themen_auswahl(self, auswahl=None) -> list[dict]:
         auswahl = self.auswahl_pruefen(auswahl)
         self._stufen_auswahl = list(auswahl["stufen"])  # make_seed zieht die Stufe nur aus der Auswahl
-        return [t for t in self.topics() if self.passt(t, auswahl)]
+        return super().themen_auswahl(auswahl)  # Filter passt + nahe Dubletten der WLO-Abstraktion (wlo_dubletten)
 
     kombination_label = "Thema × Fach × Stufe"
 
