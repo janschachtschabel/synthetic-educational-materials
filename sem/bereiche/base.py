@@ -51,7 +51,8 @@ WLO_VORSCHLAG = {"label": "Fach und Stufe (WLO-Abstraktion)",
                            "vorschlag": "vom Modell aus dem OEH-Vokabular vorgeschlagen (Datensätze ohne Fach oder "
                                         "Stufe)"},
                  "standard": ["metadaten", "vorschlag"]}
-# Filter (alle Bereiche mit WLO-Abstraktion: Schule, Hochschule, Erwachsenenbildung, Elementar): nahe Dubletten der WLO-Abstraktion zusammenfassen. Grundlage sind die beim Bau der
+# Filter (alle Bereiche mit WLO-Abstraktion: Schule, Hochschule, Erwachsenenbildung, Elementar, Berufsbildung): nahe
+# Dubletten der WLO-Abstraktion zusammenfassen. Grundlage sind die beim Bau der
 # Themen gespeicherten Verknüpfungen (verknuepft_mit, lokale Embeddings, gleiches Fach): nahe_dublette = anderes
 # WLO-Thema, vorhanden = Thema aus einer anderen Quelle. Unter etwa 0,97 sind es oft verwandte, aber verschiedene
 # Themen (z. B. Management und Marketing von Nonprofit-Organisationen), darüber meist echte Dubletten.
@@ -65,13 +66,13 @@ WLO_DUBLETTEN = {"label": "Nahe Dubletten (WLO-Abstraktion)",
                  "standard": ["97"]}
 
 
-# Filter (Erwachsenenbildung, Elementarbereich): Eignung der ohne LLM zugeordneten Themen (sem/wlo_zuordnung.py)
+# Filter (Erwachsenenbildung, Elementarbereich, Berufsbildung): Eignung der ohne LLM zugeordneten Themen (sem/wlo_zuordnung.py)
 WLO_EIGNUNG = {"label": "Eignung (WLO-Abstraktion)",
                "beschreibung": "Themen der WLO-Abstraktion, die eine Regel als fraglich markiert hat (z. B. eher "
                                "Berufsbildung, Schulstoff, Schulbezug, Kita-fern); Gründe stehen am Thema",
                "werte": {"geeignet": "ohne Markierung", "fraglich": "als fraglich markiert"},
                "standard": ["geeignet"]}
-# Filter (Erwachsenenbildung, Elementarbereich): Status der Zuordnung; ersetzt für diese Themen die Status-Filter der
+# Filter (Erwachsenenbildung, Elementarbereich, Berufsbildung): Status der Zuordnung; ersetzt für diese Themen die Status-Filter der
 # Abstimmung (die WLO-Themen wurden nicht abgestimmt)
 WLO_ZUORDNUNG = {"label": "Zuordnung (WLO-Abstraktion)",
                  "beschreibung": "Status der Zuordnung zu Fachgebiet bzw. Bildungsbereich: gesichert = Embeddings und "

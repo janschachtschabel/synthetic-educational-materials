@@ -72,7 +72,7 @@ def test_export_mit_wlo_themen(ohne_lokal):
     p = ohne_lokal / "wlo_abstraktion" / "abstraktion.jsonl"
     p.parent.mkdir(parents=True)
     p.write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in ROWS), encoding="utf-8")
-    WS.bauen([p], gnd={}, vorhanden={"schule": [], "hochschule": []}, on_progress=lambda *_: None)
+    WS.bauen([p], ("schule", "hochschule"), gnd={}, vorhanden={"schule": [], "hochschule": []}, on_progress=lambda *_: None)
     bekannt = set(E.EXPORTED_SEED_FIELDS) | set(E.NOT_EXPORTED_SEED_FIELDS)
     for key, auswahl in (("schule", {"herkunft": ["wlo_abstraktion"]}), ("hochschule", {"quellen": ["wlo_abstraktion"]})):
         bb = get(key)

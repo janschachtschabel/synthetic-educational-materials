@@ -302,3 +302,107 @@ def zuordnen_elementar(themen: list[dict], vorhanden: list[dict], embedder) -> l
                         "eignung": {"status": "fraglich" if gruende else "geeignet", "gruende": gruende,
                                     "kita_naehe": round(float(kita[i]), 4)}})
     return out
+
+
+# --- Berufsbildung -----------------------------------------------------------------------------------
+
+# Fächer der beruflichen Bildung (OEH discipline): „Berufliche Bildung“ und ihre Berufsfelder. Ein Thema mit einem
+# dieser Fächer gilt als beruflich; sonst (allgemeinbildende Schulfächer wie Religion, Politik, Geschichte, Sprachen,
+# „Allgemein“ oder ohne Fach) wird es „schulstoff“, wenn es vorhandenen Schulthemen näher ist als den ESCO-Kompetenzen
+# und Lernfeldern (Abstand < SCHWELLE_SCHULSTOFF)
+BERUFLICHE_FAECHER = {DISC + d for d in ("040", "04001", "04002", "04003", "04005", "04006", "04007", "04009",
+                                         "04010", "04011", "04012", "04013", "04014", "oeh04010")}
+SCHWELLE_SCHULSTOFF = 0.0
+BB_QUALIFIZIERUNG = ("ausbildung", "fortbildung")  # Berufe, denen ein Thema zugeordnet werden kann (Standardfilter)
+
+
+@lru_cache(maxsize=1)
+def bb_prior() -> dict[str, set[str]]:
+    """discipline-URI → KldB-Berufshauptgruppen (Umkehrung von kldb_discipline.json, ohne „Berufliche Bildung“)."""
+    cm = json.loads((MAPPING_DIR / "berufsbildung" / "kldb_discipline.json").read_text(encoding="utf-8"))["closeMatch"]
+    out: dict[str, set[str]] = defaultdict(set)
+    for hg, uris in cm.items():
+        for u in uris:
+            out[u].add(hg)
+    return out
+
+
+def _knn_zeilen(v: np.ndarray, vorbilder: np.ndarray, k: int = K_KNN, batch: int = 2048) -> np.ndarray:
+    """Je Zeile das Mittel der k größten Ähnlichkeiten zu allen Vorbildern (nan ohne Vorbilder)."""
+    if not len(vorbilder):
+        return np.full(len(v), np.nan, dtype=np.float32)
+    kk = min(k, len(vorbilder))
+    out = np.empty(len(v), dtype=np.float32)
+    for s in range(0, len(v), batch):
+        sims = v[s:s + batch] @ vorbilder.T
+        out[s:s + batch] = -np.partition(-sims, kk - 1, axis=1)[:, :kk].mean(axis=1)
+    return out
+
+
+def zuordnen_bb(themen: list[dict], berufe: list[dict], vorbilder: list[str], schule: list[str], embedder) -> list[dict]:
+    """themen wie bei zuordnen_eb; berufe: [{"uri", "text", "hauptgruppe", "vorbilder": [Index in vorbilder]}]
+    (Kompetenzen und Lernfelder des Berufs), vorbilder: Texte, schule: Labels vorhandener Schulthemen. → je Thema
+    {"beruf", "status", "wert", "eignung"}. Wert je Beruf wie bei EB: Mittel der drei ähnlichsten Kompetenzen bzw.
+    Lernfelder des Berufs (0,6) und Ähnlichkeit zur Berufsbeschreibung (0,4); zum Fach passende Berufe (KldB-
+    Berufshauptgruppe über kldb_discipline.json) bevorzugt."""
+    texte = [text(t["label"], t.get("allgemeiner")) for t in themen]
+    v = embedder.encode(texte, art="anfrage")
+    vv = embedder.encode(vorbilder, art="anfrage") if vorbilder else np.zeros((0, v.shape[1]), dtype=np.float32)
+    uris = [b["uri"] for b in berufe]
+    w = werte(v, vv, [b["vorbilder"] for b in berufe], embedder.encode([b["text"] for b in berufe], art="ziel"))
+    sv = embedder.encode(schule, art="anfrage") if schule else np.zeros((0, v.shape[1]), dtype=np.float32)
+    naehe = _knn_zeilen(v, vv) - _knn_zeilen(v, sv) if len(sv) else np.zeros(len(v), dtype=np.float32)
+    hg = [b["hauptgruppe"] for b in berufe]
+    out = []
+    for i, t in enumerate(themen):
+        hgs = {h for d in t.get("faecher") or [] for h in bb_prior().get(d, ())}
+        prior = {u: BONUS_FACH for u, h in zip(uris, hg) if h in hgs}
+        beruf, status, wert = waehlen(w[i], uris, prior)
+        faecher = set(t.get("faecher") or [])
+        gruende = []
+        if not faecher & BERUFLICHE_FAECHER and float(naehe[i]) < SCHWELLE_SCHULSTOFF:
+            gruende.append("schulstoff")
+        if produktname(t["label"]):
+            gruende.append("produktname")
+        out.append({"beruf": beruf, "status": status, "wert": round(wert, 4),
+                    "eignung": {"status": "fraglich" if gruende else "geeignet", "gruende": gruende,
+                                "berufsnaehe": round(float(naehe[i]), 4)}})
+    return out
+
+
+# --- Schule: Stufe für Datensätze nur mit „Schule“ ------------------------------------------------------
+
+K_STUFEN = 10
+ANTEIL_STUFE = 0.3
+
+
+def stufen_vorschlagen(themen: list[dict], vorhanden: list[dict], embedder) -> list[list[str]]:
+    """Schulstufen (primar, sek1, sek2) für Themen, deren Datensätze nur „Schule“ tragen: die K_STUFEN ähnlichsten
+    vorhandenen Schulthemen desselben Fachs (ohne Fachtreffer: aller Fächer), nach Ähnlichkeit gewichtet; jede Stufe
+    mit mindestens ANTEIL_STUFE des Gewichts, sonst die stärkste. themen: [{"label", "allgemeiner", "faecher"}]."""
+    vh = [t for t in vorhanden if t.get("stufen")]
+    if not themen:
+        return []
+    if not vh:
+        return [["sek1"] for _ in themen]
+    v = embedder.encode([text(t["label"], t.get("allgemeiner")) for t in themen], art="anfrage")
+    pv = embedder.encode([t.get("label_de") or "" for t in vh], art="anfrage")
+    je_fach: dict[str, list[int]] = defaultdict(list)
+    for j, t in enumerate(vh):
+        for f in t.get("faecher") or []:
+            je_fach[f].append(j)
+    alle = list(range(len(vh)))
+    out = []
+    for i, t in enumerate(themen):
+        kand = sorted({j for f in t.get("faecher") or [] for j in je_fach.get(f, [])}) or alle
+        sims = pv[kand] @ v[i]
+        k = min(K_STUFEN, len(kand))
+        gew = Counter()
+        for r in np.argpartition(-sims, k - 1)[:k]:
+            st = vh[kand[r]]["stufen"]
+            for s in st:
+                gew[s] += max(float(sims[r]), 0.0) / len(st)
+        summe = sum(gew.values()) or 1.0
+        st = [s for s in ("primar", "sek1", "sek2") if gew[s] >= ANTEIL_STUFE * summe]
+        out.append(st or [gew.most_common(1)[0][0] if gew else "sek1"])
+    return out

@@ -164,7 +164,11 @@ vorgeschlagenem Fach oder vorgeschlagener Stufe getrennt an oder ab. `wlo_dublet
 nahe Dubletten weg: Ein WLO-Thema fällt weg, wenn ein behaltenes Thema der Auswahl im selben Fach mindestens so
 ähnlich ist (gespeicherte Verknüpfungen, keine neue Berechnung); Themen anderer Quellen bleiben, sonst das mit den
 meisten Datensätzen. Unter etwa 0,97 sind es oft verwandte, aber verschiedene Themen. Der Filter gilt in allen
-Bereichen mit WLO-Themen (Schule, Hochschule, Erwachsenen- und Elementarbildung). Herkunft und Rechte: `PROVENIENZ.md`.
+Bereichen mit WLO-Themen (Schule, Hochschule, Erwachsenen-, Elementar- und Berufsbildung). Datensätze nur mit
+der Bildungsstufe „Schule“ (ohne Primar-, Sekundarstufe) kommen in die Schule: Die Stufe wird aus den zehn
+ähnlichsten vorhandenen Schulthemen desselben Fachs vorgeschlagen (jede Stufe mit mindestens 30 % des Gewichts) und
+als `vorschlag` markiert (Filter `wlo_vorschlag`). Die Stufen „Informelles Lernen“ und „Fortbildung“ zählen zur
+Erwachsenenbildung. Herkunft und Rechte: `PROVENIENZ.md`.
 
 **WLO-Abstraktion in Erwachsenen- und Elementarbildung:** Diese Bereiche gliedern anders als die OEH-Fächer, deshalb
 ordnet `--zusammenfuehren` ihre Themen ohne LLM zu (`sem/wlo_zuordnung.py`): gleiche Themen werden über alle Fächer
@@ -185,6 +189,15 @@ Bereichen `produktname` (Produkt- oder Plattformname im Thema, z. B. Excel, H5P)
 `wlo_eignung`, Standard nur `geeignet`. Stichprobe von je 100 Themen (November 2026): nach dem Standardfilter
 83 % (EB) bzw. 84 % (Elementar) geeignet; der Rest sind vor allem falsche Fachgebiete bzw. Kita-ferne Themen, die
 keine Regel erkennt.
+
+**WLO-Abstraktion in der Berufsbildung:** Themenquelle `wlo_abstraktion` (Standard aus). Jedes Thema bekommt ohne LLM
+einen ESCO-Beruf mit Qualifizierungsweg Ausbildung oder Fortbildung: 0,6 × Mittel der drei ähnlichsten essenziellen
+Kompetenzen bzw. Lernfelder des Berufs plus 0,4 × Ähnlichkeit zur Berufsbeschreibung; Berufe, deren
+KldB-Berufshauptgruppe zum Fach der Datensätze passt (umgekehrtes `kldb_discipline.json`), gewinnen bei knappem
+Abstand. Damit gelten die Berufsfilter (Qualifizierungsweg, KldB-Status, KMK-Rahmenlehrplan) auch für diese Themen,
+die Kompetenz- und Lernfeldfilter nicht. Eignung: `schulstoff`, wenn kein Fach der beruflichen Bildung (Berufliche
+Bildung und ihre Berufsfelder) dabei ist und das Thema vorhandenen Schulthemen näher ist als den ESCO-Kompetenzen
+und Lernfeldern; `produktname` wie oben. Nahe Dubletten werden innerhalb der KldB-Berufshauptgruppe verknüpft.
 
 **Themen auswählen:** Jeder Bereich hat eigene Filter für Quellen bzw. Herkunft, Abstimmungsstatus (Konfidenz:
 `gesichert`, `wahrscheinlich`, `unsicher`, `redaktionell`) und Belege; `python -m sem auswahl <bereich>` zeigt

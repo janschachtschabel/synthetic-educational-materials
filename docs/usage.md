@@ -160,7 +160,10 @@ and is not committed. For seeds, this origin is off by default; `wlo_anteil` set
 0.97) leaves out near duplicates: a WLO topic is dropped if a kept topic of the selection in the same subject is at
 least this similar (stored links, nothing is recomputed); topics from other sources stay, otherwise the one with the
 most records. Below about 0.97 they are often related but different topics. The filter applies in every sector
-with WLO topics (school, higher education, adult and early childhood education).
+with WLO topics (school, higher education, adult, early childhood and vocational education). Records that only
+carry the level "Schule" (no primary or secondary level) go to school: the level is suggested from the ten most
+similar existing school topics of the same subject (every level with at least 30 % of the weight) and marked as
+`vorschlag` (filter `wlo_vorschlag`). The levels "Informelles Lernen" and "Fortbildung" count as adult education.
 Origin and rights: `PROVENIENZ.md`.
 
 **WLO abstraction in adult and early childhood education:** these sectors are structured differently from the OEH
@@ -179,6 +182,15 @@ platform name in the topic, e.g. Excel, H5P). Filter
 `wlo_eignung`, default only `geeignet`. Sample of 100 topics each (November 2026): after the default filter 83 %
 (adult) and 84 % (early childhood) suitable; the rest are mostly wrong subject areas or topics far from early
 childhood education that no rule catches.
+
+**WLO abstraction in vocational education:** topic source `wlo_abstraktion` (off by default). Without an LLM, each
+topic gets an ESCO occupation trained via apprenticeship or further training: 0.6 × mean of the three most similar
+essential skills or learning fields of the occupation plus 0.4 × similarity to the occupation description;
+occupations whose KldB main group matches the records' subject (reversed `kldb_discipline.json`) win if close. The
+occupation filters (qualification path, KldB status, KMK framework curriculum) therefore apply to these topics, the
+skill and learning field filters do not. Suitability: `schulstoff` if no vocational subject (Berufliche Bildung and
+its occupational fields) is present and the topic is closer to existing school topics than to ESCO skills and
+learning fields; `produktname` as above. Near duplicates are linked within the KldB main group.
 
 **Selecting topics:** each sector offers its own filters for sources/origin, voting status (confidence:
 `gesichert`, `wahrscheinlich`, `unsicher`, `redaktionell`) and evidence; `python -m sem auswahl <bereich>`

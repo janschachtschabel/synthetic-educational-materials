@@ -8,10 +8,12 @@ steuerbar.
 
 - Schule: Primarstufe, Sekundarstufe I und II aus der Bildungsstufe der WLO-Datensätze, Fach = OEH discipline.
 - Hochschule: Fach = OEH-Hochschulfächersystematik (Destatis), Lehrebene offen.
-- Erwachsenenbildung: Fachgebiet der Volkshochschul-Statistik, Elementarbereich: Bildungsbereich, Altersgruppe und
-  Themenart, beide ohne LLM zugeordnet (sem/wlo_zuordnung.py); Eignung als "wlo.eignung" markiert (Filter
-  wlo_eignung), gleiche Themen über alle Fächer zusammengefasst.
-- Berufsbildung: Die Abstraktion läuft mit, gemappt wird nicht (gezählt in der Statistik).
+  Datensätze nur mit „Schule“ (ohne Schulstufe): Stufe aus den ähnlichsten vorhandenen Schulthemen desselben Fachs
+  vorgeschlagen (wlo.vorschlag, Filter wlo_vorschlag).
+- Erwachsenenbildung (auch Stufen „Informelles Lernen“ und „Fortbildung“): Fachgebiet der Volkshochschul-Statistik,
+  Elementarbereich: Bildungsbereich, Altersgruppe und Themenart, Berufsbildung: ESCO-Beruf (mit KldB), alle ohne LLM
+  zugeordnet (sem/wlo_zuordnung.py); Eignung als "wlo.eignung" markiert (Filter wlo_eignung), gleiche Themen über
+  alle Fächer zusammengefasst.
 
 Dubletten werden verknüpft, nicht gelöscht: gleiches normalisiertes Thema im selben Bereich und Fach → ein Thema mit
 allen Node-IDs und deren Zahl als Gewicht. Nahe Dubletten (Embedding-Ähnlichkeit) und Überschneidungen mit den
@@ -36,9 +38,12 @@ from .wlo_themen import CTX, HFS, lade_jsonl, norm, ordner, vokabulare
 
 GND_PREFIX = "https://d-nb.info/gnd/"
 SCHULSTUFEN = {CTX + "grundschule": "primar", CTX + "sekundarstufe_1": "sek1", CTX + "sekundarstufe_2": "sek2"}
+# Stufe „Schule“ ohne Schulstufe: Stufe wird aus den vorhandenen Schulthemen vorgeschlagen (stufen_vorschlagen)
+SCHULE_ALLGEMEIN = CTX + "schule"
 BEREICHE_STUFE = {CTX + "berufliche_bildung": "berufsbildung", CTX + "erwachsenenbildung": "erwachsenenbildung",
+                  CTX + "informelles_lernen": "erwachsenenbildung", CTX + "fortbildung": "erwachsenenbildung",
                   CTX + "elementarbereich": "elementar", CTX + "hochschule": "hochschule"}
-STANDARD_BEREICHE = ("schule", "hochschule", "erwachsenenbildung", "elementar")
+STANDARD_BEREICHE = ("schule", "hochschule", "erwachsenenbildung", "elementar", "berufsbildung")
 QUELLE = {"name": "WirLernenOnline (Themen-Abstraktion aus Titel und Beschreibung der Datensätze)",
           "uri": "https://wirlernenonline.de",
           "lizenz": "CC0-1.0 (vom Projekt abstrahiertes Thema; Titel und Beschreibungen nicht übernommen)"}
@@ -54,7 +59,7 @@ SCHWELLE_VORHANDEN = 0.92
 MAX_VERKNUEPFUNGEN = 3
 DATEIEN_FACH = {"schule": "themen_schule.jsonl", "hochschule": "themen_hochschule.jsonl"}
 DATEIEN = {**DATEIEN_FACH, "erwachsenenbildung": "themen_erwachsenenbildung.jsonl",
-           "elementar": "themen_elementar.jsonl"}
+           "elementar": "themen_elementar.jsonl", "berufsbildung": "themen_berufsbildung.jsonl"}
 
 
 def themen_pfad(bereich: str) -> Path:
@@ -165,8 +170,8 @@ def ziele(rec: dict) -> dict[str, dict]:
     disc = [f["uri"] for f in rec["fach"] if f["uri"] in vokabulare()["discipline"].by_uri]
     hfs = [f["uri"] for f in rec["fach"] if HFS in f["uri"]]
     schul = [SCHULSTUFEN[s] for s in stufen if s in SCHULSTUFEN]
-    if schul and disc:
-        out["schule"] = {"faecher": disc, "stufen": schul}
+    if disc and (schul or SCHULE_ALLGEMEIN in stufen):
+        out["schule"] = {"faecher": disc, "stufen": schul}  # leer: Stufe wird beim Bau vorgeschlagen
     for s in stufen:
         b = BEREICHE_STUFE.get(s)
         if b == "hochschule" and hfs:
@@ -260,15 +265,17 @@ def _thema(g: dict, gnd: dict[str, dict], online: dict | None, zuordnung: dict |
     fb = gnd_abgleich([f for f, _ in g["fachbegriffe"].most_common(5)], gnd, online)
     status = "wahrscheinlich" if g["vorschlag"] else "gesichert"
     stufen = [s for s in ("primar", "sek1", "sek2") if s in g["stufen"]]
-    mapping = {"methode": METHODE.format(vorschlag=" (fehlende vom Modell aus dem OEH-Vokabular vorgeschlagen)"
-                                         if g["vorschlag"] else ""),
+    vorschlag = (" (Schulstufe aus den ähnlichsten vorhandenen Schulthemen desselben Fachs vorgeschlagen, lokale "
+                 "Embeddings; Datensätze nur mit Bildungsstufe „Schule“)" if g.get("stufe_vorgeschlagen") else
+                 " (fehlende vom Modell aus dem OEH-Vokabular vorgeschlagen)" if g["vorschlag"] else "")
+    mapping = {"methode": METHODE.format(vorschlag=vorschlag),
                "status": status, "datum": date.today().isoformat()}
     wlo = {"node_ids": sorted(g["node_ids"]), "gewicht": len(g["node_ids"]) or g["abstraktionen"],
            "abstraktionen": g["abstraktionen"], "vorschlag": g["vorschlag"]}
     t: dict = {"id": f"{WLO_THEMA_PREFIX}{b}:{g['key']}", "label_de": label, "herkunft": "wlo_abstraktion",
                "quelle": QUELLE, "thema_allgemeiner": ta, "fachbegriffe": fb, "wlo": wlo}
     thema_gnd = gnd.get(norm(label)) or (online or {}).get(norm(label))
-    if b in ("erwachsenenbildung", "elementar"):
+    if b in ZUORDNUNG:
         return _thema_zuordnung(t, g, fb, ta, zuordnung, thema_gnd)
     if b == "schule":
         fach = vokabulare()["discipline"].by_uri[g["faecher"][0]]["label"]
@@ -299,7 +306,12 @@ def _thema_zuordnung(t: dict, g: dict, fb: list, ta: str | None, z: dict, thema_
     kw = list(dict.fromkeys([f["label"] for f in fb] + ([ta] if ta else [])))
     mapping = {"status": z["status"], "wert": z["wert"], "datum": date.today().isoformat(),
                "embedding_modell": z.get("embedding_modell")}
-    if b == "erwachsenenbildung":
+    if b == "berufsbildung":
+        # Herkunft als Themenquelle des Bereichs (Filter quellen); Beruf wird beim Laden aus berufe.jsonl aufgelöst
+        t.update(quelle="wlo_abstraktion", quelle_wlo=QUELLE, beruf_uri=z["beruf"], berufsfeld=z["berufsfeld"],
+                 keywords=kw, mapping={"methode": METHODE_ZUORDNUNG.format(vorschlag=vorschlag, ziel="ESCO-Beruf "
+                                                                         "(mit KldB-Berufsgruppe)"), **mapping})
+    elif b == "erwachsenenbildung":
         fg = next(x for x in Z.eb_ziele() if x["notation"] == z["fachgebiet"])
         t.update(art=z["art"], fachgebiet=[{k: fg[k] for k in ("notation", "uri", "label")}],
                  programmbereich=[fg["programmbereich"]], synonyme=[], definition="", oberbegriffe=[], keywords=kw,
@@ -319,7 +331,10 @@ def _thema_zuordnung(t: dict, g: dict, fb: list, ta: str | None, z: dict, thema_
 
 
 def _faecher_des_themas(t: dict) -> set[str]:
-    """Gruppe, innerhalb der verknüpft wird: Fach (Schule), Hochschulfächer, VHS-Fachgebiet, Bildungsbereich."""
+    """Gruppe, innerhalb der verknüpft wird: Fach (Schule), Hochschulfächer, VHS-Fachgebiet, Bildungsbereich,
+    KldB-Berufshauptgruppe (Berufsbildung)."""
+    if "berufsfeld" in t:
+        return {f["notation"] for f in t.get("berufsfeld") or []}
     if "fachgebiet" in t:
         return {f["notation"] for f in t.get("fachgebiet") or []}
     if "bildungsbereich" in t:
@@ -330,6 +345,8 @@ def _faecher_des_themas(t: dict) -> set[str]:
 
 
 def _hauptfach(t: dict) -> str:
+    if "berufsfeld" in t:
+        return t["berufsfeld"][0]["notation"]
     if "fachgebiet" in t:
         return t["fachgebiet"][0]["notation"]
     if "bildungsbereich" in t:
@@ -355,8 +372,27 @@ def vorhandene_themen(bereich: str) -> list[dict]:
     from .bereiche import get
 
     b = get(bereich)
+    if bereich == "berufsbildung":
+        return vorhandene_bb(b)
     roh = b._topics_roh()
     return [t for t in roh if not str(t["id"]).startswith(WLO_THEMA_PREFIX)]
+
+
+def vorhandene_bb(b) -> list[dict]:
+    """Themen der Berufsbildung als Vergleichsthemen: Kompetenz- bzw. Lernfeld-Label je KldB-Berufshauptgruppe des
+    Berufs (gleiche Labels in derselben Hauptgruppe einmal); DigComp ohne Beruf fehlt."""
+    out, gesehen = [], set()
+    for t in b.topics():
+        if str(t["id"]).startswith(WLO_THEMA_PREFIX) or "beruf" not in t:
+            continue
+        label = t["kompetenz"]["label"] if t.get("kompetenz") else t["lernfeld"]["titel"]
+        hg = t["beruf"]["berufshauptgruppe"][0]
+        key = (norm(label), hg["notation"])
+        if key not in gesehen:
+            gesehen.add(key)
+            out.append({"id": t["id"], "label_de": label, "herkunft": t.get("quelle", "esco"),
+                        "berufsfeld": [{k: hg[k] for k in ("notation", "uri", "label")}]})
+    return out
 
 
 def verknuepfen(neu: list[dict], vorhanden: list[dict], embedder=None) -> dict:
@@ -454,6 +490,17 @@ def bauen(abstraktion: list[Path], bereiche=STANDARD_BEREICHE, embedder=None, on
         gs = gruppen.get(b, [])
         v = vorhanden[b] if vorhanden is not None and b in vorhanden else (vorhandene_themen(b) if gs else [])
         zu = [None] * len(gs)
+        if b == "schule":
+            ohne = [g for g in gs if not g["stufen"]]
+            if ohne:
+                from . import wlo_zuordnung as Z
+
+                if any(t.get("stufen") for t in v):  # ohne vorhandene Schulthemen: Sek I, kein Modell nötig
+                    embedder = embedder or _standard_embedder()
+                on_progress(f"schule: Schulstufe für {len(ohne)} Themen vorschlagen")
+                for g, st in zip(ohne, Z.stufen_vorschlagen(_zuordnung_eingabe(ohne), v, embedder)):
+                    g.update(stufen=st, vorschlag=True, stufe_vorgeschlagen=True)
+                zaehl["schule_stufe_vorgeschlagen"] = len(ohne)
         if b in ZUORDNUNG and gs:
             embedder = embedder or _standard_embedder()
             zu = zuordnen(b, gs, v, embedder, berufe=berufe)
@@ -490,7 +537,7 @@ def bauen(abstraktion: list[Path], bereiche=STANDARD_BEREICHE, embedder=None, on
     return stat
 
 
-ZUORDNUNG = ("erwachsenenbildung", "elementar")
+ZUORDNUNG = ("erwachsenenbildung", "elementar", "berufsbildung")
 
 
 def _standard_embedder():
@@ -504,10 +551,10 @@ def zuordnen(bereich: str, gruppen: list[dict], vorhanden: list[dict], embedder,
     """Fachgebiet (EB) bzw. Bildungsbereich (Elementar) je zusammengefasster Gruppe, siehe sem/wlo_zuordnung.py."""
     from . import wlo_zuordnung as Z
 
-    themen_ = [{"label": g["schreibweisen"].most_common(1)[0][0],
-                "allgemeiner": g["allgemeiner"].most_common(1)[0][0] if g["allgemeiner"] else None,
-                "faecher": g["faecher"], "stufen_uris": g.get("stufen_uris", [])} for g in gruppen]
-    if bereich == "erwachsenenbildung":
+    themen_ = _zuordnung_eingabe(gruppen)
+    if bereich == "berufsbildung":
+        out = _zuordnen_bb(themen_, embedder)
+    elif bereich == "erwachsenenbildung":
         if berufe is None:
             p = paths.MAPPING_DIR / "berufsbildung" / "kompetenzen.jsonl"
             berufe = [x["label"] for x in lade_jsonl(p)] if p.exists() else []
@@ -516,6 +563,42 @@ def zuordnen(bereich: str, gruppen: list[dict], vorhanden: list[dict], embedder,
         out = Z.zuordnen_elementar(themen_, vorhanden, embedder)
     for z in out:
         z["embedding_modell"] = getattr(embedder, "model", None)
+    return out
+
+
+def _zuordnung_eingabe(gruppen: list[dict]) -> list[dict]:
+    return [{"label": g["schreibweisen"].most_common(1)[0][0],
+             "allgemeiner": g["allgemeiner"].most_common(1)[0][0] if g["allgemeiner"] else None,
+             "faecher": g["faecher"], "stufen_uris": g.get("stufen_uris", [])} for g in gruppen]
+
+
+def _zuordnen_bb(themen_: list[dict], embedder) -> list[dict]:
+    """Beruf je Thema (sem/wlo_zuordnung.zuordnen_bb): Kandidaten sind die Berufe mit Qualifizierungsweg Ausbildung
+    oder Fortbildung, Vorbilder ihre essenziellen Kompetenzen und Lernfelder; Schulthemen für die Eignung."""
+    from . import wlo_zuordnung as Z
+    from .bereiche import get
+
+    bb = get("berufsbildung")
+    vorbilder: dict[str, int] = {}
+    je_beruf: dict[str, list[int]] = defaultdict(list)
+    for t in bb.topics():
+        if str(t["id"]).startswith(WLO_THEMA_PREFIX) or "beruf" not in t or t.get("relation") == "optional":
+            continue
+        label = t["kompetenz"]["label"] if t.get("kompetenz") else t["lernfeld"]["titel"]
+        je_beruf[t["beruf"]["uri"]].append(vorbilder.setdefault(label, len(vorbilder)))
+    berufe = [b for b in bb.berufe if b.get("qualifizierung") in Z.BB_QUALIFIZIERUNG]
+    eingabe = [{"uri": b["uri"], "text": f"Beruf {b['label']}: {b.get('beschreibung', '')}",
+                "hauptgruppe": b["berufshauptgruppe"][0]["notation"], "vorbilder": je_beruf.get(b["uri"], [])}
+               for b in berufe]
+    try:
+        schule = [t["label_de"] for t in vorhandene_themen("schule") if t.get("label_de")]
+    except FileNotFoundError:
+        schule = []
+    out = Z.zuordnen_bb(themen_, eingabe, list(vorbilder), schule, embedder)
+    by = {b["uri"]: b for b in berufe}
+    for z in out:
+        hg = by[z["beruf"]]["berufshauptgruppe"][0]
+        z["berufsfeld"] = [{k: hg[k] for k in ("notation", "uri", "label")}]
     return out
 
 
@@ -533,9 +616,17 @@ def kennzahlen_verknuepfung(neu: list[dict]) -> dict:
 
 
 def kennzahlen_zuordnung(neu: list[dict]) -> dict:
-    ziel = (lambda t: t["fachgebiet"][0]["notation"]) if neu and "fachgebiet" in neu[0] else         (lambda t: t["bildungsbereich"][0]["id"])
+    if neu and "berufsfeld" in neu[0]:
+        def ziel(t):
+            return t["berufsfeld"][0]["notation"]
+    elif neu and "fachgebiet" in neu[0]:
+        def ziel(t):
+            return t["fachgebiet"][0]["notation"]
+    else:
+        def ziel(t):
+            return t["bildungsbereich"][0]["id"]
     return {"status": dict(Counter(t["mapping"]["status"] for t in neu)),
-            "art": dict(Counter(t["art"] for t in neu)),
+            **({"art": dict(Counter(t["art"] for t in neu))} if neu and "art" in neu[0] else {}),
             "eignung": dict(Counter(t["wlo"]["eignung"]["status"] for t in neu)),
             "eignung_gruende": dict(Counter(g for t in neu for g in t["wlo"]["eignung"]["gruende"])),
             "ziel": dict(sorted(Counter(ziel(t) for t in neu).items())),
