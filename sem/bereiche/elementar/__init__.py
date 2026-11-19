@@ -18,7 +18,7 @@ from ... import gnd_ergaenzung
 from ... import schema as S
 from ...paths import MAPPING_DIR
 from ...vocabs import load as load_vocab
-from ..base import (WLO_ANTEIL, WLO_EIGNUNG, WLO_VORSCHLAG, WLO_ZUORDNUNG, Bildungsbereich, MappingSchritt, SeedState,
+from ..base import (WLO_ANTEIL, WLO_DUBLETTEN, WLO_EIGNUNG, WLO_VORSCHLAG, WLO_ZUORDNUNG, Bildungsbereich, MappingSchritt, SeedState,
                     ist_wlo, wlo_passt)
 from ..hochschule import load_jsonl
 
@@ -96,6 +96,7 @@ class Elementar(Bildungsbereich):
                          "standard": ["llm", "wlo"]},
             "wlo_anteil": WLO_ANTEIL,
             "wlo_vorschlag": WLO_VORSCHLAG,
+            "wlo_dubletten": WLO_DUBLETTEN,
             "wlo_eignung": WLO_EIGNUNG,
             "wlo_zuordnung": WLO_ZUORDNUNG,
             "eignung_status": {"label": "Status der Eignung", "beschreibung": "Abstimmung", "werte": status,

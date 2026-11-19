@@ -23,7 +23,7 @@ from ... import faecher, gnd_ergaenzung
 from ... import schema as S
 from ...paths import MAPPING_DIR, lokal_pfad
 from ...vocabs import load as load_vocab
-from ..base import (WLO_ANTEIL, WLO_EIGNUNG, WLO_VORSCHLAG, WLO_ZUORDNUNG, Bildungsbereich, MappingSchritt, SeedState,
+from ..base import (WLO_ANTEIL, WLO_DUBLETTEN, WLO_EIGNUNG, WLO_VORSCHLAG, WLO_ZUORDNUNG, Bildungsbereich, MappingSchritt, SeedState,
                     ist_wlo, wlo_passt)
 from ..hochschule import load_jsonl
 
@@ -162,6 +162,7 @@ class Erwachsenenbildung(Bildungsbereich):
                         "standard": ["gnd", "rahmencurriculum", "schulthemen", "grundbildung", "digcomp"]},
             "wlo_anteil": WLO_ANTEIL,
             "wlo_vorschlag": WLO_VORSCHLAG,
+            "wlo_dubletten": WLO_DUBLETTEN,
             "wlo_eignung": WLO_EIGNUNG,
             "wlo_zuordnung": WLO_ZUORDNUNG,
             "art": {"label": "Themenart", "beschreibung": "Abstimmung",

@@ -51,7 +51,7 @@ WLO_VORSCHLAG = {"label": "Fach und Stufe (WLO-Abstraktion)",
                            "vorschlag": "vom Modell aus dem OEH-Vokabular vorgeschlagen (Datensätze ohne Fach oder "
                                         "Stufe)"},
                  "standard": ["metadaten", "vorschlag"]}
-# Filter (Schule, Hochschule): nahe Dubletten der WLO-Abstraktion zusammenfassen. Grundlage sind die beim Bau der
+# Filter (alle Bereiche mit WLO-Abstraktion: Schule, Hochschule, Erwachsenenbildung, Elementar): nahe Dubletten der WLO-Abstraktion zusammenfassen. Grundlage sind die beim Bau der
 # Themen gespeicherten Verknüpfungen (verknuepft_mit, lokale Embeddings, gleiches Fach): nahe_dublette = anderes
 # WLO-Thema, vorhanden = Thema aus einer anderen Quelle. Unter etwa 0,97 sind es oft verwandte, aber verschiedene
 # Themen (z. B. Management und Marketing von Nonprofit-Organisationen), darüber meist echte Dubletten.

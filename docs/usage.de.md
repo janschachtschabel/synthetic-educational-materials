@@ -163,7 +163,8 @@ in `data/lokal/wlo_abstraktion/` und wird nicht committet. Bei den Seeds ist die
 vorgeschlagenem Fach oder vorgeschlagener Stufe getrennt an oder ab. `wlo_dubletten` (Standard 0,97) lässt
 nahe Dubletten weg: Ein WLO-Thema fällt weg, wenn ein behaltenes Thema der Auswahl im selben Fach mindestens so
 ähnlich ist (gespeicherte Verknüpfungen, keine neue Berechnung); Themen anderer Quellen bleiben, sonst das mit den
-meisten Datensätzen. Unter etwa 0,97 sind es oft verwandte, aber verschiedene Themen. Herkunft und Rechte: `PROVENIENZ.md`.
+meisten Datensätzen. Unter etwa 0,97 sind es oft verwandte, aber verschiedene Themen. Der Filter gilt in allen
+Bereichen mit WLO-Themen (Schule, Hochschule, Erwachsenen- und Elementarbildung). Herkunft und Rechte: `PROVENIENZ.md`.
 
 **WLO-Abstraktion in Erwachsenen- und Elementarbildung:** Diese Bereiche gliedern anders als die OEH-Fächer, deshalb
 ordnet `--zusammenfuehren` ihre Themen ohne LLM zu (`sem/wlo_zuordnung.py`): gleiche Themen werden über alle Fächer
