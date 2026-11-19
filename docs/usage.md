@@ -159,7 +159,8 @@ and is not committed. For seeds, this origin is off by default; `wlo_anteil` set
 `wlo_vorschlag` switches topics with a suggested subject or level on or off separately. `wlo_dubletten` (default
 0.97) leaves out near duplicates: a WLO topic is dropped if a kept topic of the selection in the same subject is at
 least this similar (stored links, nothing is recomputed); topics from other sources stay, otherwise the one with the
-most records. Below about 0.97 they are often related but different topics.
+most records. Below about 0.97 they are often related but different topics. The filter applies in every sector
+with WLO topics (school, higher education, adult and early childhood education).
 Origin and rights: `PROVENIENZ.md`.
 
 **WLO abstraction in adult and early childhood education:** these sectors are structured differently from the OEH

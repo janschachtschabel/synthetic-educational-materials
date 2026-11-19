@@ -485,7 +485,7 @@ def test_filter_wlo_dubletten():
     assert ids(ohne_wlo_dubletten(themen[2:3] + themen[3:4], 0.93)) == ["b", "c"]
     assert wlo_dubletten_schwelle({"wlo_dubletten": ["97", "95"]}) == 0.95
     assert wlo_dubletten_schwelle({"wlo_dubletten": []}) is None and wlo_dubletten_schwelle({}) is None
-    for b in ("schule", "hochschule"):
+    for b in ("schule", "hochschule", "erwachsenenbildung", "elementar"):
         assert get(b).standard_auswahl()["wlo_dubletten"] == ["97"]
 
 
