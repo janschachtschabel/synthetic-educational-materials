@@ -6,6 +6,9 @@ OEH-Vokabular escoSkills. Berufsfeld: KldB 2010 (Fassung 2020) aus dem OEH-Vokab
 Feld ccm:oeh_profession_group nutzt. Optional (Standard aus): Lernergebnisse aus DigComp 3.0 als berufsübergreifende
 digitale Kompetenz; der Beruf wird beim Seed passend zum DigComp-Niveau gezogen. Qualifizierungsweg (Ausbildung, Fortbildung, Studium, Anlernen) und
 KldB-Zuordnung je Beruf per Mehrfachabstimmung, filterbar über auswahl_optionen.
+Nur lokal: Themen der WLO-Abstraktion (data/lokal/wlo_abstraktion/themen_berufsbildung.jsonl, Themenquelle
+„wlo_abstraktion“, Standard aus); ESCO-Beruf ohne LLM zugeordnet, eher schulische Themen als fraglich markiert (siehe
+sem/wlo_zuordnung.py).
 """
 
 from __future__ import annotations
@@ -18,7 +21,8 @@ from ... import faecher
 from ... import schema as S
 from ...paths import MAPPING_DIR, lokal_pfad
 from ...vocabs import load as load_vocab
-from ..base import Bildungsbereich, MappingSchritt, SeedState
+from ..base import (WLO_ANTEIL, WLO_DUBLETTEN, WLO_EIGNUNG, WLO_VORSCHLAG, WLO_ZUORDNUNG, Bildungsbereich, MappingSchritt,
+                    SeedState, ist_wlo, wlo_passt)
 from ..hochschule import load_jsonl
 
 DIR = MAPPING_DIR / "berufsbildung"
@@ -102,8 +106,19 @@ class Berufsbildung(Bildungsbereich):
                         "werte": {"esco": "ESCO-Beruf × Kompetenz des Berufs",
                                   "lernfeld": "ESCO-Beruf × Lernfeld des KMK-Rahmenlehrplans",
                                   "digcomp": "Lernergebnis aus DigComp 3.0 (digitale Kompetenz, berufsübergreifend); "
-                                             "Beruf passend zum Niveau beim Seed gezogen"},
+                                             "Beruf passend zum Niveau beim Seed gezogen",
+                                  "wlo_abstraktion": "Thema, per LLM aus Titel und Beschreibung von WLO-Datensätzen "
+                                                     "abstrahiert, ESCO-Beruf ohne LLM zugeordnet (nur mit lokaler "
+                                                     "Datei, python -m sem wlo-themen)"},
                         "standard": ["esco", "lernfeld"]},
+            "wlo_anteil": WLO_ANTEIL,
+            "wlo_vorschlag": WLO_VORSCHLAG,
+            "wlo_dubletten": WLO_DUBLETTEN,
+            "wlo_eignung": WLO_EIGNUNG,
+            "wlo_zuordnung": {**WLO_ZUORDNUNG, "beschreibung": "Status der Zuordnung zum ESCO-Beruf: gesichert = "
+                              "Embeddings und Fach der Datensätze (über die KldB-Berufshauptgruppe) einig, "
+                              "wahrscheinlich = zum Fach passender Beruf gewählt oder kein Berufsfach, unsicher = "
+                              "Embeddings gegen das Fach"},
             "qualifizierung": {"label": "Qualifizierungsweg des Berufs",
                                "beschreibung": "wie der Beruf in Deutschland üblicherweise erlernt wird (Abstimmung)",
                                "werte": {"ausbildung": "Berufsausbildung (dual oder schulisch)",
@@ -168,14 +183,21 @@ class Berufsbildung(Bildungsbereich):
             out.add("handmapping")
         return out
 
+    @staticmethod
+    def _quelle(topic: dict) -> str:
+        return "wlo_abstraktion" if ist_wlo(topic) else topic.get("quelle", "esco")
+
     def passt(self, topic: dict, auswahl: dict[str, list[str]]) -> bool:
         if topic.get("quelle") == "digcomp":  # Beruf erst beim Seed; Berufs- und Kompetenzfilter gelten nicht
             return "digcomp" in auswahl["quellen"] and not auswahl["belege"]
         b, k = topic["beruf"], topic.get("kompetenz")
         m = b.get("mapping") or {}
-        if topic.get("quelle", "esco") not in auswahl["quellen"] or b.get("qualifizierung") not in auswahl["qualifizierung"]:
+        if self._quelle(topic) not in auswahl["quellen"] or b.get("qualifizierung") not in auswahl["qualifizierung"]:
             return False
-        if k is None:  # Lernfeld-Thema: die Kompetenzfilter gelten nicht
+        if ist_wlo(topic):  # Beruf aus der Zuordnung: Berufsfilter gelten, Kompetenz- und Lernfeldfilter nicht
+            if not wlo_passt(topic, auswahl):
+                return False
+        elif k is None:  # Lernfeld-Thema: die Kompetenzfilter gelten nicht
             if topic["plan"]["mapping"]["status"] not in auswahl["lernfeld_status"]:
                 return False
         elif topic["relation"] not in auswahl["relation"] or k.get("art") not in auswahl["kompetenzart"] \
@@ -249,7 +271,14 @@ class Berufsbildung(Bildungsbereich):
                     if k:
                         out.append({"id": f"{b['uri']}|{uri.rsplit('/', 1)[-1]}", "beruf": b, "kompetenz": k,
                                     "relation": relation})
-        return out + self._lernfeld_topics() + self._digcomp_topics()
+        return out + self._lernfeld_topics() + self._digcomp_topics() + self._wlo_topics()
+
+    def _wlo_topics(self) -> list[dict]:
+        """WLO-Abstraktion (nur mit lokaler Datei); der zugeordnete Beruf wird aus berufe.jsonl ergänzt."""
+        from ... import wlo_seeds
+
+        by_uri = {b["uri"]: b for b in self.berufe}
+        return [{**t, "beruf": by_uri[t["beruf_uri"]]} for t in wlo_seeds.themen(self.key) if t["beruf_uri"] in by_uri]
 
     def _digcomp_topics(self) -> list[dict]:
         from ...quellen import digcomp as D
@@ -377,6 +406,16 @@ class Berufsbildung(Bildungsbereich):
                 q["name"], uri=p["url"], license=q["lizenz"],
                 method="Lernfeld des Rahmenlehrplans im zugeordneten ESCO-Beruf")
             status["rahmenlehrplan"] = p["mapping"]["status"]
+        elif ist_wlo(topic):
+            from ...wlo_seeds import belege_kompakt
+
+            q = topic["quelle_wlo"]
+            seed[S.F_THEMA] = {"id": topic["id"], "label_de": topic["label_de"], "beschreibung_de": "",
+                               "keywords_de": list(dict.fromkeys([topic["label_de"], *topic.get("keywords", [])[:5]]))}
+            seed[S.F_PROVENANCE][S.F_THEMA] = S.provenance(q["name"], uri=q["uri"], license=q["lizenz"],
+                                                           method=topic["mapping"]["methode"])
+            seed[S.F_PROVENANCE][S.F_THEMA]["herkunft"] = "wlo_abstraktion"
+            status.update(beruf=topic["mapping"]["status"], eignung=topic["wlo"]["eignung"]["status"])
         elif dc:
             from ...quellen import digcomp as D
             from ..erwachsenenbildung import digcomp as dmod
@@ -407,6 +446,8 @@ class Berufsbildung(Bildungsbereich):
                 method="Kombination aus ESCO-Beruf und verknüpfter Kompetenz")
         seed[S.F_PROVENANCE][S.F_THEMA].update(status=status,
                                                belege={"erfuellt": sorted(self.belege_des_themas(topic))})
+        if ist_wlo(topic):
+            seed[S.F_PROVENANCE][S.F_THEMA]["belege"].update(belege_kompakt(topic))
 
         seed[S.F_NIVEAU] = {"id": niveau["id"], "label": niveau["label"], "dqr": niveau["dqr"],
                             "exactMatch": niveau["exactMatch"]}

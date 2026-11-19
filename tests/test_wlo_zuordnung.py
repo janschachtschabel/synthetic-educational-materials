@@ -157,3 +157,88 @@ def test_seeds_mit_wlo_themen(ohne_lokal, bereich, filter_):
     ids = {s["synth:thema"]["id"] for s in nur}
     fraglich = {t["id"] for t in wlo if t["wlo"]["eignung"]["status"] == "fraglich"}
     assert ids and not ids & fraglich
+
+
+def test_ziele_neue_stufen():
+    """Informelles Lernen und Fortbildung → Erwachsenenbildung; nur „Schule“ → Schule ohne Stufe (Vorschlag beim Bau)."""
+    r = _abstraktion("x", "Stadtgeschichte", [f"{DISC}240"], [f"{CTX}informelles_lernen"], ["n"])
+    assert set(WS.ziele(r)) == {"erwachsenenbildung"}
+    r = _abstraktion("x", "Online-Kurse betreuen", [f"{DISC}720"], [f"{CTX}fortbildung"], ["n"])
+    assert set(WS.ziele(r)) == {"erwachsenenbildung"}
+    r = _abstraktion("x", "Reformation", [f"{DISC}240"], [f"{CTX}schule"], ["n"])
+    assert WS.ziele(r) == {"schule": {"faecher": [f"{DISC}240"], "stufen": []}}
+    r = _abstraktion("x", "Reformation", [], [f"{CTX}schule"], ["n"])
+    assert WS.ziele(r) == {}  # ohne Fach kein Schulthema
+
+
+def test_stufen_vorschlagen():
+    vorhanden = [{"label_de": "Malerei der Renaissance", "faecher": ["kunst"], "stufen": ["sek2"]},
+                 {"label_de": "Malerei mit Fingerfarben", "faecher": ["kunst"], "stufen": ["primar"]},
+                 {"label_de": "Tiere im Zoo", "faecher": ["bio"], "stufen": ["primar", "sek1"]}]
+    st = Z.stufen_vorschlagen([{"label": "Malerei", "faecher": ["kunst"]}, {"label": "Tiere", "faecher": ["bio"]},
+                               {"label": "Tiere", "faecher": ["chemie"]}], vorhanden, WortEmbedder())
+    assert st[0] == ["primar", "sek2"] and st[1] == ["primar", "sek1"]
+    assert st[2]  # ohne Fachtreffer: alle Fächer
+    assert Z.stufen_vorschlagen([{"label": "x"}], [], WortEmbedder()) == [["sek1"]]
+
+
+def test_bb_zuordnung_und_eignung():
+    berufe = [{"uri": "b:schweisser", "text": "Beruf Schweißer: Schweißen von Metall", "hauptgruppe": "24",
+               "vorbilder": [0]},
+              {"uri": "b:tierpfleger", "text": "Beruf Tierpfleger: Pflege von Tieren", "hauptgruppe": "11",
+               "vorbilder": [1]}]
+    themen = [{"label": "WIG-Schweißen von Rohren", "faecher": [f"{DISC}04011"]},
+              {"label": "Religion in Europa", "faecher": [f"{DISC}520"]},
+              {"label": "Tierhaltung", "faecher": [f"{DISC}520"]},
+              {"label": "Schweißen mit Microsoft Excel planen", "faecher": [f"{DISC}040"]}]
+    out = Z.zuordnen_bb(themen, berufe, ["Schweißnähte prüfen", "Tiere füttern"], ["Religion im Unterricht"],
+                        WortEmbedder())
+    assert out[0]["beruf"] == "b:schweisser" and out[0]["status"] == "gesichert"
+    assert out[0]["eignung"]["status"] == "geeignet"
+    assert out[1]["eignung"]["gruende"] == ["schulstoff"] and out[1]["eignung"]["berufsnaehe"] < 0
+    assert out[2]["beruf"] == "b:tierpfleger" and out[2]["eignung"]["status"] == "geeignet"  # nah an Kompetenzen
+    assert out[3]["eignung"]["gruende"] == ["produktname"]  # berufliches Fach: nie Schulstoff
+
+
+def test_bb_themen_filter_und_seeds(ohne_lokal, monkeypatch):
+    b = get("berufsbildung")
+    try:
+        beruf = b.berufe[0]
+    except FileNotFoundError:
+        pytest.skip("keine Berufe gebaut")
+    rows = [_abstraktion("b1", "WIG-Schweißen von Rohren", [f"{DISC}04011"], [f"{CTX}berufliche_bildung"], ["n1"]),
+            _abstraktion("b2", "Religion in Europa", [f"{DISC}520"], [f"{CTX}berufliche_bildung"], ["n2"])]
+    hg = beruf["berufshauptgruppe"][0]
+
+    def zuordnen(themen_, embedder):
+        return [{"beruf": beruf["uri"], "status": "wahrscheinlich", "wert": 0.9,
+                 "berufsfeld": [{k: hg[k] for k in ("notation", "uri", "label")}],
+                 "eignung": {"status": "fraglich" if "Religion" in t["label"] else "geeignet",
+                             "gruende": ["schulstoff"] if "Religion" in t["label"] else []}} for t in themen_]
+
+    monkeypatch.setattr(WS, "_zuordnen_bb", zuordnen)
+    p = ohne_lokal / "wlo_abstraktion" / "abstraktion.jsonl"
+    p.parent.mkdir(parents=True)
+    p.write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows), encoding="utf-8")
+    st = WS.bauen([p], bereiche=("berufsbildung",), embedder=WortEmbedder(), gnd={}, vorhanden={"berufsbildung": []},
+                  on_progress=lambda *_: None)
+    assert st["bereiche"]["berufsbildung"]["themen"] == 2
+    assert st["bereiche"]["berufsbildung"]["eignung"] == {"geeignet": 1, "fraglich": 1}
+    b = get("berufsbildung")
+    wlo = [t for t in b.topics() if t["id"].startswith(WLO_THEMA_PREFIX + "berufsbildung:")]
+    assert len(wlo) == 2 and wlo[0]["beruf"]["uri"] == beruf["uri"] and wlo[0]["berufsfeld"][0]["notation"]
+    o = b.auswahl_optionen()
+    assert o["wlo_dubletten"]["standard"] == ["97"] and o["wlo_eignung"]["standard"] == ["geeignet"]
+    assert "wlo_abstraktion" in o["quellen"]["werte"] and "wlo_abstraktion" not in o["quellen"]["standard"]
+    assert not [t for t in b.themen_auswahl() if t["id"].startswith(WLO_THEMA_PREFIX)]  # Standard: aus
+    alle = {k: list(v["werte"]) for k, v in o.items() if k not in ("belege", "wlo_eignung")}
+    nur = b.themen_auswahl({**alle, "quellen": ["wlo_abstraktion"]})
+    assert [t["label_de"] for t in nur] == ["WIG-Schweißen von Rohren"]
+    assert len(b.themen_auswahl({**alle, "quellen": ["wlo_abstraktion"], "wlo_eignung": ["geeignet", "fraglich"]})) == 2
+    seeds = build_seeds(b, 4, seed=1, auswahl={**alle, "quellen": ["wlo_abstraktion"]})
+    s = seeds[0]
+    assert s["synth:thema"]["label_de"] == "WIG-Schweißen von Rohren" and s["synth:beruf"]["uri"] == beruf["uri"]
+    prov = s["synth:provenance"]["synth:thema"]
+    assert prov["herkunft"] == "wlo_abstraktion" and prov["status"]["eignung"] == "geeignet"
+    assert prov["belege"]["wlo"]["nodes"][0].startswith("https://") and "synth:kompetenz" not in s
+    assert b.prompt_values(s)["thema"] == "WIG-Schweißen von Rohren"

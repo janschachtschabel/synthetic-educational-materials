@@ -339,12 +339,15 @@ ROWS = [
 def test_zusammenfassen_verknuepft_dubletten_statt_zu_loeschen():
     gruppen, z = WS.zusammenfassen(ROWS)
     schule = gruppen["schule"]
-    assert len(schule) == 2  # g1+g2 (gleiches Thema, gleiches Fach) und g3 (anderes Fach)
+    assert len(schule) == 3  # g1+g2 (gleiches Thema, gleiches Fach), g3 (anderes Fach), g7 (nur „Schule“)
     mathe = next(g for g in schule if len(g["node_ids"]) == 3)
     assert mathe["node_ids"] == ["n1", "n2", "n3"] and mathe["stufen"] == ["primar", "sek1"]
+    assert next(g for g in schule if g["node_ids"] == ["n8"])["stufen"] == []  # Stufe wird beim Bau vorgeschlagen
     assert len(gruppen["hochschule"]) == 1 and gruppen["hochschule"][0]["faecher"] == [f"{HFS}n37"]
-    assert z["nicht_seed_tauglich"] == 1 and z["nicht_gemappt_berufsbildung"] == 1
-    assert z["ohne_bereich_oder_fach"] == 1  # g7: nur „Schule“ ohne Schulstufe
+    assert len(gruppen["berufsbildung"]) == 1 and z["abstraktionen_berufsbildung"] == 1
+    assert z["nicht_seed_tauglich"] == 1 and "ohne_bereich_oder_fach" not in z
+    _, z = WS.zusammenfassen(ROWS, bereiche=("schule", "hochschule"))
+    assert z["nicht_gemappt_berufsbildung"] == 1
 
 
 class _FakeEmbedder:
@@ -368,8 +371,9 @@ def test_bauen_mit_gnd_und_verknuepfung(ohne_lokal):
                             {"id": "oeh:2", "label_de": "Bruchrechnung im Alltag", "faecher": [f"{DISC}380"]},
                             {"id": "oeh:3", "label_de": "Brüche", "faecher": [f"{DISC}240"]}],
                  "hochschule": []}
-    st = WS.bauen([p], embedder=_FakeEmbedder(), gnd=gnd, vorhanden=vorhanden, on_progress=lambda *_: None)
-    assert st["bereiche"]["schule"]["themen"] == 2 and st["bereiche"]["hochschule"]["themen"] == 1
+    st = WS.bauen([p], bereiche=("schule", "hochschule"), embedder=_FakeEmbedder(), gnd=gnd, vorhanden=vorhanden,
+                  on_progress=lambda *_: None)
+    assert st["bereiche"]["schule"]["themen"] == 3 and st["bereiche"]["hochschule"]["themen"] == 1
     schule = WS.themen("schule")
     t = next(x for x in schule if x["wlo"]["gewicht"] == 3)
     assert t["id"].startswith(WLO_THEMA_PREFIX + "schule:") and t["herkunft"] == "wlo_abstraktion"
@@ -395,9 +399,10 @@ def test_seeds_herkunft_und_anteil(ohne_lokal):
     p = ohne_lokal / "wlo_abstraktion" / "abstraktion.jsonl"
     p.parent.mkdir(parents=True)
     p.write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in ROWS), encoding="utf-8")
-    WS.bauen([p], gnd={}, vorhanden={"schule": [], "hochschule": []}, on_progress=lambda *_: None)
+    WS.bauen([p], bereiche=("schule", "hochschule"), gnd={}, vorhanden={"schule": [], "hochschule": []},
+             on_progress=lambda *_: None)
     b = get("schule")
-    assert len([t for t in b.topics() if t["id"].startswith(WLO_THEMA_PREFIX)]) == 2
+    assert len([t for t in b.topics() if t["id"].startswith(WLO_THEMA_PREFIX)]) == 3
     # Standard: aus
     assert not [s for s in build_seeds(b, 50, seed=1) if s["synth:thema"]["id"].startswith(WLO_THEMA_PREFIX)]
     an = {"herkunft": ["themenbaum", "wlo_keyword", "wlo_abstraktion"], "wlo_anteil": ["10", "30"]}
@@ -539,11 +544,11 @@ def test_gnd_online_nur_fachbegriffe_ab_mindestanzahl(ohne_lokal, monkeypatch):
     gefragt = []
     monkeypatch.setattr(WS, "gnd_online", lambda b, **k: gefragt.append(list(b)) or
                         {"bruch": {"uri": "https://d-nb.info/gnd/4008131-x", "label": "Bruch"}})
-    WS.bauen([p], gnd={}, vorhanden={"schule": [], "hochschule": []}, online=True, schreiben=False,
+    WS.bauen([p], ("schule", "hochschule"), gnd={}, vorhanden={"schule": [], "hochschule": []}, online=True, schreiben=False,
              on_progress=lambda *_: None)
     assert gefragt == [["Bruch"]]  # Vektorraum nur in einem Thema, Themenlabels werden nicht gefragt
     gefragt.clear()
-    WS.bauen([p], gnd={}, vorhanden={"schule": [], "hochschule": []}, online=True, online_min=1, schreiben=False,
+    WS.bauen([p], ("schule", "hochschule"), gnd={}, vorhanden={"schule": [], "hochschule": []}, online=True, online_min=1, schreiben=False,
              on_progress=lambda *_: None)
     assert gefragt == [["Bruch", "Vektorraum"]]
 
