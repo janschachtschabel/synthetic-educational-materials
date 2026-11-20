@@ -255,6 +255,7 @@ def test_kombiniert_unlesbar_dann_einzeln():
     assert m2.antwort("metadaten", json.dumps({"titel": "Kurz", "beschreibung": "Satz eins. " * 40,
                                                 "keywords": ["A", "B", "C", "D", "E"]})) is True
     assert m2.neu == {"titel": 1, "lernziele": 1, "suchanfragen": 1, "fragen_antworten": 1}
+    assert m2.gruende["titel"] == ["Titel mit 4 Zeichen"] and m2.zustand()["gruende"] == m2.gruende
     assert m2.felder["keywords"] == ["A", "B", "C", "D", "E"] and "beschreibung" in m2.felder
     assert m2.stufe == ["titel"]
     assert m2.zustand()["kombiniert"] is True

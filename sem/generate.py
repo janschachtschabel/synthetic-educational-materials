@@ -406,10 +406,12 @@ class Material:
         z = zustand or {}
         self.felder: dict = dict(z.get("felder", {}))
         self.neu: dict[str, int] = dict(z.get("neu", {}))  # Fehlversuche je Feld
+        self.gruende: dict[str, list[str]] = {k: list(v) for k, v in z.get("gruende", {}).items()}  # warum
         self.tokens: dict[str, int] = dict(z.get("tokens", dict.fromkeys(TOKEN_FELDER, 0)))
 
     def zustand(self) -> dict:
         return {"felder": self.felder, "neu": self.neu, "tokens": self.tokens,
+                **({"gruende": self.gruende} if self.gruende else {}),
                 **({"kombiniert": True} if self.kombiniert else {})}
 
     @property
@@ -463,12 +465,17 @@ class Material:
             self.felder[feld] = self._parse(feld, text)
             return True
         except ValueError as e:  # auch json.JSONDecodeError
-            self.neu[feld] = self.neu.get(feld, 0) + 1
+            self._fehlversuch(feld, e)
             if self.neu[feld] >= FELD_VERSUCHE:
                 if feld == "volltext":
                     raise ValueError(f"Volltext nach {FELD_VERSUCHE} Versuchen zu kurz") from e
                 raise ValueError(f"{feld} nach {FELD_VERSUCHE} Versuchen unbrauchbar: {e}") from e
             return False
+
+    def _fehlversuch(self, feld: str, e: Exception):
+        """Fehlversuch zählen und den Grund festhalten (synth:generierung.neu_gruende, zur Auswertung der Prompts)."""
+        self.neu[feld] = self.neu.get(feld, 0) + 1
+        self.gruende.setdefault(feld, []).append(str(e)[:120])
 
     def _metadaten(self, text: str) -> bool:
         """Antwort des kombinierten Aufrufs: Jedes Feld wird wie seine Einzelantwort geprüft. Brauchbare Felder werden
@@ -478,8 +485,8 @@ class Material:
             data = json_aus_text(text)
             if not isinstance(data, dict):
                 raise ValueError("kein JSON-Objekt")
-        except ValueError:  # auch json.JSONDecodeError
-            self.neu["metadaten"] = self.neu.get("metadaten", 0) + 1
+        except ValueError as e:  # auch json.JSONDecodeError
+            self._fehlversuch("metadaten", e)
             if self.neu["metadaten"] < METADATEN_VERSUCHE:
                 return False
             self.felder["metadaten"] = True
@@ -500,8 +507,8 @@ class Material:
                 if not w:
                     raise ValueError("fehlt")
                 self.felder[feld] = self._parse(feld, str(w))
-            except ValueError:
-                self.neu[feld] = self.neu.get(feld, 0) + 1
+            except ValueError as e:
+                self._fehlversuch(feld, e)
         self.felder["metadaten"] = True
         return True
 
@@ -568,6 +575,8 @@ class Material:
             prov[feld] = dict(S.provenance("LLM", method=f"aus Volltext und festen Metadaten erzeugt ({datei})"),
                               modell=meta["modell"])
         rec[S.F_GENERATION] = {**meta, "dauer_sekunden": round(dauer, 1), "neu_angefragt": self.neu}
+        if self.gruende:
+            rec[S.F_GENERATION]["neu_gruende"] = self.gruende
         if mit_tokens and self.tokens.get("aufrufe"):
             rec[S.F_GENERATION]["tokens"] = self.tokens
         return rec
