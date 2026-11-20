@@ -183,20 +183,22 @@ def test_parse_entitaeten():
         {"name": "Faust. Eine Tragödie", "typ": "werk", "art": "eigenname", "im_text": "Faust"},
         {"name": "Leipzig", "typ": "Stadt", "art": "Eigenname", "im_text": "leipzig"},  # Schreibweise aus dem Text
         {"name": "Lena", "typ": "Person", "art": "Eigenname", "im_text": "Lena"},
-        {"name": "Herr Yılmaz", "typ": "Person", "art": "Eigenname", "im_text": "Yılmaz"},
+        {"name": "Herr Yılmaz", "typ": "Rolle", "art": "Begriff", "im_text": "Yılmaz"},  # erfunden: Person
         {"name": "Rom", "typ": "Ort", "art": "Eigenname", "im_text": "Rom", "fiktiv": "false"},
         {"name": "Stromstärke", "typ": "Größe", "im_text": "Stromstärke"},  # ohne art: Begriff
+        {"name": "Roman", "typ": "Werk", "art": "Begriff", "im_text": "Roman"},  # Begriff: Fachbegriff
         {"name": "Berlin", "typ": "Ort", "art": "Eigenname", "im_text": "Berlin"},      # steht nicht im Text
         {"name": "Spannung", "typ": "Hypothese", "art": "Begriff", "im_text": "Faust"},  # kein Entitätstyp
         {"name": "Goethe", "typ": "Person", "im_text": "Goethe", "fiktiv": True},  # nicht als ganzes Wort im Text
         {"name": "Faust. Eine Tragödie", "typ": "Werk", "im_text": "Faust"}]},  # doppelt
         text, ["Lena", "Herr Yılmaz"])
     assert [x["name"] for x in e] == ["Johann Wolfgang von Goethe", "Faust. Eine Tragödie", "Leipzig", "Lena",
-                                       "Herr Yılmaz", "Rom", "Gruppenarbeit", "Stromstärke"]  # Eigennamen zuerst
+                                       "Herr Yılmaz", "Rom", "Gruppenarbeit", "Stromstärke", "Roman"]  # Eigennamen zuerst
     assert e[1]["typ"] == "Werk" and e[1]["positionen"] == [[8, 13], [48, 53]]
     assert e[1]["kategorie"] == "Werke, Recht & Dokumente" and e[1]["art"] == "Eigenname"
     assert e[2]["typ"] == "Ort" and e[2]["im_text"] == "Leipzig" and text[slice(*e[2]["positionen"][0])] == "Leipzig"
-    assert [x["fiktiv"] for x in e] == [False, False, False, True, True, False, False, False]
+    assert [x["fiktiv"] for x in e] == [False, False, False, True, True, False, False, False, False]
+    assert (e[4]["typ"], e[4]["art"], e[8]["typ"]) == ("Person", "Eigenname", "Fachbegriff")
     assert e[5]["positionen"] == [[text.index("Rom."), text.index("Rom.") + 3]]  # nicht in „Roman“
     assert (e[6]["kategorie"], e[7]["typ"], e[7]["art"]) == ("Bildung & Unterricht", "Größe", "Begriff")
     assert parse_entitaeten({"entitaeten": []}, text) == []

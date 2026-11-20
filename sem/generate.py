@@ -342,6 +342,9 @@ _ENTITAET_TYP = {t.lower(): t for t in ENTITAET_TYPEN} | {
     "prozent": "Menge", "kompetenzbereich": "Kompetenz", "zertifikat": "Abschluss", "qualifikation": "Abschluss",
     "prüfung": "Prüfungsform", "medium": "Lernressource", "aufgabe": "Aufgabenformat"}
 _ENTITAET_ART = {"eigenname": "Eigenname", "name": "Eigenname", "begriff": "Begriff"}
+# Typen, die nur Eigennamen meinen: kommt einer als Begriff („Delta“, „Finanzkrise“), ist es ein Fachbegriff
+_NUR_EIGENNAMEN = {"Person", "Figur", "Gruppe", "Staat", "Ort", "Geografikum", "Bauwerk", "Organisation", "Unternehmen",
+                   "Ereignis", "Werk", "Quelle", "Regelwerk", "Lehrplan", "Produkt"}
 
 
 def _stellen(text: str, teil: str) -> list[list[int]]:
@@ -380,9 +383,15 @@ def parse_entitaeten(data: dict | list, volltext: str, stil_namen: list[str] | t
         if (schluessel := name.lower()) in gesehen:
             continue
         gesehen.add(schluessel)
-        fiktiv = e.get("fiktiv") is True or str(e.get("fiktiv")).lower() == "true" or (
-            typ in ("Person", "Figur") and any(_stellen(name, n) or _stellen(im_text, n) for n in erfunden))
+        stil = any(_stellen(name, n) or _stellen(im_text, n) for n in erfunden)
+        if stil and typ in ("Figur", "Rolle"):  # in der Probe kamen erfundene Personen oft als Figur oder Rolle
+            typ = "Person"
+        fiktiv = e.get("fiktiv") is True or str(e.get("fiktiv")).lower() == "true" or (typ == "Person" and stil)
         art = _ENTITAET_ART.get(_einzeilig(str(e.get("art") or "")).lower(), "Begriff")
+        if typ == "Person":
+            art = "Eigenname"
+        elif art == "Begriff" and typ in _NUR_EIGENNAMEN:
+            typ = "Fachbegriff"
         out.append({"name": name, "typ": typ, "kategorie": _ENTITAET_KATEGORIE[typ], "art": art, "im_text": im_text,
                     "fiktiv": fiktiv, "positionen": stellen})
     # Eigennamen vor Begriffen, sonst in der Reihenfolge der Antwort

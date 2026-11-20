@@ -742,7 +742,8 @@ Pro Seed bis zu acht LLM-Aufrufe (OpenAI-kompatible API, Standardmodell `gpt-6-l
    Aufgabenformat, Sozialform, Unterrichtsmethode) sowie Sonstiges. Textabschnitte (Lernziel, Aufgabe, Merksatz,
    Versuchsablauf) sind keine Entitäten. Eine Entität, deren `im_text` nicht als ganzes Wort im Volltext steht, fällt weg,
    ebenso unbekannte Typen; eine leere Liste ist gültig. Personen mit einem Namen aus `synth:stil` gelten immer als
-   fiktiv. Das Verknüpfen mit GND oder Wikidata ist ein späterer, eigener Schritt.
+   fiktiv und als Person (nicht Figur oder Rolle); ein Begriff mit einem Typ, der nur Eigennamen meint („Delta“ als
+   Geografikum), wird zum Fachbegriff. Das Verknüpfen mit GND oder Wikidata ist ein späterer, eigener Schritt.
 
 Schritt 3 bis 7 laufen gleichzeitig.
 

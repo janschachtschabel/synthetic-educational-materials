@@ -543,7 +543,8 @@ Up to six LLM calls per seed (OpenAI-compatible API, default model `gpt-6-luna`)
    Lernressource, Aufgabenformat, Sozialform, Unterrichtsmethode) and Sonstiges. Text passages (learning objective, task,
    key sentence, experimental procedure) are not entities. An entity whose `im_text` does not occur as a whole word in
    the fulltext is dropped, as are unknown types; an empty list is valid. Persons with a name from `synth:stil` are
-   always fictional. Linking to GND or Wikidata is a later, separate step.
+   always fictional and typed Person (not Figur or Rolle); a term with a type meant only for proper names („Delta“ as
+   Geografikum) becomes Fachbegriff. Linking to GND or Wikidata is a later, separate step.
 
 Steps 3 to 7 run simultaneously.
 
