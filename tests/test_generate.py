@@ -40,7 +40,7 @@ class FakeClient:
             return LERNZIELE_JSON
         if "Suchanfragen, die Lehrende" in user:
             return SUCHANFRAGEN_JSON
-        if "benannten Entitäten" in user:
+        if "Nenne die Entitäten" in user:
             return json.dumps({"entitaeten": []})
         if "Frage-Antwort-Paare" in user:
             return json.dumps({"paare": [{"frage": f"F{i}?", "antwort": "A.", "typ": "verstehen"} for i in range(10)]})
@@ -175,25 +175,30 @@ def test_titel_nennt_form():
 
 
 def test_parse_entitaeten():
-    text = "Goethes Faust spielt in Leipzig. Lena liest den Faust, Herr Yılmaz fragt nach Rom. Der Roman ist lang."
+    text = ("Goethes Faust spielt in Leipzig. Lena liest den Faust, Herr Yılmaz fragt nach Rom. Der Roman ist lang. "
+            "In Gruppenarbeit messen alle die Stromstärke.")
     e = parse_entitaeten({"entitaeten": [
-        {"name": "Johann Wolfgang von Goethe", "typ": "Person", "im_text": "Goethes"},
-        {"name": "Faust. Eine Tragödie", "typ": "werk", "im_text": "Faust"},
-        {"name": "Leipzig", "typ": "Ort", "im_text": "leipzig"},  # Schreibweise aus dem Text übernommen
-        {"name": "Lena", "typ": "Person", "im_text": "Lena"},
-        {"name": "Herr Yılmaz", "typ": "Person", "im_text": "Yılmaz"},
-        {"name": "Rom", "typ": "Ort", "im_text": "Rom", "fiktiv": "false"},
-        {"name": "Berlin", "typ": "Ort", "im_text": "Berlin"},          # steht nicht im Text
-        {"name": "Photosynthese", "typ": "Konzept", "im_text": "Faust"},  # kein Entitätstyp
+        {"name": "Gruppenarbeit", "typ": "Sozialform", "art": "Begriff", "im_text": "Gruppenarbeit"},
+        {"name": "Johann Wolfgang von Goethe", "typ": "Person", "art": "Eigenname", "im_text": "Goethes"},
+        {"name": "Faust. Eine Tragödie", "typ": "werk", "art": "eigenname", "im_text": "Faust"},
+        {"name": "Leipzig", "typ": "Stadt", "art": "Eigenname", "im_text": "leipzig"},  # Schreibweise aus dem Text
+        {"name": "Lena", "typ": "Person", "art": "Eigenname", "im_text": "Lena"},
+        {"name": "Herr Yılmaz", "typ": "Person", "art": "Eigenname", "im_text": "Yılmaz"},
+        {"name": "Rom", "typ": "Ort", "art": "Eigenname", "im_text": "Rom", "fiktiv": "false"},
+        {"name": "Stromstärke", "typ": "Größe", "im_text": "Stromstärke"},  # ohne art: Begriff
+        {"name": "Berlin", "typ": "Ort", "art": "Eigenname", "im_text": "Berlin"},      # steht nicht im Text
+        {"name": "Spannung", "typ": "Hypothese", "art": "Begriff", "im_text": "Faust"},  # kein Entitätstyp
         {"name": "Goethe", "typ": "Person", "im_text": "Goethe", "fiktiv": True},  # nicht als ganzes Wort im Text
         {"name": "Faust. Eine Tragödie", "typ": "Werk", "im_text": "Faust"}]},  # doppelt
         text, ["Lena", "Herr Yılmaz"])
     assert [x["name"] for x in e] == ["Johann Wolfgang von Goethe", "Faust. Eine Tragödie", "Leipzig", "Lena",
-                                       "Herr Yılmaz", "Rom"]
+                                       "Herr Yılmaz", "Rom", "Gruppenarbeit", "Stromstärke"]  # Eigennamen zuerst
     assert e[1]["typ"] == "Werk" and e[1]["positionen"] == [[8, 13], [48, 53]]
-    assert e[2]["im_text"] == "Leipzig" and text[slice(*e[2]["positionen"][0])] == "Leipzig"
-    assert [x["fiktiv"] for x in e] == [False, False, False, True, True, False]
+    assert e[1]["kategorie"] == "Werke, Recht & Dokumente" and e[1]["art"] == "Eigenname"
+    assert e[2]["typ"] == "Ort" and e[2]["im_text"] == "Leipzig" and text[slice(*e[2]["positionen"][0])] == "Leipzig"
+    assert [x["fiktiv"] for x in e] == [False, False, False, True, True, False, False, False]
     assert e[5]["positionen"] == [[text.index("Rom."), text.index("Rom.") + 3]]  # nicht in „Roman“
+    assert (e[6]["kategorie"], e[7]["typ"], e[7]["art"]) == ("Bildung & Unterricht", "Größe", "Begriff")
     assert parse_entitaeten({"entitaeten": []}, text) == []
     with pytest.raises(ValueError):
         parse_entitaeten({"paare": []}, text)

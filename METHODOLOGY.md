@@ -531,15 +531,19 @@ Up to six LLM calls per seed (OpenAI-compatible API, default model `gpt-6-luna`)
    case like real input) for which the
    material is a fitting hit. Intended as query → material training pairs for search and embedding models.
 
-7. **Entities** (`entitaeten.md`, JSON, `synth:entitaeten`): the named entities of the fulltext, at most 15, each with
-   `name` (full form, „Johann Wolfgang von Goethe“), `typ`, `im_text` (the form as it appears in the text, „Goethes“),
-   `fiktiv` and `positionen` (every occurrence of that form in the fulltext as [start, end) in characters, for training
-   named-entity recognition). The 15 types are fixed: Person, Figur, Gruppe, Organisation, Ort, Bauwerk, Ereignis, Epoche,
-   Werk, Regelwerk, Theorie, Methode, Abschluss, Produkt, Sonstiges; besides the classic ones, types that are common in
-   educational material, roughly aligned with the entity types of the GND. General technical terms belong in the
-   keywords; theories and methods count only when they carry a fixed name („Satz des Pythagoras“). An entity whose
-   `im_text` does not occur as a whole word in the fulltext is dropped, as are unknown types; an empty list is valid.
-   Persons with a name from `synth:stil` are always fictional. Linking to GND or Wikidata is a later, separate step.
+7. **Entities** (`entitaeten.md`, JSON, `synth:entitaeten`): proper names and the most important terms of the fulltext,
+   at most 30 (all proper names, listed first; at most 15 terms), each with `name` (full form, „Johann Wolfgang von
+   Goethe“), `typ`, `kategorie`, `art` (Eigenname = proper name or Begriff = term), `im_text` (the form as it appears in
+   the text, „Goethes“), `fiktiv` and `positionen` (every occurrence of that form in the fulltext as [start, end) in
+   characters, for training named-entity recognition). The 36 types are fixed and grouped into six categories, which the
+   code assigns: Personen & Gruppen (Person, Figur, Rolle, Gruppe), Orte & Organisationen (Staat, Ort, Geografikum,
+   Bauwerk, Organisation, Unternehmen, Bildungseinrichtung), Zeit & Geschehen (Ereignis, Epoche, Datum), Werke, Recht &
+   Dokumente (Werk, Quelle, Regelwerk, Lehrplan, Produkt), Wissenschaft & Fachinhalt (Fach, Fachbegriff, Theorie, Methode,
+   Formel, Größe, Menge, Sprache), Bildung & Unterricht (Bildungsstufe, Kompetenz, Abschluss, Prüfungsform,
+   Lernressource, Aufgabenformat, Sozialform, Unterrichtsmethode) and Sonstiges. Text passages (learning objective, task,
+   key sentence, experimental procedure) are not entities. An entity whose `im_text` does not occur as a whole word in
+   the fulltext is dropped, as are unknown types; an empty list is valid. Persons with a name from `synth:stil` are
+   always fictional. Linking to GND or Wikidata is a later, separate step.
 
 Steps 3 to 7 run simultaneously.
 

@@ -312,16 +312,36 @@ def parse_lernziele(data: dict | list, minimum: int = 2, maximum: int = 4) -> li
 
 SUCHANFRAGE_MAX_WOERTER = 6  # Prompt: höchstens 5 Wörter
 
-# feste Typen: die Klassiker der Eigennamenerkennung plus Typen, die in Bildungsmaterial häufig sind (Epochen, benannte
-# Theorien und Methoden, Abschlüsse); grob an den Entitätstypen der GND ausgerichtet, damit ein späteres Verknüpfen leichtfällt
-ENTITAET_TYPEN = ("Person", "Figur", "Gruppe", "Organisation", "Ort", "Bauwerk", "Ereignis", "Epoche", "Werk",
-                  "Regelwerk", "Theorie", "Methode", "Abschluss", "Produkt", "Sonstiges")
-ENTITAETEN_MAX = 15
+# feste Typen in sechs Kategorien: die Klassiker der Eigennamenerkennung plus Typen, die in Bildungsmaterial häufig sind;
+# die Kategorie setzt der Code. Eigennamen und Begriffe unterscheidet "art" (Eigennamen vollständig, Begriffe nur die
+# wichtigsten). Textabschnitte (Lernziel, Experiment, Merksatz …) sind keine Entitäten.
+ENTITAET_KATEGORIEN = {
+    "Personen & Gruppen": ("Person", "Figur", "Rolle", "Gruppe"),
+    "Orte & Organisationen": ("Staat", "Ort", "Geografikum", "Bauwerk", "Organisation", "Unternehmen",
+                              "Bildungseinrichtung"),
+    "Zeit & Geschehen": ("Ereignis", "Epoche", "Datum"),
+    "Werke, Recht & Dokumente": ("Werk", "Quelle", "Regelwerk", "Lehrplan", "Produkt"),
+    "Wissenschaft & Fachinhalt": ("Fach", "Fachbegriff", "Theorie", "Methode", "Formel", "Größe", "Menge", "Sprache"),
+    "Bildung & Unterricht": ("Bildungsstufe", "Kompetenz", "Abschluss", "Prüfungsform", "Lernressource",
+                             "Aufgabenformat", "Sozialform", "Unterrichtsmethode"),
+    "Sonstiges": ("Sonstiges",),
+}
+ENTITAET_TYPEN = tuple(t for typen in ENTITAET_KATEGORIEN.values() for t in typen)
+_ENTITAET_KATEGORIE = {t: k for k, typen in ENTITAET_KATEGORIEN.items() for t in typen}
+ENTITAETEN_MAX = 30
 _ENTITAET_TYP = {t.lower(): t for t in ENTITAET_TYPEN} | {
-    "personen": "Person", "figuren": "Figur", "gruppen": "Gruppe", "volk": "Gruppe", "organisationen": "Organisation",
-    "institution": "Organisation", "orte": "Ort", "bauwerke": "Bauwerk", "ereignisse": "Ereignis", "epochen": "Epoche",
-    "werke": "Werk", "regelwerke": "Regelwerk", "gesetz": "Regelwerk", "theorien": "Theorie", "modell": "Theorie",
-    "methoden": "Methode", "abschlüsse": "Abschluss", "produkte": "Produkt", "software": "Produkt"}
+    "personen": "Person", "figuren": "Figur", "beruf": "Rolle", "funktion": "Rolle", "gruppen": "Gruppe",
+    "volk": "Gruppe", "nationalität": "Gruppe", "land": "Staat", "stadt": "Ort", "gemeinde": "Ort", "orte": "Ort",
+    "geografische einheit": "Geografikum", "gebäude": "Bauwerk", "bauwerke": "Bauwerk", "institution": "Organisation",
+    "organisationen": "Organisation", "firma": "Unternehmen", "schule": "Bildungseinrichtung",
+    "ereignisse": "Ereignis", "epochen": "Epoche", "zeitraum": "Epoche", "zeitangabe": "Datum", "frist": "Datum",
+    "werke": "Werk", "publikation": "Quelle", "dokument": "Quelle", "gesetz": "Regelwerk", "recht": "Regelwerk",
+    "curriculum": "Lehrplan", "bildungsstandard": "Lehrplan", "software": "Produkt", "tool": "Produkt",
+    "disziplin": "Fach", "fachgebiet": "Fach", "begriff": "Fachbegriff", "konzept": "Fachbegriff",
+    "modell": "Theorie", "verfahren": "Methode", "experiment": "Methode", "einheit": "Größe", "zahl": "Menge",
+    "prozent": "Menge", "kompetenzbereich": "Kompetenz", "zertifikat": "Abschluss", "qualifikation": "Abschluss",
+    "prüfung": "Prüfungsform", "medium": "Lernressource", "aufgabe": "Aufgabenformat"}
+_ENTITAET_ART = {"eigenname": "Eigenname", "name": "Eigenname", "begriff": "Begriff"}
 
 
 def _stellen(text: str, teil: str) -> list[list[int]]:
@@ -362,8 +382,11 @@ def parse_entitaeten(data: dict | list, volltext: str, stil_namen: list[str] | t
         gesehen.add(schluessel)
         fiktiv = e.get("fiktiv") is True or str(e.get("fiktiv")).lower() == "true" or (
             typ in ("Person", "Figur") and any(_stellen(name, n) or _stellen(im_text, n) for n in erfunden))
-        out.append({"name": name, "typ": typ, "im_text": im_text, "fiktiv": fiktiv, "positionen": stellen})
-    return out[:ENTITAETEN_MAX]
+        art = _ENTITAET_ART.get(_einzeilig(str(e.get("art") or "")).lower(), "Begriff")
+        out.append({"name": name, "typ": typ, "kategorie": _ENTITAET_KATEGORIE[typ], "art": art, "im_text": im_text,
+                    "fiktiv": fiktiv, "positionen": stellen})
+    # Eigennamen vor Begriffen, sonst in der Reihenfolge der Antwort
+    return sorted(out, key=lambda e: e["art"] != "Eigenname")[:ENTITAETEN_MAX]
 
 
 def parse_suchanfragen(data: dict | list, minimum: int = 4, maximum: int = 8) -> list[str]:

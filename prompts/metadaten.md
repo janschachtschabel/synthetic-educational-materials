@@ -25,4 +25,4 @@ Jedes Feld bekommt dieselbe Sorgfalt wie in einer eigenen Antwort: Halte Längen
 
 ## Ausgabe
 Ein einziges JSON-Objekt ohne Codeblock, mit genau diesen Schlüsseln in dieser Reihenfolge: "titel" (Text), "beschreibung" (Text), "keywords" (Liste von Texten), "lernziele" (Liste wie im Abschnitt lernziele), "suchanfragen" (Liste von Texten), "paare" (Liste wie im Abschnitt paare), "entitaeten" (Liste wie im Abschnitt entitaeten, auch leer).
-{"titel": "...", "beschreibung": "...", "keywords": ["...", "..."], "lernziele": [{"lernziel": "...", "operator": "...", "stufe": "..."}], "suchanfragen": ["...", "..."], "paare": [{"frage": "...", "antwort": "...", "typ": "..."}], "entitaeten": [{"name": "...", "typ": "...", "im_text": "...", "fiktiv": false}]}
+{"titel": "...", "beschreibung": "...", "keywords": ["...", "..."], "lernziele": [{"lernziel": "...", "operator": "...", "stufe": "..."}], "suchanfragen": ["...", "..."], "paare": [{"frage": "...", "antwort": "...", "typ": "..."}], "entitaeten": [{"name": "...", "typ": "...", "art": "...", "im_text": "...", "fiktiv": false}]}

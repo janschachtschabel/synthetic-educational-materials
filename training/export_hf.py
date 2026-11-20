@@ -98,7 +98,8 @@ def schema():
     types = {"str": pa.string(), "list": pa.list_(pa.string()), "bool": pa.bool_(), "int": pa.int32(),
              "qa": pa.list_(pa.struct([("question", pa.string()), ("answer", pa.string()), ("type", pa.string())])),
              "lo": pa.list_(pa.struct([("objective", pa.string()), ("operator", pa.string()), ("level", pa.string())])),
-             "ent": pa.list_(pa.struct([("name", pa.string()), ("type", pa.string()), ("text", pa.string()),
+             "ent": pa.list_(pa.struct([("name", pa.string()), ("type", pa.string()), ("category", pa.string()),
+                                        ("kind", pa.string()), ("text", pa.string()),
                                         ("fictional", pa.bool_()), ("spans", pa.list_(pa.list_(pa.int32())))]))}
     return pa.schema([(name, types[t]) for name, t in COLUMNS])
 
@@ -206,7 +207,9 @@ def flatten(r: dict) -> dict:
                                  "level": z.get("stufe", "")} for z in r.get("synth:lernziele") or []],
         "search_queries": list(r.get("synth:suchanfragen") or []),
         # named entities in the fulltext with character spans [start, end) of the form "text" (newer runs only)
-        "entities": [{"name": e.get("name", ""), "type": e.get("typ", ""), "text": e.get("im_text", ""),
+        "entities": [{"name": e.get("name", ""), "type": e.get("typ", ""), "category": e.get("kategorie", ""),
+                      "kind": {"Eigenname": "proper_name", "Begriff": "term"}.get(e.get("art", ""), ""),
+                      "text": e.get("im_text", ""),
                       "fictional": bool(e.get("fiktiv")), "spans": e.get("positionen") or []}
                      for e in r.get("synth:entitaeten") or []],
         "educational_context": _labels(r, "ccm:educationalcontext"),

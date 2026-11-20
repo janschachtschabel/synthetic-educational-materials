@@ -730,16 +730,19 @@ Pro Seed bis zu acht LLM-Aufrufe (OpenAI-kompatible API, Standardmodell `gpt-6-l
    die das Material ein passender Treffer ist. Gedacht als Trainingspaare Anfrage → Material für
    Such- und Embedding-Modelle.
 
-7. **Entitäten** (`entitaeten.md`, JSON, `synth:entitaeten`): die benannten Entitäten des Volltexts, höchstens 15,
-   je mit `name` (vollständige Form, „Johann Wolfgang von Goethe“), `typ`, `im_text` (die Form, wie sie im Text steht,
+7. **Entitäten** (`entitaeten.md`, JSON, `synth:entitaeten`): Eigennamen und die wichtigsten Begriffe des Volltexts,
+   höchstens 30 (Eigennamen vollständig und zuerst, Begriffe höchstens 15), je mit `name` (vollständige Form, „Johann
+   Wolfgang von Goethe“), `typ`, `kategorie`, `art` (Eigenname oder Begriff), `im_text` (die Form, wie sie im Text steht,
    „Goethes“), `fiktiv` und `positionen` (alle Stellen dieser Form im Volltext als [Anfang, Ende) in Zeichen, für das
-   Training einer Eigennamenerkennung). Die 15 Typen sind fest: Person, Figur, Gruppe, Organisation, Ort, Bauwerk,
-   Ereignis, Epoche, Werk, Regelwerk, Theorie, Methode, Abschluss, Produkt, Sonstiges; neben den Klassikern also Typen,
-   die in Bildungsmaterial häufig sind, grob an den Entitätstypen der GND ausgerichtet. Allgemeine Fachbegriffe gehören in
-   die Keywords, Theorien und Methoden zählen nur, wenn sie fest benannt sind („Satz des Pythagoras“). Eine Entität,
-   deren `im_text` nicht als ganzes Wort im Volltext steht, fällt weg, ebenso unbekannte Typen; eine leere Liste ist
-   gültig. Personen mit einem Namen aus `synth:stil` gelten immer als fiktiv. Das Verknüpfen mit GND oder Wikidata ist
-   ein späterer, eigener Schritt.
+   Training einer Eigennamenerkennung). Die 36 Typen sind fest und in sechs Kategorien geordnet, die Kategorie setzt der
+   Code: Personen & Gruppen (Person, Figur, Rolle, Gruppe), Orte & Organisationen (Staat, Ort, Geografikum, Bauwerk,
+   Organisation, Unternehmen, Bildungseinrichtung), Zeit & Geschehen (Ereignis, Epoche, Datum), Werke, Recht & Dokumente
+   (Werk, Quelle, Regelwerk, Lehrplan, Produkt), Wissenschaft & Fachinhalt (Fach, Fachbegriff, Theorie, Methode, Formel,
+   Größe, Menge, Sprache), Bildung & Unterricht (Bildungsstufe, Kompetenz, Abschluss, Prüfungsform, Lernressource,
+   Aufgabenformat, Sozialform, Unterrichtsmethode) sowie Sonstiges. Textabschnitte (Lernziel, Aufgabe, Merksatz,
+   Versuchsablauf) sind keine Entitäten. Eine Entität, deren `im_text` nicht als ganzes Wort im Volltext steht, fällt weg,
+   ebenso unbekannte Typen; eine leere Liste ist gültig. Personen mit einem Namen aus `synth:stil` gelten immer als
+   fiktiv. Das Verknüpfen mit GND oder Wikidata ist ein späterer, eigener Schritt.
 
 Schritt 3 bis 7 laufen gleichzeitig.
 
