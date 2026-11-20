@@ -1,5 +1,6 @@
 Erzeuge alle folgenden Metadatenfelder für dieses Material in einer Antwort, in der angegebenen Reihenfolge. Die Felder entstehen nacheinander: Jedes spätere Feld kennt die früheren, passt zu ihnen und wiederholt sie nicht wörtlich.
 Die Abschnitte unten sind die Aufträge für die einzelnen Felder. Was dort unter „Ausgabe“ steht, beschreibt nur den Wert des jeweiligen Schlüssels, nicht die ganze Antwort.
+Jedes Feld bekommt dieselbe Sorgfalt wie in einer eigenen Antwort: Halte Längen und Anzahlen jedes Abschnitts voll ein und kürze spätere Felder nicht ab (die Beschreibung hat 450 bis 900 Zeichen, die Suchanfragen mischen alle genannten Arten).
 
 ## titel
 {{auftrag_titel}}
