@@ -732,6 +732,15 @@ Pro Seed bis zu acht LLM-Aufrufe (OpenAI-kompatible API, Standardmodell `gpt-6-l
 
 Schritt 3 bis 6 laufen gleichzeitig.
 
+**Ein Aufruf für alle Metadaten** (Standard seit November 2026, `--metadaten-einzeln` für das alte Verfahren):
+Schritt 2, 4, 5 und 6 gehen in einem einzigen JSON-Aufruf (`metadaten.md` setzt die Felddateien unverändert
+zusammen), daneben läuft die Inhaltstyp-Prüfung als eigener Aufruf, weil sie den Inhaltstyp des Seeds nicht sehen darf.
+Jedes Feld der Antwort wird wie eine Einzelantwort geprüft; nur was durchfällt, wird danach einzeln mit seiner
+Felddatei nachgefragt (der kombinierte Versuch zählt als erster der drei Versuche). Ist die Antwort kein lesbares
+JSON, wird sie einmal wiederholt, danach gehen alle Felder einzeln. So geht der Volltext zweimal statt siebenmal
+an das Modell; im Hochschul-Lauf machte er fast die Hälfte der Eingabe-Tokens aus. Gezielte Korrekturen einzelner
+Felder (`python -m sem korrektur`) laufen weiter einzeln. In `synth:generierung` steht dann `"metadaten": "kombiniert"`.
+
 Jedes Material vermerkt in `synth:generierung` die Dauer und welche Felder neu angefragt werden mussten
 (`neu_angefragt`). Die Fortschrittsanzeige zählt außerdem Wiederholungen ganzer Materialien
 (z. B. nach Rate-Limit oder Zeitüberschreitung) und zeigt die letzte Meldung. Ein Material braucht fünf

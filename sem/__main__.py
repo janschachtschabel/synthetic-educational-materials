@@ -154,6 +154,9 @@ def main(argv=None):
     p.add_argument("--limit", type=int)
     p.add_argument("--ohne-inhaltstyp-pruefung", action="store_true",
                    help="Inhaltstyp nicht am fertigen Material prüfen (spart einen Aufruf je Material)")
+    p.add_argument("--metadaten-einzeln", action="store_true",
+                   help="jedes Metadatenfeld in einem eigenen Aufruf wie bis November 2026 (Standard: alle in einem "
+                        "Aufruf, prompts/metadaten.md; spart rund ein Drittel der Kosten)")
     p.add_argument("--sprache", default="de", metavar="CODE",
                    help="Ausgabesprache als ISO-Code (de, en, fr, es, …; Standard de). Der Hinweis an das Modell "
                         "steht in prompts/ausgabesprache.md")
@@ -333,6 +336,7 @@ def main(argv=None):
                 raise SystemExit(f"Kein Lauf {a.fortsetzen!r}; siehe python -m sem laeufe")
             a.seeds, a.out, a.limit, a.sprache = Path(lauf["seeds"]), Path(lauf["ausgabe"]), lauf["limit"],                 lauf["ausgabesprache"]
             a.ohne_inhaltstyp_pruefung = not lauf["inhaltstyp_pruefen"]
+            a.metadaten_einzeln = not lauf.get("metadaten_kombiniert", False)  # ältere Läufe: einzeln
             a.batch = lauf["verarbeitung"] == "batch"
             a.anbieter = a.anbieter or lauf["anbieter"]
             a.model = a.model or lauf["modell"]
@@ -348,7 +352,7 @@ def main(argv=None):
             from .batch import BatchLauf, status_zeile
 
             lauf = BatchLauf(a.seeds, out, _cfg(a), limit=a.limit, inhaltstyp_pruefen=not a.ohne_inhaltstyp_pruefung,
-                             ausgabesprache=a.sprache)
+                             ausgabesprache=a.sprache, kombiniert=not a.metadaten_einzeln)
             schreiber = stop = None
             if a.stand:  # Oberfläche: Stand der Batch-Runden
                 from .llm import Progress
@@ -425,7 +429,8 @@ def main(argv=None):
             stand(st, ende=True)
             return
         prog = _mit_stand(a, lambda **kw: generate(a.seeds, out, _cfg(a), **kw), limit=a.limit,
-                          inhaltstyp_pruefen=not a.ohne_inhaltstyp_pruefung, ausgabesprache=a.sprache)
+                          inhaltstyp_pruefen=not a.ohne_inhaltstyp_pruefung, ausgabesprache=a.sprache,
+                          kombiniert=not a.metadaten_einzeln)
         print(f"{prog.done} neu, {prog.skipped} schon vorhanden, {prog.failed} fehlgeschlagen → {out}")
         if prog.status != "fertig":
             sys.exit(2)

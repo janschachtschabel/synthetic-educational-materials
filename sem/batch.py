@@ -184,7 +184,8 @@ STUFEN = ("volltext", "titel", "beschreibung", "keywords")
 
 def _stufe(z: dict) -> str:
     felder = z.get("felder", {})
-    return next((f for f in STUFEN if f not in felder), "abschluss")
+    stufen = ("volltext", "metadaten", *STUFEN[1:]) if z.get("kombiniert") else STUFEN
+    return next((f for f in stufen if f not in felder), "abschluss")
 
 
 class Zustaende:
@@ -278,7 +279,7 @@ def batch_ordner(out_path: Path) -> Path:
 
 class BatchLauf:
     def __init__(self, seeds_path: Path, out_path: Path, cfg: LLMConfig, limit: int | None = None,
-                 inhaltstyp_pruefen: bool = True, ausgabesprache: str = "de", client=None):
+                 inhaltstyp_pruefen: bool = True, ausgabesprache: str = "de", client=None, kombiniert: bool = True):
         self.out_path = Path(out_path)
         self.err_path = self.out_path.with_suffix(".fehler.jsonl")
         self.ordner = batch_ordner(self.out_path)
@@ -286,12 +287,14 @@ class BatchLauf:
         self.cfg = cfg
         self.inhaltstyp_pruefen = inhaltstyp_pruefen
         self.ausgabesprache = ausgabesprache
+        self.kombiniert = kombiniert
         seeds = read_seeds(seeds_path)
         self.seeds = {s["id"]: s for s in (seeds[:limit] if limit else seeds)}
         keys = {s[S.F_BEREICH] for s in self.seeds.values()}
         self.bereiche = {k: get_bereich(k) for k in keys}
         self.prompts = {k: load_prompts(k) for k in keys}
-        self.meta = meta_fuer(cfg, self.prompts, inhaltstyp_pruefen, ausgabesprache, verarbeitung="batch")
+        self.meta = meta_fuer(cfg, self.prompts, inhaltstyp_pruefen, ausgabesprache, verarbeitung="batch",
+                              kombiniert=kombiniert)
         cfg.pruefen()
         if client is None:
             if not cfg.api_key:
@@ -314,6 +317,8 @@ class BatchLauf:
                      "reasoning_effort": cfg.reasoning_effort}
         if cfg.anbieter != "openai":  # fehlt bei OpenAI, damit ältere Läufe weiterhin passen
             parameter["anbieter"] = cfg.anbieter
+        if kombiniert:  # fehlt bei einzelnen Aufrufen, damit ältere Läufe weiterhin passen
+            parameter["metadaten"] = "kombiniert"
         self.zustaende = Zustaende(self.ordner / "materialien.sqlite")
         if self.stand_path.exists():
             self.stand = _alten_stand_umziehen(self.stand_path, self.zustaende)
@@ -325,7 +330,7 @@ class BatchLauf:
                           "fehlgeschlagen": [], "batches": []}
         self.stand.setdefault("token_budget", None)  # geschätzte Tokens, die höchstens gleichzeitig unterwegs sind
         self.stand.setdefault("batch_fehler_in_folge", 0)
-        lauf_speichern(self.out_path, seeds_path, cfg, limit, inhaltstyp_pruefen, ausgabesprache, "batch")
+        lauf_speichern(self.out_path, seeds_path, cfg, limit, inhaltstyp_pruefen, ausgabesprache, "batch", kombiniert)
 
     # --- Stand ------------------------------------------------------------------------------------
 
@@ -351,7 +356,8 @@ class BatchLauf:
         seed = self.seeds[sid]
         z = self.zustaende.get(sid)
         return Material(seed, self.prompts, inhaltstyp_pruefen=self.inhaltstyp_pruefen,
-                        ausgabesprache=self.ausgabesprache, zustand=z, bereich=self.bereiche[seed[S.F_BEREICH]])
+                        ausgabesprache=self.ausgabesprache, zustand=z, bereich=self.bereiche[seed[S.F_BEREICH]],
+                        kombiniert=self.kombiniert)
 
     def _offene_ids(self) -> list[str]:
         erledigt = read_done(self.out_path) | set(self.stand["fehlgeschlagen"])

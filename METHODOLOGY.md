@@ -533,6 +533,15 @@ Up to six LLM calls per seed (OpenAI-compatible API, default model `gpt-6-luna`)
 
 Steps 3 to 6 run simultaneously.
 
+**One call for all metadata** (default since November 2026, `--metadaten-einzeln` for the previous procedure):
+steps 2, 4, 5 and 6 go into a single JSON call (`metadaten.md` combines the field files unchanged), while the
+content-type check runs as its own call, because it must not see the seed’s content type. Each field of the answer is
+validated like a single answer; only fields that fail are then requested individually with their field file (the
+combined attempt counts as the first of the three attempts). If the answer is not readable JSON, it is repeated once,
+after that all fields go individually. This sends the full text to the model twice instead of seven times; in the
+higher-education run it made up almost half of the input tokens. Targeted corrections of individual fields
+(`python -m sem korrektur`) still run individually. `synth:generierung` then contains `"metadaten": "kombiniert"`.
+
 Each material records in `synth:generierung` the duration and which fields had to be requested again
 (`neu_angefragt`). The progress display also counts retries of whole materials (e.g. after a rate
 limit or timeout) and shows the latest message. A material needs five consecutive rounds; with

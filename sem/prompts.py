@@ -13,10 +13,10 @@ from pathlib import Path
 from .paths import PROMPT_DIR
 
 # volltext_system + volltext erzeugen den Text; system + material sind für alle Metadatenfelder gleich,
-# die Felddateien liefern den jeweiligen Auftrag; ausgabesprache wird nur bei anderer Sprache als Deutsch an
-# beide Systemprompts angehängt
+# die Felddateien liefern den jeweiligen Auftrag; metadaten fasst sie zu einem Aufruf zusammen; ausgabesprache wird
+# nur bei anderer Sprache als Deutsch an beide Systemprompts angehängt
 PROMPT_FILES = ["volltext_system", "volltext", "system", "material", "titel", "beschreibung", "keywords",
-                "inhaltstyp", "fragen_antworten", "lernziele", "suchanfragen", "ausgabesprache"]
+                "inhaltstyp", "fragen_antworten", "lernziele", "suchanfragen", "metadaten", "ausgabesprache"]
 FELD_PROMPTS = ["titel", "beschreibung", "keywords", "inhaltstyp", "fragen_antworten", "lernziele", "suchanfragen"]
 
 _SECTION = re.compile(r"\{\{#(\w+)\}\}(.*?)\{\{/\1\}\}", re.S)

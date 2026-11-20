@@ -21,8 +21,9 @@ def lauf_pfad(out_path: Path) -> Path:
 
 
 def lauf_speichern(out_path: Path, seeds_path: Path, cfg: LLMConfig, limit: int | None, inhaltstyp_pruefen: bool,
-                   ausgabesprache: str, verarbeitung: str):
-    """Hält fest, was der Lauf erzeugen soll. verarbeitung: "sofort", "flex" oder "batch"."""
+                   ausgabesprache: str, verarbeitung: str, kombiniert: bool = False):
+    """Hält fest, was der Lauf erzeugen soll. verarbeitung: "sofort", "flex" oder "batch"; kombiniert: Metadaten in
+    einem Aufruf (fehlt bei älteren Läufen = einzeln)."""
     seeds_path = Path(seeds_path)
     with seeds_path.open(encoding="utf-8") as f:
         n_seeds = sum(1 for z in f if z.strip())
@@ -30,6 +31,7 @@ def lauf_speichern(out_path: Path, seeds_path: Path, cfg: LLMConfig, limit: int 
     alt = json.loads(p.read_text(encoding="utf-8")) if p.exists() else {}
     lauf = {"seeds": str(seeds_path.resolve()), "limit": limit, "ziel": min(limit, n_seeds) if limit else n_seeds,
             "ausgabesprache": ausgabesprache, "inhaltstyp_pruefen": inhaltstyp_pruefen, "verarbeitung": verarbeitung,
+            "metadaten_kombiniert": kombiniert,
             "anbieter": cfg.anbieter, "modell": cfg.model, "reasoning_effort": cfg.reasoning_effort,
             "gestartet": alt.get("gestartet") or datetime.now().isoformat(timespec="seconds"),
             "zuletzt": datetime.now().isoformat(timespec="seconds")}

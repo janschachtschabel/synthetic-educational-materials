@@ -19,6 +19,7 @@ Platzhalter stehen in doppelten geschweiften Klammern, z. B. `{{thema}}`. Welche
 | `fragen_antworten.md` | Auftrag Frage-Antwort-Paare | JSON `{"paare": [...]}` |
 | `lernziele.md` | Auftrag kompetenzorientierte Lernziele mit Taxonomiestufe | JSON `{"lernziele": [...]}`, 2–4 |
 | `suchanfragen.md` | Auftrag kurze Suchanfragen (Suchschlitz) | JSON `{"suchanfragen": [...]}`, 4–8 übernommen |
+| `metadaten.md` | ein Aufruf für Titel, Beschreibung, Keywords, Lernziele, Suchanfragen und Frage-Antwort-Paare (Standard); setzt die Felddateien über `{{auftrag_<feld>}}` zusammen, ein durchgefallenes Feld wird danach einzeln mit seiner Felddatei angefragt | JSON mit allen sechs Feldern |
 | `beschreibung_einstieg.md` | nur Befehl `beschreibung-einstieg`: ersten Satz einer fertigen Beschreibung ersetzen | ein Satz |
 | `ausgabesprache.md` | Hinweis an beide Systemprompts, nur wenn beim Erzeugen eine andere Ausgabesprache als Deutsch gewählt ist (App: „Ausgabesprache“, CLI: `--sprache en`) | – |
 | `wlo_themen.md`, `wlo_themen_vorschlag.md` | nur Befehl `wlo-themen`: Thema, allgemeineres Thema und Fachbegriffe aus Titel und Beschreibung eines WLO-Datensatzes; der zweite Teil (Fach-/Stufenvorschlag mit Vokabular) nur mit `--ohne-stufe vorschlag` | JSON |

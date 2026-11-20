@@ -11,6 +11,10 @@ Pro Seed nacheinander:
 Liefert ein Feld nichts Brauchbares, wird nur dieses Feld erneut angefragt. Dauer und
 Neuanfragen je Feld stehen in synth:generierung.
 
+Kombiniert (Standard für neue Läufe, abschaltbar mit --metadaten-einzeln): Schritt 2 und 3 ohne die
+Inhaltstyp-Prüfung in einem JSON-Aufruf (prompts/metadaten.md setzt die Felddateien zusammen), daneben die
+Inhaltstyp-Prüfung; nur Felder, die die Prüfung nicht bestehen, werden danach einzeln angefragt.
+
 Material hält den Stand eines Materials über diese Stufen. generate_one arbeitet sie sofort ab
 (ein Aufruf nach dem anderen), sem.batch über die Batch-Schnittstelle in Runden; Prompts, Prüfungen und
 Ergebnis sind in beiden Fällen gleich.
@@ -43,7 +47,15 @@ MIN_ANTEIL_UMFANG = 0.6  # kürzer als 60 % der unteren Umfangsgrenze: neu anfra
 # Stufen eines Materials; die Felder einer Stufe hängen nicht voneinander ab und laufen gleichzeitig
 STUFEN = [["volltext"], ["titel"], ["beschreibung"], ["keywords"],
           ["inhaltstyp", "fragen_antworten", "lernziele", "suchanfragen"]]
-JSON_FELDER = {"fragen_antworten", "lernziele", "suchanfragen"}
+# Kombiniert (Standard für neue Läufe): alle Metadaten in einem Aufruf, daneben die Inhaltstyp-Prüfung (getrennt, damit
+# sie den Inhaltstyp des Seeds nicht sieht). Ein Feld, das die Prüfung nicht besteht, wird danach einzeln mit seinem
+# Feld-Prompt nachgefragt; die übrigen Stufen sind dann meist leer und fallen weg. Spart je Material fünf Aufrufe, die
+# jeweils den ganzen Volltext mitschicken (gemessen am HS-Lauf: knapp die Hälfte der Eingabe-Tokens).
+STUFEN_KOMBINIERT = [["volltext"], ["metadaten", "inhaltstyp"], *STUFEN[1:4],
+                     ["fragen_antworten", "lernziele", "suchanfragen"]]
+METADATEN_FELDER = ("titel", "beschreibung", "keywords", "lernziele", "suchanfragen", "fragen_antworten")
+METADATEN_VERSUCHE = 2  # so oft wird der kombinierte Aufruf bei unlesbarem JSON wiederholt, dann alle Felder einzeln
+JSON_FELDER = {"fragen_antworten", "lernziele", "suchanfragen", "metadaten"}
 # Ausgabesprachen (ISO 639-1 → Name im Prompt); andere Codes werden unverändert übergeben
 SPRACHEN = {"de": "Deutsch", "en": "Englisch", "fr": "Französisch", "es": "Spanisch", "it": "Italienisch",
             "nl": "Niederländisch", "pl": "Polnisch", "tr": "Türkisch", "uk": "Ukrainisch", "ru": "Russisch",
@@ -361,8 +373,9 @@ class Material:
     sich mit zustand() speichern und mit Material(..., zustand=...) fortsetzen (Batch-Verarbeitung)."""
 
     def __init__(self, seed: dict, prompts_by_bereich: dict, qa_min: int = 8, inhaltstyp_pruefen: bool = True,
-                 ausgabesprache: str = "de", zustand: dict | None = None, bereich=None):
+                 ausgabesprache: str = "de", zustand: dict | None = None, bereich=None, kombiniert: bool = False):
         self.seed = seed
+        self.kombiniert = kombiniert
         self.bereich = bereich or get_bereich(seed[S.F_BEREICH])  # bereich: schon geladen (viele Materialien)
         self.prompts = prompts_by_bereich[self.bereich.key]
         self.qa_min = qa_min
@@ -393,13 +406,17 @@ class Material:
         self.tokens: dict[str, int] = dict(z.get("tokens", dict.fromkeys(TOKEN_FELDER, 0)))
 
     def zustand(self) -> dict:
-        return {"felder": self.felder, "neu": self.neu, "tokens": self.tokens}
+        return {"felder": self.felder, "neu": self.neu, "tokens": self.tokens,
+                **({"kombiniert": True} if self.kombiniert else {})}
 
     @property
     def stufe(self) -> list[str] | None:
         """Felder der ersten Stufe, die noch nicht fertig ist; None = Material fertig."""
-        for stufe in STUFEN:
-            offen = [f for f in stufe if f not in self.felder and not (f == "inhaltstyp" and not self.kategorien)]
+        # kombiniert nur, solange noch kein Metadatenfeld vorliegt (Korrekturen setzen einzelne Felder neu: einzeln)
+        einzeln = any(f in self.felder for f in METADATEN_FELDER)
+        for stufe in STUFEN_KOMBINIERT if self.kombiniert else STUFEN:
+            offen = [f for f in stufe if f not in self.felder and not (f == "inhaltstyp" and not self.kategorien)
+                     and not (f == "metadaten" and einzeln)]
             if offen:
                 return offen
         return None
@@ -417,6 +434,9 @@ class Material:
             return Anfrage(feld, render(p["volltext_system"], v) + self.hinweis, render(p["volltext"], v))
         system = render(p["system"], v) + self.hinweis
         text = self.felder["volltext"]
+        if feld == "metadaten":
+            auftrag = render(p["metadaten"], {f"auftrag_{f}": render(p[f], v) for f in METADATEN_FELDER})
+            return Anfrage(feld, system, material_user(p, v, self.felder, text, auftrag), json_mode=True)
         if feld == "inhaltstyp":
             auftrag = render(p["inhaltstyp"], {
                 "kategorien": "\n".join(f"- {k['name']} → {k['id']}" + (f": {k['definition']}" if k.get("definition") else "")
@@ -431,6 +451,8 @@ class Material:
         """Prüft die Antwort auf ein Feld. True = übernommen, False = wird neu angefragt."""
         for k, n in (tokens or {}).items():
             self.tokens[k] = self.tokens.get(k, 0) + n
+        if feld == "metadaten":
+            return self._metadaten(text)
         try:
             self.felder[feld] = self._parse(feld, text)
             return True
@@ -441,6 +463,41 @@ class Material:
                     raise ValueError(f"Volltext nach {FELD_VERSUCHE} Versuchen zu kurz") from e
                 raise ValueError(f"{feld} nach {FELD_VERSUCHE} Versuchen unbrauchbar: {e}") from e
             return False
+
+    def _metadaten(self, text: str) -> bool:
+        """Antwort des kombinierten Aufrufs: Jedes Feld wird wie seine Einzelantwort geprüft. Brauchbare Felder werden
+        übernommen; ein unbrauchbares zählt als Fehlversuch und wird danach einzeln angefragt. Ist die Antwort kein
+        lesbares JSON-Objekt, wird der Aufruf wiederholt, nach METADATEN_VERSUCHE gehen alle Felder einzeln."""
+        try:
+            data = json_aus_text(text)
+            if not isinstance(data, dict):
+                raise ValueError("kein JSON-Objekt")
+        except ValueError:  # auch json.JSONDecodeError
+            self.neu["metadaten"] = self.neu.get("metadaten", 0) + 1
+            if self.neu["metadaten"] < METADATEN_VERSUCHE:
+                return False
+            self.felder["metadaten"] = True
+            return False
+        werte = {"titel": data.get("titel"), "beschreibung": data.get("beschreibung"),
+                 "keywords": data.get("keywords"), "lernziele": {"lernziele": data.get("lernziele") or []},
+                 "suchanfragen": {"suchanfragen": data.get("suchanfragen") or []},
+                 "fragen_antworten": {"paare": data.get("paare") or data.get("fragen_antworten") or []}}
+        for feld in METADATEN_FELDER:
+            if feld in self.felder:
+                continue
+            w = werte[feld]
+            if isinstance(w, list):  # keywords als Liste
+                w = ", ".join(str(x) for x in w)
+            elif isinstance(w, dict):
+                w = json.dumps(w, ensure_ascii=False)
+            try:
+                if not w:
+                    raise ValueError("fehlt")
+                self.felder[feld] = self._parse(feld, str(w))
+            except ValueError:
+                self.neu[feld] = self.neu.get(feld, 0) + 1
+        self.felder["metadaten"] = True
+        return True
 
     def _parse(self, feld: str, text: str):
         if feld == "volltext":
@@ -511,9 +568,9 @@ class Material:
 
 
 def generate_one(client: LLMClient, seed: dict, prompts_by_bereich: dict, meta: dict, qa_min: int = 8,
-                 inhaltstyp_pruefen: bool = True, ausgabesprache: str = "de") -> dict:
+                 inhaltstyp_pruefen: bool = True, ausgabesprache: str = "de", kombiniert: bool = False) -> dict:
     """Ein Material sofort erzeugen: Stufe für Stufe, die Felder einer Stufe gleichzeitig."""
-    m = Material(seed, prompts_by_bereich, qa_min, inhaltstyp_pruefen, ausgabesprache)
+    m = Material(seed, prompts_by_bereich, qa_min, inhaltstyp_pruefen, ausgabesprache, kombiniert=kombiniert)
     start = time.time()
     zaehlt = hasattr(client, "zaehler")
 
@@ -536,7 +593,7 @@ def generate_one(client: LLMClient, seed: dict, prompts_by_bereich: dict, meta: 
 
 
 def meta_fuer(cfg: LLMConfig, prompts_by_bereich: dict, inhaltstyp_pruefen: bool, ausgabesprache: str,
-              verarbeitung: str | None = None) -> dict:
+              verarbeitung: str | None = None, kombiniert: bool = False) -> dict:
     """Angaben zur Erzeugung, die in jedem Material unter synth:generierung stehen."""
     pub = cfg.public()
     meta = {"modell": cfg.model, "base_url": pub["base_url"], "datum": date.today().isoformat(),
@@ -548,22 +605,25 @@ def meta_fuer(cfg: LLMConfig, prompts_by_bereich: dict, inhaltstyp_pruefen: bool
         meta["reasoning_effort"] = cfg.reasoning_effort
     if verarbeitung or cfg.service_tier:
         meta["verarbeitung"] = verarbeitung or cfg.service_tier  # "flex" oder "batch"; fehlt = Standard
+    if kombiniert:
+        meta["metadaten"] = "kombiniert"  # fehlt = jedes Feld in einem eigenen Aufruf
     return meta
 
 
 def generate(seeds_path: Path, out_path: Path, cfg: LLMConfig, limit: int | None = None,
              inhaltstyp_pruefen: bool = True, ausgabesprache: str = "de", on_progress=print_progress,
-             stop_event=None) -> Progress:
+             stop_event=None, kombiniert: bool = True) -> Progress:
     from .laeufe import lauf_speichern
 
-    lauf_speichern(out_path, seeds_path, cfg, limit, inhaltstyp_pruefen, ausgabesprache, cfg.service_tier or "sofort")
+    lauf_speichern(out_path, seeds_path, cfg, limit, inhaltstyp_pruefen, ausgabesprache, cfg.service_tier or "sofort",
+                   kombiniert)
     seeds = read_seeds(seeds_path)
     if limit:
         seeds = seeds[:limit]
     bereiche = {s[S.F_BEREICH] for s in seeds}
     prompts_by_bereich = {b: load_prompts(b) for b in bereiche}
-    meta = meta_fuer(cfg, prompts_by_bereich, inhaltstyp_pruefen, ausgabesprache)
+    meta = meta_fuer(cfg, prompts_by_bereich, inhaltstyp_pruefen, ausgabesprache, kombiniert=kombiniert)
     return run_tasks(seeds, lambda client, seed: generate_one(client, seed, prompts_by_bereich, meta,
                                                               inhaltstyp_pruefen=inhaltstyp_pruefen,
-                                                              ausgabesprache=ausgabesprache),
+                                                              ausgabesprache=ausgabesprache, kombiniert=kombiniert),
                      Path(out_path), cfg, on_progress=on_progress, stop_event=stop_event)
