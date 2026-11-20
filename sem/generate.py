@@ -46,16 +46,17 @@ MIN_WOERTER = 60  # Volltext: absolute Untergrenze; die eigentliche Grenze häng
 MIN_ANTEIL_UMFANG = 0.6  # kürzer als 60 % der unteren Umfangsgrenze: neu anfragen
 # Stufen eines Materials; die Felder einer Stufe hängen nicht voneinander ab und laufen gleichzeitig
 STUFEN = [["volltext"], ["titel"], ["beschreibung"], ["keywords"],
-          ["inhaltstyp", "fragen_antworten", "lernziele", "suchanfragen"]]
+          ["inhaltstyp", "fragen_antworten", "lernziele", "suchanfragen", "entitaeten"]]
 # Kombiniert (Standard für neue Läufe): alle Metadaten in einem Aufruf, daneben die Inhaltstyp-Prüfung (getrennt, damit
 # sie den Inhaltstyp des Seeds nicht sieht). Ein Feld, das die Prüfung nicht besteht, wird danach einzeln mit seinem
 # Feld-Prompt nachgefragt; die übrigen Stufen sind dann meist leer und fallen weg. Spart je Material fünf Aufrufe, die
 # jeweils den ganzen Volltext mitschicken (gemessen am HS-Lauf: knapp die Hälfte der Eingabe-Tokens).
 STUFEN_KOMBINIERT = [["volltext"], ["metadaten", "inhaltstyp"], *STUFEN[1:4],
-                     ["fragen_antworten", "lernziele", "suchanfragen"]]
-METADATEN_FELDER = ("titel", "beschreibung", "keywords", "lernziele", "suchanfragen", "fragen_antworten")
+                     ["fragen_antworten", "lernziele", "suchanfragen", "entitaeten"]]
+METADATEN_FELDER = ("titel", "beschreibung", "keywords", "lernziele", "suchanfragen", "fragen_antworten",
+                    "entitaeten")
 METADATEN_VERSUCHE = 2  # so oft wird der kombinierte Aufruf bei unlesbarem JSON wiederholt, dann alle Felder einzeln
-JSON_FELDER = {"fragen_antworten", "lernziele", "suchanfragen", "metadaten"}
+JSON_FELDER = {"fragen_antworten", "lernziele", "suchanfragen", "entitaeten", "metadaten"}
 # Ausgabesprachen (ISO 639-1 → Name im Prompt); andere Codes werden unverändert übergeben
 SPRACHEN = {"de": "Deutsch", "en": "Englisch", "fr": "Französisch", "es": "Spanisch", "it": "Italienisch",
             "nl": "Niederländisch", "pl": "Polnisch", "tr": "Türkisch", "uk": "Ukrainisch", "ru": "Russisch",
@@ -311,6 +312,59 @@ def parse_lernziele(data: dict | list, minimum: int = 2, maximum: int = 4) -> li
 
 SUCHANFRAGE_MAX_WOERTER = 6  # Prompt: höchstens 5 Wörter
 
+# feste Typen: die Klassiker der Eigennamenerkennung plus Typen, die in Bildungsmaterial häufig sind (Epochen, benannte
+# Theorien und Methoden, Abschlüsse); grob an den Entitätstypen der GND ausgerichtet, damit ein späteres Verknüpfen leichtfällt
+ENTITAET_TYPEN = ("Person", "Figur", "Gruppe", "Organisation", "Ort", "Bauwerk", "Ereignis", "Epoche", "Werk",
+                  "Regelwerk", "Theorie", "Methode", "Abschluss", "Produkt", "Sonstiges")
+ENTITAETEN_MAX = 15
+_ENTITAET_TYP = {t.lower(): t for t in ENTITAET_TYPEN} | {
+    "personen": "Person", "figuren": "Figur", "gruppen": "Gruppe", "volk": "Gruppe", "organisationen": "Organisation",
+    "institution": "Organisation", "orte": "Ort", "bauwerke": "Bauwerk", "ereignisse": "Ereignis", "epochen": "Epoche",
+    "werke": "Werk", "regelwerke": "Regelwerk", "gesetz": "Regelwerk", "theorien": "Theorie", "modell": "Theorie",
+    "methoden": "Methode", "abschlüsse": "Abschluss", "produkte": "Produkt", "software": "Produkt"}
+
+
+def _stellen(text: str, teil: str) -> list[list[int]]:
+    """Alle Stellen von teil in text als [Anfang, Ende) in Zeichen, nur als ganzes Wort (Rom nicht in Roman)."""
+    muster = re.compile(r"(?<!\w)" + re.escape(teil) + r"(?!\w)")
+    return [[m.start(), m.end()] for m in muster.finditer(text)]
+
+
+def parse_entitaeten(data: dict | list, volltext: str, stil_namen: list[str] | tuple = ()) -> list[dict]:
+    """Benannte Entitäten im Volltext. Jede muss mit "im_text" wörtlich (als ganzes Wort) im Text stehen, sonst fällt
+    sie weg; Typen außerhalb von ENTITAET_TYPEN fallen ebenso weg. "positionen" sind alle Stellen dieser Form im Text
+    (Zeichen, Ende ausschließlich), etwa für das Training einer Eigennamenerkennung. Personen mit einem der Namen aus
+    synth:stil gelten immer als fiktiv. Leere Liste ist gültig (Text ohne Eigennamen)."""
+    liste = data.get("entitaeten") if isinstance(data, dict) else data
+    if not isinstance(liste, list):
+        raise ValueError("keine Liste von Entitäten")
+    namen = [n.strip() for n in stil_namen if n and n.strip()]
+    # „Herr Yılmaz“ steht im Text auch als „Yılmaz“
+    erfunden = {n for x in namen for n in (x, x.split()[-1])}
+    out, gesehen = [], set()
+    for e in liste:
+        if not isinstance(e, dict):
+            continue
+        im_text = _einzeilig(str(e.get("im_text") or e.get("name") or ""))
+        typ = _ENTITAET_TYP.get(_einzeilig(str(e.get("typ") or "")).lower())
+        if not (im_text and typ):
+            continue
+        stellen = _stellen(volltext, im_text)
+        if not stellen:  # andere Groß- und Kleinschreibung: die Form aus dem Text übernehmen
+            m = re.search(r"(?<!\w)" + re.escape(im_text) + r"(?!\w)", volltext, re.I)
+            if not m:
+                continue
+            im_text = m.group(0)
+            stellen = _stellen(volltext, im_text)
+        name = _einzeilig(str(e.get("name") or "")) or im_text
+        if (schluessel := name.lower()) in gesehen:
+            continue
+        gesehen.add(schluessel)
+        fiktiv = e.get("fiktiv") is True or str(e.get("fiktiv")).lower() == "true" or (
+            typ in ("Person", "Figur") and any(_stellen(name, n) or _stellen(im_text, n) for n in erfunden))
+        out.append({"name": name, "typ": typ, "im_text": im_text, "fiktiv": fiktiv, "positionen": stellen})
+    return out[:ENTITAETEN_MAX]
+
 
 def parse_suchanfragen(data: dict | list, minimum: int = 4, maximum: int = 8) -> list[str]:
     """Kurze Suchschlitz-Eingaben; ganze Sätze und zu lange Anfragen fallen weg, Dubletten ohne Groß/klein. Die
@@ -510,7 +564,9 @@ class Material:
         werte = {"titel": data.get("titel"), "beschreibung": data.get("beschreibung"),
                  "keywords": data.get("keywords"), "lernziele": {"lernziele": data.get("lernziele") or []},
                  "suchanfragen": {"suchanfragen": data.get("suchanfragen") or []},
-                 "fragen_antworten": {"paare": data.get("paare") or data.get("fragen_antworten") or []}}
+                 "fragen_antworten": {"paare": data.get("paare") or data.get("fragen_antworten") or []},
+                 # eine leere Liste ist eine gültige Antwort (Text ohne Eigennamen), ein fehlender Schlüssel nicht
+                 "entitaeten": {"entitaeten": data["entitaeten"]} if isinstance(data.get("entitaeten"), list) else None}
         for feld in METADATEN_FELDER:
             if feld in self.felder:
                 continue
@@ -546,6 +602,10 @@ class Material:
             return parse_lernziele(json_aus_text(text), minimum=1 if letzter else 2)
         if feld == "suchanfragen":
             return parse_suchanfragen(json_aus_text(text))
+        if feld == "entitaeten":
+            # leere Antwort: keine Eigennamen (der Systemprompt erlaubt sie, wenn keine Aussage möglich ist)
+            data = json_aus_text(text) if text.strip() else []
+            return parse_entitaeten(data, self.felder["volltext"], (self.seed.get(S.F_STIL) or {}).get("namen", []))
         if feld == "titel":
             letzter = self.neu.get("titel", 0) >= FELD_VERSUCHE - 1
             t = titel_reparieren(text) if letzter else parse_titel(text)
@@ -576,6 +636,8 @@ class Material:
                                   for z in f["lernziele"]]
         if "suchanfragen" in f:
             rec[S.F_SUCHANFRAGEN] = f["suchanfragen"]
+        if f.get("entitaeten") is not None:  # None: Korrektur eines Materials, das vor diesem Feld entstand
+            rec[S.F_ENTITAETEN] = f["entitaeten"]
         if a != "de":
             rec[S.F_LANGUAGE] = list(dict.fromkeys([a, *[x for x in rec.get(S.F_LANGUAGE, []) if x != "de"]]))
         if "inhaltstyp" in f:
@@ -589,7 +651,7 @@ class Material:
         prov[S.F_FULLTEXT] = dict(S.provenance("LLM", method="aus dem Seed erzeugt (volltext)"), modell=meta["modell"])
         for feld, datei in ((S.F_TITLE, "titel"), (S.F_DESCRIPTION, "beschreibung"), (S.F_KEYWORD, "keywords"),
                             (S.F_QA, "fragen_antworten"), (S.F_LERNZIELE, "lernziele"),
-                            (S.F_SUCHANFRAGEN, "suchanfragen")):
+                            (S.F_SUCHANFRAGEN, "suchanfragen"), (S.F_ENTITAETEN, "entitaeten")):
             if feld not in rec:
                 continue
             prov[feld] = dict(S.provenance("LLM", method=f"aus Volltext und festen Metadaten erzeugt ({datei})"),

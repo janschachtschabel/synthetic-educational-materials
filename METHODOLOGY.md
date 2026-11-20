@@ -531,10 +531,20 @@ Up to six LLM calls per seed (OpenAI-compatible API, default model `gpt-6-luna`)
    case like real input) for which the
    material is a fitting hit. Intended as query → material training pairs for search and embedding models.
 
-Steps 3 to 6 run simultaneously.
+7. **Entities** (`entitaeten.md`, JSON, `synth:entitaeten`): the named entities of the fulltext, at most 15, each with
+   `name` (full form, „Johann Wolfgang von Goethe“), `typ`, `im_text` (the form as it appears in the text, „Goethes“),
+   `fiktiv` and `positionen` (every occurrence of that form in the fulltext as [start, end) in characters, for training
+   named-entity recognition). The 15 types are fixed: Person, Figur, Gruppe, Organisation, Ort, Bauwerk, Ereignis, Epoche,
+   Werk, Regelwerk, Theorie, Methode, Abschluss, Produkt, Sonstiges; besides the classic ones, types that are common in
+   educational material, roughly aligned with the entity types of the GND. General technical terms belong in the
+   keywords; theories and methods count only when they carry a fixed name („Satz des Pythagoras“). An entity whose
+   `im_text` does not occur as a whole word in the fulltext is dropped, as are unknown types; an empty list is valid.
+   Persons with a name from `synth:stil` are always fictional. Linking to GND or Wikidata is a later, separate step.
+
+Steps 3 to 7 run simultaneously.
 
 **One call for all metadata** (default since November 2026, `--metadaten-einzeln` for the previous procedure):
-steps 2, 4, 5 and 6 go into a single JSON call (`metadaten.md` combines the field files unchanged), while the
+steps 2, 4, 5, 6 and 7 go into a single JSON call (`metadaten.md` combines the field files unchanged), while the
 content-type check runs as its own call, because it must not see the seed’s content type. Each field of the answer is
 validated like a single answer; only fields that fail are then requested individually with their field file (the
 combined attempt counts as the first of the three attempts). If the answer is not readable JSON, it is repeated once,

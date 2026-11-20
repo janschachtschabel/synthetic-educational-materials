@@ -41,7 +41,7 @@ class Antworten:
             einzeln = {f: self(self._nur(f)) for f in ("titel", "beschreibung", "keywords")}
             return json.dumps({**einzeln, "keywords": einzeln["keywords"].split(", "),
                                **json.loads(LERNZIELE_JSON), **json.loads(SUCHANFRAGEN_JSON),
-                               **json.loads(self(self._nur("fragen_antworten")))}, ensure_ascii=False)
+                               **json.loads(self(self._nur("fragen_antworten"))), "entitaeten": []}, ensure_ascii=False)
         if feld == "volltext":
             return " ".join(["Wort"] * 1000)
         if feld == "titel":
@@ -57,6 +57,8 @@ class Antworten:
             return LERNZIELE_JSON
         if feld == "suchanfragen":
             return SUCHANFRAGEN_JSON
+        if feld == "entitaeten":
+            return '{"entitaeten": [{"name": "Wort", "typ": "Sonstiges", "im_text": "Wort"}]}'
         return json.dumps({"paare": [{"frage": f"F{i}?", "antwort": "A.", "typ": "verstehen"} for i in range(10)]})
 
     def _nur(self, feld):
@@ -166,11 +168,11 @@ def test_batch_ergibt_dieselben_materialien_wie_sofort(seeds_datei, tmp_path):
                      S.F_LERNZIELE, S.F_SUCHANFRAGEN):
             assert b[feld] == sofort[feld]
         assert b[S.F_GENERATION]["verarbeitung"] == "batch"
-        assert b[S.F_GENERATION]["tokens"]["aufrufe"] == 8 + b[S.F_GENERATION]["neu_angefragt"].get("titel", 0)
+        assert b[S.F_GENERATION]["tokens"]["aufrufe"] == 9 + b[S.F_GENERATION]["neu_angefragt"].get("titel", 0)
     # Batch-Anfragen ohne service_tier, JSON-Modus nur für Frage-Antwort-Paare, Lernziele und Suchanfragen
     bodies = [r["body"] for r in client.anfragen]
     assert not any("service_tier" in x for x in bodies)
-    assert all(("response_format" in x) == r["custom_id"].split("|")[1].startswith(("fragen", "lernziele", "such"))
+    assert all(("response_format" in x) == r["custom_id"].split("|")[1].startswith(("fragen", "lernziele", "such", "entitaeten"))
                for x, r in zip(bodies, client.anfragen))
 
 
@@ -254,7 +256,7 @@ def test_kombiniert_unlesbar_dann_einzeln():
                   inhaltstyp_pruefen=False, bereich=B(), kombiniert=True, zustand={"felder": {"volltext": "T " * 400}})
     assert m2.antwort("metadaten", json.dumps({"titel": "Kurz", "beschreibung": "Satz eins. " * 40,
                                                 "keywords": ["A", "B", "C", "D", "E"]})) is True
-    assert m2.neu == {"titel": 1, "lernziele": 1, "suchanfragen": 1, "fragen_antworten": 1}
+    assert m2.neu == {"titel": 1, "lernziele": 1, "suchanfragen": 1, "fragen_antworten": 1, "entitaeten": 1}
     assert m2.gruende["titel"] == ["Titel mit 4 Zeichen"] and m2.zustand()["gruende"] == m2.gruende
     assert m2.felder["keywords"] == ["A", "B", "C", "D", "E"] and "beschreibung" in m2.felder
     assert m2.stufe == ["titel"]

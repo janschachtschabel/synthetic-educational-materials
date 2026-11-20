@@ -730,10 +730,21 @@ Pro Seed bis zu acht LLM-Aufrufe (OpenAI-kompatible API, Standardmodell `gpt-6-l
    die das Material ein passender Treffer ist. Gedacht als Trainingspaare Anfrage → Material für
    Such- und Embedding-Modelle.
 
-Schritt 3 bis 6 laufen gleichzeitig.
+7. **Entitäten** (`entitaeten.md`, JSON, `synth:entitaeten`): die benannten Entitäten des Volltexts, höchstens 15,
+   je mit `name` (vollständige Form, „Johann Wolfgang von Goethe“), `typ`, `im_text` (die Form, wie sie im Text steht,
+   „Goethes“), `fiktiv` und `positionen` (alle Stellen dieser Form im Volltext als [Anfang, Ende) in Zeichen, für das
+   Training einer Eigennamenerkennung). Die 15 Typen sind fest: Person, Figur, Gruppe, Organisation, Ort, Bauwerk,
+   Ereignis, Epoche, Werk, Regelwerk, Theorie, Methode, Abschluss, Produkt, Sonstiges; neben den Klassikern also Typen,
+   die in Bildungsmaterial häufig sind, grob an den Entitätstypen der GND ausgerichtet. Allgemeine Fachbegriffe gehören in
+   die Keywords, Theorien und Methoden zählen nur, wenn sie fest benannt sind („Satz des Pythagoras“). Eine Entität,
+   deren `im_text` nicht als ganzes Wort im Volltext steht, fällt weg, ebenso unbekannte Typen; eine leere Liste ist
+   gültig. Personen mit einem Namen aus `synth:stil` gelten immer als fiktiv. Das Verknüpfen mit GND oder Wikidata ist
+   ein späterer, eigener Schritt.
+
+Schritt 3 bis 7 laufen gleichzeitig.
 
 **Ein Aufruf für alle Metadaten** (Standard seit November 2026, `--metadaten-einzeln` für das alte Verfahren):
-Schritt 2, 4, 5 und 6 gehen in einem einzigen JSON-Aufruf (`metadaten.md` setzt die Felddateien unverändert
+Schritt 2, 4, 5, 6 und 7 gehen in einem einzigen JSON-Aufruf (`metadaten.md` setzt die Felddateien unverändert
 zusammen), daneben läuft die Inhaltstyp-Prüfung als eigener Aufruf, weil sie den Inhaltstyp des Seeds nicht sehen darf.
 Jedes Feld der Antwort wird wie eine Einzelantwort geprüft; nur was durchfällt, wird danach einzeln mit seiner
 Felddatei nachgefragt (der kombinierte Versuch zählt als erster der drei Versuche). Ist die Antwort kein lesbares

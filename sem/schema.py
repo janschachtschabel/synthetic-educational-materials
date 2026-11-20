@@ -41,6 +41,7 @@ F_FULLTEXT = "synth:volltext"
 F_QA = "synth:frage_antwort_paare"
 F_LERNZIELE = "synth:lernziele"                     # kompetenzorientierte Lernziele mit Taxonomiestufe
 F_SUCHANFRAGEN = "synth:suchanfragen"               # kurze Suchschlitz-Eingaben, für die das Material passt
+F_ENTITAETEN = "synth:entitaeten"                   # Eigennamen im Volltext mit Typ und Zeichenpositionen
 F_LRT_CHECK = "synth:inhaltstyp_pruefung"           # Inhaltstyp aus dem fertigen Material bestimmt
 F_PROVENANCE = "synth:provenance"
 F_GENERATION = "synth:generierung"

@@ -59,11 +59,11 @@ OPEN_TOPIC_PREFIXES = (
 OWN_TOPIC_PREFIXES = ("wlo-abstraktion:",)
 
 
-# Export columns and their types (str, list of str, bool, int, qa, lo = learning objectives); schema() turns them into a pyarrow schema
+# Export columns and their types (str, list of str, bool, int, qa, lo = learning objectives, ent = named entities); schema() turns them into a pyarrow schema
 COLUMNS = [
     ("id", "str"), ("education_sector", "str"), ("language", "str"), ("title", "str"), ("description", "str"),
     ("keywords", "list"), ("fulltext", "str"), ("qa_pairs", "qa"), ("learning_objectives", "lo"),
-    ("search_queries", "list"),
+    ("search_queries", "list"), ("entities", "ent"),
     ("educational_context", "list"), ("educational_context_uri", "list"), ("subject", "list"),
     ("subject_uri", "list"), ("content_type", "list"), ("content_type_uri", "list"),
     ("content_type_check_match", "bool"), ("target_group", "list"), ("target_group_uri", "list"), ("level", "str"),
@@ -97,7 +97,9 @@ def schema():
 
     types = {"str": pa.string(), "list": pa.list_(pa.string()), "bool": pa.bool_(), "int": pa.int32(),
              "qa": pa.list_(pa.struct([("question", pa.string()), ("answer", pa.string()), ("type", pa.string())])),
-             "lo": pa.list_(pa.struct([("objective", pa.string()), ("operator", pa.string()), ("level", pa.string())]))}
+             "lo": pa.list_(pa.struct([("objective", pa.string()), ("operator", pa.string()), ("level", pa.string())])),
+             "ent": pa.list_(pa.struct([("name", pa.string()), ("type", pa.string()), ("text", pa.string()),
+                                        ("fictional", pa.bool_()), ("spans", pa.list_(pa.list_(pa.int32())))]))}
     return pa.schema([(name, types[t]) for name, t in COLUMNS])
 
 
@@ -203,6 +205,10 @@ def flatten(r: dict) -> dict:
         "learning_objectives": [{"objective": z.get("lernziel", ""), "operator": z.get("operator", ""),
                                  "level": z.get("stufe", "")} for z in r.get("synth:lernziele") or []],
         "search_queries": list(r.get("synth:suchanfragen") or []),
+        # named entities in the fulltext with character spans [start, end) of the form "text" (newer runs only)
+        "entities": [{"name": e.get("name", ""), "type": e.get("typ", ""), "text": e.get("im_text", ""),
+                      "fictional": bool(e.get("fiktiv")), "spans": e.get("positionen") or []}
+                     for e in r.get("synth:entitaeten") or []],
         "educational_context": _labels(r, "ccm:educationalcontext"),
         "educational_context_uri": _uris(r, "ccm:educationalcontext"),
         "subject": _labels(r, subj_field),
