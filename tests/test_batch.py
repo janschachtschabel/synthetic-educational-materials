@@ -310,3 +310,37 @@ def test_wiederholt_abgelehnte_batches_halten_den_lauf_an(seeds_datei, tmp_path)
         for _ in range(10):
             lauf.weiter()
     assert not (tmp_path / "materialien_t.fehler.jsonl").exists()
+
+
+def test_paket_begrenzt_materialien_je_batch(seeds_datei, tmp_path):
+    """Höchstens paket Materialien je Batch; die zwei Anfragen eines Materials (Metadaten, Inhaltstyp) bleiben
+    zusammen im selben Batch."""
+    path, seeds = seeds_datei
+    client = FakeOpenAI(Antworten(load_prompts("hochschule"), titel_kaputt=0))
+    lauf = _lauf(path, tmp_path, client, paket=2)
+    assert len(lauf.weiter()["batches_laufend"]) == 2  # 3 Materialien, höchstens 2 je Batch
+    st = lauf.weiter()  # Runde 2: Metadaten und Inhaltstyp
+    teile = [b for b in lauf.stand["batches"] if not b["ausgewertet"]]
+    assert [len(b["anfragen"]) for b in teile] == [4, 2]
+    for b in teile:
+        sids = [c.split("|")[0] for c in b["anfragen"]]
+        assert len(set(sids)) <= 2 and all(sids.count(s) == 2 for s in sids)
+    while not st["abgeschlossen"]:
+        st = lauf.weiter()
+    assert len(read_done(tmp_path / "materialien_t.jsonl")) == 3
+
+
+def test_metadaten_ohne_denken_nur_anthropic(seeds_datei):
+    cfg = LLMConfig(anbieter="anthropic", api_key="x", model="m", reasoning_effort="low")
+    assert cfg.parameter("s", "u", denken=False)["thinking"] == {"type": "disabled"}
+    assert "thinking" not in cfg.parameter("s", "u")
+    assert "thinking" not in LLMConfig(anbieter="anthropic", model="m", reasoning_effort="max").parameter(
+        "s", "u", denken=False)  # disabled nur bis effort high erlaubt
+    assert "thinking" not in LLMConfig(model="m").parameter("s", "u", denken=False)  # OpenAI-kompatibel: unverändert
+    from sem.generate import Material
+
+    m = Material(seeds_datei[1][0], {"hochschule": load_prompts("hochschule")}, kombiniert=True,
+                 denken_metadaten=False)
+    assert [a.denken for a in m.anfragen()] == [True]  # Volltext denkt
+    m.felder["volltext"] = "Wort " * 1000
+    assert {a.feld: a.denken for a in m.anfragen()} == {"metadaten": False, "inhaltstyp": False}

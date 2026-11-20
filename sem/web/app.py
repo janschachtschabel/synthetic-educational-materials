@@ -544,10 +544,11 @@ def materialien_neu_felder(request: Request, src: str, name: str = "", nur_hinwe
     return seite(request, "teil_mat_hinweis.html" if nur_hinweis else "teil_mat_neu_felder.html", neu=ctx)
 
 
-def _mat_argv(src: Path, out: Path, sprache_: str, limit: int, lrt: bool, kombiniert: bool = True) -> list[str]:
+def _mat_argv(src: Path, out: Path, sprache_: str, limit: int, lrt: bool, kombiniert: bool = True,
+              denken: bool = False) -> list[str]:
     return (["materialien", "--seeds", str(src), "--out", str(out), "--sprache", sprache_]
             + (["--limit", str(limit)] if limit else []) + ([] if lrt else ["--ohne-inhaltstyp-pruefung"])
-            + ([] if kombiniert else ["--metadaten-einzeln"]))
+            + ([] if kombiniert else ["--metadaten-einzeln"]) + (["--metadaten-denken"] if denken else []))
 
 
 @app.post("/materialien/start", response_class=HTMLResponse)
@@ -604,7 +605,8 @@ def fortsetzen(request: Request, name: str, aktion: str = Form("fortsetzen"), ve
                   service_tier="flex" if verarbeitung == "flex" and not batch else None)
     if aktion == "neu":
         argv = _mat_argv(Path(L["seeds"]), freier_name(Path(L["ausgabe"])), L["ausgabesprache"], L["limit"] or 0,
-                         L["inhaltstyp_pruefen"], L.get("metadaten_kombiniert", False)) \
+                         L["inhaltstyp_pruefen"], L.get("metadaten_kombiniert", False),
+                         L.get("denken_metadaten", True)) \
             + (["--batch", "--warten"] if batch else [])
     else:
         argv = ["materialien", "--fortsetzen", L["name"]] + (["--warten"] if batch else [])

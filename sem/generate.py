@@ -363,6 +363,7 @@ class Anfrage:
     system: str
     user: str
     json_mode: bool = False
+    denken: bool = True  # False: ohne Denken des Modells (nur Anthropic)
 
 
 class Material:
@@ -373,9 +374,11 @@ class Material:
     sich mit zustand() speichern und mit Material(..., zustand=...) fortsetzen (Batch-Verarbeitung)."""
 
     def __init__(self, seed: dict, prompts_by_bereich: dict, qa_min: int = 8, inhaltstyp_pruefen: bool = True,
-                 ausgabesprache: str = "de", zustand: dict | None = None, bereich=None, kombiniert: bool = False):
+                 ausgabesprache: str = "de", zustand: dict | None = None, bereich=None, kombiniert: bool = False,
+                 denken_metadaten: bool = True):
         self.seed = seed
         self.kombiniert = kombiniert
+        self.denken_metadaten = denken_metadaten  # False: Metadaten und Inhaltstyp-Prüfung ohne Denken
         self.bereich = bereich or get_bereich(seed[S.F_BEREICH])  # bereich: schon geladen (viele Materialien)
         self.prompts = prompts_by_bereich[self.bereich.key]
         self.qa_min = qa_min
@@ -426,7 +429,10 @@ class Material:
         return self.stufe is None
 
     def anfragen(self) -> list[Anfrage]:
-        return [self._anfrage(f) for f in self.stufe or []]
+        out = [self._anfrage(f) for f in self.stufe or []]
+        for a in out:
+            a.denken = a.feld == "volltext" or self.denken_metadaten
+        return out
 
     def _anfrage(self, feld: str) -> Anfrage:
         p, v = self.prompts, self.values
@@ -568,16 +574,18 @@ class Material:
 
 
 def generate_one(client: LLMClient, seed: dict, prompts_by_bereich: dict, meta: dict, qa_min: int = 8,
-                 inhaltstyp_pruefen: bool = True, ausgabesprache: str = "de", kombiniert: bool = False) -> dict:
+                 inhaltstyp_pruefen: bool = True, ausgabesprache: str = "de", kombiniert: bool = False,
+                 denken_metadaten: bool = True) -> dict:
     """Ein Material sofort erzeugen: Stufe für Stufe, die Felder einer Stufe gleichzeitig."""
-    m = Material(seed, prompts_by_bereich, qa_min, inhaltstyp_pruefen, ausgabesprache, kombiniert=kombiniert)
+    m = Material(seed, prompts_by_bereich, qa_min, inhaltstyp_pruefen, ausgabesprache, kombiniert=kombiniert,
+                 denken_metadaten=denken_metadaten)
     start = time.time()
     zaehlt = hasattr(client, "zaehler")
 
     def frage(a: Anfrage) -> tuple[str, dict]:
         if zaehlt:
             client.zaehler(neu=True)  # Zähler je Thread
-        text = client.chat(a.system, a.user, json_mode=a.json_mode)
+        text = client.chat(a.system, a.user, json_mode=a.json_mode, **({} if a.denken else {"denken": False}))
         return text, (dict(client.zaehler()) if zaehlt else {})
 
     while not m.fertig:
@@ -593,7 +601,7 @@ def generate_one(client: LLMClient, seed: dict, prompts_by_bereich: dict, meta: 
 
 
 def meta_fuer(cfg: LLMConfig, prompts_by_bereich: dict, inhaltstyp_pruefen: bool, ausgabesprache: str,
-              verarbeitung: str | None = None, kombiniert: bool = False) -> dict:
+              verarbeitung: str | None = None, kombiniert: bool = False, denken_metadaten: bool = True) -> dict:
     """Angaben zur Erzeugung, die in jedem Material unter synth:generierung stehen."""
     pub = cfg.public()
     meta = {"modell": cfg.model, "base_url": pub["base_url"], "datum": date.today().isoformat(),
@@ -607,23 +615,27 @@ def meta_fuer(cfg: LLMConfig, prompts_by_bereich: dict, inhaltstyp_pruefen: bool
         meta["verarbeitung"] = verarbeitung or cfg.service_tier  # "flex" oder "batch"; fehlt = Standard
     if kombiniert:
         meta["metadaten"] = "kombiniert"  # fehlt = jedes Feld in einem eigenen Aufruf
+    if not denken_metadaten and cfg.anbieter == "anthropic":
+        meta["denken_metadaten"] = False  # fehlt = Metadaten mit Denken (wie der Volltext)
     return meta
 
 
 def generate(seeds_path: Path, out_path: Path, cfg: LLMConfig, limit: int | None = None,
              inhaltstyp_pruefen: bool = True, ausgabesprache: str = "de", on_progress=print_progress,
-             stop_event=None, kombiniert: bool = True) -> Progress:
+             stop_event=None, kombiniert: bool = True, denken_metadaten: bool = False) -> Progress:
     from .laeufe import lauf_speichern
 
     lauf_speichern(out_path, seeds_path, cfg, limit, inhaltstyp_pruefen, ausgabesprache, cfg.service_tier or "sofort",
-                   kombiniert)
+                   kombiniert, denken_metadaten)
     seeds = read_seeds(seeds_path)
     if limit:
         seeds = seeds[:limit]
     bereiche = {s[S.F_BEREICH] for s in seeds}
     prompts_by_bereich = {b: load_prompts(b) for b in bereiche}
-    meta = meta_fuer(cfg, prompts_by_bereich, inhaltstyp_pruefen, ausgabesprache, kombiniert=kombiniert)
+    meta = meta_fuer(cfg, prompts_by_bereich, inhaltstyp_pruefen, ausgabesprache, kombiniert=kombiniert,
+                     denken_metadaten=denken_metadaten)
     return run_tasks(seeds, lambda client, seed: generate_one(client, seed, prompts_by_bereich, meta,
                                                               inhaltstyp_pruefen=inhaltstyp_pruefen,
-                                                              ausgabesprache=ausgabesprache, kombiniert=kombiniert),
+                                                              ausgabesprache=ausgabesprache, kombiniert=kombiniert,
+                                                              denken_metadaten=denken_metadaten),
                      Path(out_path), cfg, on_progress=on_progress, stop_event=stop_event)

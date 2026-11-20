@@ -157,6 +157,9 @@ def main(argv=None):
     p.add_argument("--metadaten-einzeln", action="store_true",
                    help="jedes Metadatenfeld in einem eigenen Aufruf wie bis November 2026 (Standard: alle in einem "
                         "Aufruf, prompts/metadaten.md; spart rund ein Drittel der Kosten)")
+    p.add_argument("--metadaten-denken", action="store_true",
+                   help="Anthropic: Metadaten und Inhaltstyp-Prüfung mit Denken des Modells (Standard: nur der "
+                        "Volltext denkt; spart rund ein Zehntel der Kosten)")
     p.add_argument("--sprache", default="de", metavar="CODE",
                    help="Ausgabesprache als ISO-Code (de, en, fr, es, …; Standard de). Der Hinweis an das Modell "
                         "steht in prompts/ausgabesprache.md")
@@ -164,6 +167,9 @@ def main(argv=None):
                    help="über die Batch-Schnittstelle (OpenAI): halber Preis, Ergebnis je Runde bis 24 h; jeder Aufruf "
                         "holt Fertiges ab und schickt die nächste Runde (Stand in <ausgabe>.batch/)")
     p.add_argument("--warten", action="store_true", help="mit --batch: wiederholen, bis alles fertig ist")
+    p.add_argument("--paket", type=int, default=2000,
+                   help="mit --batch: höchstens so viele Materialien je Batch (Standard 2000); kleinere Batches sind "
+                        "schneller fertig, jedes Material rückt weiter, sobald sein Batch fertig ist")
     p.add_argument("--intervall", type=float, default=60, help="mit --warten: Sekunden zwischen den Abfragen")
     _stand_arg(p)
     _llm_args(p)
@@ -337,6 +343,7 @@ def main(argv=None):
             a.seeds, a.out, a.limit, a.sprache = Path(lauf["seeds"]), Path(lauf["ausgabe"]), lauf["limit"],                 lauf["ausgabesprache"]
             a.ohne_inhaltstyp_pruefung = not lauf["inhaltstyp_pruefen"]
             a.metadaten_einzeln = not lauf.get("metadaten_kombiniert", False)  # ältere Läufe: einzeln
+            a.metadaten_denken = lauf.get("denken_metadaten", True)  # ältere Läufe: mit Denken
             a.batch = lauf["verarbeitung"] == "batch"
             a.anbieter = a.anbieter or lauf["anbieter"]
             a.model = a.model or lauf["modell"]
@@ -352,7 +359,8 @@ def main(argv=None):
             from .batch import BatchLauf, status_zeile
 
             lauf = BatchLauf(a.seeds, out, _cfg(a), limit=a.limit, inhaltstyp_pruefen=not a.ohne_inhaltstyp_pruefung,
-                             ausgabesprache=a.sprache, kombiniert=not a.metadaten_einzeln)
+                             ausgabesprache=a.sprache, kombiniert=not a.metadaten_einzeln,
+                             denken_metadaten=a.metadaten_denken, paket=a.paket)
             schreiber = stop = None
             if a.stand:  # Oberfläche: Stand der Batch-Runden
                 from .llm import Progress
@@ -430,7 +438,7 @@ def main(argv=None):
             return
         prog = _mit_stand(a, lambda **kw: generate(a.seeds, out, _cfg(a), **kw), limit=a.limit,
                           inhaltstyp_pruefen=not a.ohne_inhaltstyp_pruefung, ausgabesprache=a.sprache,
-                          kombiniert=not a.metadaten_einzeln)
+                          kombiniert=not a.metadaten_einzeln, denken_metadaten=a.metadaten_denken)
         print(f"{prog.done} neu, {prog.skipped} schon vorhanden, {prog.failed} fehlgeschlagen → {out}")
         if prog.status != "fertig":
             sys.exit(2)

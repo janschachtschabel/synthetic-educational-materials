@@ -40,6 +40,9 @@ MAX_BYTES = 190 * 1024 ** 2      # je Batch-Datei (Grenze der API: 200 MB)
 # Anthropic: Die Anfragen gehen direkt im Request mit. Der Server bricht lange Uploads ab (500 timeout_error, bei
 # ~190 MB und langsamer Leitung beobachtet); kleine Teile laden auch bei ~300 KB/s in gut einer Minute hoch.
 MAX_BYTES_ANTHROPIC = 24 * 1024 ** 2
+# Materialien je Batch-Teil: kleine Teile sind beim Anbieter schneller fertig; jedes Material rückt weiter, sobald
+# sein Teil fertig ist, die Teile laufen also wie unabhängige Pakete
+PAKET = 2000
 MAX_API_FEHLER = 3               # so oft wird eine Anfrage neu gestellt, die im Batch selbst scheitert
 MAX_BATCH_FEHLER_IN_FOLGE = 3    # so viele ganze Batches dürfen nacheinander scheitern, dann hält der Lauf an
 DATEI_TIMEOUT = 1800.0           # Sekunden für Hoch- und Herunterladen der Batch-Dateien (bis 190 MB)
@@ -279,7 +282,8 @@ def batch_ordner(out_path: Path) -> Path:
 
 class BatchLauf:
     def __init__(self, seeds_path: Path, out_path: Path, cfg: LLMConfig, limit: int | None = None,
-                 inhaltstyp_pruefen: bool = True, ausgabesprache: str = "de", client=None, kombiniert: bool = True):
+                 inhaltstyp_pruefen: bool = True, ausgabesprache: str = "de", client=None, kombiniert: bool = True,
+                 denken_metadaten: bool = False, paket: int = PAKET):
         self.out_path = Path(out_path)
         self.err_path = self.out_path.with_suffix(".fehler.jsonl")
         self.ordner = batch_ordner(self.out_path)
@@ -288,13 +292,15 @@ class BatchLauf:
         self.inhaltstyp_pruefen = inhaltstyp_pruefen
         self.ausgabesprache = ausgabesprache
         self.kombiniert = kombiniert
+        self.denken_metadaten = denken_metadaten
+        self.paket = max(1, paket)
         seeds = read_seeds(seeds_path)
         self.seeds = {s["id"]: s for s in (seeds[:limit] if limit else seeds)}
         keys = {s[S.F_BEREICH] for s in self.seeds.values()}
         self.bereiche = {k: get_bereich(k) for k in keys}
         self.prompts = {k: load_prompts(k) for k in keys}
         self.meta = meta_fuer(cfg, self.prompts, inhaltstyp_pruefen, ausgabesprache, verarbeitung="batch",
-                              kombiniert=kombiniert)
+                              kombiniert=kombiniert, denken_metadaten=denken_metadaten)
         cfg.pruefen()
         if client is None:
             if not cfg.api_key:
@@ -319,6 +325,8 @@ class BatchLauf:
             parameter["anbieter"] = cfg.anbieter
         if kombiniert:  # fehlt bei einzelnen Aufrufen, damit ältere Läufe weiterhin passen
             parameter["metadaten"] = "kombiniert"
+        if not denken_metadaten and cfg.anbieter == "anthropic":  # ebenso
+            parameter["denken_metadaten"] = False
         self.zustaende = Zustaende(self.ordner / "materialien.sqlite")
         if self.stand_path.exists():
             self.stand = _alten_stand_umziehen(self.stand_path, self.zustaende)
@@ -330,7 +338,8 @@ class BatchLauf:
                           "fehlgeschlagen": [], "batches": []}
         self.stand.setdefault("token_budget", None)  # geschätzte Tokens, die höchstens gleichzeitig unterwegs sind
         self.stand.setdefault("batch_fehler_in_folge", 0)
-        lauf_speichern(self.out_path, seeds_path, cfg, limit, inhaltstyp_pruefen, ausgabesprache, "batch", kombiniert)
+        lauf_speichern(self.out_path, seeds_path, cfg, limit, inhaltstyp_pruefen, ausgabesprache, "batch", kombiniert,
+                       denken_metadaten)
 
     # --- Stand ------------------------------------------------------------------------------------
 
@@ -357,7 +366,7 @@ class BatchLauf:
         z = self.zustaende.get(sid)
         return Material(seed, self.prompts, inhaltstyp_pruefen=self.inhaltstyp_pruefen,
                         ausgabesprache=self.ausgabesprache, zustand=z, bereich=self.bereiche[seed[S.F_BEREICH]],
-                        kombiniert=self.kombiniert)
+                        kombiniert=self.kombiniert, denken_metadaten=self.denken_metadaten)
 
     def _offene_ids(self) -> list[str]:
         erledigt = read_done(self.out_path) | set(self.stand["fehlgeschlagen"])
@@ -462,17 +471,18 @@ class BatchLauf:
         runde = self.stand["runde"] + 1
         max_bytes = getattr(self.api, "max_bytes", MAX_BYTES)
         teil, groesse, nr, gesamt = [], 0, 0, 0
+        im_teil: set[str] = set()  # Materialien im aktuellen Teil
         voll = False
 
         def schicken():
-            nonlocal teil, groesse, nr
+            nonlocal teil, groesse, nr, im_teil
             nr += 1
             self.stand["runde"] = runde
             if self.fortschritt:
                 self.fortschritt(f"Runde {runde}: schickt Teil {nr} ({len(teil)} Anfragen, {gesamt} insgesamt bis hier) "
                                  "an den Anbieter …")
             self._batch_anlegen(runde, nr, teil)
-            teil, groesse = [], 0
+            teil, groesse, im_teil = [], 0, set()
 
         # Materialien mit einer Anfrage unterwegs überspringen: Ihr nächster Schritt hängt an deren Antwort, und den
         # Zustand jedes offenen Materials (mit Volltext) bei jeder Abfrage zu laden, kostete bei 80.000 Minuten
@@ -488,10 +498,12 @@ class BatchLauf:
                 if budget and tokens + n > budget and (gesamt or tokens):
                     voll = True  # Rest in einer späteren Runde, wenn Platz in der Warteschlange ist
                     break
-                body = self.cfg.parameter(a.system, a.user, a.json_mode, batch=True)
+                body = self.cfg.parameter(a.system, a.user, a.json_mode, batch=True, denken=a.denken)
                 b = len(json.dumps(body, ensure_ascii=False).encode("utf-8")) + 200
-                if teil and (len(teil) >= MAX_ANFRAGEN or groesse + b > max_bytes):
+                if teil and (len(teil) >= MAX_ANFRAGEN or groesse + b > max_bytes
+                             or (sid not in im_teil and len(im_teil) >= self.paket)):
                     schicken()
+                im_teil.add(sid)
                 teil.append((f"{sid}|{a.feld}|{runde}", body, n))
                 groesse += b
                 tokens += n

@@ -740,6 +740,10 @@ Felddatei nachgefragt (der kombinierte Versuch zählt als erster der drei Versuc
 JSON, wird sie einmal wiederholt, danach gehen alle Felder einzeln. So geht der Volltext zweimal statt siebenmal
 an das Modell; im Hochschul-Lauf machte er fast die Hälfte der Eingabe-Tokens aus. Gezielte Korrekturen einzelner
 Felder (`python -m sem korrektur`) laufen weiter einzeln. In `synth:generierung` steht dann `"metadaten": "kombiniert"`.
+Bei Anthropic denkt das Modell standardmäßig nur beim Volltext; Metadaten und Inhaltstyp-Prüfung laufen ohne Denken
+(`"denken_metadaten": false`, mit `--metadaten-denken` wieder mit). Im Hochschul-Lauf kostete das Denken etwa ein
+Siebtel. Im Batch gehen höchstens 2.000 Materialien in einen Batch (`--paket`); kleine Batches sind schneller fertig,
+und jedes Material rückt weiter, sobald sein Batch fertig ist.
 
 Jedes Material vermerkt in `synth:generierung` die Dauer und welche Felder neu angefragt werden mussten
 (`neu_angefragt`). Die Fortschrittsanzeige zählt außerdem Wiederholungen ganzer Materialien
