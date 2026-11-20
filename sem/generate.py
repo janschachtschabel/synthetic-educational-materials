@@ -433,7 +433,8 @@ class Material:
     def anfragen(self) -> list[Anfrage]:
         out = [self._anfrage(f) for f in self.stufe or []]
         for a in out:
-            a.denken = a.feld == "volltext" or self.denken_metadaten
+            # die Inhaltstyp-Prüfung denkt immer: ohne Denken traf sie in der Probe 77 statt 94 von 100
+            a.denken = a.feld in ("volltext", "inhaltstyp") or self.denken_metadaten
         return out
 
     def _anfrage(self, feld: str) -> Anfrage:
@@ -477,6 +478,21 @@ class Material:
         self.neu[feld] = self.neu.get(feld, 0) + 1
         self.gruende.setdefault(feld, []).append(str(e)[:120])
 
+    def _titel_ohne_untertitel(self, text: str) -> str | None:
+        """Titel mit Untertitel („Thema: Zusatz“, „Thema – Zusatz“): der erste Teil, wenn er für sich alle Prüfungen
+        besteht. In den Proben waren neun von zehn Neuanfragen des Titels solche Untertitel."""
+        t = _einzeilig(text.strip().splitlines()[0] if text.strip() else "")
+        if not _TITEL_TRENNER.search(t):
+            return None
+        teil = _TITEL_TRENNER.split(t)[0]
+        if len(teil.split()) < 2:
+            return None
+        try:
+            teil = parse_titel(teil)
+        except ValueError:
+            return None
+        return None if titel_nennt_form(teil, self.values) else teil
+
     def _metadaten(self, text: str) -> bool:
         """Antwort des kombinierten Aufrufs: Jedes Feld wird wie seine Einzelantwort geprüft. Brauchbare Felder werden
         übernommen; ein unbrauchbares zählt als Fehlversuch und wird danach einzeln angefragt. Ist die Antwort kein
@@ -508,6 +524,10 @@ class Material:
                     raise ValueError("fehlt")
                 self.felder[feld] = self._parse(feld, str(w))
             except ValueError as e:
+                if feld == "titel" and (t := self._titel_ohne_untertitel(str(w))):
+                    self.felder["titel"] = t  # spart eine Neuanfrage mit dem ganzen Volltext
+                    self.gruende.setdefault("titel", []).append(f"Untertitel abgeschnitten: {str(w)[:100]}")
+                    continue
                 self._fehlversuch(feld, e)
         self.felder["metadaten"] = True
         return True

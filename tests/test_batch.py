@@ -259,6 +259,12 @@ def test_kombiniert_unlesbar_dann_einzeln():
     assert m2.felder["keywords"] == ["A", "B", "C", "D", "E"] and "beschreibung" in m2.felder
     assert m2.stufe == ["titel"]
     assert m2.zustand()["kombiniert"] is True
+    # Untertitel: der erste Teil wird übernommen, ohne Neuanfrage
+    m3 = Material({"id": "x", S.F_UMFANG: {"von": 300, "bis": 600}}, {"hochschule": load_prompts("hochschule")},
+                  inhaltstyp_pruefen=False, bereich=B(), kombiniert=True, zustand={"felder": {"volltext": "T " * 400}})
+    m3.antwort("metadaten", json.dumps({"titel": "Stromkreis und Glühlampe: Ein einfacher Versuch"}) + "\n{}")
+    assert m3.felder["titel"] == "Stromkreis und Glühlampe" and "titel" not in m3.neu
+    assert m3.gruende["titel"][0].startswith("Untertitel abgeschnitten")
 
 
 def test_unbrauchbares_feld_nach_drei_versuchen_fehlgeschlagen(seeds_datei, tmp_path):
@@ -344,4 +350,4 @@ def test_metadaten_ohne_denken_nur_anthropic(seeds_datei):
                  denken_metadaten=False)
     assert [a.denken for a in m.anfragen()] == [True]  # Volltext denkt
     m.felder["volltext"] = "Wort " * 1000
-    assert {a.feld: a.denken for a in m.anfragen()} == {"metadaten": False, "inhaltstyp": False}
+    assert {a.feld: a.denken for a in m.anfragen()} == {"metadaten": False, "inhaltstyp": True}

@@ -541,9 +541,10 @@ combined attempt counts as the first of the three attempts). If the answer is no
 after that all fields go individually. This sends the full text to the model twice instead of seven times; in the
 higher-education run it made up almost half of the input tokens. Targeted corrections of individual fields
 (`python -m sem korrektur`) still run individually. `synth:generierung` then contains `"metadaten": "kombiniert"`.
-With Anthropic, the model thinks only for the full text by default; metadata and the content-type check run without
-thinking (`"denken_metadaten": false`, `--metadaten-denken` turns it back on). In the higher-education run, thinking
-cost about one seventh. In batch mode, at most 2,000 materials go into one batch (`--paket`); small batches finish
+With Anthropic, metadata runs without thinking by default (`"denken_metadaten": false`, `--metadaten-denken` turns it
+back on); the full text and the content-type check think (without thinking, the check matched 77 instead of 94 of 100
+in a sample). If the title in the combined call has a subtitle („Thema: Zusatz“), the first part is kept if it passes
+all checks on its own, instead of requesting the title again (noted in `synth:generierung.neu_gruende`). In batch mode, at most 2,000 materials go into one batch (`--paket`); small batches finish
 faster, and each material moves on as soon as its batch is done.
 
 Each material records in `synth:generierung` the duration and which fields had to be requested again

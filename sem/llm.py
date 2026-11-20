@@ -226,7 +226,11 @@ def json_aus_text(text: str):
     except json.JSONDecodeError:
         a, b = text.find("{"), text.rfind("}")  # Satz vor oder nach dem Objekt
         if 0 <= a < b:
-            return json.loads(text[a:b + 1])
+            try:
+                return json.loads(text[a:b + 1])
+            except json.JSONDecodeError:
+                # ein vollständiges Objekt, dahinter weiterer Text oder ein zweites Objekt („Extra data“)
+                return json.JSONDecoder().raw_decode(text[a:])[0]
         raise
 
 
