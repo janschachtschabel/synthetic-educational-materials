@@ -47,6 +47,10 @@ GRUND = {VOLL: "RVK-Klammerzusatz als Fachaussage: Material mit aktuellen Prompt
          "fragen_antworten": f"mindestens {FIKTIV_MIN} Fragen zu erfundenen Figuren des Textes"}
 
 STUFE = re.compile(r"\b(hochschule|studium|uni|universität|vorlesung|bachelor|master|studierende)\b", re.I)
+# Schule (Prüfung 2026-11-21: 22,7 % der Anfragen mit Stufenbegriff, 19,8 % der Materialien mit mehreren)
+STUFE_SCHULE = re.compile(r"\b(klassen?|jahrgang|jahrgangsstufe|grundschule|primarstufe|unterstufe|mittelstufe|oberstufe|"
+                          r"sekundarstufe|sek ?(?:i{1,2}|[12])|abitur)\b", re.I)
+STUFE_JE_BEREICH = {"hochschule": STUFE, "schule": STUFE_SCHULE}
 _EBOOK = re.compile(r"e-book", re.I)
 
 # grobe Kosten je Material (Anthropic Haiku 5.5, Batch), gemessen im Hochschul-Lauf
@@ -76,11 +80,11 @@ def korrektur(rec: dict) -> str | list[str] | None:
     return felder or None
 
 
-def suchanfragen_kuerzen(anfragen: list[str]) -> list[str]:
+def suchanfragen_kuerzen(anfragen: list[str], muster: re.Pattern = STUFE) -> list[str]:
     """Nur die erste Anfrage mit Stufenbegriff behalten, solange mindestens SUCHANFRAGEN_MIN übrig bleiben."""
     gesehen, out = False, []
     for q in anfragen:
-        if STUFE.search(q):
+        if muster.search(q):
             if gesehen:
                 continue
             gesehen = True
@@ -201,6 +205,30 @@ def zusammenfuehren(materialien: Path, out_path: Path, name: str = "korrektur_ho
                     zaehler["unveraendert_korrektur_gescheitert"] += 1
             q = rec.get(S.F_SUCHANFRAGEN)
             if q and (kurz := suchanfragen_kuerzen(q)) != q:
+                rec.setdefault(F_SUCHANFRAGEN_ALT, q)
+                rec[S.F_SUCHANFRAGEN] = kurz
+                zaehler["suchanfragen_gekuerzt"] += 1
+                zaehler["suchanfragen_gestrichen"] += len(q) - len(kurz)
+            o.write(json.dumps(rec, ensure_ascii=False) + "\n")
+    return dict(zaehler)
+
+
+def suchanfragen_datei(materialien: Path, out_path: Path) -> dict:
+    """Nur das Kürzen der Suchanfragen (ohne LLM) für eine ganze Datei; Stufenbegriffe je Bildungsbereich
+    (STUFE_JE_BEREICH, andere Bereiche bleiben unverändert). Bisherige Anfragen in synth:suchanfragen_alt."""
+    materialien, out_path = Path(materialien), Path(out_path)
+    if out_path.resolve() == materialien.resolve():
+        raise ValueError("Ausgabe muss eine neue Datei sein")
+    zaehler = Counter()
+    with materialien.open(encoding="utf-8") as f, out_path.open("w", encoding="utf-8") as o:
+        for z in f:
+            if not z.strip():
+                continue
+            rec = json.loads(z)
+            zaehler["materialien"] += 1
+            muster = STUFE_JE_BEREICH.get(rec.get(S.F_BEREICH))
+            q = rec.get(S.F_SUCHANFRAGEN)
+            if muster and q and (kurz := suchanfragen_kuerzen(q, muster)) != q:
                 rec.setdefault(F_SUCHANFRAGEN_ALT, q)
                 rec[S.F_SUCHANFRAGEN] = kurz
                 zaehler["suchanfragen_gekuerzt"] += 1

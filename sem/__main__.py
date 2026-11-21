@@ -12,6 +12,10 @@
     python -m sem titel-neu --materialien output/materialien_….jsonl [--out …] [--limit N]   (nur Titel neu)
     python -m sem beschreibung-einstieg --materialien output/materialien_….jsonl   (nur Schablonen-Anfang neu)
     python -m sem faecher-ergaenzen --materialien output/materialien_….jsonl   (OEH-Fach für Berufs- und EB nachtragen)
+    python -m sem entitaeten-ergaenzen --materialien output/materialien_….jsonl [--out …]
+                            (erfundene Namen aus synth:stil als Entitäten nachtragen, ohne LLM)
+    python -m sem suchanfragen-kuerzen --materialien output/materialien_….jsonl [--out …]
+                            (von mehreren Suchanfragen mit Stufenbegriff nur die erste behalten, ohne LLM)
     python -m sem korrektur vorbereiten|zusammenfuehren --materialien output/materialien_….jsonl [--out …]
                             (gezielte Korrekturen nach der Prüfung, siehe sem/korrektur.py)
     python -m sem mappings hochschule [alle|openalex|gnd|rvk|schritt …] [--limit N] [--stimmen 3] [--wlo export.csv …]
@@ -194,6 +198,18 @@ def main(argv=None):
                             "nachtragen (Handmapping, ohne LLM, neue Datei)")
     p.add_argument("--materialien", type=Path, required=True, help="fertige Materialien (JSONL)")
     p.add_argument("--out", type=Path, help="Ausgabe (Standard: <eingabe>_faecher.jsonl daneben)")
+
+    p = sub.add_parser("entitaeten-ergaenzen",
+                       help="Erfundene Namen aus synth:stil, die im Volltext stehen, als fiktive Personen in die "
+                            "Entitäten fertiger Materialien nachtragen (ohne LLM, neue Datei)")
+    p.add_argument("--materialien", type=Path, required=True, help="fertige Materialien (JSONL)")
+    p.add_argument("--out", type=Path, help="Ausgabe (Standard: <eingabe>_entitaeten.jsonl daneben)")
+
+    p = sub.add_parser("suchanfragen-kuerzen",
+                       help="Von mehreren Suchanfragen mit Stufenbegriff nur die erste behalten (Hochschule, Schule; "
+                            "ohne LLM, neue Datei)")
+    p.add_argument("--materialien", type=Path, required=True, help="fertige Materialien (JSONL)")
+    p.add_argument("--out", type=Path, help="Ausgabe (Standard: <eingabe>_suchanfragen.jsonl daneben)")
 
     p = sub.add_parser("korrektur", help="Gezielte Korrekturen an fertigen Materialien: Auswahl vorbereiten (Seeds und "
                                          "Batch-Stand), nach dem Batch-Lauf zusammenführen (neue Datei)")
@@ -482,6 +498,18 @@ def main(argv=None):
 
         out = a.out or standard_ausgabe(a.materialien)
         print(json.dumps(ergaenzen(a.materialien, out), ensure_ascii=False), "→", out)
+
+    elif a.cmd == "entitaeten-ergaenzen":
+        from .entitaeten_ergaenzen import ergaenzen, standard_ausgabe
+
+        out = a.out or standard_ausgabe(a.materialien)
+        print(json.dumps(ergaenzen(a.materialien, out), ensure_ascii=False), "→", out)
+
+    elif a.cmd == "suchanfragen-kuerzen":
+        from .korrektur import suchanfragen_datei
+
+        out = a.out or a.materialien.with_name(a.materialien.stem + "_suchanfragen.jsonl")
+        print(json.dumps(suchanfragen_datei(a.materialien, out), ensure_ascii=False), "→", out)
 
     elif a.cmd == "gnd-ergaenzen":
         from .gnd_ergaenzung import DATEI, bauen

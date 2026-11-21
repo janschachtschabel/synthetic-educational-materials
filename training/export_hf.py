@@ -84,11 +84,13 @@ _KORREKTUR_FELD = {"beschreibung": "description", "fragen_antworten": "qa_pairs"
 
 
 def correction(r: dict) -> str | None:
-    """What was corrected afterwards: regenerated, description, qa_pairs, search_queries (comma-separated)."""
+    """What was corrected afterwards: regenerated, description, qa_pairs, search_queries, entities (comma-separated)."""
     k = (r.get("synth:generierung") or {}).get("korrektur") or {}
     out = ["regenerated"] if k.get("neu_erzeugt") else [_KORREKTUR_FELD.get(f, f) for f in k.get("felder", [])]
     if r.get("synth:suchanfragen_alt") is not None:
         out.append("search_queries")
+    if (r.get("synth:generierung") or {}).get("entitaeten_ergaenzt"):  # python -m sem entitaeten-ergaenzen
+        out.append("entities")
     return ", ".join(out) or None
 
 
@@ -342,10 +344,21 @@ def build_card(rows_by_split: dict[str, list[dict]], name: str, card: str = "dat
                  (corr["description"], "descriptions that had taken over a vocabulary addition („auch als E-Book“) "
                                        "were regenerated (earlier text in `description_previous`)"),
                  (corr["search_queries"], "materials had more than one search query with a level term (e.g. "
-                                          "„… hochschule“, „… studium“); only the first of these was kept")]
+                                          + ("„… klasse 7“, „… oberstufe“" if "school" in sectors else
+                                             "„… hochschule“, „… studium“") + "); only the first of these was kept"),
+                 (corr["entities"], "materials got invented person names added to `entities` without a language "
+                                    "model: names from the generation controls that occur in the full text but were "
+                                    "missing from the model's entity list (type `Person`, `fictional` true, all spans)")]
         title_note += (" After a review of the finished data, a few targeted corrections were made: "
                        + "; ".join(f"{n:,} {t}" for n, t in teile if n)
                        + ". The column `correction` names what was changed in each record.")
+    ents = [e for r in rows for e in r["entities"]]
+    ent_n = [len(r["entities"]) for r in rows]
+    ent_types = Counter((e["category"], e["type"]) for e in ents)
+    ent_lines = ["| Category | Type | entities | share |", "|---|---|---:|---:|"]
+    for (cat, typ), c in sorted(ent_types.items(), key=lambda x: (x[0][0] == "Sonstiges", -x[1])):
+        ent_lines.append(f"| {cat} | {typ} | {c:,} | {100 * c / max(len(ents), 1):.1f} % |")
+    titles = Counter(r["title"].strip().lower() for r in rows)
     lo = [len(r["learning_objectives"]) for r in rows]
     sq = [len(r["search_queries"]) for r in rows]
     text = (HERE / card).read_text(encoding="utf-8")
@@ -358,6 +371,12 @@ def build_card(rows_by_split: dict[str, list[dict]], name: str, card: str = "dat
         "pretty_name": json.dumps(pretty_name, ensure_ascii=False),
         "n_topics": f"{len({r['topic'] for r in rows if r['topic']}):,}",
         "lo_total": f"{sum(lo):,}", "lo_median": f"{int(statistics.median(lo)) if lo else 0}",
+        "ent_total": f"{len(ents):,}", "ent_median": f"{int(statistics.median(ent_n)) if ent_n else 0}",
+        "ent_none": f"{ent_n.count(0):,}", "ent_type_table": "\n".join(ent_lines),
+        "ent_fictional": f"{100 * sum(e['fictional'] for e in ents) / max(len(ents), 1):.1f} %",
+        "ent_proper": f"{100 * sum(e['kind'] == 'proper_name' for e in ents) / max(len(ents), 1):.1f} %",
+        "ent_added": f"{sum('entities' in (r.get('correction') or '') for r in rows):,}",
+        "dup_titles": f"{100 * sum(c for c in titles.values() if c > 1) / max(n, 1):.1f} %",
         "sq_total": f"{sum(sq):,}", "sq_median": f"{int(statistics.median(sq)) if sq else 0}",
         "topic_source_table": _count_table("Topic source", Counter(r["topic_source"] for r in rows), n),
         "subject_table": _count_table("Subject", Counter(s for r in rows for s in r["subject"][:1]), n, top=25),

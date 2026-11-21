@@ -125,3 +125,18 @@ def test_korrekturen_in_spalte_und_karte():
     text = E.build_card({"train": rows}, "x", "dataset_card_university.md", "X")
     assert "1 materials whose RVK topic" in text and "only the first of these was kept" in text
     assert "only that sentence was rewritten" not in text  # description_previous stammt hier aus der Korrektur, nicht vom Einstieg
+
+
+def test_entitaeten_ergaenzt_und_schulkarte():
+    """Ergänzte Stilnamen (python -m sem entitaeten-ergaenzen): Spalte correction, Satz und Typentabelle in der Karte."""
+    basis = {"synth:bildungsbereich": "schule", "synth:thema": {"id": "wlo-abstraktion:schule:1", "label_de": "T"},
+             "ccm:taxonid": ["u"], "ccm:taxonid_DISPLAYNAME": ["Physik"], "synth:niveau": {"label": "Klasse 7–8"},
+             "synth:lernziele": [], "synth:suchanfragen": ["a"],
+             "synth:entitaeten": [{"name": "Lea", "typ": "Person", "kategorie": "Personen & Gruppen",
+                                   "art": "Eigenname", "im_text": "Lea", "fiktiv": True, "positionen": [[0, 3]]}]}
+    rows = [E.flatten(_material({**basis, "id": "m0", "synth:generierung": {"modell": "m", "entitaeten_ergaenzt": 1}})),
+            E.flatten(_material({**basis, "id": "m1"}))]
+    assert [r["correction"] for r in rows] == ["entities", None]
+    text = E.build_card({"train": rows}, "x", "dataset_card_school.md", "X")
+    assert "{{" not in text and "1 materials got invented person names" in text
+    assert "| Personen & Gruppen | Person | 2 | 100.0 % |" in text

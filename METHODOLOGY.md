@@ -544,7 +544,7 @@ Up to six LLM calls per seed (OpenAI-compatible API, default model `gpt-6-luna`)
    key sentence, experimental procedure) are not entities. An entity whose `im_text` does not occur as a whole word in
    the fulltext is dropped, as are unknown types; an empty list is valid. Persons with a name from `synth:stil` are
    always fictional and typed Person (not Figur or Rolle); a term with a type meant only for proper names („Delta“ as
-   Geografikum) becomes Fachbegriff. Linking to GND or Wikidata is a later, separate step.
+   Geografikum) becomes Fachbegriff. Linking to GND or Wikidata is a later, separate step. Invented names from `synth:stil` that occur in the fulltext but are missing from the answer can be added afterwards without an LLM (`python -m sem entitaeten-ergaenzen`, Person, fictional, all spans; `synth:generierung.entitaeten_ergaenzt`, HF column `correction` = `entities`); in the school run this concerned 12 % of the materials.
 
 Steps 3 to 7 run simultaneously.
 
