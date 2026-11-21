@@ -743,7 +743,7 @@ Pro Seed bis zu acht LLM-Aufrufe (OpenAI-kompatible API, Standardmodell `gpt-6-l
    Versuchsablauf) sind keine Entitäten. Eine Entität, deren `im_text` nicht als ganzes Wort im Volltext steht, fällt weg,
    ebenso unbekannte Typen; eine leere Liste ist gültig. Personen mit einem Namen aus `synth:stil` gelten immer als
    fiktiv und als Person (nicht Figur oder Rolle); ein Begriff mit einem Typ, der nur Eigennamen meint („Delta“ als
-   Geografikum), wird zum Fachbegriff. Das Verknüpfen mit GND oder Wikidata ist ein späterer, eigener Schritt.
+   Geografikum), wird zum Fachbegriff. Das Verknüpfen mit GND oder Wikidata ist ein späterer, eigener Schritt. Erfundene Namen aus `synth:stil`, die im Volltext stehen, aber in der Antwort fehlen, lassen sich nachträglich ohne LLM ergänzen (`python -m sem entitaeten-ergaenzen`, Person, fiktiv, alle Stellen; `synth:generierung.entitaeten_ergaenzt`, HF-Spalte `correction` = `entities`); im Schul-Lauf betraf das 12 % der Materialien.
 
 Schritt 3 bis 7 laufen gleichzeitig.
 
