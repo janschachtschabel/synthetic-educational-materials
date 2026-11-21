@@ -96,6 +96,8 @@ def _zustand(rec: dict, neu: list[str]) -> dict:
         felder["lernziele"] = [{k: v for k, v in z.items() if k != "anforderungsbereich"} for z in rec[S.F_LERNZIELE]]
     if S.F_SUCHANFRAGEN in rec:
         felder["suchanfragen"] = rec[S.F_SUCHANFRAGEN]
+    # ältere Materialien ohne Entitäten: None, damit die Korrektur sie nicht nebenbei erzeugt
+    felder["entitaeten"] = rec.get(S.F_ENTITAETEN)
     if chk := rec.get(S.F_LRT_CHECK):
         felder["inhaltstyp"] = {"uri": chk["erkannt"], "name": chk["erkannt_label"]}
     for f in neu:

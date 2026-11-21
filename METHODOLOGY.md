@@ -531,7 +531,36 @@ Up to six LLM calls per seed (OpenAI-compatible API, default model `gpt-6-luna`)
    case like real input) for which the
    material is a fitting hit. Intended as query → material training pairs for search and embedding models.
 
-Steps 3 to 6 run simultaneously.
+7. **Entities** (`entitaeten.md`, JSON, `synth:entitaeten`): proper names and the most important terms of the fulltext,
+   at most 30 (all proper names, listed first; at most 15 terms), each with `name` (full form, „Johann Wolfgang von
+   Goethe“), `typ`, `kategorie`, `art` (Eigenname = proper name or Begriff = term), `im_text` (the form as it appears in
+   the text, „Goethes“), `fiktiv` and `positionen` (every occurrence of that form in the fulltext as [start, end) in
+   characters, for training named-entity recognition). The 36 types are fixed and grouped into six categories, which the
+   code assigns: Personen & Gruppen (Person, Figur, Rolle, Gruppe), Orte & Organisationen (Staat, Ort, Geografikum,
+   Bauwerk, Organisation, Unternehmen, Bildungseinrichtung), Zeit & Geschehen (Ereignis, Epoche, Datum), Werke, Recht &
+   Dokumente (Werk, Quelle, Regelwerk, Lehrplan, Produkt), Wissenschaft & Fachinhalt (Fach, Fachbegriff, Theorie, Methode,
+   Formel, Größe, Menge, Sprache), Bildung & Unterricht (Bildungsstufe, Kompetenz, Abschluss, Prüfungsform,
+   Lernressource, Aufgabenformat, Sozialform, Unterrichtsmethode) and Sonstiges. Text passages (learning objective, task,
+   key sentence, experimental procedure) are not entities. An entity whose `im_text` does not occur as a whole word in
+   the fulltext is dropped, as are unknown types; an empty list is valid. Persons with a name from `synth:stil` are
+   always fictional and typed Person (not Figur or Rolle); a term with a type meant only for proper names („Delta“ as
+   Geografikum) becomes Fachbegriff. Linking to GND or Wikidata is a later, separate step.
+
+Steps 3 to 7 run simultaneously.
+
+**One call for all metadata** (default since November 2026, `--metadaten-einzeln` for the previous procedure):
+steps 2, 4, 5, 6 and 7 go into a single JSON call (`metadaten.md` combines the field files unchanged), while the
+content-type check runs as its own call, because it must not see the seed’s content type. Each field of the answer is
+validated like a single answer; only fields that fail are then requested individually with their field file (the
+combined attempt counts as the first of the three attempts). If the answer is not readable JSON, it is repeated once,
+after that all fields go individually. This sends the full text to the model twice instead of seven times; in the
+higher-education run it made up almost half of the input tokens. Targeted corrections of individual fields
+(`python -m sem korrektur`) still run individually. `synth:generierung` then contains `"metadaten": "kombiniert"`.
+With Anthropic, metadata runs without thinking by default (`"denken_metadaten": false`, `--metadaten-denken` turns it
+back on); the full text and the content-type check think (without thinking, the check matched 77 instead of 94 of 100
+in a sample). If the title in the combined call has a subtitle („Thema: Zusatz“), the first part is kept if it passes
+all checks on its own, instead of requesting the title again (noted in `synth:generierung.neu_gruende`). In batch mode, at most 2,000 materials go into one batch (`--paket`); small batches finish
+faster, and each material moves on as soon as its batch is done.
 
 Each material records in `synth:generierung` the duration and which fields had to be requested again
 (`neu_angefragt`). The progress display also counts retries of whole materials (e.g. after a rate

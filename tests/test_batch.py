@@ -31,11 +31,17 @@ class Antworten:
     """Gültige Antworten je Feld; der erste Titel ist zu kurz und wird neu angefragt."""
 
     def __init__(self, prompts, titel_kaputt=1):
-        self.marker = {n: _marker(prompts[n]) for n in FELD_PROMPTS}
+        # metadaten zuerst: der kombinierte Auftrag enthält die Marker aller Felddateien
+        self.marker = {"metadaten": _marker(prompts["metadaten"]), **{n: _marker(prompts[n]) for n in FELD_PROMPTS}}
         self.titel_kaputt = titel_kaputt
 
     def __call__(self, user):
         feld = next((n for n, m in self.marker.items() if m in user), "volltext")
+        if feld == "metadaten":
+            einzeln = {f: self(self._nur(f)) for f in ("titel", "beschreibung", "keywords")}
+            return json.dumps({**einzeln, "keywords": einzeln["keywords"].split(", "),
+                               **json.loads(LERNZIELE_JSON), **json.loads(SUCHANFRAGEN_JSON),
+                               **json.loads(self(self._nur("fragen_antworten"))), "entitaeten": []}, ensure_ascii=False)
         if feld == "volltext":
             return " ".join(["Wort"] * 1000)
         if feld == "titel":
@@ -51,7 +57,12 @@ class Antworten:
             return LERNZIELE_JSON
         if feld == "suchanfragen":
             return SUCHANFRAGEN_JSON
+        if feld == "entitaeten":
+            return '{"entitaeten": [{"name": "Wort", "typ": "Sonstiges", "im_text": "Wort"}]}'
         return json.dumps({"paare": [{"frage": f"F{i}?", "antwort": "A.", "typ": "verstehen"} for i in range(10)]})
+
+    def _nur(self, feld):
+        return self.marker[feld]
 
 
 class FakeOpenAI:
@@ -133,7 +144,7 @@ def test_batch_ergibt_dieselben_materialien_wie_sofort(seeds_datei, tmp_path):
     path, seeds = seeds_datei
     prompts = load_prompts("hochschule")
     client = FakeOpenAI(Antworten(prompts, titel_kaputt=1))
-    lauf = _lauf(path, tmp_path, client)
+    lauf = _lauf(path, tmp_path, client, kombiniert=False)
     runden = 0
     while not lauf.weiter()["abgeschlossen"]:
         runden += 1
@@ -157,11 +168,11 @@ def test_batch_ergibt_dieselben_materialien_wie_sofort(seeds_datei, tmp_path):
                      S.F_LERNZIELE, S.F_SUCHANFRAGEN):
             assert b[feld] == sofort[feld]
         assert b[S.F_GENERATION]["verarbeitung"] == "batch"
-        assert b[S.F_GENERATION]["tokens"]["aufrufe"] == 8 + b[S.F_GENERATION]["neu_angefragt"].get("titel", 0)
+        assert b[S.F_GENERATION]["tokens"]["aufrufe"] == 9 + b[S.F_GENERATION]["neu_angefragt"].get("titel", 0)
     # Batch-Anfragen ohne service_tier, JSON-Modus nur für Frage-Antwort-Paare, Lernziele und Suchanfragen
     bodies = [r["body"] for r in client.anfragen]
     assert not any("service_tier" in x for x in bodies)
-    assert all(("response_format" in x) == r["custom_id"].split("|")[1].startswith(("fragen", "lernziele", "such"))
+    assert all(("response_format" in x) == r["custom_id"].split("|")[1].startswith(("fragen", "lernziele", "such", "entitaeten"))
                for x, r in zip(bodies, client.anfragen))
 
 
@@ -175,6 +186,87 @@ def test_fehler_und_abgelaufene_batches_werden_neu_gestellt(seeds_datei, tmp_pat
             break
     assert len(read_done(tmp_path / "materialien_t.jsonl")) == 3
     assert not (tmp_path / "materialien_t.fehler.jsonl").exists()
+
+
+def test_batch_kombiniert_wie_sofort(seeds_datei, tmp_path):
+    """Kombiniert: Volltext, dann Metadaten und Inhaltstyp-Prüfung in einer Runde; nur der unbrauchbare Titel wird
+    danach einzeln nachgefragt. Batch und sofort ergeben dieselben Materialien."""
+    path, seeds = seeds_datei
+    prompts = load_prompts("hochschule")
+    client = FakeOpenAI(Antworten(prompts, titel_kaputt=1))
+    lauf = _lauf(path, tmp_path, client)
+    assert lauf.kombiniert and lauf.stand["parameter"]["metadaten"] == "kombiniert"
+    runden = 0
+    while not lauf.weiter()["abgeschlossen"]:
+        runden += 1
+        assert runden < 10
+    assert lauf.stand["runde"] == 3  # Volltext, Metadaten + Inhaltstyp, Titel einzeln (ein Material)
+    gefragt = [r["custom_id"].split("|")[1] for r in client.anfragen]
+    assert sorted(gefragt) == sorted(["volltext"] * 3 + ["metadaten"] * 3 + ["inhaltstyp"] * 3 + ["titel"])
+    out = {r["id"]: r for r in _zeilen(tmp_path / "materialien_t.jsonl")}
+    assert set(out) == {s["id"] for s in seeds}
+    meta = [r["body"] for r in client.anfragen if "|metadaten|" in r["custom_id"]][0]
+    assert "response_format" in meta and "## paare" in meta["messages"][1]["content"]
+
+    class Sofort:
+        def __init__(self):
+            self.a = Antworten(prompts, titel_kaputt=1)
+
+        def chat(self, system, user, json_mode=False):
+            return self.a(user)
+
+    for s in seeds:
+        sofort = generate_one(Sofort(), s, {"hochschule": prompts}, lauf.meta, kombiniert=True)
+        b = out[s["id"]]
+        for feld in (S.F_TITLE, S.F_DESCRIPTION, S.F_KEYWORD, S.F_FULLTEXT, S.F_QA, S.F_LRT_CHECK, S.F_PROVENANCE,
+                     S.F_LERNZIELE, S.F_SUCHANFRAGEN):
+            assert b[feld] == sofort[feld]
+        assert b[S.F_GENERATION]["metadaten"] == "kombiniert"
+        assert "metadaten" not in b
+        assert b[S.F_GENERATION]["tokens"]["aufrufe"] == 3 + b[S.F_GENERATION]["neu_angefragt"].get("titel", 0)
+
+
+def test_kombiniert_unlesbar_dann_einzeln():
+    """Kein JSON: einmal wiederholen, danach jedes Feld einzeln; ein unbrauchbares Feld zählt als Fehlversuch."""
+    from sem.generate import Material
+
+    class B:
+        key = "hochschule"
+
+        def prompt_values(self, seed):
+            return {}
+
+        def umfang(self, seed):
+            return (300, 600)
+
+        def sprachprofil(self, seed):
+            return ""
+
+        def inhaltstyp_kategorien(self):
+            return []
+
+    m = Material({"id": "x", S.F_UMFANG: {"von": 300, "bis": 600}}, {"hochschule": load_prompts("hochschule")},
+                 inhaltstyp_pruefen=False, bereich=B(), kombiniert=True)
+    m.felder["volltext"] = "Text " * 400
+    assert m.stufe == ["metadaten"]
+    assert m.antwort("metadaten", "kein json") is False and m.stufe == ["metadaten"]
+    assert m.antwort("metadaten", "immer noch keins") is False
+    assert m.stufe == ["titel"] and "metadaten" in m.felder
+    m2 = Material({"id": "x", S.F_UMFANG: {"von": 300, "bis": 600}}, {"hochschule": load_prompts("hochschule")},
+                  inhaltstyp_pruefen=False, bereich=B(), kombiniert=True, zustand={"felder": {"volltext": "T " * 400}})
+    assert m2.antwort("metadaten", json.dumps({"titel": "Kurz", "beschreibung": "Satz eins. " * 40,
+                                                "keywords": ["A", "B", "C", "D", "E"]})) is True
+    assert m2.neu == {"titel": 1, "lernziele": 1, "suchanfragen": 1, "fragen_antworten": 1, "entitaeten": 1}
+    assert m2.gruende["titel"] == ["Titel mit 4 Zeichen"] and m2.zustand()["gruende"] == m2.gruende
+    assert m2.felder["keywords"] == ["A", "B", "C", "D", "E"] and "beschreibung" in m2.felder
+    assert m2.stufe == ["titel"]
+    assert m2.zustand()["kombiniert"] is True
+    # Untertitel: der erste Teil wird übernommen, ohne Neuanfrage
+    m3 = Material({"id": "x", S.F_UMFANG: {"von": 300, "bis": 600}}, {"hochschule": load_prompts("hochschule")},
+                  inhaltstyp_pruefen=False, bereich=B(), kombiniert=True, zustand={"felder": {"volltext": "T " * 400}})
+    m3.antwort("metadaten", json.dumps({"titel": "Stromkreis und Glühlampe: Ein einfacher Versuch"}) + "\n{}")
+    assert m3.felder["titel"] == "Stromkreis und Glühlampe" and "titel" not in m3.neu
+    assert m3.gruende["titel"][0].startswith("Untertitel abgeschnitten")
 
 
 def test_unbrauchbares_feld_nach_drei_versuchen_fehlgeschlagen(seeds_datei, tmp_path):
@@ -227,3 +319,37 @@ def test_wiederholt_abgelehnte_batches_halten_den_lauf_an(seeds_datei, tmp_path)
         for _ in range(10):
             lauf.weiter()
     assert not (tmp_path / "materialien_t.fehler.jsonl").exists()
+
+
+def test_paket_begrenzt_materialien_je_batch(seeds_datei, tmp_path):
+    """Höchstens paket Materialien je Batch; die zwei Anfragen eines Materials (Metadaten, Inhaltstyp) bleiben
+    zusammen im selben Batch."""
+    path, seeds = seeds_datei
+    client = FakeOpenAI(Antworten(load_prompts("hochschule"), titel_kaputt=0))
+    lauf = _lauf(path, tmp_path, client, paket=2)
+    assert len(lauf.weiter()["batches_laufend"]) == 2  # 3 Materialien, höchstens 2 je Batch
+    st = lauf.weiter()  # Runde 2: Metadaten und Inhaltstyp
+    teile = [b for b in lauf.stand["batches"] if not b["ausgewertet"]]
+    assert [len(b["anfragen"]) for b in teile] == [4, 2]
+    for b in teile:
+        sids = [c.split("|")[0] for c in b["anfragen"]]
+        assert len(set(sids)) <= 2 and all(sids.count(s) == 2 for s in sids)
+    while not st["abgeschlossen"]:
+        st = lauf.weiter()
+    assert len(read_done(tmp_path / "materialien_t.jsonl")) == 3
+
+
+def test_metadaten_ohne_denken_nur_anthropic(seeds_datei):
+    cfg = LLMConfig(anbieter="anthropic", api_key="x", model="m", reasoning_effort="low")
+    assert cfg.parameter("s", "u", denken=False)["thinking"] == {"type": "disabled"}
+    assert "thinking" not in cfg.parameter("s", "u")
+    assert "thinking" not in LLMConfig(anbieter="anthropic", model="m", reasoning_effort="max").parameter(
+        "s", "u", denken=False)  # disabled nur bis effort high erlaubt
+    assert "thinking" not in LLMConfig(model="m").parameter("s", "u", denken=False)  # OpenAI-kompatibel: unverändert
+    from sem.generate import Material
+
+    m = Material(seeds_datei[1][0], {"hochschule": load_prompts("hochschule")}, kombiniert=True,
+                 denken_metadaten=False)
+    assert [a.denken for a in m.anfragen()] == [True]  # Volltext denkt
+    m.felder["volltext"] = "Wort " * 1000
+    assert {a.feld: a.denken for a in m.anfragen()} == {"metadaten": False, "inhaltstyp": True}

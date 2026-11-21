@@ -28,6 +28,7 @@ DEFAULT_BASE_URLS = {"openai": "https://api.openai.com/v1", "anthropic": "https:
 ANTHROPIC_MAX_TOKENS = 16000
 # OpenAI-Stufen ohne Gegenstück bei Anthropic (dort: low, medium, high, xhigh, max)
 ANTHROPIC_EFFORT = {"none": "low", "minimal": "low"}
+ANTHROPIC_EFFORT_NUR_MIT_DENKEN = {"xhigh", "max"}  # thinking disabled ist nur bis high erlaubt
 ANTHROPIC_JSON_HINWEIS = "Antworte ausschließlich mit einem JSON-Objekt, ohne Erklärung und ohne Codeblock."
 DEFAULT_WORKERS = 20
 DEFAULT_REASONING_EFFORT = "low"  # gemessen: ein Drittel schneller als der Modellstandard, gleiche Prüfwerte
@@ -98,11 +99,13 @@ class LLMConfig:
         if self.anbieter == "anthropic" and self.service_tier:
             raise ValueError("Flex gibt es bei Anthropic nicht. Für den halben Preis Batch verwenden.")
 
-    def parameter(self, system: str, user: str, json_mode: bool = False, batch: bool = False) -> dict:
+    def parameter(self, system: str, user: str, json_mode: bool = False, batch: bool = False,
+                  denken: bool = True) -> dict:
         """Parameter für chat.completions.create bzw. (Anthropic) messages.create; batch=True für den Body einer
-        Batch-Anfrage (ohne service_tier, Batch ist schon die günstige Verarbeitung)."""
+        Batch-Anfrage (ohne service_tier, Batch ist schon die günstige Verarbeitung). denken=False schaltet das
+        Denken des Modells ab (nur Anthropic; OpenAI-kompatibel bleibt es beim reasoning_effort)."""
         if self.anbieter == "anthropic":
-            return self._anthropic_parameter(system, user, json_mode)
+            return self._anthropic_parameter(system, user, json_mode, denken)
         kwargs = dict(self.extra)
         if self.temperature is not None:
             kwargs["temperature"] = self.temperature
@@ -115,7 +118,7 @@ class LLMConfig:
         return {"model": self.model,
                 "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}], **kwargs}
 
-    def _anthropic_parameter(self, system: str, user: str, json_mode: bool) -> dict:
+    def _anthropic_parameter(self, system: str, user: str, json_mode: bool, denken: bool = True) -> dict:
         """Systemprompt als Cache-Block: Er ist für alle Materialien eines Felds gleich, ab der Mindestlänge des
         Modells kosten Wiederholungen nur ein Zehntel (kürzere werden ohne Aufpreis nicht gecacht). temperature
         wird nicht gesendet: Aktuelle Claude-Modelle lehnen Sampling-Parameter ab."""
@@ -124,8 +127,12 @@ class LLMConfig:
         kwargs = {"model": self.model, "max_tokens": self.max_tokens,
                   "system": [{"type": "text", "text": system, "cache_control": {"type": "ephemeral"}}],
                   "messages": [{"role": "user", "content": user}]}
-        if self.reasoning_effort:
-            kwargs["output_config"] = {"effort": ANTHROPIC_EFFORT.get(self.reasoning_effort, self.reasoning_effort)}
+        effort = ANTHROPIC_EFFORT.get(self.reasoning_effort, self.reasoning_effort) if self.reasoning_effort else None
+        if effort:
+            kwargs["output_config"] = {"effort": effort}
+        # ohne Denken: nur bis effort high erlaubt (xhigh/max lehnt die API mit disabled ab, dann denkt das Modell)
+        if not denken and effort not in ANTHROPIC_EFFORT_NUR_MIT_DENKEN:
+            kwargs["thinking"] = {"type": "disabled"}
         return {**kwargs, **self.extra}
 
 
@@ -219,7 +226,11 @@ def json_aus_text(text: str):
     except json.JSONDecodeError:
         a, b = text.find("{"), text.rfind("}")  # Satz vor oder nach dem Objekt
         if 0 <= a < b:
-            return json.loads(text[a:b + 1])
+            try:
+                return json.loads(text[a:b + 1])
+            except json.JSONDecodeError:
+                # ein vollständiges Objekt, dahinter weiterer Text oder ein zweites Objekt („Extra data“)
+                return json.JSONDecoder().raw_decode(text[a:])[0]
         raise
 
 
@@ -243,10 +254,10 @@ class LLMClient:
 
             self.client = OpenAI(base_url=client_base_url(cfg), api_key=cfg.api_key, timeout=timeout, max_retries=0)
 
-    def chat(self, system: str, user: str, json_mode: bool = False) -> str:
+    def chat(self, system: str, user: str, json_mode: bool = False, denken: bool = True) -> str:
         if self.stop is not None and self.stop.is_set():
             raise Abgebrochen()
-        params = self.cfg.parameter(system, user, json_mode)
+        params = self.cfg.parameter(system, user, json_mode, denken=denken)
         if self.cfg.anbieter == "anthropic":
             msg = self.client.messages.create(**params)
             self._zaehlen(anthropic_usage(getattr(msg, "usage", None)))

@@ -11,6 +11,10 @@ Pro Seed nacheinander:
 Liefert ein Feld nichts Brauchbares, wird nur dieses Feld erneut angefragt. Dauer und
 Neuanfragen je Feld stehen in synth:generierung.
 
+Kombiniert (Standard für neue Läufe, abschaltbar mit --metadaten-einzeln): Schritt 2 und 3 ohne die
+Inhaltstyp-Prüfung in einem JSON-Aufruf (prompts/metadaten.md setzt die Felddateien zusammen), daneben die
+Inhaltstyp-Prüfung; nur Felder, die die Prüfung nicht bestehen, werden danach einzeln angefragt.
+
 Material hält den Stand eines Materials über diese Stufen. generate_one arbeitet sie sofort ab
 (ein Aufruf nach dem anderen), sem.batch über die Batch-Schnittstelle in Runden; Prompts, Prüfungen und
 Ergebnis sind in beiden Fällen gleich.
@@ -42,8 +46,17 @@ MIN_WOERTER = 60  # Volltext: absolute Untergrenze; die eigentliche Grenze häng
 MIN_ANTEIL_UMFANG = 0.6  # kürzer als 60 % der unteren Umfangsgrenze: neu anfragen
 # Stufen eines Materials; die Felder einer Stufe hängen nicht voneinander ab und laufen gleichzeitig
 STUFEN = [["volltext"], ["titel"], ["beschreibung"], ["keywords"],
-          ["inhaltstyp", "fragen_antworten", "lernziele", "suchanfragen"]]
-JSON_FELDER = {"fragen_antworten", "lernziele", "suchanfragen"}
+          ["inhaltstyp", "fragen_antworten", "lernziele", "suchanfragen", "entitaeten"]]
+# Kombiniert (Standard für neue Läufe): alle Metadaten in einem Aufruf, daneben die Inhaltstyp-Prüfung (getrennt, damit
+# sie den Inhaltstyp des Seeds nicht sieht). Ein Feld, das die Prüfung nicht besteht, wird danach einzeln mit seinem
+# Feld-Prompt nachgefragt; die übrigen Stufen sind dann meist leer und fallen weg. Spart je Material fünf Aufrufe, die
+# jeweils den ganzen Volltext mitschicken (gemessen am HS-Lauf: knapp die Hälfte der Eingabe-Tokens).
+STUFEN_KOMBINIERT = [["volltext"], ["metadaten", "inhaltstyp"], *STUFEN[1:4],
+                     ["fragen_antworten", "lernziele", "suchanfragen", "entitaeten"]]
+METADATEN_FELDER = ("titel", "beschreibung", "keywords", "lernziele", "suchanfragen", "fragen_antworten",
+                    "entitaeten")
+METADATEN_VERSUCHE = 2  # so oft wird der kombinierte Aufruf bei unlesbarem JSON wiederholt, dann alle Felder einzeln
+JSON_FELDER = {"fragen_antworten", "lernziele", "suchanfragen", "entitaeten", "metadaten"}
 # Ausgabesprachen (ISO 639-1 → Name im Prompt); andere Codes werden unverändert übergeben
 SPRACHEN = {"de": "Deutsch", "en": "Englisch", "fr": "Französisch", "es": "Spanisch", "it": "Italienisch",
             "nl": "Niederländisch", "pl": "Polnisch", "tr": "Türkisch", "uk": "Ukrainisch", "ru": "Russisch",
@@ -299,6 +312,91 @@ def parse_lernziele(data: dict | list, minimum: int = 2, maximum: int = 4) -> li
 
 SUCHANFRAGE_MAX_WOERTER = 6  # Prompt: höchstens 5 Wörter
 
+# feste Typen in sechs Kategorien: die Klassiker der Eigennamenerkennung plus Typen, die in Bildungsmaterial häufig sind;
+# die Kategorie setzt der Code. Eigennamen und Begriffe unterscheidet "art" (Eigennamen vollständig, Begriffe nur die
+# wichtigsten). Textabschnitte (Lernziel, Experiment, Merksatz …) sind keine Entitäten.
+ENTITAET_KATEGORIEN = {
+    "Personen & Gruppen": ("Person", "Figur", "Rolle", "Gruppe"),
+    "Orte & Organisationen": ("Staat", "Ort", "Geografikum", "Bauwerk", "Organisation", "Unternehmen",
+                              "Bildungseinrichtung"),
+    "Zeit & Geschehen": ("Ereignis", "Epoche", "Datum"),
+    "Werke, Recht & Dokumente": ("Werk", "Quelle", "Regelwerk", "Lehrplan", "Produkt"),
+    "Wissenschaft & Fachinhalt": ("Fach", "Fachbegriff", "Theorie", "Methode", "Formel", "Größe", "Menge", "Sprache"),
+    "Bildung & Unterricht": ("Bildungsstufe", "Kompetenz", "Abschluss", "Prüfungsform", "Lernressource",
+                             "Aufgabenformat", "Sozialform", "Unterrichtsmethode"),
+    "Sonstiges": ("Sonstiges",),
+}
+ENTITAET_TYPEN = tuple(t for typen in ENTITAET_KATEGORIEN.values() for t in typen)
+_ENTITAET_KATEGORIE = {t: k for k, typen in ENTITAET_KATEGORIEN.items() for t in typen}
+ENTITAETEN_MAX = 30
+_ENTITAET_TYP = {t.lower(): t for t in ENTITAET_TYPEN} | {
+    "personen": "Person", "figuren": "Figur", "beruf": "Rolle", "funktion": "Rolle", "gruppen": "Gruppe",
+    "volk": "Gruppe", "nationalität": "Gruppe", "land": "Staat", "stadt": "Ort", "gemeinde": "Ort", "orte": "Ort",
+    "geografische einheit": "Geografikum", "gebäude": "Bauwerk", "bauwerke": "Bauwerk", "institution": "Organisation",
+    "organisationen": "Organisation", "firma": "Unternehmen", "schule": "Bildungseinrichtung",
+    "ereignisse": "Ereignis", "epochen": "Epoche", "zeitraum": "Epoche", "zeitangabe": "Datum", "frist": "Datum",
+    "werke": "Werk", "publikation": "Quelle", "dokument": "Quelle", "gesetz": "Regelwerk", "recht": "Regelwerk",
+    "curriculum": "Lehrplan", "bildungsstandard": "Lehrplan", "software": "Produkt", "tool": "Produkt",
+    "disziplin": "Fach", "fachgebiet": "Fach", "begriff": "Fachbegriff", "konzept": "Fachbegriff",
+    "modell": "Theorie", "verfahren": "Methode", "experiment": "Methode", "einheit": "Größe", "zahl": "Menge",
+    "prozent": "Menge", "kompetenzbereich": "Kompetenz", "zertifikat": "Abschluss", "qualifikation": "Abschluss",
+    "prüfung": "Prüfungsform", "medium": "Lernressource", "aufgabe": "Aufgabenformat"}
+_ENTITAET_ART = {"eigenname": "Eigenname", "name": "Eigenname", "begriff": "Begriff"}
+# Typen, die nur Eigennamen meinen: kommt einer als Begriff („Delta“, „Finanzkrise“), ist es ein Fachbegriff
+_NUR_EIGENNAMEN = {"Person", "Figur", "Gruppe", "Staat", "Ort", "Geografikum", "Bauwerk", "Organisation", "Unternehmen",
+                   "Ereignis", "Werk", "Quelle", "Regelwerk", "Lehrplan", "Produkt"}
+
+
+def _stellen(text: str, teil: str) -> list[list[int]]:
+    """Alle Stellen von teil in text als [Anfang, Ende) in Zeichen, nur als ganzes Wort (Rom nicht in Roman)."""
+    muster = re.compile(r"(?<!\w)" + re.escape(teil) + r"(?!\w)")
+    return [[m.start(), m.end()] for m in muster.finditer(text)]
+
+
+def parse_entitaeten(data: dict | list, volltext: str, stil_namen: list[str] | tuple = ()) -> list[dict]:
+    """Benannte Entitäten im Volltext. Jede muss mit "im_text" wörtlich (als ganzes Wort) im Text stehen, sonst fällt
+    sie weg; Typen außerhalb von ENTITAET_TYPEN fallen ebenso weg. "positionen" sind alle Stellen dieser Form im Text
+    (Zeichen, Ende ausschließlich), etwa für das Training einer Eigennamenerkennung. Personen mit einem der Namen aus
+    synth:stil gelten immer als fiktiv. Leere Liste ist gültig (Text ohne Eigennamen)."""
+    liste = data.get("entitaeten") if isinstance(data, dict) else data
+    if not isinstance(liste, list):
+        raise ValueError("keine Liste von Entitäten")
+    namen = [n.strip() for n in stil_namen if n and n.strip()]
+    # „Herr Yılmaz“ steht im Text auch als „Yılmaz“
+    erfunden = {n for x in namen for n in (x, x.split()[-1])}
+    out, gesehen = [], set()
+    for e in liste:
+        if not isinstance(e, dict):
+            continue
+        im_text = _einzeilig(str(e.get("im_text") or e.get("name") or ""))
+        typ = _ENTITAET_TYP.get(_einzeilig(str(e.get("typ") or "")).lower())
+        if not (im_text and typ):
+            continue
+        stellen = _stellen(volltext, im_text)
+        if not stellen:  # andere Groß- und Kleinschreibung: die Form aus dem Text übernehmen
+            m = re.search(r"(?<!\w)" + re.escape(im_text) + r"(?!\w)", volltext, re.I)
+            if not m:
+                continue
+            im_text = m.group(0)
+            stellen = _stellen(volltext, im_text)
+        name = _einzeilig(str(e.get("name") or "")) or im_text
+        if (schluessel := name.lower()) in gesehen:
+            continue
+        gesehen.add(schluessel)
+        stil = any(_stellen(name, n) or _stellen(im_text, n) for n in erfunden)
+        if stil and typ in ("Figur", "Rolle"):  # in der Probe kamen erfundene Personen oft als Figur oder Rolle
+            typ = "Person"
+        fiktiv = e.get("fiktiv") is True or str(e.get("fiktiv")).lower() == "true" or (typ == "Person" and stil)
+        art = _ENTITAET_ART.get(_einzeilig(str(e.get("art") or "")).lower(), "Begriff")
+        if typ == "Person":
+            art = "Eigenname"
+        elif art == "Begriff" and typ in _NUR_EIGENNAMEN:
+            typ = "Fachbegriff"
+        out.append({"name": name, "typ": typ, "kategorie": _ENTITAET_KATEGORIE[typ], "art": art, "im_text": im_text,
+                    "fiktiv": fiktiv, "positionen": stellen})
+    # Eigennamen vor Begriffen, sonst in der Reihenfolge der Antwort
+    return sorted(out, key=lambda e: e["art"] != "Eigenname")[:ENTITAETEN_MAX]
+
 
 def parse_suchanfragen(data: dict | list, minimum: int = 4, maximum: int = 8) -> list[str]:
     """Kurze Suchschlitz-Eingaben; ganze Sätze und zu lange Anfragen fallen weg, Dubletten ohne Groß/klein. Die
@@ -351,6 +449,7 @@ class Anfrage:
     system: str
     user: str
     json_mode: bool = False
+    denken: bool = True  # False: ohne Denken des Modells (nur Anthropic)
 
 
 class Material:
@@ -361,8 +460,11 @@ class Material:
     sich mit zustand() speichern und mit Material(..., zustand=...) fortsetzen (Batch-Verarbeitung)."""
 
     def __init__(self, seed: dict, prompts_by_bereich: dict, qa_min: int = 8, inhaltstyp_pruefen: bool = True,
-                 ausgabesprache: str = "de", zustand: dict | None = None, bereich=None):
+                 ausgabesprache: str = "de", zustand: dict | None = None, bereich=None, kombiniert: bool = False,
+                 denken_metadaten: bool = True):
         self.seed = seed
+        self.kombiniert = kombiniert
+        self.denken_metadaten = denken_metadaten  # False: Metadaten und Inhaltstyp-Prüfung ohne Denken
         self.bereich = bereich or get_bereich(seed[S.F_BEREICH])  # bereich: schon geladen (viele Materialien)
         self.prompts = prompts_by_bereich[self.bereich.key]
         self.qa_min = qa_min
@@ -390,16 +492,22 @@ class Material:
         z = zustand or {}
         self.felder: dict = dict(z.get("felder", {}))
         self.neu: dict[str, int] = dict(z.get("neu", {}))  # Fehlversuche je Feld
+        self.gruende: dict[str, list[str]] = {k: list(v) for k, v in z.get("gruende", {}).items()}  # warum
         self.tokens: dict[str, int] = dict(z.get("tokens", dict.fromkeys(TOKEN_FELDER, 0)))
 
     def zustand(self) -> dict:
-        return {"felder": self.felder, "neu": self.neu, "tokens": self.tokens}
+        return {"felder": self.felder, "neu": self.neu, "tokens": self.tokens,
+                **({"gruende": self.gruende} if self.gruende else {}),
+                **({"kombiniert": True} if self.kombiniert else {})}
 
     @property
     def stufe(self) -> list[str] | None:
         """Felder der ersten Stufe, die noch nicht fertig ist; None = Material fertig."""
-        for stufe in STUFEN:
-            offen = [f for f in stufe if f not in self.felder and not (f == "inhaltstyp" and not self.kategorien)]
+        # kombiniert nur, solange noch kein Metadatenfeld vorliegt (Korrekturen setzen einzelne Felder neu: einzeln)
+        einzeln = any(f in self.felder for f in METADATEN_FELDER)
+        for stufe in STUFEN_KOMBINIERT if self.kombiniert else STUFEN:
+            offen = [f for f in stufe if f not in self.felder and not (f == "inhaltstyp" and not self.kategorien)
+                     and not (f == "metadaten" and einzeln)]
             if offen:
                 return offen
         return None
@@ -409,7 +517,11 @@ class Material:
         return self.stufe is None
 
     def anfragen(self) -> list[Anfrage]:
-        return [self._anfrage(f) for f in self.stufe or []]
+        out = [self._anfrage(f) for f in self.stufe or []]
+        for a in out:
+            # die Inhaltstyp-Prüfung denkt immer: ohne Denken traf sie in der Probe 77 statt 94 von 100
+            a.denken = a.feld in ("volltext", "inhaltstyp") or self.denken_metadaten
+        return out
 
     def _anfrage(self, feld: str) -> Anfrage:
         p, v = self.prompts, self.values
@@ -417,6 +529,9 @@ class Material:
             return Anfrage(feld, render(p["volltext_system"], v) + self.hinweis, render(p["volltext"], v))
         system = render(p["system"], v) + self.hinweis
         text = self.felder["volltext"]
+        if feld == "metadaten":
+            auftrag = render(p["metadaten"], {f"auftrag_{f}": render(p[f], v) for f in METADATEN_FELDER})
+            return Anfrage(feld, system, material_user(p, v, self.felder, text, auftrag), json_mode=True)
         if feld == "inhaltstyp":
             auftrag = render(p["inhaltstyp"], {
                 "kategorien": "\n".join(f"- {k['name']} → {k['id']}" + (f": {k['definition']}" if k.get("definition") else "")
@@ -431,16 +546,79 @@ class Material:
         """Prüft die Antwort auf ein Feld. True = übernommen, False = wird neu angefragt."""
         for k, n in (tokens or {}).items():
             self.tokens[k] = self.tokens.get(k, 0) + n
+        if feld == "metadaten":
+            return self._metadaten(text)
         try:
             self.felder[feld] = self._parse(feld, text)
             return True
         except ValueError as e:  # auch json.JSONDecodeError
-            self.neu[feld] = self.neu.get(feld, 0) + 1
+            self._fehlversuch(feld, e)
             if self.neu[feld] >= FELD_VERSUCHE:
                 if feld == "volltext":
                     raise ValueError(f"Volltext nach {FELD_VERSUCHE} Versuchen zu kurz") from e
                 raise ValueError(f"{feld} nach {FELD_VERSUCHE} Versuchen unbrauchbar: {e}") from e
             return False
+
+    def _fehlversuch(self, feld: str, e: Exception):
+        """Fehlversuch zählen und den Grund festhalten (synth:generierung.neu_gruende, zur Auswertung der Prompts)."""
+        self.neu[feld] = self.neu.get(feld, 0) + 1
+        self.gruende.setdefault(feld, []).append(str(e)[:120])
+
+    def _titel_ohne_untertitel(self, text: str) -> str | None:
+        """Titel mit Untertitel („Thema: Zusatz“, „Thema – Zusatz“): der erste Teil, wenn er für sich alle Prüfungen
+        besteht. In den Proben waren neun von zehn Neuanfragen des Titels solche Untertitel."""
+        t = _einzeilig(text.strip().splitlines()[0] if text.strip() else "")
+        if not _TITEL_TRENNER.search(t):
+            return None
+        teil = _TITEL_TRENNER.split(t)[0]
+        if len(teil.split()) < 2:
+            return None
+        try:
+            teil = parse_titel(teil)
+        except ValueError:
+            return None
+        return None if titel_nennt_form(teil, self.values) else teil
+
+    def _metadaten(self, text: str) -> bool:
+        """Antwort des kombinierten Aufrufs: Jedes Feld wird wie seine Einzelantwort geprüft. Brauchbare Felder werden
+        übernommen; ein unbrauchbares zählt als Fehlversuch und wird danach einzeln angefragt. Ist die Antwort kein
+        lesbares JSON-Objekt, wird der Aufruf wiederholt, nach METADATEN_VERSUCHE gehen alle Felder einzeln."""
+        try:
+            data = json_aus_text(text)
+            if not isinstance(data, dict):
+                raise ValueError("kein JSON-Objekt")
+        except ValueError as e:  # auch json.JSONDecodeError
+            self._fehlversuch("metadaten", e)
+            if self.neu["metadaten"] < METADATEN_VERSUCHE:
+                return False
+            self.felder["metadaten"] = True
+            return False
+        werte = {"titel": data.get("titel"), "beschreibung": data.get("beschreibung"),
+                 "keywords": data.get("keywords"), "lernziele": {"lernziele": data.get("lernziele") or []},
+                 "suchanfragen": {"suchanfragen": data.get("suchanfragen") or []},
+                 "fragen_antworten": {"paare": data.get("paare") or data.get("fragen_antworten") or []},
+                 # eine leere Liste ist eine gültige Antwort (Text ohne Eigennamen), ein fehlender Schlüssel nicht
+                 "entitaeten": {"entitaeten": data["entitaeten"]} if isinstance(data.get("entitaeten"), list) else None}
+        for feld in METADATEN_FELDER:
+            if feld in self.felder:
+                continue
+            w = werte[feld]
+            if isinstance(w, list):  # keywords als Liste
+                w = ", ".join(str(x) for x in w)
+            elif isinstance(w, dict):
+                w = json.dumps(w, ensure_ascii=False)
+            try:
+                if not w:
+                    raise ValueError("fehlt")
+                self.felder[feld] = self._parse(feld, str(w))
+            except ValueError as e:
+                if feld == "titel" and (t := self._titel_ohne_untertitel(str(w))):
+                    self.felder["titel"] = t  # spart eine Neuanfrage mit dem ganzen Volltext
+                    self.gruende.setdefault("titel", []).append(f"Untertitel abgeschnitten: {str(w)[:100]}")
+                    continue
+                self._fehlversuch(feld, e)
+        self.felder["metadaten"] = True
+        return True
 
     def _parse(self, feld: str, text: str):
         if feld == "volltext":
@@ -456,6 +634,10 @@ class Material:
             return parse_lernziele(json_aus_text(text), minimum=1 if letzter else 2)
         if feld == "suchanfragen":
             return parse_suchanfragen(json_aus_text(text))
+        if feld == "entitaeten":
+            # leere Antwort: keine Eigennamen (der Systemprompt erlaubt sie, wenn keine Aussage möglich ist)
+            data = json_aus_text(text) if text.strip() else []
+            return parse_entitaeten(data, self.felder["volltext"], (self.seed.get(S.F_STIL) or {}).get("namen", []))
         if feld == "titel":
             letzter = self.neu.get("titel", 0) >= FELD_VERSUCHE - 1
             t = titel_reparieren(text) if letzter else parse_titel(text)
@@ -486,6 +668,8 @@ class Material:
                                   for z in f["lernziele"]]
         if "suchanfragen" in f:
             rec[S.F_SUCHANFRAGEN] = f["suchanfragen"]
+        if f.get("entitaeten") is not None:  # None: Korrektur eines Materials, das vor diesem Feld entstand
+            rec[S.F_ENTITAETEN] = f["entitaeten"]
         if a != "de":
             rec[S.F_LANGUAGE] = list(dict.fromkeys([a, *[x for x in rec.get(S.F_LANGUAGE, []) if x != "de"]]))
         if "inhaltstyp" in f:
@@ -499,28 +683,32 @@ class Material:
         prov[S.F_FULLTEXT] = dict(S.provenance("LLM", method="aus dem Seed erzeugt (volltext)"), modell=meta["modell"])
         for feld, datei in ((S.F_TITLE, "titel"), (S.F_DESCRIPTION, "beschreibung"), (S.F_KEYWORD, "keywords"),
                             (S.F_QA, "fragen_antworten"), (S.F_LERNZIELE, "lernziele"),
-                            (S.F_SUCHANFRAGEN, "suchanfragen")):
+                            (S.F_SUCHANFRAGEN, "suchanfragen"), (S.F_ENTITAETEN, "entitaeten")):
             if feld not in rec:
                 continue
             prov[feld] = dict(S.provenance("LLM", method=f"aus Volltext und festen Metadaten erzeugt ({datei})"),
                               modell=meta["modell"])
         rec[S.F_GENERATION] = {**meta, "dauer_sekunden": round(dauer, 1), "neu_angefragt": self.neu}
+        if self.gruende:
+            rec[S.F_GENERATION]["neu_gruende"] = self.gruende
         if mit_tokens and self.tokens.get("aufrufe"):
             rec[S.F_GENERATION]["tokens"] = self.tokens
         return rec
 
 
 def generate_one(client: LLMClient, seed: dict, prompts_by_bereich: dict, meta: dict, qa_min: int = 8,
-                 inhaltstyp_pruefen: bool = True, ausgabesprache: str = "de") -> dict:
+                 inhaltstyp_pruefen: bool = True, ausgabesprache: str = "de", kombiniert: bool = False,
+                 denken_metadaten: bool = True) -> dict:
     """Ein Material sofort erzeugen: Stufe für Stufe, die Felder einer Stufe gleichzeitig."""
-    m = Material(seed, prompts_by_bereich, qa_min, inhaltstyp_pruefen, ausgabesprache)
+    m = Material(seed, prompts_by_bereich, qa_min, inhaltstyp_pruefen, ausgabesprache, kombiniert=kombiniert,
+                 denken_metadaten=denken_metadaten)
     start = time.time()
     zaehlt = hasattr(client, "zaehler")
 
     def frage(a: Anfrage) -> tuple[str, dict]:
         if zaehlt:
             client.zaehler(neu=True)  # Zähler je Thread
-        text = client.chat(a.system, a.user, json_mode=a.json_mode)
+        text = client.chat(a.system, a.user, json_mode=a.json_mode, **({} if a.denken else {"denken": False}))
         return text, (dict(client.zaehler()) if zaehlt else {})
 
     while not m.fertig:
@@ -536,7 +724,7 @@ def generate_one(client: LLMClient, seed: dict, prompts_by_bereich: dict, meta: 
 
 
 def meta_fuer(cfg: LLMConfig, prompts_by_bereich: dict, inhaltstyp_pruefen: bool, ausgabesprache: str,
-              verarbeitung: str | None = None) -> dict:
+              verarbeitung: str | None = None, kombiniert: bool = False, denken_metadaten: bool = True) -> dict:
     """Angaben zur Erzeugung, die in jedem Material unter synth:generierung stehen."""
     pub = cfg.public()
     meta = {"modell": cfg.model, "base_url": pub["base_url"], "datum": date.today().isoformat(),
@@ -548,22 +736,29 @@ def meta_fuer(cfg: LLMConfig, prompts_by_bereich: dict, inhaltstyp_pruefen: bool
         meta["reasoning_effort"] = cfg.reasoning_effort
     if verarbeitung or cfg.service_tier:
         meta["verarbeitung"] = verarbeitung or cfg.service_tier  # "flex" oder "batch"; fehlt = Standard
+    if kombiniert:
+        meta["metadaten"] = "kombiniert"  # fehlt = jedes Feld in einem eigenen Aufruf
+    if not denken_metadaten and cfg.anbieter == "anthropic":
+        meta["denken_metadaten"] = False  # fehlt = Metadaten mit Denken (wie der Volltext)
     return meta
 
 
 def generate(seeds_path: Path, out_path: Path, cfg: LLMConfig, limit: int | None = None,
              inhaltstyp_pruefen: bool = True, ausgabesprache: str = "de", on_progress=print_progress,
-             stop_event=None) -> Progress:
+             stop_event=None, kombiniert: bool = True, denken_metadaten: bool = False) -> Progress:
     from .laeufe import lauf_speichern
 
-    lauf_speichern(out_path, seeds_path, cfg, limit, inhaltstyp_pruefen, ausgabesprache, cfg.service_tier or "sofort")
+    lauf_speichern(out_path, seeds_path, cfg, limit, inhaltstyp_pruefen, ausgabesprache, cfg.service_tier or "sofort",
+                   kombiniert, denken_metadaten)
     seeds = read_seeds(seeds_path)
     if limit:
         seeds = seeds[:limit]
     bereiche = {s[S.F_BEREICH] for s in seeds}
     prompts_by_bereich = {b: load_prompts(b) for b in bereiche}
-    meta = meta_fuer(cfg, prompts_by_bereich, inhaltstyp_pruefen, ausgabesprache)
+    meta = meta_fuer(cfg, prompts_by_bereich, inhaltstyp_pruefen, ausgabesprache, kombiniert=kombiniert,
+                     denken_metadaten=denken_metadaten)
     return run_tasks(seeds, lambda client, seed: generate_one(client, seed, prompts_by_bereich, meta,
                                                               inhaltstyp_pruefen=inhaltstyp_pruefen,
-                                                              ausgabesprache=ausgabesprache),
+                                                              ausgabesprache=ausgabesprache, kombiniert=kombiniert,
+                                                              denken_metadaten=denken_metadaten),
                      Path(out_path), cfg, on_progress=on_progress, stop_event=stop_event)

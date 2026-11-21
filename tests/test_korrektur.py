@@ -67,9 +67,9 @@ def test_vorbereiten_lauf_zusammenfuehren(seeds_datei, tmp_path, monkeypatch):  
     client = FakeOpenAI(Antworten(prompts, titel_kaputt=0))
     _laufen(BatchLauf(p["seeds"], p["ergebnis"], cfg, client=client))
     gefragt = [(r["custom_id"].split("|")[0], r["custom_id"].split("|")[1]) for r in client.anfragen]
-    # b: nur Beschreibung und Frage-Antwort-Paare, a: alle 8 Anfragen
+    # b: nur Beschreibung und Frage-Antwort-Paare (einzeln), a: ganz neu (Volltext, Metadaten kombiniert, Inhaltstyp)
     assert sorted(f for i, f in gefragt if i == b["id"]) == ["beschreibung", "fragen_antworten"]
-    assert len([f for i, f in gefragt if i == a["id"]]) == 8
+    assert sorted(f for i, f in gefragt if i == a["id"]) == ["inhaltstyp", "metadaten", "volltext"]
     abgrenzung = [r["body"]["messages"][1]["content"] for r in client.anfragen
                   if r["custom_id"].startswith(a["id"] + "|volltext")][0]
     assert "Abgrenzung des Themas" in abgrenzung and "ohne Spaltung und Streuung" in abgrenzung

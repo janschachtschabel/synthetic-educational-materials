@@ -5,7 +5,7 @@ import pytest
 from sem import schema as S
 from sem.bereiche import get
 from sem.bereiche.base import build_seeds
-from sem.generate import (generate_one, parse_inhaltstyp, parse_keywords, parse_lernziele, parse_suchanfragen,
+from sem.generate import (generate_one, parse_entitaeten, parse_inhaltstyp, parse_keywords, parse_lernziele, parse_suchanfragen,
                           parse_titel, titel_nennt_form, titel_reparieren)
 from sem.prompts import load_prompts
 from tests.test_batch import LERNZIELE_JSON, SUCHANFRAGEN_JSON
@@ -40,6 +40,8 @@ class FakeClient:
             return LERNZIELE_JSON
         if "Suchanfragen, die Lehrende" in user:
             return SUCHANFRAGEN_JSON
+        if "Nenne die Entitäten" in user:
+            return json.dumps({"entitaeten": []})
         if "Frage-Antwort-Paare" in user:
             return json.dumps({"paare": [{"frage": f"F{i}?", "antwort": "A.", "typ": "verstehen"} for i in range(10)]})
         raise AssertionError(user[:200])
@@ -122,7 +124,8 @@ def test_generate_one_einzelaufrufe_und_inhaltstyp_pruefung(hochschule):
     assert rec[S.F_KEYWORD] == ["Eigenwert", "Diagonalisierung", "Symmetrische Matrix", "Spektralsatz", "Orthogonalbasis"]
     assert len(rec[S.F_QA]) == 10 and rec[S.F_LRT_CHECK]["uebereinstimmung"]
     # Volltext, Titel (2x), Beschreibung, Keywords, Inhaltstyp, Fragen
-    assert len(client.calls) == 9  # + Lernziele, Suchanfragen
+    assert len(client.calls) == 10  # + Lernziele, Suchanfragen, Entitäten
+    assert rec[S.F_ENTITAETEN] == []
     assert len(rec[S.F_LERNZIELE]) == 2 and len(rec[S.F_SUCHANFRAGEN]) == 5
     # spätere Felder sehen die früheren
     assert "Titel: Eigenwerte Diagonalisierung" in client.calls[-1]
@@ -169,6 +172,38 @@ def test_titel_nennt_form():
     assert titel_nennt_form("Urheberrecht in der Kita", {**kita, "thema": "Urheberrecht in der Kita"}) is None
     # nur Wörter, die auch in den Metadaten stehen
     assert titel_nennt_form("Quiz und Rätsel im Mittelalter", {"inhaltstyp": "Arbeitsblatt"}) is None
+
+
+def test_parse_entitaeten():
+    text = ("Goethes Faust spielt in Leipzig. Lena liest den Faust, Herr Yılmaz fragt nach Rom. Der Roman ist lang. "
+            "In Gruppenarbeit messen alle die Stromstärke.")
+    e = parse_entitaeten({"entitaeten": [
+        {"name": "Gruppenarbeit", "typ": "Sozialform", "art": "Begriff", "im_text": "Gruppenarbeit"},
+        {"name": "Johann Wolfgang von Goethe", "typ": "Person", "art": "Eigenname", "im_text": "Goethes"},
+        {"name": "Faust. Eine Tragödie", "typ": "werk", "art": "eigenname", "im_text": "Faust"},
+        {"name": "Leipzig", "typ": "Stadt", "art": "Eigenname", "im_text": "leipzig"},  # Schreibweise aus dem Text
+        {"name": "Lena", "typ": "Person", "art": "Eigenname", "im_text": "Lena"},
+        {"name": "Herr Yılmaz", "typ": "Rolle", "art": "Begriff", "im_text": "Yılmaz"},  # erfunden: Person
+        {"name": "Rom", "typ": "Ort", "art": "Eigenname", "im_text": "Rom", "fiktiv": "false"},
+        {"name": "Stromstärke", "typ": "Größe", "im_text": "Stromstärke"},  # ohne art: Begriff
+        {"name": "Roman", "typ": "Werk", "art": "Begriff", "im_text": "Roman"},  # Begriff: Fachbegriff
+        {"name": "Berlin", "typ": "Ort", "art": "Eigenname", "im_text": "Berlin"},      # steht nicht im Text
+        {"name": "Spannung", "typ": "Hypothese", "art": "Begriff", "im_text": "Faust"},  # kein Entitätstyp
+        {"name": "Goethe", "typ": "Person", "im_text": "Goethe", "fiktiv": True},  # nicht als ganzes Wort im Text
+        {"name": "Faust. Eine Tragödie", "typ": "Werk", "im_text": "Faust"}]},  # doppelt
+        text, ["Lena", "Herr Yılmaz"])
+    assert [x["name"] for x in e] == ["Johann Wolfgang von Goethe", "Faust. Eine Tragödie", "Leipzig", "Lena",
+                                       "Herr Yılmaz", "Rom", "Gruppenarbeit", "Stromstärke", "Roman"]  # Eigennamen zuerst
+    assert e[1]["typ"] == "Werk" and e[1]["positionen"] == [[8, 13], [48, 53]]
+    assert e[1]["kategorie"] == "Werke, Recht & Dokumente" and e[1]["art"] == "Eigenname"
+    assert e[2]["typ"] == "Ort" and e[2]["im_text"] == "Leipzig" and text[slice(*e[2]["positionen"][0])] == "Leipzig"
+    assert [x["fiktiv"] for x in e] == [False, False, False, True, True, False, False, False, False]
+    assert (e[4]["typ"], e[4]["art"], e[8]["typ"]) == ("Person", "Eigenname", "Fachbegriff")
+    assert e[5]["positionen"] == [[text.index("Rom."), text.index("Rom.") + 3]]  # nicht in „Roman“
+    assert (e[6]["kategorie"], e[7]["typ"], e[7]["art"]) == ("Bildung & Unterricht", "Größe", "Begriff")
+    assert parse_entitaeten({"entitaeten": []}, text) == []
+    with pytest.raises(ValueError):
+        parse_entitaeten({"paare": []}, text)
 
 
 def test_parse_lernziele():

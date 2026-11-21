@@ -59,6 +59,7 @@ are never seen during training.
 | `qa_pairs` | at least 8 question-answer pairs with `question`, `answer` and `type` (cognitive level after Bloom/Anderson, in German, e.g. `erinnern`, `verstehen`, `anwenden`) |
 | `learning_objectives` | 2–4 competence-oriented learning objectives with `objective`, `operator` and `level` (Anderson/Krathwohl, in German); only in runs from November 2026 on, otherwise empty |
 | `search_queries` | 4–8 short search-box queries for which the material is a fitting hit (query → document pairs for retrieval); only in runs from November 2026 on, otherwise empty |
+| `entities` | entities in the fulltext: `name` (full form), `type` (one of 36 fixed German types, e.g. Person, Ort, Epoche, Fachbegriff, Sozialform), `category` (one of six groups), `kind` (`proper_name` or `term`), `text` (form as in the fulltext), `fictional` (invented for this material), `spans` (character offsets [start, end) of every occurrence of `text`); only in runs from late November 2026 on, otherwise empty |
 | `educational_context`, `_uri` | educational level (OpenEduHub vocabulary `educationalContext`) |
 | `subject`, `_uri` | school subject, higher-education subject, occupational group (KldB 2010) or adult-education subject area, depending on the sector |
 | `content_type`, `_uri` | content type (OpenEduHub vocabulary `new_lrt`), e.g. worksheet, explanatory video transcript, case study |

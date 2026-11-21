@@ -730,7 +730,36 @@ Pro Seed bis zu acht LLM-Aufrufe (OpenAI-kompatible API, Standardmodell `gpt-6-l
    die das Material ein passender Treffer ist. Gedacht als Trainingspaare Anfrage → Material für
    Such- und Embedding-Modelle.
 
-Schritt 3 bis 6 laufen gleichzeitig.
+7. **Entitäten** (`entitaeten.md`, JSON, `synth:entitaeten`): Eigennamen und die wichtigsten Begriffe des Volltexts,
+   höchstens 30 (Eigennamen vollständig und zuerst, Begriffe höchstens 15), je mit `name` (vollständige Form, „Johann
+   Wolfgang von Goethe“), `typ`, `kategorie`, `art` (Eigenname oder Begriff), `im_text` (die Form, wie sie im Text steht,
+   „Goethes“), `fiktiv` und `positionen` (alle Stellen dieser Form im Volltext als [Anfang, Ende) in Zeichen, für das
+   Training einer Eigennamenerkennung). Die 36 Typen sind fest und in sechs Kategorien geordnet, die Kategorie setzt der
+   Code: Personen & Gruppen (Person, Figur, Rolle, Gruppe), Orte & Organisationen (Staat, Ort, Geografikum, Bauwerk,
+   Organisation, Unternehmen, Bildungseinrichtung), Zeit & Geschehen (Ereignis, Epoche, Datum), Werke, Recht & Dokumente
+   (Werk, Quelle, Regelwerk, Lehrplan, Produkt), Wissenschaft & Fachinhalt (Fach, Fachbegriff, Theorie, Methode, Formel,
+   Größe, Menge, Sprache), Bildung & Unterricht (Bildungsstufe, Kompetenz, Abschluss, Prüfungsform, Lernressource,
+   Aufgabenformat, Sozialform, Unterrichtsmethode) sowie Sonstiges. Textabschnitte (Lernziel, Aufgabe, Merksatz,
+   Versuchsablauf) sind keine Entitäten. Eine Entität, deren `im_text` nicht als ganzes Wort im Volltext steht, fällt weg,
+   ebenso unbekannte Typen; eine leere Liste ist gültig. Personen mit einem Namen aus `synth:stil` gelten immer als
+   fiktiv und als Person (nicht Figur oder Rolle); ein Begriff mit einem Typ, der nur Eigennamen meint („Delta“ als
+   Geografikum), wird zum Fachbegriff. Das Verknüpfen mit GND oder Wikidata ist ein späterer, eigener Schritt.
+
+Schritt 3 bis 7 laufen gleichzeitig.
+
+**Ein Aufruf für alle Metadaten** (Standard seit November 2026, `--metadaten-einzeln` für das alte Verfahren):
+Schritt 2, 4, 5, 6 und 7 gehen in einem einzigen JSON-Aufruf (`metadaten.md` setzt die Felddateien unverändert
+zusammen), daneben läuft die Inhaltstyp-Prüfung als eigener Aufruf, weil sie den Inhaltstyp des Seeds nicht sehen darf.
+Jedes Feld der Antwort wird wie eine Einzelantwort geprüft; nur was durchfällt, wird danach einzeln mit seiner
+Felddatei nachgefragt (der kombinierte Versuch zählt als erster der drei Versuche). Ist die Antwort kein lesbares
+JSON, wird sie einmal wiederholt, danach gehen alle Felder einzeln. So geht der Volltext zweimal statt siebenmal
+an das Modell; im Hochschul-Lauf machte er fast die Hälfte der Eingabe-Tokens aus. Gezielte Korrekturen einzelner
+Felder (`python -m sem korrektur`) laufen weiter einzeln. In `synth:generierung` steht dann `"metadaten": "kombiniert"`.
+Bei Anthropic laufen die Metadaten standardmäßig ohne Denken (`"denken_metadaten": false`, mit `--metadaten-denken`
+wieder mit); Volltext und Inhaltstyp-Prüfung denken (ohne Denken traf die Prüfung in einer Probe 77 statt 94 von 100).
+Hat der Titel im kombinierten Aufruf einen Untertitel („Thema: Zusatz“), wird der erste Teil übernommen, wenn er
+für sich alle Prüfungen besteht, statt den Titel neu anzufragen (vermerkt in `synth:generierung.neu_gruende`). Im Batch gehen höchstens 2.000 Materialien in einen Batch (`--paket`); kleine Batches sind schneller fertig,
+und jedes Material rückt weiter, sobald sein Batch fertig ist.
 
 Jedes Material vermerkt in `synth:generierung` die Dauer und welche Felder neu angefragt werden mussten
 (`neu_angefragt`). Die Fortschrittsanzeige zählt außerdem Wiederholungen ganzer Materialien

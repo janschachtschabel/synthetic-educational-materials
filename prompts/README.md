@@ -19,6 +19,8 @@ Placeholders use double curly braces, e.g. `{{thema}}`. See
 | `fragen_antworten.md` | Question-and-answer pairs task | JSON `{"paare": [...]}` |
 | `lernziele.md` | Competence-oriented learning objectives with taxonomy level | JSON `{"lernziele": [...]}`, 2–4 |
 | `suchanfragen.md` | Short search queries (search box) | JSON `{"suchanfragen": [...]}`, 4–8 retained |
+| `entitaeten.md` | Entities in the fulltext: proper names and key terms (36 fixed types in 6 categories) | JSON `{"entitaeten": [...]}`, may be empty, at most 30 |
+| `metadaten.md` | One call for title, description, keywords, learning objectives, search queries, question-answer pairs and entities (default); combines the field files via `{{auftrag_<feld>}}`, a field that fails is then requested individually with its field file | JSON with all seven fields |
 | `beschreibung_einstieg.md` | only the `beschreibung-einstieg` command: replace the first sentence of a finished description | one sentence |
 | `ausgabesprache.md` | Note for both system prompts, only when an output language other than German is selected during generation (app: “Ausgabesprache” (output language), CLI: `--sprache en`) | – |
 | `wlo_themen.md`, `wlo_themen_vorschlag.md` | only the `wlo-themen` command: topic, broader topic and key terms from the title and description of a WLO record; the second part (subject/level suggestion with vocabulary) only with `--ohne-stufe vorschlag` | JSON |
