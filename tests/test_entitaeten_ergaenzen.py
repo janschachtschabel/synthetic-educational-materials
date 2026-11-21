@@ -44,3 +44,18 @@ def test_datei(tmp_path):
     z = EE.ergaenzen(p, EE.standard_ausgabe(p))
     assert z == {"materialien": 2, "materialien_ergaenzt": 1, "namen_ergaenzt": 1, "vorher_ohne_entitaeten": 1}
     assert EE.standard_ausgabe(p).name == "m_entitaeten.jsonl"
+
+
+def test_suchanfragen_schule(tmp_path):
+    from sem import korrektur as K
+
+    q = ["bruchrechnung klasse 6", "brüche", "bruch kürzen", "brüche grundschule", "bruchrechnung oberstufe", "anteile"]
+    assert K.suchanfragen_kuerzen(q, K.STUFE_SCHULE) == ["bruchrechnung klasse 6", "brüche", "bruch kürzen", "anteile"]
+    p = tmp_path / "m.jsonl"
+    p.write_text(json.dumps({"id": "a", "synth:bildungsbereich": "schule", "synth:suchanfragen": q}) + "\n"
+                 + json.dumps({"id": "b", "synth:bildungsbereich": "elementar", "synth:suchanfragen": q}) + "\n",
+                 encoding="utf-8")
+    z = K.suchanfragen_datei(p, tmp_path / "o.jsonl")
+    assert z == {"materialien": 2, "suchanfragen_gekuerzt": 1, "suchanfragen_gestrichen": 2}
+    a, b = (json.loads(x) for x in (tmp_path / "o.jsonl").read_text(encoding="utf-8").splitlines())
+    assert len(a["synth:suchanfragen"]) == 4 and a["synth:suchanfragen_alt"] == q and "synth:suchanfragen_alt" not in b

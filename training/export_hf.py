@@ -344,7 +344,8 @@ def build_card(rows_by_split: dict[str, list[dict]], name: str, card: str = "dat
                  (corr["description"], "descriptions that had taken over a vocabulary addition („auch als E-Book“) "
                                        "were regenerated (earlier text in `description_previous`)"),
                  (corr["search_queries"], "materials had more than one search query with a level term (e.g. "
-                                          "„… hochschule“, „… studium“); only the first of these was kept"),
+                                          + ("„… klasse 7“, „… oberstufe“" if "school" in sectors else
+                                             "„… hochschule“, „… studium“") + "); only the first of these was kept"),
                  (corr["entities"], "materials got invented person names added to `entities` without a language "
                                     "model: names from the generation controls that occur in the full text but were "
                                     "missing from the model's entity list (type `Person`, `fictional` true, all spans)")]

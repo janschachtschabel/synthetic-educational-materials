@@ -114,7 +114,7 @@ with URI; these records also carry the topic tree node in `curriculum`.
 | `topic`, `topic_uri` | topic the material was generated from; URI only for topics from the topic trees and GND |
 | `topic_source` | where the topic comes from (see table above) |
 | `generator_model` | language model that generated the texts |
-| `correction` | post-hoc correction of the record, if any: `entities` (see "How the data was created") |
+| `correction` | post-hoc correction of the record, if any: `entities`, `search_queries` (see "How the data was created") |
 
 Columns for other education sectors (`occupation`, `competence`, `programme_area`, `early_childhood_area`,
 `rvk_notation`, `digcomp_*`, `teaching_level`, …) are kept for schema compatibility with the other datasets and are
